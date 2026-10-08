@@ -14,7 +14,7 @@ For people working on Less Pull:
 
 | Document | What it covers |
 | :-- | :-- |
-| [Build 19 release notes](1.4.4-19-release.txt) | What changed in builds 18 to 28 |
+| [Build 19 release notes](1.4.4-19-release.txt) | What changed in builds 18 to 29 |
 | [Build 17 release notes](1.4.4-17-release.txt) | What changed in build 17 |
 | [Build 16 release notes](1.4.4-16-release.txt) | What changed in build 16 and what was verified |
 | [Build 15 release notes](1.4.4-release.txt) | The previous build |

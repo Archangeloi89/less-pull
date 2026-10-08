@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-28"><b>Download build 28</b></a>
+  <a href="https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-29"><b>Download build 29</b></a>
   &nbsp;·&nbsp; <a href="#install">Install</a>
   &nbsp;·&nbsp; <a href="docs/EXCEPTIONS.md">App and website exceptions</a>
   &nbsp;·&nbsp; <a href="docs/README.md">All docs</a>
@@ -202,7 +202,7 @@ The app changes the display; nothing is injected into pages, and the Mac app has
 
 ## Install
 
-1. Download **Less-Pull-1.4.4-28.zip** from the [build 28 release](https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-28), unzip it, and move **Less Pull.app** to **Applications**.
+1. Download **Less-Pull-1.4.4-29.zip** from the [build 29 release](https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-29), unzip it, and move **Less Pull.app** to **Applications**.
 2. Open it. The Settings window greets you once; the circle in the menu bar is where you choose Grayscale and Extra Warmth from then on. It sits at the left end of your menu-bar icons, where it stays visible even on a crowded MacBook menu bar; ⌘-drag it to move it.
 3. For website rules, open **Settings… → Websites**, choose **Install Browser Extension…**, and follow the steps for [your browser](docs/INSTALL.md#safari-brave-chrome-firefox-opera-or-edge).
 
@@ -210,7 +210,7 @@ The app changes the display; nothing is injected into pages, and the Mac app has
 > Setting up with an AI agent? The release includes an **agent pack** (`Less-Pull-Agent-Pack.zip`): a script that installs the app and the bridge, and scripts that connect Brave, Chrome, Opera, Edge and Firefox, with the instructions an agent needs. See [tools/agent-pack](tools/agent-pack/README.md).
 
 > [!NOTE]
-> Version 1.4.4 (build 28) is a test build for Apple silicon Macs. The version number stays 1.4.4 on purpose; the build number is what changes. It is ad-hoc signed and not notarized by Apple, so Gatekeeper may block a downloaded copy. It is built for macOS 13 and later and has been tested on macOS 27 only. The browser extension is loaded locally and is not in the Chrome Web Store, on addons.mozilla.org or in the App Store. See [install help](docs/INSTALL.md) and [what is still open](docs/RELEASE-PLAN.md).
+> Version 1.4.4 (build 29) is a test build for Apple silicon Macs. The version number stays 1.4.4 on purpose; the build number is what changes. It is ad-hoc signed and not notarized by Apple, so Gatekeeper may block a downloaded copy. It is built for macOS 13 and later and has been tested on macOS 27 only. The browser extension is loaded locally and is not in the Chrome Web Store, on addons.mozilla.org or in the App Store. See [install help](docs/INSTALL.md) and [what is still open](docs/RELEASE-PLAN.md).
 
 ## Private by design
 

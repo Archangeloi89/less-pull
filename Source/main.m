@@ -801,12 +801,14 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
 // Per display (the default): a press peeks the display with the window you are using; a quick
 // double press keeps that display plain; the next press there lets it go. Other displays can be
 // kept the same way later, so each one is toggled on its own. All displays: one lock for all.
-- (BOOL)peeksPerDisplay {return [NSUserDefaults.standardUserDefaults boolForKey:@"peekActiveDisplayOnly"]&&[[self.warmth displays].firstObject unsignedIntValue]!=0;}
+// Per-display handling applies with the per-display scope, and always when the app in front has its own Peek choice.
+- (BOOL)peeksPerDisplay {if([[self.warmth displays].firstObject unsignedIntValue]==0)return NO;return [NSUserDefaults.standardUserDefaults boolForKey:@"peekActiveDisplayOnly"]||self.frontPeekDisplays!=nil||self.frontPeekSpansAll;}
 // The display under the mouse pointer: where you are looking, no click needed.
 - (uint32_t)displayUnderMouse {NSPoint p=NSEvent.mouseLocation;CGPoint cg=CGPointMake(p.x,CGDisplayBounds(CGMainDisplayID()).size.height-p.y);CGDirectDisplayID id=0;uint32_t n=0;if(CGGetDisplaysWithPoint(cg,1,&id,&n)==kCGErrorSuccess&&n)return id;return self.activeDisplay?:CGMainDisplayID();}
 - (void)peekKeyPressed:(BOOL)pressed at:(NSTimeInterval)now {
+ if(pressed)[self updateForeground];
  if(pressed&&[self peeksPerDisplay]){
-  self.peekDisplay=[self displayUnderMouse];[self updateForeground];
+  self.peekDisplay=[self displayUnderMouse];
   NSSet *targets=self.frontPeekSpansAll?[NSSet setWithArray:[self.warmth displays]]:self.frontPeekDisplays?:[NSSet setWithObject:@(self.peekDisplay)];
   if([targets isSubsetOfSet:self.peekLockedDisplays]){[self.peekLockedDisplays minusSet:targets];self.peekIgnoreRelease=YES;_peeking=NO;self.animateAppearance=YES;[self sync];return;}
   if(now-self.lastPeekPress<0.45)[self.peekLockedDisplays unionSet:targets];
@@ -1375,7 +1377,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
    NSInteger g=o?[o[@"grayMode"] integerValue]:self.grayOverride;BOOL custom=o?[o[@"customWarmth"] boolValue]:self.customWarmth;double w=o?[o[@"warmth"] doubleValue]:self.appWarmth;
    NSInteger eff=g==1?100:g==2?101:(self.grayOffUntil?101:mode);double str=custom?w/100*3:((mode==100||mode==101)&&!warmthOff?[self currentWarmth]:0);
    if([o[@"plain"] boolValue]){eff=101;str=0;}
-   BOOL peekHere=(self.peeking&&(!peekActiveOnly||self.frontPeekSpansAll||(self.frontPeekDisplays?[self.frontPeekDisplays containsObject:dn]:d==self.peekDisplay)))||[self.peekLockedDisplays containsObject:dn];
+   BOOL peekHere=(self.peeking&&(self.frontPeekDisplays?[self.frontPeekDisplays containsObject:dn]:(self.frontPeekSpansAll||!peekActiveOnly||d==self.peekDisplay)))||[self.peekLockedDisplays containsObject:dn];
    if(self.pausedUntil){eff=101;str=0;}else if(peekHere){NSDictionary *e=[self peekEffects];if([e[@"grayscale"] boolValue])eff=101;if([e[@"warmth"] boolValue])str=0;}
    BOOL grayHere=eff==100||eff==1;NSArray *last=[self.warmth stateForDisplay:d];
    if(last&&([last[0] doubleValue]!=str||[last[1] boolValue]!=grayHere)&&!self.quitting){__weak AppDelegate *weak=self;[self.warmth transitionStrength:str grayscale:grayHere display:d reduceMotion:reduce duration:0.5 completion:^{[weak.warmth applyStrength:str grayscale:grayHere display:d];}];}
