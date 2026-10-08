@@ -219,6 +219,9 @@ static NSString *const LessPullOldBundleIdentifier=@"local.nightshiftfilters.app
 @property BOOL websiteScopeExact; // menu: whole domain (NO) or this exact page (YES)
 @property (nonatomic) BOOL peeking;
 @property BOOL peekLocked,peekIgnoreRelease;
+// Per display: the display with the window you are using, and the displays whose peek is kept by a double press.
+@property uint32_t activeDisplay;
+@property NSMutableSet<NSNumber *> *peekLockedDisplays;
 @property NSTimeInterval lastPeekPress;
 @property NSDictionary *availableUpdate;
 @property NSString *updateStatus;
@@ -297,7 +300,7 @@ static NSString *const LessPullOldBundleIdentifier=@"local.nightshiftfilters.app
  if(hasRule&&!self.visibilityTimer){self.visibilityTimer=[NSTimer timerWithTimeInterval:.5 target:self selector:@selector(visibilityCheck:) userInfo:nil repeats:YES];[NSRunLoop.mainRunLoop addTimer:self.visibilityTimer forMode:NSRunLoopCommonModes];}
  if(!hasRule){[self.visibilityTimer invalidate];self.visibilityTimer=nil;}
 }
-- (void)visibilityCheck:(id)sender {NSInteger gray=self.grayOverride,night=self.nightOverride;BOOL custom=self.customWarmth;double warmth=self.appWarmth;NSDictionary *overrides=self.displayOverrides;[self updateForeground];if(gray!=self.grayOverride||night!=self.nightOverride||custom!=self.customWarmth||warmth!=self.appWarmth||!(overrides==self.displayOverrides||[overrides isEqual:self.displayOverrides]))[self sync];}
+- (void)visibilityCheck:(id)sender {NSInteger gray=self.grayOverride,night=self.nightOverride;BOOL custom=self.customWarmth;double warmth=self.appWarmth;NSDictionary *overrides=self.displayOverrides;uint32_t active=self.activeDisplay;[self updateForeground];if(gray!=self.grayOverride||active!=self.activeDisplay||night!=self.nightOverride||custom!=self.customWarmth||warmth!=self.appWarmth||!(overrides==self.displayOverrides||[overrides isEqual:self.displayOverrides]))[self sync];}
 // Settings → General → Displays: one choice per connected display. Follows what is on it (the
 // default): the app in front, or the app on top there, or your defaults. Always your defaults:
 // exceptions never apply there. Always plain: no grayscale and no warmth there, ever.
@@ -325,13 +328,13 @@ static NSString *const LessPullOldBundleIdentifier=@"local.nightshiftfilters.app
 // app whose window is on top decides (its exception, if it has one, or the defaults); an empty display
 // shows the defaults. Only the frontmost app's own display carries a website rule.
 - (void)updateDisplayMap:(pid_t)frontPid {
- NSArray *displays=[self.warmth displays];if(displays.count<2||![displays.firstObject unsignedIntValue]){self.frontDisplays=nil;self.displayOverrides=@{};return;}
+ NSArray *displays=[self.warmth displays];self.activeDisplay=CGMainDisplayID();if(displays.count<2||![displays.firstObject unsignedIntValue]){self.frontDisplays=nil;self.displayOverrides=@{};return;}
  CFArrayRef array=CGWindowListCopyWindowInfo(kCGWindowListOptionOnScreenOnly|kCGWindowListExcludeDesktopElements,kCGNullWindowID);NSArray *windows=array?CFBridgingRelease(array):@[];
- NSMutableDictionary *top=[NSMutableDictionary new];
+ NSMutableDictionary *top=[NSMutableDictionary new];NSMutableSet *front=[NSMutableSet new];
  for(NSDictionary *w in windows){if([w[(id)kCGWindowLayer] intValue]!=0||[w[(id)kCGWindowAlpha] doubleValue]<=0)continue;CGRect rect=CGRectZero;if(!CGRectMakeWithDictionaryRepresentation((__bridge CFDictionaryRef)w[(id)kCGWindowBounds],&rect)||rect.size.width<160||rect.size.height<100)continue;
-  for(NSNumber *d in displays){if(top[d])continue;CGRect overlap=CGRectIntersection(CGDisplayBounds(d.unsignedIntValue),rect);if(!CGRectIsNull(overlap)&&overlap.size.width>=80&&overlap.size.height>=50)top[d]=w[(id)kCGWindowOwnerPID];}
+  for(NSNumber *d in displays){if(top[d])continue;CGRect overlap=CGRectIntersection(CGDisplayBounds(d.unsignedIntValue),rect);if(!CGRectIsNull(overlap)&&overlap.size.width>=80&&overlap.size.height>=50){top[d]=w[(id)kCGWindowOwnerPID];if([w[(id)kCGWindowOwnerPID] intValue]==frontPid&&!front.count)[front addObject:d];}}
   if(top.count==displays.count)break;}
- NSMutableSet *front=[NSMutableSet new];NSMutableDictionary *overrides=[NSMutableDictionary new];
+ if(front.count)self.activeDisplay=[front.anyObject unsignedIntValue];NSMutableDictionary *overrides=[NSMutableDictionary new];
  for(NSNumber *d in displays){NSInteger mode=[self displayMode:d.unsignedIntValue];
   if(mode){overrides[d]=@{@"grayMode":@0,@"customWarmth":@NO,@"warmth":@0,@"plain":@(mode==2)};continue;}
   NSNumber *pid=top[d];if(pid&&pid.intValue==frontPid){[front addObject:d];continue;}
@@ -499,7 +502,7 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  // New users get the two shortcuts set for them (Option-A to peek, Option-Command-G to toggle),
  // each only if it is free on this Mac and keyboard; the tour shows which ones. Changeable under Shortcuts.
  if(firstLaunch)for(NSString *key in @[@"peekShortcut",@"grayscaleShortcut"]){if(![d objectForKey:key]){NSDictionary *pick=[self suggestedShortcutFor:key];if(pick)[d setObject:pick forKey:key];}}
- [d registerDefaults:@{@"automatic":@YES,@"overrideMode":@(-1),@"warmth":@0,@"nightMode":@101,@"manualMode":@1,@"checkForUpdates":@YES}];
+ [d registerDefaults:@{@"automatic":@YES,@"overrideMode":@(-1),@"warmth":@0,@"nightMode":@101,@"manualMode":@1,@"checkForUpdates":@YES,@"peekActiveDisplayOnly":@YES}];self.peekLockedDisplays=[NSMutableSet new];
  self.availableUpdate=[d dictionaryForKey:@"availableUpdate"];
  if([d integerForKey:@"nightMode"]==16)[d setInteger:100 forKey:@"nightMode"];
  if([d integerForKey:@"manualMode"]==16)[d setInteger:100 forKey:@"manualMode"];
@@ -733,6 +736,7 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  NSString *line=[self appearanceSummary];
  if(self.pausedUntil)return [self lessPullPauseLabel];
  if(self.peekLocked)return @"Peeking · press the shortcut to return";
+ if(self.peekLockedDisplays.count)return self.peekLockedDisplays.count>1?@"Peeking on several displays · press the shortcut on each to return":@"Peeking on one display · press the shortcut there to return";
  if(self.grayOffUntil)line=[NSString stringWithFormat:@"%@ · %@",line,[self grayOffLabel]];
  if(self.pause)return [line stringByAppendingFormat:@" · Night Shift off until %@",[self timeLabel:self.pause.expiry]];
  if(self.grayOverride||self.nightOverride||self.customWarmth)return [line stringByAppendingFormat:@" · %@ exception",self.foregroundName];
@@ -749,7 +753,17 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
 }
 - (void)setPeeking:(BOOL)peeking {if(_peeking==peeking)return;_peeking=peeking;self.animateAppearance=YES;[self sync];}
 // Hold the shortcut to peek; a quick double press keeps the peek on; one more press lets go.
+// Per display (the default): a press peeks the display with the window you are using; a quick
+// double press keeps that display plain; the next press there lets it go. Other displays can be
+// kept the same way later, so each one is toggled on its own. All displays: one lock for all.
+- (BOOL)peeksPerDisplay {return [NSUserDefaults.standardUserDefaults boolForKey:@"peekActiveDisplayOnly"]&&[[self.warmth displays].firstObject unsignedIntValue]!=0;}
 - (void)peekKeyPressed:(BOOL)pressed at:(NSTimeInterval)now {
+ if(pressed&&[self peeksPerDisplay]){
+  [self updateForeground];NSNumber *d=@(self.activeDisplay);
+  if([self.peekLockedDisplays containsObject:d]){[self.peekLockedDisplays removeObject:d];self.peekIgnoreRelease=YES;_peeking=NO;self.animateAppearance=YES;[self sync];return;}
+  if(now-self.lastPeekPress<0.45)[self.peekLockedDisplays addObject:d];
+  self.lastPeekPress=now;self.animateAppearance=YES;_peeking=YES;[self sync];return;
+ }
  if(pressed){
   if(self.peekLocked){self.peekLocked=NO;self.peekIgnoreRelease=YES;self.peeking=NO;return;}
   if(now-self.lastPeekPress<0.45)self.peekLocked=YES;
@@ -797,7 +811,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
 - (void)startRecording:(ShortcutRecorder *)sender {if(sender.recording){sender.recording=NO;[self refreshPeekRecorder:nil];return;}sender.recording=YES;[sender.window makeFirstResponder:sender];[self refreshPeekRecorder:nil];}
 // What Peek turns off while held: Grayscale and Extra Warmth by default; Night Shift if wanted.
 - (NSDictionary *)peekEffects {NSDictionary *e=[NSUserDefaults.standardUserDefaults dictionaryForKey:@"peekEffects"];return e?:@{@"grayscale":@YES,@"warmth":@YES,@"nightShift":@NO};}
-- (void)peekScopeChanged:(NSPopUpButton *)sender {[NSUserDefaults.standardUserDefaults setBool:sender.indexOfSelectedItem==1 forKey:@"peekActiveDisplayOnly"];if(self.peeking)[self sync];}
+- (void)peekScopeChanged:(NSPopUpButton *)sender {[NSUserDefaults.standardUserDefaults setBool:sender.indexOfSelectedItem==1 forKey:@"peekActiveDisplayOnly"];[self.peekLockedDisplays removeAllObjects];self.peekLocked=NO;self.animateAppearance=YES;[self sync];}
 - (void)peekEffectChanged:(NSButton *)sender {NSMutableDictionary *e=[[self peekEffects] mutableCopy];e[sender.identifier]=@(sender.state==NSControlStateValueOn);[NSUserDefaults.standardUserDefaults setObject:e forKey:@"peekEffects"];if(self.peeking){self.animateAppearance=YES;[self sync];}}
 - (void)scheduleUpdateChecks {
  [self.updateTimer invalidate];self.updateTimer=[NSTimer timerWithTimeInterval:3600 target:self selector:@selector(maybeCheckForUpdates) userInfo:nil repeats:YES];[NSRunLoop.mainRunLoop addTimer:self.updateTimer forMode:NSRunLoopCommonModes];
@@ -1010,7 +1024,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  for(NSButton *b in @[self.peekGrayButton,self.peekWarmthButton,self.peekNightButton])[self helpView:b text:@"Turned off while you hold the Peek shortcut." label:[NSString stringWithFormat:@"While peeking, turn off %@",b.title]];
  NSTextField *peekEffectsLabel=[NSTextField labelWithString:@"While peeking, turn off:"];peekEffectsLabel.font=[NSFont systemFontOfSize:12];
  NSTextField *peekScopeLabel=[NSTextField labelWithString:@"Peek on:"];peekScopeLabel.font=[NSFont systemFontOfSize:12];
- self.peekScopePopup=[[NSPopUpButton alloc]initWithFrame:NSZeroRect pullsDown:NO];[self.peekScopePopup addItemsWithTitles:@[@"All displays",@"Only the display with the active window"]];self.peekScopePopup.target=self;self.peekScopePopup.action=@selector(peekScopeChanged:);[self.peekScopePopup selectItemAtIndex:[NSUserDefaults.standardUserDefaults boolForKey:@"peekActiveDisplayOnly"]?1:0];[self helpView:self.peekScopePopup text:@"With more than one display, peek everywhere or only where the window you are using is." label:@"Peek on"];
+ self.peekScopePopup=[[NSPopUpButton alloc]initWithFrame:NSZeroRect pullsDown:NO];[self.peekScopePopup addItemsWithTitles:@[@"All displays",@"The display with the window you are using"]];self.peekScopePopup.target=self;self.peekScopePopup.action=@selector(peekScopeChanged:);[self.peekScopePopup selectItemAtIndex:[NSUserDefaults.standardUserDefaults boolForKey:@"peekActiveDisplayOnly"]?1:0];[self helpView:self.peekScopePopup text:@"With more than one display: peek only where the window you are using is (a double press keeps that display plain; the next press there lets go, so each display is toggled on its own), or everywhere at once." label:@"Peek on"];
  NSTextField *peekTitle=[NSTextField labelWithString:@"Peek in color"];peekTitle.font=[NSFont systemFontOfSize:13 weight:NSFontWeightMedium];
  self.peekRecorder=[ShortcutRecorder new];self.peekRecorder.bezelStyle=NSBezelStyleRounded;self.peekRecorder.title=@"Record Shortcut";self.peekRecorder.target=self;self.peekRecorder.action=@selector(startRecording:);[self.peekRecorder.widthAnchor constraintGreaterThanOrEqualToConstant:150].active=YES;
  __weak AppDelegate *weakSelf=self;self.peekRecorder.recorded=^(NSInteger keyCode,NSEventModifierFlags modifiers){[weakSelf savePeekShortcutKeyCode:keyCode modifiers:modifiers];};self.peekRecorder.cleared=^{[weakSelf savePeekShortcutKeyCode:-1 modifiers:0];};
@@ -1313,7 +1327,8 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
    NSInteger g=o?[o[@"grayMode"] integerValue]:self.grayOverride;BOOL custom=o?[o[@"customWarmth"] boolValue]:self.customWarmth;double w=o?[o[@"warmth"] doubleValue]:self.appWarmth;
    NSInteger eff=g==1?100:g==2?101:(self.grayOffUntil?101:mode);double str=custom?w/100*3:((mode==100||mode==101)&&!warmthOff?[self currentWarmth]:0);
    if([o[@"plain"] boolValue]){eff=101;str=0;}
-   if(self.pausedUntil){eff=101;str=0;}else if(self.peeking&&(!peekActiveOnly||!o)){NSDictionary *e=[self peekEffects];if([e[@"grayscale"] boolValue])eff=101;if([e[@"warmth"] boolValue])str=0;}
+   BOOL peekHere=(self.peeking&&(!peekActiveOnly||d==self.activeDisplay))||[self.peekLockedDisplays containsObject:dn];
+   if(self.pausedUntil){eff=101;str=0;}else if(peekHere){NSDictionary *e=[self peekEffects];if([e[@"grayscale"] boolValue])eff=101;if([e[@"warmth"] boolValue])str=0;}
    BOOL grayHere=eff==100||eff==1;NSArray *last=[self.warmth stateForDisplay:d];
    if(last&&([last[0] doubleValue]!=str||[last[1] boolValue]!=grayHere)&&!self.quitting){__weak AppDelegate *weak=self;[self.warmth transitionStrength:str grayscale:grayHere display:d reduceMotion:reduce duration:0.5 completion:^{[weak.warmth applyStrength:str grayscale:grayHere display:d];}];}
    else if(!last||![self.warmth transitioning]){if(![self.warmth applyStrength:str grayscale:grayHere display:d])ok=NO;}

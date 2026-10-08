@@ -23,6 +23,16 @@
 - (void)transitionStrength:(double)s grayscale:(BOOL)g reduceMotion:(BOOL)r duration:(double)d completion:(void (^)(void))c {self.transitions++;self.lastDuration=d;self.value=s;self.gray=g;self.lastReduced=r;c();}
 - (void)invalidate {}
 @end
+// Two displays: records what each one shows.
+@interface TwoDisplays : FakeWarmth
+@property NSMutableDictionary *grayOn;
+@end
+@implementation TwoDisplays
+- (NSArray<NSNumber *> *)displays {return @[@11,@22];}
+- (BOOL)applyStrength:(double)s grayscale:(BOOL)g display:(uint32_t)d {if(!self.grayOn)self.grayOn=[NSMutableDictionary new];self.grayOn[@(d)]=@(g);return YES;}
+- (void)transitionStrength:(double)s grayscale:(BOOL)g display:(uint32_t)d reduceMotion:(BOOL)r duration:(double)du completion:(void (^)(void))c {[self applyStrength:s grayscale:g display:d];c();}
+- (NSArray<NSNumber *> *)stateForDisplay:(uint32_t)d {NSNumber *g=self.grayOn[@(d)];return g?@[@0,g]:nil;}
+@end
 @interface TestApp : AppDelegate
 @end
 @implementation TestApp
@@ -203,5 +213,13 @@ int main(){@autoreleasepool{
  }
  printf("PASS: %lu combined following/global-state/base/grayscale/Night-Shift/warmth cases and restoration.\n",(unsigned long)combinations);
  check(e.nativeWrites==0,"no native filter toggles / HUD requests");
- puts("PASS: Peek latch (hold, double-press keep, press to let go); Grayscale off for a while, Peek effects, shortcut suggestions; preference migration; update check version/build/compatibility parsing; Peek in color (plain display while held, release restores, nothing saved, shortcut rules); Pause Less Pull (plain display, rules ignored, settings kept, relaunch, expiry); inheritance, independent gray/warmth, Night Shift on/off, own versus genuine transitions, manual off, timed-off precedence/expiry, schedule cutoff, recovery, rapid rule switches.");
+ {// Peek per display: a press peeks the active display only; a double press keeps it; each display is toggled on its own.
+  TestApp *t=[TestApp new];FakeFilter *fe=[FakeFilter new];fe.on=YES;fe.state=(NSBlueStatus){.mode=0,.available=YES};TwoDisplays *tw=[TwoDisplays new];t.engine=fe;t.warmth=tw;t.exclusion=[ExclusionPolicy new];t.policy=[SwitchingPolicy new];t.selectedMode=100;t.peekLockedDisplays=[NSMutableSet new];[d setBool:YES forKey:@"peekActiveDisplayOnly"];
+  t.activeDisplay=11;t.animateAppearance=YES;[t sync];check([tw.grayOn[@11] boolValue]&&[tw.grayOn[@22] boolValue],"both displays gray at rest");
+  [t peekKeyPressed:YES at:10];check(![tw.grayOn[@11] boolValue]&&[tw.grayOn[@22] boolValue],"a press peeks the active display only");[t peekKeyPressed:NO at:10.3];check([tw.grayOn[@11] boolValue]&&[tw.grayOn[@22] boolValue],"release returns that display");
+  [t peekKeyPressed:YES at:20];[t peekKeyPressed:NO at:20.1];[t peekKeyPressed:YES at:20.3];[t peekKeyPressed:NO at:20.4];check(![tw.grayOn[@11] boolValue]&&[tw.grayOn[@22] boolValue]&&[t.peekLockedDisplays containsObject:@11],"a double press keeps the active display plain");
+  t.activeDisplay=22;[t peekKeyPressed:YES at:30];[t peekKeyPressed:NO at:30.1];[t peekKeyPressed:YES at:30.3];[t peekKeyPressed:NO at:30.4];check(![tw.grayOn[@11] boolValue]&&![tw.grayOn[@22] boolValue],"the other display can be kept too, later");
+  t.activeDisplay=11;[t peekKeyPressed:YES at:40];check([tw.grayOn[@11] boolValue]&&![tw.grayOn[@22] boolValue]&&![t.peekLockedDisplays containsObject:@11],"a press on a kept display lets it go, the other stays");[t peekKeyPressed:NO at:40.2];check([tw.grayOn[@11] boolValue]&&![tw.grayOn[@22] boolValue],"its release changes nothing");
+  [d removeObjectForKey:@"peekActiveDisplayOnly"];}
+ puts("PASS: Peek latch (hold, double-press keep, press to let go), per-display peek and locks; Grayscale off for a while, Peek effects, shortcut suggestions; preference migration; update check version/build/compatibility parsing; Peek in color (plain display while held, release restores, nothing saved, shortcut rules); Pause Less Pull (plain display, rules ignored, settings kept, relaunch, expiry); inheritance, independent gray/warmth, Night Shift on/off, own versus genuine transitions, manual off, timed-off precedence/expiry, schedule cutoff, recovery, rapid rule switches.");
 }}

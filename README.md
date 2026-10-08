@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-20"><b>Download build 20</b></a>
+  <a href="https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-21"><b>Download build 21</b></a>
   &nbsp;·&nbsp; <a href="#install">Install</a>
   &nbsp;·&nbsp; <a href="docs/EXCEPTIONS.md">App and website exceptions</a>
   &nbsp;·&nbsp; <a href="docs/README.md">All docs</a>
@@ -105,6 +105,7 @@ Sometimes you need color for a moment: to tell two lines in a chart apart, to ch
 <sub>Drawn with the app's own color matrix. Option-A is an example; Less Pull ships without a shortcut, and Suggest offers one that is free on your Mac.</sub>
 
 - **Press it twice quickly to keep the peek.** The plain display then stays until you press the shortcut once more. Nothing is saved and no exception is made.
+- **With more than one display,** Peek works on the display with the window you are using. A double press keeps that display plain; move to another display and do the same there, and each one is let go on its own with a press. "All displays" under Shortcuts peeks everywhere at once.
 - **Choose what peeking turns off.** Grayscale and Extra Warmth by default; Night Shift too, if you like.
 - **Toggle Grayscale** is the second shortcut, for switching your default on and off without opening the menu. A right-click on the menu-bar icon does the same.
 - **For longer than a moment**, there is **Grayscale off for** an hour, four hours, or until Night Shift next changes, and **Pause Less Pull** for 15 minutes, an hour, or until you resume. Both are in the menu.
@@ -113,7 +114,7 @@ Sometimes you need color for a moment: to tell two lines in a chart apart, to ch
 
 With more than one display, each one gets its own matrix and its own fade, on its own refresh clock. The app you are working in decides how its display looks, website rule included. Every other display follows the app whose window is on top there: its exception, if it has one, or your defaults. An empty display shows your defaults. Any number of displays works the same way.
 
-Each connected display is listed under **Settings… → General → Displays** with a choice of its own: **Follows what is on it** (the rule above), **Always your defaults** (exceptions never apply there), or **Always plain, in color** (never grayscale or warmth there, for a TV or a pair of glasses). A display keeps its choice when it is plugged in again. Night Shift, Pause, Grayscale off for a while and the Toggle shortcut stay global, since Night Shift is system wide anyway. Peek has a choice under **Settings… → Shortcuts**: all displays, or only the display with the active window.
+Each connected display is listed under **Settings… → General → Displays** with a choice of its own: **Follows what is on it** (the rule above), **Always your defaults** (exceptions never apply there), or **Always plain, in color** (never grayscale or warmth there, for a TV or a pair of glasses). A display keeps its choice when it is plugged in again. Night Shift, Pause, Grayscale off for a while and the Toggle shortcut stay global, since Night Shift is system wide anyway. Peek works on the display with the window you are using, with its own double-press lock per display; "All displays" is the other choice under **Settings… → Shortcuts**.
 
 ## Screenshots keep their colors
 
@@ -196,7 +197,7 @@ The app changes the display; nothing is injected into pages, and the Mac app has
 
 ## Install
 
-1. Download **Less-Pull-1.4.4-20.zip** from the [build 20 release](https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-20), unzip it, and move **Less Pull.app** to **Applications**.
+1. Download **Less-Pull-1.4.4-21.zip** from the [build 21 release](https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-21), unzip it, and move **Less Pull.app** to **Applications**.
 2. Open it. The Settings window greets you once; the circle in the menu bar is where you choose Grayscale and Extra Warmth from then on.
 3. For website rules, open **Settings… → Websites**, choose **Install Browser Extension…**, and follow the steps for [your browser](docs/INSTALL.md#safari-brave-chrome-firefox-opera-or-edge).
 
@@ -204,7 +205,7 @@ The app changes the display; nothing is injected into pages, and the Mac app has
 > Setting up with an AI agent? The release includes an **agent pack** (`Less-Pull-Agent-Pack.zip`): a script that installs the app and the bridge, and scripts that connect Brave, Chrome, Opera, Edge and Firefox, with the instructions an agent needs. See [tools/agent-pack](tools/agent-pack/README.md).
 
 > [!NOTE]
-> Version 1.4.4 (build 20) is a test build for Apple silicon Macs. The version number stays 1.4.4 on purpose; the build number is what changes. It is ad-hoc signed and not notarized by Apple, so Gatekeeper may block a downloaded copy. It is built for macOS 13 and later and has been tested on macOS 27 only. The browser extension is loaded locally and is not in the Chrome Web Store, on addons.mozilla.org or in the App Store. See [install help](docs/INSTALL.md) and [what is still open](docs/RELEASE-PLAN.md).
+> Version 1.4.4 (build 21) is a test build for Apple silicon Macs. The version number stays 1.4.4 on purpose; the build number is what changes. It is ad-hoc signed and not notarized by Apple, so Gatekeeper may block a downloaded copy. It is built for macOS 13 and later and has been tested on macOS 27 only. The browser extension is loaded locally and is not in the Chrome Web Store, on addons.mozilla.org or in the App Store. See [install help](docs/INSTALL.md) and [what is still open](docs/RELEASE-PLAN.md).
 
 ## Private by design
 
