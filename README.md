@@ -192,6 +192,10 @@ The app changes the display; nothing is injected into pages, and the Mac app has
 
 ## Private by design
 
+<p align="center">
+  <img src="docs/assets/privacy.png" width="100%" alt="Where a website address goes. Three cards with arrows: Your browser sends the address of the tab in front, private tabs send nothing; Less Pull, in memory only, holds the one address in front, overwritten by the next, gone within a minute of the browser going quiet or at once when it disconnects, never written to disk; Your screen takes the look you set for that site. Below, four crossed-out cards: Disk, not in preferences, not in logs; Internet, no server, no sync, no analytics; Page content, no reading, no changing, no typing; Account, none to create, nothing to identify you.">
+</p>
+
 No account, no analytics, no cloud sync. The extension reads the address of the active tab, passes it to the app on your Mac, and never reads or changes page content. Private tabs are excluded. **The addresses of the sites you visit are never stored.** They pass through memory only: the app keeps the one address in front, overwrites it with the next, and drops it a minute after the browser stops reporting or as soon as it disconnects. Nothing about them is written to disk, not in preferences and not in logs. Only the exceptions you save yourself are kept, on your Mac. The only thing the app sends anywhere is one request to GitHub once a day to ask whether a newer build exists; it carries nothing about you and can be turned off in Settings → About. [Privacy details](docs/PRIVACY.md).
 
 ## Free to use, including at work

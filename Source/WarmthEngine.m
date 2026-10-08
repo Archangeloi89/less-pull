@@ -47,7 +47,7 @@ static CFStringRef matrixKey;
  self.active=YES;self.strength=strength;self.grayscale=grayscale;self.cacheValid=NO;[NSUserDefaults.standardUserDefaults setBool:YES forKey:@"customMatrixActive"];
  if(reduce||duration<=0){self.cacheValid=[self send:to];completion();return;}
  self.transitionFrom=[NSData dataWithBytes:&from length:sizeof(from)];self.transitionTo=[NSData dataWithBytes:&to length:sizeof(to)];self.transitionCompletion=completion;self.transitionStart=NSProcessInfo.processInfo.systemUptime;self.transitionDuration=fmax(.05,fmin(2,duration));
- self.transitionTimer=[NSTimer timerWithTimeInterval:1.0/30 target:self selector:@selector(transitionTick:) userInfo:nil repeats:YES];[NSRunLoop.mainRunLoop addTimer:self.transitionTimer forMode:NSRunLoopCommonModes];
+ self.transitionTimer=[NSTimer timerWithTimeInterval:1.0/60 target:self selector:@selector(transitionTick:) userInfo:nil repeats:YES];[NSRunLoop.mainRunLoop addTimer:self.transitionTimer forMode:NSRunLoopCommonModes];
 }
 - (void)transitionTick:(id)sender {
  double t=fmin(1,(NSProcessInfo.processInfo.systemUptime-self.transitionStart)/self.transitionDuration);double blend=t*t*(3-2*t);FilterMatrix from,to,m;memcpy(&from,self.transitionFrom.bytes,sizeof(from));memcpy(&to,self.transitionTo.bytes,sizeof(to));for(int i=0;i<9;i++)m.m[i]=from.m[i]+(to.m[i]-from.m[i])*blend;
