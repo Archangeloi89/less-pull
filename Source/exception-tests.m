@@ -137,6 +137,29 @@ int main(){@autoreleasepool{
   NSUserDefaults *empty=[[NSUserDefaults alloc]initWithSuiteName:@"com.jiriarion.lesspull.migration-empty"];[empty removePersistentDomainForName:@"com.jiriarion.lesspull.migration-empty"];check(![PreferenceMigration migrateFromDomain:@"local.nightshiftfilters.nothing-here" into:empty]&&![empty boolForKey:@"migratedPreferences"],"no old settings means a plain first launch");
   [fresh removePersistentDomainForName:oldDomain];[fresh removePersistentDomainForName:@"com.jiriarion.lesspull.migration-test"];[empty removePersistentDomainForName:@"com.jiriarion.lesspull.migration-empty"];
  }
+
+ // Grayscale off for a while, Peek effects, and shortcut suggestions.
+ {
+  TestApp *t=[TestApp new];FakeFilter *fe=[FakeFilter new];fe.on=YES;fe.state=(NSBlueStatus){.mode=0,.available=YES};FakeWarmth *fw=[FakeWarmth new];t.engine=fe;t.warmth=fw;t.exclusion=[ExclusionPolicy new];t.policy=[SwitchingPolicy new];t.policy.known=YES;t.policy.nightShiftOn=YES;t.policy.automatic=YES;t.automatic=YES;t.selectedMode=100;[d setInteger:100 forKey:@"nightMode"];[d setDouble:1.5 forKey:@"warmth"];t.exclusionRules=[NSMutableDictionary new];[d removeObjectForKey:@"grayscaleOff"];[d removeObjectForKey:@"peekEffects"];
+  [t sync];check(fw.gray&&fw.value==1.5,"grayscale on before timed off");
+  [t grayscaleOffForMinutes:60];check(!fw.gray&&fw.value==1.5&&fw.lastDuration==0.5&&[d integerForKey:@"nightMode"]==100&&t.selectedMode==100,"grayscale off for an hour shows color, keeps warmth and the saved choice");
+  check([[d dictionaryForKey:@"grayscaleOff"][@"until"] doubleValue]>NSDate.date.timeIntervalSince1970+59*60,"timed grayscale off persisted");
+  t.grayOverride=1;t.animateAppearance=YES;[t sync];check(fw.gray,"an app exception for grayscale still wins during timed off");t.grayOverride=0;t.animateAppearance=YES;[t sync];
+  t.grayOffUntil=[NSDate dateWithTimeIntervalSinceNow:-1];[t sync];check(t.grayOffUntil==nil&&fw.gray&&[d dictionaryForKey:@"grayscaleOff"]==nil,"expiry brings grayscale back");
+  [t grayscaleOffForMinutes:0];check(!fw.gray&&[t.grayOffUntil isEqualToDate:NSDate.distantFuture],"off until Night Shift changes");[t sync];check(!fw.gray,"stays off while Night Shift is unchanged");
+  fe.on=NO;[t sync];check(t.grayOffUntil==nil&&fw.gray&&fw.value==0,"a Night Shift change ends it and the morning removes warmth as usual");fe.on=YES;[t sync];
+  TestApp *again=[TestApp new];again.engine=fe;again.warmth=fw;again.exclusion=[ExclusionPolicy new];again.policy=t.policy;[d setObject:@{@"until":@0} forKey:@"grayscaleOff"];[again restoreGrayscaleOff];check([again.grayOffUntil isEqualToDate:NSDate.distantFuture],"open-ended grayscale off survives relaunch");[d removeObjectForKey:@"grayscaleOff"];
+  [t grayscaleBackOn:nil];check(fw.gray&&t.grayOffUntil==nil,"back on now");
+  // Peek effects: default grayscale+warmth; Night Shift when chosen.
+  t.peeking=YES;check(!fw.gray&&fw.value==0&&fe.on,"peek turns off grayscale and warmth, leaves Night Shift");t.peeking=NO;
+  [d setObject:@{@"grayscale":@NO,@"warmth":@YES,@"nightShift":@YES} forKey:@"peekEffects"];t.peeking=YES;[t sync];check(fw.gray&&fw.value==0&&!fe.on,"peek with Night Shift chosen turns it off and keeps grayscale when unticked");
+  t.peeking=NO;t.nightOverride=0;t.excludeNight=NO;[t sync];[t sync];check(fe.on&&fw.gray&&fw.value==1.5,"release restores Night Shift and the appearance");[d removeObjectForKey:@"peekEffects"];
+  // Suggestions avoid macOS and Less Pull's other shortcut.
+  NSDictionary *first=[PeekShortcut suggestionAvoiding:[NSSet set] preferring:@[@{@"keyCode":@8,@"modifiers":@(NSEventModifierFlagControl|NSEventModifierFlagOption)},@{@"keyCode":@9,@"modifiers":@(NSEventModifierFlagControl|NSEventModifierFlagOption)}]];check([first[@"keyCode"] integerValue]==8,"first free candidate is suggested");
+  NSDictionary *second=[PeekShortcut suggestionAvoiding:[NSSet setWithObject:[PeekShortcut keyForKeyCode:8 modifiers:NSEventModifierFlagControl|NSEventModifierFlagOption]] preferring:@[@{@"keyCode":@8,@"modifiers":@(NSEventModifierFlagControl|NSEventModifierFlagOption)},@{@"keyCode":@9,@"modifiers":@(NSEventModifierFlagControl|NSEventModifierFlagOption)}]];check([second[@"keyCode"] integerValue]==9,"a taken shortcut is skipped");
+  check([PeekShortcut suggestionAvoiding:[NSSet set] preferring:@[@{@"keyCode":@8,@"modifiers":@0}]]==nil,"candidates without a real modifier are never suggested");
+  check([[PeekShortcut systemShortcutKeys] isKindOfClass:NSSet.class],"system shortcut list reads without error");
+ }
  NSUInteger combinations=0;
  for(int follow=0;follow<2;follow++)for(int globalNight=0;globalNight<2;globalNight++)for(int base=100;base<=101;base++)for(int grayRule=0;grayRule<3;grayRule++)for(int nightRule=0;nightRule<3;nightRule++)for(int custom=0;custom<2;custom++)for(NSNumber *percent in @[@0,@25,@77,@100]){
   TestApp *t=[TestApp new];FakeFilter *fe=[FakeFilter new];fe.on=globalNight;fe.state=(NSBlueStatus){.mode=0,.available=YES};FakeWarmth *fw=[FakeWarmth new];t.engine=fe;t.warmth=fw;t.exclusion=[ExclusionPolicy new];t.policy=[SwitchingPolicy new];t.policy.known=YES;t.policy.nightShiftOn=globalNight;t.policy.automatic=follow;t.automatic=follow;t.policy.overrideMode=-1;t.selectedMode=base;[d setInteger:base forKey:@"nightMode"];t.grayOverride=grayRule;t.nightOverride=nightRule;t.excludeNight=nightRule!=0;t.customWarmth=custom;t.appWarmth=percent.doubleValue;t.animateAppearance=YES;
@@ -146,5 +169,5 @@ int main(){@autoreleasepool{
  }
  printf("PASS: %lu combined following/global-state/base/grayscale/Night-Shift/warmth cases and restoration.\n",(unsigned long)combinations);
  check(e.nativeWrites==0,"no native filter toggles / HUD requests");
- puts("PASS: preference migration; update check version/build/compatibility parsing; Peek in color (plain display while held, release restores, nothing saved, shortcut rules); Pause Less Pull (plain display, rules ignored, settings kept, relaunch, expiry); inheritance, independent gray/warmth, Night Shift on/off, own versus genuine transitions, manual off, timed-off precedence/expiry, schedule cutoff, recovery, rapid rule switches.");
+ puts("PASS: Grayscale off for a while, Peek effects, shortcut suggestions; preference migration; update check version/build/compatibility parsing; Peek in color (plain display while held, release restores, nothing saved, shortcut rules); Pause Less Pull (plain display, rules ignored, settings kept, relaunch, expiry); inheritance, independent gray/warmth, Night Shift on/off, own versus genuine transitions, manual off, timed-off precedence/expiry, schedule cutoff, recovery, rapid rule switches.");
 }}

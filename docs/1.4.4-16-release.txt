@@ -12,7 +12,8 @@ What is new, from the app improvements approved on 8 October 2026:
 - The menu-bar icon shows state: its left half fills while grayscale is showing, its right half takes the warmth color, a pause mark shows while paused, and a small dot shows when a newer build is available.
 - The extension popup shows what a default resolves to, e.g. Use default (On); Save exception is the primary button; the back button only appears after choosing a saved rule. Extension 0.2.0.
 - Pause Less Pull for 15 minutes, 1 hour or until resumed: the plain display, rules ignored, settings kept, survives a relaunch.
-- Peek in color: hold a shortcut recorded in Settings → General to see the plain display; no Accessibility permission needed.
+- Peek in color: hold a shortcut recorded in Settings → Shortcuts to see the plain display; choose there what it turns off (Grayscale, Extra Warmth, Night Shift). Suggest picks a shortcut that is free of macOS shortcuts. No Accessibility permission needed.
+- A Toggle Grayscale shortcut, Grayscale off for 1 hour, 4 hours or until Night Shift changes (menu and Settings), and a choice of what clicking the menu-bar icon does: by default a click opens the menu and a right-click toggles Grayscale; Settings → Shortcuts can swap the two.
 - Updates, phase 1: once a day one request asks GitHub for the latest release; builds made for another macOS version are not offered; installing stays manual until the app is signed and notarized.
 - Firefox: the same extension code with a Firefox manifest, a Mozilla native-host registration and Firefox in the install flow. Untested live on this Mac.
 - A thank-you window after 30 days of use, once, with the author's links. Later asks again in 90 days.

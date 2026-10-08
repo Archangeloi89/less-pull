@@ -95,4 +95,4 @@ These are ideas, not built-in presets.
 
 When you move between apps or tabs, the screen fades to the new look over half a second. If **Reduce motion** is on in macOS, it changes at once.
 
-Two ways to see the plain display without touching your rules: **Pause Less Pull** in the menu (15 minutes, 1 hour, or until you resume), and **Peek in color**, a shortcut you record in Settings → General that shows the plain display while you hold it.
+Two ways to see the plain display without touching your rules: **Pause Less Pull** in the menu (15 minutes, 1 hour, or until you resume), and **Peek in color**, a shortcut you record in Settings → Shortcuts that shows the plain display while you hold it.

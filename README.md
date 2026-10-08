@@ -99,26 +99,27 @@ More in [Night Shift and warmth](docs/NIGHT-SHIFT.md).
 Less Pull has two interfaces on the Mac and a third in the browser.
 
 <p align="center">
-  <img src="docs/assets/interfaces.png" width="100%" alt="Two screenshots of Less Pull side by side. On the left, the menu-bar dropdown under its half-filled circle icon: one status line, Grayscale, the Extra Warmth slider drawn as a ramp from neutral through amber to red with stops labeled Off, 25, 50, 75 and Red, Night Shift with a submenu, Pause Less Pull, Exception for the current app with its icon, Settings and Quit. On the right, the Settings window on its General tab, with the toolbar tabs General, Apps, Websites and About: the heading Grayscale, Warmth 40 percent, a Grayscale checkbox, the Extra Warmth ramp slider with a Reset button, Night Shift with a Turn Night Shift off for menu, Extra Warmth follows Night Shift, Peek in color with a Record Shortcut button, and Launch at login, each with a short explanation underneath.">
+  <img src="docs/assets/interfaces.png" width="100%" alt="Two screenshots of Less Pull side by side. On the left, the menu-bar dropdown under its half-filled circle icon: one status line, Grayscale, the Extra Warmth slider drawn as a ramp from neutral through amber to red with stops labeled Off, 25, 50, 75 and Red, Night Shift with a submenu, Pause Less Pull, Exception for the current app with its icon, Settings and Quit. On the right, the Settings window on its General tab, with the toolbar tabs General, Shortcuts, Apps, Websites and About: the heading Grayscale, Warmth 40 percent, a Grayscale checkbox, the Extra Warmth ramp slider with a Reset button, Night Shift with a Turn Night Shift off for menu, Extra Warmth follows Night Shift, Peek in color with a Record Shortcut button, and Launch at login, each with a short explanation underneath.">
 </p>
 
 <sub>Two real screenshots of build 16, placed side by side on a plain backdrop.</sub>
 
 ### The menu bar, for quick changes
 
-Click the circle in the menu bar. This is the dropdown on the left. The icon itself tells you the state: its left half fills while grayscale is showing, its right half warms as you add warmth, and it shows a pause mark while Less Pull or Night Shift is paused.
+Click the circle in the menu bar (a right-click toggles Grayscale straight away). This is the dropdown on the left. The icon itself tells you the state: its left half fills while grayscale is showing, its right half warms as you add warmth, and it shows a pause mark while Less Pull or Night Shift is paused.
 
 - The first line tells you what is applied right now.
-- **Grayscale** and the **Extra Warmth** slider change your defaults. The slider's track shows the real ramp from neutral through amber to red.
+- **Grayscale** and the **Extra Warmth** slider change your defaults. The slider's track shows the real ramp from neutral through amber to red. **Grayscale off for** gives you color for an hour, four hours, or until Night Shift next changes.
 - **Night Shift** holds everything about Night Shift: on or off now, off for a while, and whether Extra Warmth follows it.
 - **Pause Less Pull** shows the plain display for 15 minutes, an hour, or until you resume.
 - **Exception for [current app]** sets the rule for the app you were just using, right in the menu.
 
 ### The settings window, for everything in one place
 
-Choose **Settings…** in the menu. This is the window on the right, with four tabs.
+Choose **Settings…** in the menu. This is the window on the right, with five tabs.
 
-- **General**: the same controls as the menu, with a short line under each one, plus **Peek in color** (a shortcut you hold to see the plain display) and **Launch at login**.
+- **General**: the same controls as the menu, with a short line under each one, plus **Launch at login**.
+- **Shortcuts**: **Peek in color** (a shortcut you hold to see the plain display, and what it turns off), a **Toggle Grayscale** shortcut, and what clicking the menu-bar icon does. **Suggest** picks a free shortcut for you.
 - **Apps**: every app exception, with the app's icon and Default / On / Off for Grayscale and Night Shift.
 - **Websites**: the browser extension and the saved website exceptions.
 - **About**: version, links, Help, Diagnostics, licenses, and the update check.

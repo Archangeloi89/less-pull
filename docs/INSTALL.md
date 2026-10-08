@@ -47,7 +47,7 @@ The [release plan](RELEASE-PLAN.md) lists what is still open.
 
 **The extension says it cannot connect.** Make sure Less Pull is running, then run **Install Browser Extension…** again from Settings → Websites.
 
-**You only want color for a moment.** Choose **Pause Less Pull** in the menu, or hold the **Peek in color** shortcut from Settings → General.
+**You only want color for a moment.** Choose **Pause Less Pull** in the menu, or hold the **Peek in color** shortcut from Settings → Shortcuts.
 
 **A website rule does not apply.** Check that the tab is not private, that the browser window is in front, and that the rule's scope matches the address.
 
