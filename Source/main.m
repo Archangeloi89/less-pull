@@ -689,8 +689,9 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  self.policy.overrideMode=[d integerForKey:@"overrideMode"];
  self.policy.known=[d boolForKey:@"lastNightShiftKnown"];self.policy.nightShiftOn=[d boolForKey:@"lastNightShiftOn"];
  self.browserBridge=[BrowserBridge new];__weak AppDelegate *browserOwner=self;self.browserBridge.changed=^{[browserOwner sync];[browserOwner rebuildWebsiteRulesList];};self.browserBridge.defaults=^NSDictionary *(NSString *browser){return [browserOwner browserBaseForBundle:browser];};[self.browserBridge start];
- // The icon's place in the menu bar is macOS's: new items go to the left end of the third-party items, and the
- // "Preferred Position" preference is not honored on current macOS (tested with many values). The user ⌘-drags it.
+ // The icon's place in the menu bar is macOS's: the user ⌘-drags it and macOS remembers. Builds 25 to 33 wrote a
+ // "Preferred Position" value once; it is removed here so nothing of ours can pull the icon back to the left.
+ if([d objectForKey:@"NSStatusItem Preferred Position LessPull"]){[d removeObjectForKey:@"NSStatusItem Preferred Position LessPull"];[d removeObjectForKey:@"NSStatusItem Preferred Position Item-0"];[d removeObjectForKey:@"iconPlacedRight"];}
  self.item=[NSStatusBar.systemStatusBar statusItemWithLength:NSVariableStatusItemLength];self.item.autosaveName=@"LessPull";self.item.button.imagePosition=NSImageLeft;self.item.button.imageHugsTitle=YES;
  self.item.button.image=[self menuBarImage:@"menubar-grayscale" symbol:@"circle.lefthalf.filled"];
  self.item.button.toolTip=@"Less Pull";
