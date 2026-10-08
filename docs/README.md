@@ -14,6 +14,7 @@ For people working on Less Pull:
 
 | Document | What it covers |
 | :-- | :-- |
+| [Build 17 release notes](1.4.4-17-release.txt) | What changed in build 17 |
 | [Build 16 release notes](1.4.4-16-release.txt) | What changed in build 16 and what was verified |
 | [Build 15 release notes](1.4.4-release.txt) | The previous build |
 | [Release metadata](lesspull-update.json) | The file to attach to each GitHub release so the app can tell which macOS versions a build is made for |
