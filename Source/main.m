@@ -167,7 +167,7 @@ static NSString *const LessPullOldBundleIdentifier=@"local.nightshiftfilters.app
  [ramp drawInBezierPath:path angle:0];[[NSColor.labelColor colorWithAlphaComponent:.2] setStroke];path.lineWidth=.5;[path stroke];
 }
 @end
-@interface AppDelegate : NSObject <NSApplicationDelegate,NSMenuDelegate>
+@interface AppDelegate : NSObject<NSApplicationDelegate,NSMenuDelegate,NSTextFieldDelegate>
 @property NSStatusItem *item;
 @property NSMenu *statusMenu;
 @property BrowserBridge *browserBridge;
@@ -789,17 +789,17 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  NSMutableArray *buttons=[NSMutableArray new];
  if([mode isEqual:@"start"]){time.stringValue=@"A session";time.font=[NSFont systemFontOfSize:22 weight:NSFontWeightLight];time.textColor=NSColor.labelColor;sub.stringValue=@"Focused work with a gentle end. How long?";
   NSMutableArray *chips=[NSMutableArray new];for(NSNumber *m in [self sessionPresets:@"sessionPresets" fallback:@[@25,@45,@60,@90]]){NSButton *c=[self panelButton:[NSString stringWithFormat:@"%@ min",m] action:@selector(startSession:) prominent:NO];c.tag=m.integerValue;[chips addObject:c];}
-  NSStackView *chipRow=[self row:chips];chipRow.spacing=6;chipRow.distribution=NSStackViewDistributionFillEqually;[buttons addObject:chipRow];
+  [buttons addObjectsFromArray:[self chipRows:chips]];
   NSButton *gear=[NSButton buttonWithImage:[NSImage imageWithSystemSymbolName:@"gearshape" accessibilityDescription:@"Session settings"] target:self action:@selector(showSessionsFromPanel:)];gear.bezelStyle=NSBezelStyleInline;gear.bordered=NO;[self helpView:gear text:@"Change the lengths, reminders, sound and glow under Settings → Sessions." label:@"Session settings"];
   NSButton *later=[self panelButton:@"Not now" action:@selector(closeSessionPanel) prominent:NO];later.bezelStyle=NSBezelStyleInline;later.controlSize=NSControlSizeRegular;[buttons addObject:[self row:@[[self spacer],later,gear]]];}
  else if([mode isEqual:@"callback"]){sub.stringValue=@"Call me back in";time.stringValue=@"Leaving now.";time.font=[NSFont systemFontOfSize:22 weight:NSFontWeightLight];time.textColor=NSColor.labelColor;
   NSMutableArray *chips=[NSMutableArray new];for(NSNumber *m in [self sessionPresets:@"callBackPresets" fallback:@[@5,@9,@13,@33]]){NSButton *c=[self panelButton:[NSString stringWithFormat:@"%@ min",m] action:@selector(sessionCallBack:) prominent:NO];c.tag=m.integerValue;[chips addObject:c];}
-  NSStackView *chipRow=[self row:chips];chipRow.spacing=6;chipRow.distribution=NSStackViewDistributionFillEqually;[buttons addObject:chipRow];
+  [buttons addObjectsFromArray:[self chipRows:chips]];
   NSButton *none=[self panelButton:@"Not today" action:@selector(sessionCallBack:) prominent:NO];none.tag=0;none.bezelStyle=NSBezelStyleInline;none.controlSize=NSControlSizeRegular;[buttons addObject:[self row:@[[self spacer],none,[self spacer]]]];}
  else if(s.state==SessionRunning){[buttons addObject:[self row:@[[self spacer],[self panelButton:@"End session" action:@selector(endSession:) prominent:NO],[self spacer]]]];}
  else if(s.state==SessionOver){NSTextField *ask=[NSTextField labelWithString:@"Leaving? Call me back in"];ask.font=[NSFont systemFontOfSize:12];ask.textColor=NSColor.secondaryLabelColor;ask.alignment=NSTextAlignmentCenter;[buttons addObject:ask];
   NSMutableArray *chips=[NSMutableArray new];for(NSNumber *m in [self sessionPresets:@"callBackPresets" fallback:@[@5,@9,@13,@33]]){NSButton *c=[self panelButton:[NSString stringWithFormat:@"%@ min",m] action:@selector(sessionCallBack:) prominent:NO];c.tag=m.integerValue;[chips addObject:c];}
-  NSStackView *chipRow=[self row:chips];chipRow.spacing=6;chipRow.distribution=NSStackViewDistributionFillEqually;[buttons addObject:chipRow];
+  [buttons addObjectsFromArray:[self chipRows:chips]];
   NSButton *keep=[self panelButton:@"Keep going" action:@selector(closeSessionPanel) prominent:NO];NSButton *quiet=[self panelButton:@"Leave quietly" action:@selector(sessionCallBack:) prominent:NO];quiet.tag=0;quiet.bezelStyle=NSBezelStyleInline;quiet.controlSize=NSControlSizeRegular;[self helpView:quiet text:@"End the session without a call back." label:@"Leave quietly"];
   NSButton *gear=[NSButton buttonWithImage:[NSImage imageWithSystemSymbolName:@"gearshape" accessibilityDescription:@"Session settings"] target:self action:@selector(showSessionsFromPanel:)];gear.bezelStyle=NSBezelStyleInline;gear.bordered=NO;[self helpView:gear text:@"Change the call-back times, reminders, sound and glow under Settings → Sessions." label:@"Session settings"];
   [buttons addObject:[self row:@[keep,[self spacer],quiet,gear]]];}
@@ -960,6 +960,13 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
 - (void)menuWillOpen:(NSMenu *)menu {
  if(menu!=self.statusMenu)return;if(!self.menuDismissal)self.menuDismissal=[MenuDismissal new];[self.menuDismissal begin:menu];
  [self sync];[menu removeAllItems];BOOL on=NO;BOOL known=[self logicalNightShift:&on];BOOL actualOn=NO;BOOL actualKnown=[self.engine nightShift:&actualOn];
+ Session *session=self.session;
+ if(session.state==SessionIdle){[self add:@"Start a session…" action:@selector(openStartPanel:) to:menu];}
+ else {NSDate *now=NSDate.date;NSString *line=session.state==SessionRunning?[NSString stringWithFormat:@"Session · %@ min left",[session labelAt:now]]:session.state==SessionOver?[NSString stringWithFormat:@"Session over · %@ min past",[[session labelAt:now] substringFromIndex:1]]:[NSString stringWithFormat:@"Away · back in %@ min",[session labelAt:now]];
+  NSMenuItem *head=[[NSMenuItem alloc]initWithTitle:line action:nil keyEquivalent:@""];head.enabled=NO;[menu addItem:head];
+  if(session.state==SessionOver)[self add:@"Leaving now…" action:@selector(sessionLeaving:) to:menu];
+  [self add:session.state==SessionAway?@"I’m back":@"End session" action:@selector(endSession:) to:menu];}
+ [menu addItem:NSMenuItem.separatorItem];
  [self add:[self menuStatusLine] action:nil to:menu];
  [menu addItem:NSMenuItem.separatorItem];
  NSMenuItem *gray=[self add:self.grayOverride?@"Default Grayscale":@"Grayscale" action:@selector(toggleGrayscale:) to:menu];gray.state=self.selectedMode==1||self.selectedMode==100;
@@ -983,13 +990,6 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
   [night.submenu addItem:NSMenuItem.separatorItem];
   NSMenuItem *automatic=[self add:@"Extra Warmth follows Night Shift" action:@selector(toggleAuto:) to:night.submenu];automatic.state=self.automatic;automatic.enabled=actualKnown;
   if(self.automatic&&self.policy.overrideMode>=0)[self add:@"Resume Following" action:@selector(resume:) to:night.submenu];}
- Session *session=self.session;
- if(session.state==SessionIdle){[self add:@"Start a session…" action:@selector(openStartPanel:) to:menu];}
- else {NSDate *now=NSDate.date;NSString *line=session.state==SessionRunning?[NSString stringWithFormat:@"Session · %@ min left",[session labelAt:now]]:session.state==SessionOver?[NSString stringWithFormat:@"Session over · %@ min past",[[session labelAt:now] substringFromIndex:1]]:[NSString stringWithFormat:@"Away · back in %@ min",[session labelAt:now]];
-  NSMenuItem *head=[[NSMenuItem alloc]initWithTitle:line action:nil keyEquivalent:@""];head.enabled=NO;[menu addItem:head];
-  if(session.state==SessionOver)[self add:@"Leaving now…" action:@selector(sessionLeaving:) to:menu];
-  [self add:session.state==SessionAway?@"I’m back":@"End session" action:@selector(endSession:) to:menu];}
- [menu addItem:NSMenuItem.separatorItem];
  if(self.pausedUntil){[self add:@"Resume Less Pull" action:@selector(resumeLessPull:) to:menu];}
  else {NSMenuItem *pauseAll=[self add:@"Pause Less Pull" action:nil to:menu];pauseAll.submenu=[NSMenu new];for(NSArray *pair in @[@[@"For 15 minutes",@15],@[@"For 1 hour",@60],@[@"Until I resume",@0]]){NSMenuItem *i=[self add:pair[0] action:@selector(pauseLessPull:) to:pauseAll.submenu];i.tag=[pair[1] integerValue];}}
  [menu addItem:NSMenuItem.separatorItem];
@@ -1317,16 +1317,22 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
 }
 - (void)showSessions:(id)sender {[self showSettings:nil];self.settingsTabs.selectedTabViewItemIndex=2;}
 - (NSString *)minutesList:(NSString *)key fallback:(NSArray *)fallback {NSMutableArray *parts=[NSMutableArray new];for(NSNumber *m in [self sessionPresets:key fallback:fallback])[parts addObject:m.stringValue];return [parts componentsJoinedByString:@", "];}
-- (void)presetsChanged:(NSTextField *)sender {NSMutableArray *list=[NSMutableArray new];for(NSString *part in [sender.stringValue componentsSeparatedByCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@", ;"]]){NSInteger v=part.integerValue;if(v>0&&v<=24*60&&![list containsObject:@(v)])[list addObject:@(v)];}
- NSString *key=sender.identifier;NSArray *fallback=[key isEqual:@"sessionPresets"]?@[@25,@45,@60,@90]:@[@5,@9,@13,@33];if(list.count)[NSUserDefaults.standardUserDefaults setObject:list forKey:key];else [NSUserDefaults.standardUserDefaults removeObjectForKey:key];sender.stringValue=[self minutesList:key fallback:fallback];}
+// Saved as you type (no Return needed); the field is tidied when you leave it.
+- (void)savePresets:(NSTextField *)sender tidy:(BOOL)tidy {NSMutableArray *list=[NSMutableArray new];for(NSString *part in [sender.stringValue componentsSeparatedByCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@", ;"]]){NSInteger v=part.integerValue;if(v>0&&v<=24*60&&![list containsObject:@(v)])[list addObject:@(v)];}
+ NSString *key=sender.identifier;NSArray *fallback=[key isEqual:@"sessionPresets"]?@[@25,@45,@60,@90]:@[@5,@9,@13,@33];if(list.count)[NSUserDefaults.standardUserDefaults setObject:list forKey:key];else [NSUserDefaults.standardUserDefaults removeObjectForKey:key];if(tidy)sender.stringValue=[self minutesList:key fallback:fallback];}
+- (void)presetsChanged:(NSTextField *)sender {[self savePresets:sender tidy:YES];}
+- (void)controlTextDidChange:(NSNotification *)note {NSTextField *f=note.object;if([f isKindOfClass:NSTextField.class]&&([f.identifier isEqual:@"sessionPresets"]||[f.identifier isEqual:@"callBackPresets"]))[self savePresets:f tidy:NO];}
+- (void)controlTextDidEndEditing:(NSNotification *)note {NSTextField *f=note.object;if([f isKindOfClass:NSTextField.class]&&([f.identifier isEqual:@"sessionPresets"]||[f.identifier isEqual:@"callBackPresets"]))[self savePresets:f tidy:YES];}
+// Chips in rows of up to five, so any number of lengths fits the panel.
+- (NSArray<NSView *> *)chipRows:(NSArray<NSButton *> *)chips {NSUInteger per=chips.count<=4?4:5;NSMutableArray *rows=[NSMutableArray new];for(NSUInteger i=0;i<chips.count;i+=per){NSMutableArray *items=[[chips subarrayWithRange:NSMakeRange(i,MIN(per,chips.count-i))] mutableCopy];while(items.count<per)[items addObject:[NSView new]];NSStackView *r=[self row:items];r.spacing=6;r.distribution=NSStackViewDistributionFillEqually;[rows addObject:r];}return rows;}
 - (void)sessionOptionChanged:(NSControl *)sender {NSUserDefaults *d=NSUserDefaults.standardUserDefaults;if([sender.identifier isEqual:@"remind"]){NSInteger v=[(NSPopUpButton *)sender selectedTag];[d setInteger:v forKey:@"sessionRemindEvery"];self.session.remindEvery=v;[self persistSession];}else [d setBool:[(NSButton *)sender state]==NSControlStateValueOn forKey:sender.identifier];}
 - (void)trySessionSound:(id)sender {[self glow:@"That was 30 minutes." sound:@"session-end"];}
 - (NSStackView *)sessionsTab {
  NSTextField *intro=[NSTextField wrappingLabelWithString:@"A session is a stretch of focused work with a gentle end. Start one from the menu. The icon shows the minutes left; at the end, a soft glow and a calm sound, and the count goes on past the end so you can finish your thought. When you leave, Less Pull can call you back once."];intro.preferredMaxLayoutWidth=452;
  NSTextField *lengthsLabel=[NSTextField labelWithString:@"Session lengths"];lengthsLabel.font=[NSFont systemFontOfSize:13 weight:NSFontWeightMedium];
- self.sessionPresetsField=[NSTextField textFieldWithString:[self minutesList:@"sessionPresets" fallback:@[@25,@45,@60,@90]]];self.sessionPresetsField.identifier=@"sessionPresets";self.sessionPresetsField.target=self;self.sessionPresetsField.action=@selector(presetsChanged:);self.sessionPresetsField.placeholderString=@"25, 45, 60, 90";[self.sessionPresetsField.widthAnchor constraintEqualToConstant:220].active=YES;[self helpView:self.sessionPresetsField text:@"Minutes, separated by commas. These appear under Start a session in the menu." label:@"Session lengths in minutes"];
+ self.sessionPresetsField=[NSTextField textFieldWithString:[self minutesList:@"sessionPresets" fallback:@[@25,@45,@60,@90]]];self.sessionPresetsField.identifier=@"sessionPresets";self.sessionPresetsField.target=self;self.sessionPresetsField.action=@selector(presetsChanged:);self.sessionPresetsField.delegate=self;self.sessionPresetsField.placeholderString=@"25, 45, 60, 90";[self.sessionPresetsField.widthAnchor constraintEqualToConstant:220].active=YES;[self helpView:self.sessionPresetsField text:@"Minutes, separated by commas. These appear under Start a session in the menu." label:@"Session lengths in minutes"];
  NSTextField *backLabel=[NSTextField labelWithString:@"Call me back in"];backLabel.font=[NSFont systemFontOfSize:13 weight:NSFontWeightMedium];
- self.callBackPresetsField=[NSTextField textFieldWithString:[self minutesList:@"callBackPresets" fallback:@[@5,@9,@13,@33]]];self.callBackPresetsField.identifier=@"callBackPresets";self.callBackPresetsField.target=self;self.callBackPresetsField.action=@selector(presetsChanged:);self.callBackPresetsField.placeholderString=@"5, 9, 13, 33";[self.callBackPresetsField.widthAnchor constraintEqualToConstant:220].active=YES;[self helpView:self.callBackPresetsField text:@"Minutes, separated by commas. Offered when you leave after a session; you are called back once." label:@"Call me back in, minutes"];
+ self.callBackPresetsField=[NSTextField textFieldWithString:[self minutesList:@"callBackPresets" fallback:@[@5,@9,@13,@33]]];self.callBackPresetsField.identifier=@"callBackPresets";self.callBackPresetsField.target=self;self.callBackPresetsField.action=@selector(presetsChanged:);self.callBackPresetsField.delegate=self;self.callBackPresetsField.placeholderString=@"5, 9, 13, 33";[self.callBackPresetsField.widthAnchor constraintEqualToConstant:220].active=YES;[self helpView:self.callBackPresetsField text:@"Minutes, separated by commas. Offered when you leave after a session; you are called back once." label:@"Call me back in, minutes"];
  NSTextField *remindLabel=[NSTextField labelWithString:@"After the end, remind me"];remindLabel.font=[NSFont systemFontOfSize:13 weight:NSFontWeightMedium];
  NSPopUpButton *remind=[[NSPopUpButton alloc]initWithFrame:NSZeroRect pullsDown:NO];for(NSArray *pair in @[@[@"Never",@0],@[@"Every 3 minutes",@3],@[@"Every 5 minutes",@5],@[@"Every 10 minutes",@10],@[@"Every 15 minutes",@15]]){[remind addItemWithTitle:pair[0]];remind.lastItem.tag=[pair[1] integerValue];}[remind selectItemWithTag:[NSUserDefaults.standardUserDefaults integerForKey:@"sessionRemindEvery"]];remind.identifier=@"remind";remind.target=self;remind.action=@selector(sessionOptionChanged:);[remind.widthAnchor constraintEqualToConstant:220].active=YES;[self helpView:remind text:@"A quieter glow and sound while the session runs past its end, until you leave or end it." label:@"Remind me after the end"];
  NSButton *sound=[NSButton checkboxWithTitle:@"Play a calm sound" target:self action:@selector(sessionOptionChanged:)];sound.identifier=@"sessionSound";sound.state=[NSUserDefaults.standardUserDefaults boolForKey:@"sessionSound"];[self helpView:sound text:@"A soft bell at the end, quieter for reminders, two rising notes for the call back." label:@"Play a calm sound"];
