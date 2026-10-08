@@ -18,4 +18,6 @@ Build 23 (same day): the Displays section and the install help explain the hardw
 
 Build 24 (same day): "On every display" per app exception (menu and Settings → Apps): while that app is in front, its settings and Peek cover all displays, for apps whose picture shows on another display (3D players, presenters). Works whether or not the exception is used.
 
+Build 25 (same day): the menu-bar icon is placed at the left end of the menu-bar items on a new install (and once on the first launch of this build), where it stays visible on a crowded MacBook menu bar; ⌘-drag moves it, and macOS remembers the place.
+
 Verified: the ten automated suites pass, including new per-display engine tests (apply, cache, independent fades, invalidate). Per-display color was confirmed live on the author's Mac with a second display. Browser support and everything else is as in build 17.
