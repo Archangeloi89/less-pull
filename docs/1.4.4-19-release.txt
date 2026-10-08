@@ -14,4 +14,6 @@ Build 21 (same day): Peek works per display by default, on the display with the 
 
 Build 22 (same day): the per-display Peek acts on the display under the mouse pointer, so no window has to be chosen first.
 
+Build 23 (same day): the Displays section and the install help explain the hardware arrow pointer that stays in color on some displays, with a button to the Pointer size setting (one notch larger fixes it).
+
 Verified: the ten automated suites pass, including new per-display engine tests (apply, cache, independent fades, invalidate). Per-display color was confirmed live on the author's Mac with a second display. Browser support and everything else is as in build 17.
