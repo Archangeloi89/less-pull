@@ -99,9 +99,9 @@ Less Pull has two interfaces on the Mac and a third in the browser.
 
 ### The menu bar, for quick changes
 
-Click the half-filled circle in the menu bar.
+<img src="docs/assets/menu-bar.png" align="right" width="420" alt="Screenshot of the Less Pull menu-bar dropdown. It shows the current state, a Grayscale toggle, the Extra Warmth slider at 55 percent with stops labeled Off, 25, 50, 75 and Red, Night Shift controls, Extra Warmth follows Night Shift, Resume Following, App Exceptions, Customize System Settings, Install Browser Extension, Settings, Help, About and Quit.">
 
-<img src="docs/assets/menu-bar.png" align="right" width="440" alt="Screenshot of the Less Pull menu-bar dropdown. It shows the current state, a Grayscale toggle, the Extra Warmth slider at 55 percent with stops labeled Off, 25, 50, 75 and Red, Night Shift controls, Extra Warmth follows Night Shift, Resume Following, App Exceptions, Customize System Settings, Install Browser Extension, Settings, Help, About and Quit.">
+Click the half-filled circle in the menu bar.
 
 
 - The first line tells you what is applied right now.
@@ -109,6 +109,7 @@ Click the half-filled circle in the menu bar.
 - **Night Shift** can be switched, or paused for a while.
 - **Customize [current app]…** opens the rule for the app you were just using. In this screenshot that app happened to be System Settings.
 - **App Exceptions…** lists every app rule.
+- **Install Browser Extension…**, **Settings…**, **Help** and **Quit** are at the bottom.
 
 <sub>Real screenshot of version 1.4.4, placed on a plain backdrop.</sub>
 
@@ -116,9 +117,9 @@ Click the half-filled circle in the menu bar.
 
 ### The settings window, for everything in one place
 
-Choose **Settings…** in the menu.
+<img src="docs/assets/settings.png" align="right" width="420" alt="Screenshot of the Less Pull settings window. The heading reads Grayscale, Warmth 56 percent. Below are a Grayscale checkbox, the Extra Warmth slider with a Reset button, Night Shift with a Turn Night Shift off for menu, Extra Warmth follows Night Shift with a Resume Following button, Launch at login, an App Exceptions button, an Install Browser Extension button, Help, and links to jiriarion.com and Buy me a coffee.">
 
-<img src="docs/assets/settings.png" align="right" width="440" alt="Screenshot of the Less Pull settings window. The heading reads Grayscale, Warmth 56 percent. Below are a Grayscale checkbox, the Extra Warmth slider with a Reset button, Night Shift with a Turn Night Shift off for menu, Extra Warmth follows Night Shift with a Resume Following button, Launch at login, an App Exceptions button, an Install Browser Extension button, Help, and links to jiriarion.com and Buy me a coffee.">
+Choose **Settings…** in the menu.
 
 
 - The same controls as the menu, with room to breathe.
@@ -126,6 +127,7 @@ Choose **Settings…** in the menu.
 - **App Exceptions…**, where you add an app and choose its Grayscale, Night Shift and warmth.
 - **Install Browser Extension…** to set up website rules.
 - Hover over any control for a short explanation.
+- **Help** and the links to the author are at the bottom.
 
 <sub>Real screenshot of version 1.4.4, placed on a plain backdrop.</sub>
 
