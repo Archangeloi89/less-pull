@@ -39,7 +39,7 @@ For each app you can set:
 | Night Shift | Default, On, Off |
 | Use default warmth | Checked to inherit. Uncheck it to give the app its own Extra Warmth, from Off to Red |
 
-**Remove** deletes the rule, and the app goes back to your default settings.
+**Use this exception** switches a rule off while keeping its settings; it switches itself on again as soon as you set anything away from default. **Remove** deletes the rule, and the app goes back to your default settings.
 
 Things to know:
 
@@ -58,7 +58,7 @@ Website rules need the browser extension, for Safari, Brave, Chrome, Firefox, Op
 3. Under **Apply to**, choose **Whole domain** or **This exact page**.
 4. Set Grayscale and Night Shift to **On**, **Off** or **Use default**; the default entries show what they resolve to, for example **Use default (On)**. Untick **Use default warmth** to give the site its own Extra Warmth with the slider.
 
-The first change saves the rule. **Remove this exception** deletes it. All saved website rules are listed under **Settings… → Websites**, with a **Remove** button, so they can be managed even without the extension.
+The first change saves the rule and switches it on. **Use this exception** switches it off while keeping its settings; a change away from default switches it on again. **Remove this exception** deletes it. All saved website rules are listed under **Settings… → Websites**, with a **Remove** button, so they can be managed even without the extension.
 
 Things to know:
 

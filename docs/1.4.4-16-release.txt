@@ -11,6 +11,7 @@ What is new, from the app improvements approved on 8 October 2026:
 - The warmth slider track shows the real neutral to amber to red ramp.
 - The menu-bar icon shows state: its left half fills while grayscale is showing, its right half takes the warmth color, a pause mark shows while paused, and a small dot shows when a newer build is available.
 - The extension popup shows what a default resolves to, e.g. Use default (On); Save exception is the primary button; the back button only appears after choosing a saved rule. Extension 0.2.0.
+- Every exception, for an app or a website, has “Use this exception”: off keeps the settings without applying them, and any change away from default switches it on again.
 - Pause Less Pull for 15 minutes, 1 hour or until resumed: the plain display, rules ignored, settings kept, survives a relaunch.
 - Peek in color: hold a shortcut recorded in Settings → Shortcuts to see the plain display; choose there what it turns off (Grayscale, Extra Warmth, Night Shift). Suggest picks a shortcut that is free of macOS shortcuts. No Accessibility permission needed.
 - A Toggle Grayscale shortcut, Grayscale off for 1 hour, 4 hours or until Night Shift changes (menu and Settings), and a choice of what clicking the menu-bar icon does: by default a click opens the menu and a right-click toggles Grayscale; Settings → Shortcuts can swap the two.

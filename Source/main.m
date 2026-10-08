@@ -280,7 +280,7 @@ static NSString *const LessPullOldBundleIdentifier=@"local.nightshiftfilters.app
  if(self.quitting)return;NSRunningApplication *app=NSWorkspace.sharedWorkspace.frontmostApplication;
  if(![app.bundleIdentifier isEqual:NSBundle.mainBundle.bundleIdentifier])self.lastExternalApp=app;
  self.foregroundID=app.bundleIdentifier?:@"";self.foregroundName=app.localizedName?:@"Current app";
- self.website=nil;NSString *site=nil;NSDictionary *rule=[self.browserBridge ruleForBrowser:self.foregroundID base:self.exclusionRules[self.foregroundID] site:&site]?:self.exclusionRules[self.foregroundID];self.website=site;if(site)self.foregroundName=site;BOOL hasRule=[rule[@"grayMode"] integerValue]!=0||[rule[@"nightMode"] integerValue]!=0||[rule[@"customWarmth"] boolValue];BOOL visible=hasRule&&[self hasVisibleWindow:app.processIdentifier];
+ self.website=nil;NSString *site=nil;NSDictionary *appRule=RuleEnabled(self.exclusionRules[self.foregroundID])?self.exclusionRules[self.foregroundID]:nil;NSDictionary *rule=[self.browserBridge ruleForBrowser:self.foregroundID base:appRule site:&site]?:appRule;self.website=site;if(site)self.foregroundName=site;BOOL hasRule=[rule[@"grayMode"] integerValue]!=0||[rule[@"nightMode"] integerValue]!=0||[rule[@"customWarmth"] boolValue];BOOL visible=hasRule&&[self hasVisibleWindow:app.processIdentifier];
  NSInteger gray=visible?[rule[@"grayMode"] integerValue]:0,night=visible?[rule[@"nightMode"] integerValue]:0;BOOL custom=visible&&[rule[@"customWarmth"] boolValue];double warmth=custom?[rule[@"warmth"] doubleValue]:0;
  if(gray!=self.grayOverride||custom!=self.customWarmth||warmth!=self.appWarmth)self.animateAppearance=YES;
  self.grayOverride=gray;self.nightOverride=night;self.customWarmth=custom;self.appWarmth=warmth;self.excludeGray=gray==2;self.excludeNight=night!=0;self.excludeWarmth=custom&&warmth==0;
@@ -300,19 +300,27 @@ static NSString *const LessPullOldBundleIdentifier=@"local.nightshiftfilters.app
  return effects.count?[NSString stringWithFormat:@"%@: %@",self.foregroundName,[effects componentsJoinedByString:@", "]]:@"Using your default settings";
 }
 - (NSString *)exclusionHelp {return @"An exception applies while that app is in front with a window open, on all your displays. Each setting can keep the default or get its own value. Your defaults stay saved. If Night Shift is turned off for a while, that wins over an app’s Night Shift On.";}
+// An exception can be switched off and keep its settings; a rule without the flag is on.
+static BOOL RuleEnabled(NSDictionary *rule) {return rule&&(rule[@"enabled"]==nil||[rule[@"enabled"] boolValue]);}
+static BOOL RuleDiffers(NSDictionary *rule) {return [rule[@"grayMode"] integerValue]||[rule[@"nightMode"] integerValue]||[rule[@"customWarmth"] boolValue];}
+// Any change away from default switches the exception on; the user can switch it off again.
+static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictionary *after) {if(RuleDiffers(after)&&!(RuleDiffers(before)&&!RuleEnabled(before)))after[@"enabled"]=@YES;if(after[@"enabled"]==nil)after[@"enabled"]=@(RuleDiffers(after));return after;}
 - (void)saveExclusionRules {[NSUserDefaults.standardUserDefaults setObject:self.exclusionRules forKey:@"appExclusions"];[self sync];}
 - (void)ruleChanged:(NSControl *)sender {
  NSString *bundle=sender.identifier;NSMutableDictionary *rule=[self.exclusionRules[bundle] mutableCopy];
+ NSDictionary *before=[rule copy];
  if([sender isKindOfClass:NSSegmentedControl.class])rule[sender.tag==0?@"grayMode":@"nightMode"]=@([(NSSegmentedControl *)sender selectedSegment]);
  else if(sender.tag==2)rule[@"customWarmth"]=@([(NSButton *)sender state]==NSControlStateValueOff);
+ else if(sender.tag==4)rule[@"enabled"]=@([(NSButton *)sender state]==NSControlStateValueOn);
  else rule[@"warmth"]=@([(NSSlider *)sender doubleValue]);
- self.exclusionRules[bundle]=rule;[self saveExclusionRules];if(sender.tag!=3)[self rebuildExclusionsList];else {NSTextField *readout=[sender.superview viewWithTag:99];readout.stringValue=[NSString stringWithFormat:@"%.0f%%",[rule[@"warmth"] doubleValue]];}
+ if(sender.tag!=4)RuleAfterChange(before,rule);
+ self.exclusionRules[bundle]=rule;[self saveExclusionRules];if(sender.tag!=3)[self rebuildExclusionsList];else {NSTextField *readout=[sender.superview viewWithTag:99];readout.stringValue=[NSString stringWithFormat:@"%.0f%%",[rule[@"warmth"] doubleValue]];for(NSView *v in sender.superview.superview.subviews)for(NSView *w in v.subviews)if([w isKindOfClass:NSButton.class]&&[(NSButton *)w tag]==4)[(NSButton *)w setState:RuleEnabled(rule)];}
 }
 - (void)removeRule:(NSButton *)sender {[self.exclusionRules removeObjectForKey:sender.identifier];[self saveExclusionRules];[self rebuildExclusionsList];}
 - (void)addAppURL:(NSURL *)url {
  NSBundle *bundle=[NSBundle bundleWithURL:url];NSString *identifier=bundle.bundleIdentifier;if(!identifier||[identifier isEqual:NSBundle.mainBundle.bundleIdentifier])return;
  NSString *name=[NSFileManager.defaultManager displayNameAtPath:url.path];if([name hasSuffix:@".app"])name=[name substringToIndex:name.length-4];
- if(!self.exclusionRules[identifier])self.exclusionRules[identifier]=@{@"name":name,@"grayMode":@0,@"nightMode":@0,@"customWarmth":@NO,@"warmth":@0};[self saveExclusionRules];[self rebuildExclusionsList];
+ if(!self.exclusionRules[identifier])self.exclusionRules[identifier]=@{@"name":name,@"grayMode":@0,@"nightMode":@0,@"customWarmth":@NO,@"warmth":@0,@"enabled":@NO};[self saveExclusionRules];[self rebuildExclusionsList];
 }
 - (void)addExclusionApp:(id)sender {
  NSOpenPanel *panel=[NSOpenPanel openPanel];panel.title=@"Add an app exception";panel.directoryURL=[NSURL fileURLWithPath:@"/Applications"];panel.canChooseDirectories=NO;panel.canChooseFiles=YES;panel.allowedContentTypes=@[UTTypeApplicationBundle];panel.treatsFilePackagesAsDirectories=NO;
@@ -327,22 +335,24 @@ static NSString *const LessPullOldBundleIdentifier=@"local.nightshiftfilters.app
  return [self.exclusionRules[bundle] mutableCopy];
 }
 - (void)storeCurrentAppRule:(NSDictionary *)rule {self.exclusionRules[self.lastExternalApp.bundleIdentifier]=rule;[self saveExclusionRules];[self rebuildExclusionsList];}
-- (void)currentAppChoice:(NSMenuItem *)sender {NSMutableDictionary *rule=[self currentAppRuleCreating:YES];if(!rule)return;rule[sender.tag/10==0?@"grayMode":@"nightMode"]=@(sender.tag%10);[self storeCurrentAppRule:rule];}
-- (void)currentAppWarmthDefault:(NSMenuItem *)sender {NSMutableDictionary *rule=[self currentAppRuleCreating:YES];if(!rule)return;rule[@"customWarmth"]=@(![rule[@"customWarmth"] boolValue]);[self storeCurrentAppRule:rule];}
-- (void)currentAppWarmthChanged:(NSSlider *)sender {NSMutableDictionary *rule=[self currentAppRuleCreating:YES];if(!rule)return;rule[@"customWarmth"]=@YES;rule[@"warmth"]=@(sender.doubleValue);[self storeCurrentAppRule:rule];NSTextField *readout=[sender.superview viewWithTag:98];readout.stringValue=[NSString stringWithFormat:@"%.0f%%",sender.doubleValue];}
+- (void)currentAppChoice:(NSMenuItem *)sender {NSMutableDictionary *rule=[self currentAppRuleCreating:YES];if(!rule)return;NSDictionary *before=[rule copy];rule[sender.tag/10==0?@"grayMode":@"nightMode"]=@(sender.tag%10);[self storeCurrentAppRule:RuleAfterChange(before,rule)];}
+- (void)currentAppWarmthDefault:(NSMenuItem *)sender {NSMutableDictionary *rule=[self currentAppRuleCreating:YES];if(!rule)return;NSDictionary *before=[rule copy];rule[@"customWarmth"]=@(![rule[@"customWarmth"] boolValue]);[self storeCurrentAppRule:RuleAfterChange(before,rule)];}
+- (void)currentAppEnabled:(NSMenuItem *)sender {NSMutableDictionary *rule=[self currentAppRuleCreating:YES];if(!rule)return;rule[@"enabled"]=@(!RuleEnabled(rule));[self storeCurrentAppRule:rule];}
+- (void)currentAppWarmthChanged:(NSSlider *)sender {NSMutableDictionary *rule=[self currentAppRuleCreating:YES];if(!rule)return;NSDictionary *before=[rule copy];rule[@"customWarmth"]=@YES;rule[@"warmth"]=@(sender.doubleValue);RuleAfterChange(before,rule);[self storeCurrentAppRule:rule];NSTextField *readout=[sender.superview viewWithTag:98];readout.stringValue=[NSString stringWithFormat:@"%.0f%%",sender.doubleValue];}
 // "Exception for <website>": the same choices as for an app, for the public tab in
 // front. Whole domain (also subdomains) or this exact page; saved through the bridge.
 - (NSString *)websiteKeyForTab:(NSDictionary *)tab {return self.websiteScopeExact&&[tab[@"url"] length]?tab[@"url"]:tab[@"site"];}
 - (NSDictionary *)websiteRuleForTab:(NSDictionary *)tab {return self.browserBridge.rules[[self websiteKeyForTab:tab]];}
 - (void)storeWebsiteRule:(NSDictionary *)rule forTab:(NSDictionary *)tab {
  NSString *key=[self websiteKeyForTab:tab];BOOL exact=[key containsString:@"://"];
- [self.browserBridge handle:@{@"type":@"set",@"scope":exact?@"url":@"domain",@"site":key,@"rule":@{@"grayMode":rule[@"grayMode"]?:@0,@"nightMode":rule[@"nightMode"]?:@0,@"customWarmth":rule[@"customWarmth"]?:@NO,@"warmth":rule[@"warmth"]?:@0}}];
+ [self.browserBridge handle:@{@"type":@"set",@"scope":exact?@"url":@"domain",@"site":key,@"rule":@{@"grayMode":rule[@"grayMode"]?:@0,@"nightMode":rule[@"nightMode"]?:@0,@"customWarmth":rule[@"customWarmth"]?:@NO,@"warmth":rule[@"warmth"]?:@0,@"enabled":@(RuleEnabled(rule))}}];
 }
 - (NSDictionary *)menuTab {return [self.browserBridge activeContextForBrowser:self.lastExternalApp.bundleIdentifier];}
 - (void)websiteScope:(NSMenuItem *)sender {self.websiteScopeExact=sender.tag==1;}
-- (void)websiteChoice:(NSMenuItem *)sender {NSDictionary *tab=[self menuTab];if(!tab)return;NSMutableDictionary *rule=[[self websiteRuleForTab:tab] mutableCopy]?:[NSMutableDictionary new];rule[sender.tag/10==0?@"grayMode":@"nightMode"]=@(sender.tag%10);[self storeWebsiteRule:rule forTab:tab];}
-- (void)websiteWarmthDefault:(NSMenuItem *)sender {NSDictionary *tab=[self menuTab];if(!tab)return;NSMutableDictionary *rule=[[self websiteRuleForTab:tab] mutableCopy]?:[NSMutableDictionary new];rule[@"customWarmth"]=@(![rule[@"customWarmth"] boolValue]);[self storeWebsiteRule:rule forTab:tab];}
-- (void)websiteWarmthChanged:(NSSlider *)sender {NSDictionary *tab=[self menuTab];if(!tab)return;NSMutableDictionary *rule=[[self websiteRuleForTab:tab] mutableCopy]?:[NSMutableDictionary new];rule[@"customWarmth"]=@YES;rule[@"warmth"]=@(sender.doubleValue);[self storeWebsiteRule:rule forTab:tab];NSTextField *readout=[sender.superview viewWithTag:98];readout.stringValue=[NSString stringWithFormat:@"%.0f%%",sender.doubleValue];}
+- (void)websiteChoice:(NSMenuItem *)sender {NSDictionary *tab=[self menuTab];if(!tab)return;NSMutableDictionary *rule=[[self websiteRuleForTab:tab] mutableCopy]?:[NSMutableDictionary new];NSDictionary *before=[rule copy];rule[sender.tag/10==0?@"grayMode":@"nightMode"]=@(sender.tag%10);[self storeWebsiteRule:RuleAfterChange(before,rule) forTab:tab];}
+- (void)websiteWarmthDefault:(NSMenuItem *)sender {NSDictionary *tab=[self menuTab];if(!tab)return;NSMutableDictionary *rule=[[self websiteRuleForTab:tab] mutableCopy]?:[NSMutableDictionary new];NSDictionary *before=[rule copy];rule[@"customWarmth"]=@(![rule[@"customWarmth"] boolValue]);[self storeWebsiteRule:RuleAfterChange(before,rule) forTab:tab];}
+- (void)websiteEnabled:(NSMenuItem *)sender {NSDictionary *tab=[self menuTab];if(!tab)return;NSMutableDictionary *rule=[[self websiteRuleForTab:tab] mutableCopy]?:[NSMutableDictionary new];rule[@"enabled"]=@(!RuleEnabled(rule));[self storeWebsiteRule:rule forTab:tab];}
+- (void)websiteWarmthChanged:(NSSlider *)sender {NSDictionary *tab=[self menuTab];if(!tab)return;NSMutableDictionary *rule=[[self websiteRuleForTab:tab] mutableCopy]?:[NSMutableDictionary new];NSDictionary *before=[rule copy];rule[@"customWarmth"]=@YES;rule[@"warmth"]=@(sender.doubleValue);RuleAfterChange(before,rule);[self storeWebsiteRule:rule forTab:tab];NSTextField *readout=[sender.superview viewWithTag:98];readout.stringValue=[NSString stringWithFormat:@"%.0f%%",sender.doubleValue];}
 - (void)websiteRemove:(NSMenuItem *)sender {NSDictionary *tab=[self menuTab];if(!tab)return;NSString *key=[self websiteKeyForTab:tab];[self.browserBridge handle:@{@"type":@"remove",@"scope":[key containsString:@"://"]?@"url":@"domain",@"site":key}];}
 - (NSMenu *)websiteMenuForTab:(NSDictionary *)tab {
  NSMenu *sub=[NSMenu new];if(!self.websiteScopeExact&&!self.browserBridge.rules[tab[@"site"]]&&self.browserBridge.rules[tab[@"url"]?:@""])self.websiteScopeExact=YES;
@@ -350,7 +360,8 @@ static NSString *const LessPullOldBundleIdentifier=@"local.nightshiftfilters.app
  NSMenuItem *domain=[self add:[NSString stringWithFormat:@"Whole domain · %@",tab[@"site"]] action:@selector(websiteScope:) to:sub];domain.tag=0;domain.indentationLevel=1;domain.state=!self.websiteScopeExact;domain.toolTip=@"Also covers subdomains.";
  NSMenuItem *page=[self add:@"This exact page" action:[tab[@"url"] length]?@selector(websiteScope:):nil to:sub];page.tag=1;page.indentationLevel=1;page.state=self.websiteScopeExact;page.enabled=[tab[@"url"] length]>0;page.toolTip=[NSString stringWithFormat:@"Only this address, with its path and query; the part after # is ignored.\n%@",tab[@"url"]?:@""];
  [sub addItem:NSMenuItem.separatorItem];
- NSDictionary *rule=[self websiteRuleForTab:tab];NSString *key=[self websiteKeyForTab:tab];NSDictionary *inherited=[self.browserBridge inheritedForSite:key browser:self.lastExternalApp.bundleIdentifier];NSArray *words=@[@"",@"On",@"Off"];
+ NSDictionary *rule=[self websiteRuleForTab:tab];NSString *key=[self websiteKeyForTab:tab];
+ NSMenuItem *enabled=[self add:@"Use this exception" action:@selector(websiteEnabled:) to:sub];enabled.state=RuleEnabled(rule);enabled.toolTip=@"Off keeps the settings below but does not apply them. Changing a setting away from default switches it on again.";[sub addItem:NSMenuItem.separatorItem];NSDictionary *inherited=[self.browserBridge inheritedForSite:key browser:self.lastExternalApp.bundleIdentifier];NSArray *words=@[@"",@"On",@"Off"];
  NSArray *titles=@[@"Grayscale",@"Night Shift"],*keys=@[@"grayMode",@"nightMode"];
  for(int i=0;i<2;i++){NSMenuItem *head=[[NSMenuItem alloc]initWithTitle:titles[i] action:nil keyEquivalent:@""];head.enabled=NO;[sub addItem:head];
   NSInteger resolved=[inherited[keys[i]] integerValue];NSArray *choices=@[[NSString stringWithFormat:@"Use default%@",resolved?[NSString stringWithFormat:@" (%@)",words[resolved]]:@""],@"On",@"Off"];
@@ -369,6 +380,7 @@ static NSString *const LessPullOldBundleIdentifier=@"local.nightshiftfilters.app
 }
 - (NSMenu *)currentAppMenu {
  NSMenu *sub=[NSMenu new];NSDictionary *rule=[self currentAppRuleCreating:NO];NSString *name=self.lastExternalApp.localizedName?:@"this app";
+ NSMenuItem *enabled=[self add:@"Use this exception" action:@selector(currentAppEnabled:) to:sub];enabled.state=RuleEnabled(rule);enabled.toolTip=@"Off keeps the settings below but does not apply them. Changing a setting away from default switches it on again.";[sub addItem:NSMenuItem.separatorItem];
  NSArray *titles=@[@"Grayscale",@"Night Shift"],*keys=@[@"grayMode",@"nightMode"],*choices=@[@"Use default",@"On",@"Off"];
  for(int i=0;i<2;i++){NSMenuItem *head=[[NSMenuItem alloc]initWithTitle:titles[i] action:nil keyEquivalent:@""];head.enabled=NO;[sub addItem:head];
   for(int j=0;j<3;j++){NSMenuItem *item=[self add:choices[j] action:@selector(currentAppChoice:) to:sub];item.tag=i*10+j;item.indentationLevel=1;item.state=[rule[keys[i]] integerValue]==j;item.toolTip=[NSString stringWithFormat:@"%@ for %@ while it is in front.",titles[i],name];}
@@ -387,7 +399,8 @@ static NSString *const LessPullOldBundleIdentifier=@"local.nightshiftfilters.app
  NSTextField *name=[NSTextField labelWithString:rule[@"name"]?:bundle];name.font=[NSFont systemFontOfSize:13 weight:NSFontWeightSemibold];name.toolTip=bundle;
  NSImageView *icon=[NSImageView imageViewWithImage:[self iconForBundle:bundle]];[icon.widthAnchor constraintEqualToConstant:28].active=YES;[icon.heightAnchor constraintEqualToConstant:28].active=YES;icon.accessibilityLabel=[NSString stringWithFormat:@"%@ icon",rule[@"name"]];
  NSButton *remove=[NSButton buttonWithTitle:@"Remove" target:self action:@selector(removeRule:)];remove.identifier=bundle;remove.bezelStyle=NSBezelStyleInline;[self helpView:remove text:@"Remove this exception. The app then uses your default settings." label:[NSString stringWithFormat:@"Remove %@ exception",rule[@"name"]]];
- NSStackView *header=[self row:@[icon,name,[self spacer],remove]];
+ NSButton *enable=[NSButton checkboxWithTitle:@"Use this exception" target:self action:@selector(ruleChanged:)];enable.identifier=bundle;enable.tag=4;enable.state=RuleEnabled(rule);enable.font=[NSFont systemFontOfSize:12];[self helpView:enable text:@"Off keeps the settings below but does not apply them. Changing a setting away from default switches it on again." label:[NSString stringWithFormat:@"Use the exception for %@",rule[@"name"]]];enable.tag=4;
+ NSStackView *header=[self row:@[icon,name,[self spacer],enable,remove]];
  NSMutableArray *choices=[NSMutableArray new];NSArray *titles=@[@"Grayscale",@"Night Shift"];
  for(int i=0;i<2;i++){NSTextField *label=[NSTextField labelWithString:titles[i]];NSSegmentedControl *choice=[NSSegmentedControl segmentedControlWithLabels:@[@"Default",@"On",@"Off"] trackingMode:NSSegmentSwitchTrackingSelectOne target:self action:@selector(ruleChanged:)];choice.selectedSegment=[rule[i==0?@"grayMode":@"nightMode"] integerValue];choice.identifier=bundle;choice.tag=i;for(int k=0;k<3;k++)[choice setWidth:44 forSegment:k];[self helpView:choice text:[self exclusionHelp] label:[NSString stringWithFormat:@"%@ — %@",rule[@"name"],titles[i]]];[choices addObject:label];[choices addObject:choice];}
  NSStackView *modes=[self row:choices];modes.spacing=6;[modes setCustomSpacing:14 afterView:choices[1]];
@@ -645,10 +658,10 @@ static NSString *const LessPullOldBundleIdentifier=@"local.nightshiftfilters.app
  if(self.pausedUntil){NSMenuItem *resume=[self add:@"Resume Less Pull" action:@selector(resumeLessPull:) to:menu];resume.toolTip=@"Bring Grayscale and Extra Warmth back now, with the normal fade.";}
  else {NSMenuItem *pauseAll=[self add:@"Pause Less Pull" action:nil to:menu];pauseAll.toolTip=[self pauseLessPullHelp];pauseAll.submenu=[NSMenu new];for(NSArray *pair in @[@[@"For 15 minutes",@15],@[@"For 1 hour",@60],@[@"Until I resume",@0]]){NSMenuItem *i=[self add:pair[0] action:@selector(pauseLessPull:) to:pauseAll.submenu];i.tag=[pair[1] integerValue];i.toolTip=[self pauseLessPullHelp];}}
  [menu addItem:NSMenuItem.separatorItem];
- if(self.lastExternalApp.bundleIdentifier){NSMenuItem *current=[self add:[NSString stringWithFormat:@"Exception for %@",self.lastExternalApp.localizedName?:@"current app"] action:nil to:menu];current.toolTip=[self exclusionSummary];current.submenu=[self currentAppMenu];current.image=[self menuIconForBundle:self.lastExternalApp.bundleIdentifier];}
+ if(self.lastExternalApp.bundleIdentifier){NSDictionary *appRule=self.exclusionRules[self.lastExternalApp.bundleIdentifier];NSMenuItem *current=[self add:[NSString stringWithFormat:@"Exception for %@",self.lastExternalApp.localizedName?:@"current app"] action:nil to:menu];current.toolTip=[self exclusionSummary];current.submenu=[self currentAppMenu];current.image=[self menuIconForBundle:self.lastExternalApp.bundleIdentifier];current.state=RuleEnabled(appRule)&&RuleDiffers(appRule);}
  if(self.availableUpdate){NSMenuItem *update=[self add:[NSString stringWithFormat:@"Update available: %@…",[[self updateLabel:self.availableUpdate] stringByReplacingOccurrencesOfString:@"Version " withString:@""]] action:@selector(showUpdate:) to:menu];update.toolTip=@"See what is new and open the download page.";}
  NSDictionary *tab=[self.browserBridge activeContextForBrowser:self.lastExternalApp.bundleIdentifier];
- if(tab){NSMenuItem *site=[self add:[NSString stringWithFormat:@"Exception for %@",tab[@"site"]] action:nil to:menu];site.toolTip=@"Display settings for the website in front. The browser extension only connects the browser; the settings live here.";site.submenu=[self websiteMenuForTab:tab];site.image=[NSImage imageWithSystemSymbolName:@"globe" accessibilityDescription:nil];}
+ if(tab){NSMenuItem *site=[self add:[NSString stringWithFormat:@"Exception for %@",tab[@"site"]] action:nil to:menu];site.toolTip=@"Display settings for the website in front. The browser extension only connects the browser; the settings live here.";site.submenu=[self websiteMenuForTab:tab];site.image=[NSImage imageWithSystemSymbolName:@"globe" accessibilityDescription:nil];NSDictionary *siteRule=[self websiteRuleForTab:tab];site.state=RuleEnabled(siteRule)&&RuleDiffers(siteRule);}
  [self add:@"Settings…" action:@selector(showSettings:) to:menu];
  [menu addItem:NSMenuItem.separatorItem];
  [self add:@"Quit" action:@selector(quit:) to:menu];
@@ -963,7 +976,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
 }
 // Saved website rules only (domains and exact pages), never the tab that is open now.
 - (NSString *)websiteRuleSummary:(NSDictionary *)rule {
- NSMutableArray *parts=[NSMutableArray new];NSArray *words=@[@"default",@"on",@"off"];
+ NSMutableArray *parts=[NSMutableArray new];if(!RuleEnabled(rule))[parts addObject:@"Off"];NSArray *words=@[@"default",@"on",@"off"];
  [parts addObject:[NSString stringWithFormat:@"Grayscale %@",words[MIN(2,MAX(0,[rule[@"grayMode"] integerValue]))]]];[parts addObject:[NSString stringWithFormat:@"Night Shift %@",words[MIN(2,MAX(0,[rule[@"nightMode"] integerValue]))]]];
  [parts addObject:[rule[@"customWarmth"] boolValue]?([rule[@"warmth"] doubleValue]>0?[NSString stringWithFormat:@"Warmth %.0f%%",[rule[@"warmth"] doubleValue]]:@"Warmth off"):@"Warmth default"];
  return [parts componentsJoinedByString:@" · "];
@@ -975,10 +988,12 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  BOOL first=YES;for(NSString *key in keys){if(!first){NSBox *line=[self separator];[self.websiteRulesList addArrangedSubview:line];[line.widthAnchor constraintEqualToAnchor:self.websiteRulesList.widthAnchor].active=YES;}first=NO;
   BOOL exact=[key containsString:@"://"];NSTextField *name=[NSTextField labelWithString:key];name.font=[NSFont systemFontOfSize:13 weight:NSFontWeightSemibold];name.lineBreakMode=NSLineBreakByTruncatingMiddle;name.toolTip=key;[name setContentCompressionResistancePriority:1 forOrientation:NSLayoutConstraintOrientationHorizontal];
   NSTextField *kind=[self note:exact?@"Exact page":@"Whole domain, including subdomains"];NSTextField *summary=[self note:[self websiteRuleSummary:self.browserBridge.rules[key]]];
+  NSButton *enable=[NSButton checkboxWithTitle:@"Use this exception" target:self action:@selector(toggleWebsiteRule:)];enable.identifier=key;enable.state=RuleEnabled(self.browserBridge.rules[key]);enable.font=[NSFont systemFontOfSize:12];[self helpView:enable text:@"Off keeps the settings but does not apply them." label:[NSString stringWithFormat:@"Use the exception for %@",key]];
   NSButton *remove=[NSButton buttonWithTitle:@"Remove" target:self action:@selector(removeWebsiteRule:)];remove.identifier=key;remove.bezelStyle=NSBezelStyleInline;[self helpView:remove text:@"Remove this website exception. The site then uses the inherited settings." label:[NSString stringWithFormat:@"Remove exception for %@",key]];
-  NSStackView *row=[self column:@[[self row:@[name,[self spacer],remove]],kind,summary]];row.spacing=3;row.edgeInsets=NSEdgeInsetsMake(8,10,8,10);NSView *head=row.arrangedSubviews[0];[head.widthAnchor constraintEqualToAnchor:row.widthAnchor constant:-20].active=YES;
+  NSStackView *row=[self column:@[[self row:@[name,[self spacer],enable,remove]],kind,summary]];row.spacing=3;row.edgeInsets=NSEdgeInsetsMake(8,10,8,10);NSView *head=row.arrangedSubviews[0];[head.widthAnchor constraintEqualToAnchor:row.widthAnchor constant:-20].active=YES;
   [self.websiteRulesList addArrangedSubview:row];[row.widthAnchor constraintEqualToAnchor:self.websiteRulesList.widthAnchor].active=YES;}
 }
+- (void)toggleWebsiteRule:(NSButton *)sender {NSString *key=sender.identifier;NSDictionary *rule=self.browserBridge.rules[key];if(!rule)return;NSMutableDictionary *updated=[rule mutableCopy];updated[@"enabled"]=@(sender.state==NSControlStateValueOn);[self.browserBridge handle:@{@"type":@"set",@"scope":[key containsString:@"://"]?@"url":@"domain",@"site":key,@"rule":updated}];[self rebuildWebsiteRulesList];}
 - (void)removeWebsiteRule:(NSButton *)sender {NSString *key=sender.identifier;if(!key)return;[self.browserBridge handle:@{@"type":@"remove",@"scope":[key containsString:@"://"]?@"url":@"domain",@"site":key}];[self rebuildWebsiteRulesList];}
 - (NSStackView *)aboutTab {
  NSImageView *icon=[NSImageView imageViewWithImage:NSApp.applicationIconImage];[icon.widthAnchor constraintEqualToConstant:64].active=YES;[icon.heightAnchor constraintEqualToConstant:64].active=YES;icon.accessibilityLabel=@"Less Pull app icon";
@@ -1101,7 +1116,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
   @[@"Grayscale",@"Shows everything in shades of gray, day and night. Turn it off to see color again."],
   @[@"Extra Warmth",@"Adds warmth on top of Night Shift. Off adds none; 100% is red. The slider is in the menu and in Settings."],
   @[@"Night Shift",@"Less Pull can turn Night Shift on or off now, or off for a while; your schedule in System Settings stays as it is. With “Extra Warmth follows Night Shift” on, the warmth you set is added only while Night Shift is on, and there is none in the daytime. With it off, Extra Warmth stays on all day. If you move the slider by hand while following, that warmth stays until Night Shift next changes, or until you choose Resume Following."],
-  @[@"Exceptions for apps",@"Give an app its own settings in Settings → App Exceptions, or choose “Exception for …” in the menu. They apply while that app is in front with a window open. Each setting can keep the default or get its own value."],
+  @[@"Exceptions for apps",@"Give an app its own settings in Settings → Apps, or choose “Exception for …” in the menu. They apply while that app is in front with a window open. Each setting can keep the default or get its own value. “Use this exception” switches a rule off and keeps its settings; changing a setting away from default switches it on again."],
   @[@"Exceptions for websites",@"Install the browser extension from Settings, for Safari, Brave, Chrome, Firefox, Opera or Edge. It only connects the browser; it has no buttons. With a website in front, the menu offers “Exception for that site”, for the whole domain or one exact page. Pages inherit from their domain, and domains from the browser’s app exception. Several browsers can use it at the same time; private tabs are left alone."],
   @[@"Peek in color",@"Record a shortcut in Settings → Shortcuts, or let Suggest pick one that is free. Hold it to see the plain display; let go and Less Pull fades back. Choose there what peeking turns off: Grayscale, Extra Warmth, and Night Shift if you like. Nothing is saved and no exception is made."],
   @[@"Grayscale off for a while",@"In the menu or in Settings, turn Grayscale off for 1 hour, 4 hours, or until Night Shift next changes. It comes back by itself; your setting stays saved."],

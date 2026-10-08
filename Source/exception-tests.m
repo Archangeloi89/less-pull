@@ -174,6 +174,17 @@ int main(){@autoreleasepool{
   NSDictionary *inherited=[bridge inheritedForSite:@"https://example.com/reading?x=1" browser:@"com.brave.Browser"];check([inherited[@"grayMode"] integerValue]==2,"page inherits the domain's grayscale for the menu labels");
   t.websiteScopeExact=NO;bridge.rules=[NSMutableDictionary new];[bridge handle:@{@"type":@"clear",@"browser":@"com.brave.Browser",@"session":@"m"}];(void)off;
  }
+
+ // Use this exception: off keeps the settings but does not apply them; a change away from default switches it on.
+ {
+  NSMutableDictionary *r=[@{@"name":@"X",@"grayMode":@0,@"nightMode":@0,@"customWarmth":@NO,@"warmth":@0,@"enabled":@NO} mutableCopy];
+  NSMutableDictionary *changed=[r mutableCopy];changed[@"grayMode"]=@2;RuleAfterChange(r,changed);check([changed[@"enabled"] boolValue],"a change away from default switches the exception on");
+  NSMutableDictionary *off=[changed mutableCopy];off[@"enabled"]=@NO;NSMutableDictionary *tweak=[off mutableCopy];tweak[@"warmth"]=@10;RuleAfterChange(off,tweak);check(![tweak[@"enabled"] boolValue],"adjusting a rule that was deliberately switched off leaves it off");
+  NSMutableDictionary *back=[changed mutableCopy];back[@"grayMode"]=@0;RuleAfterChange(changed,back);check([back[@"enabled"] boolValue],"going back to default does not switch it off");
+  check(RuleEnabled(@{@"grayMode":@2})&&!RuleEnabled(@{@"grayMode":@2,@"enabled":@NO})&&!RuleEnabled(nil),"rules without the flag are on");
+  TestApp *t=[TestApp new];FakeFilter *fe=[FakeFilter new];fe.on=YES;fe.state=(NSBlueStatus){.mode=0,.available=YES};FakeWarmth *fw=[FakeWarmth new];t.engine=fe;t.warmth=fw;t.exclusion=[ExclusionPolicy new];t.policy=[SwitchingPolicy new];t.policy.known=YES;t.policy.nightShiftOn=YES;t.automatic=YES;t.selectedMode=100;t.exclusionRules=[@{@"com.example":@{@"name":@"Ex",@"grayMode":@2,@"nightMode":@0,@"customWarmth":@NO,@"warmth":@0,@"enabled":@NO}} mutableCopy];t.browserBridge=[BrowserBridge new];t.browserBridge.rules=[NSMutableDictionary new];
+  check(!RuleEnabled(t.exclusionRules[@"com.example"])&&[t.exclusionRules[@"com.example"][@"grayMode"] integerValue]==2,"disabled app rule keeps its settings");
+ }
  NSUInteger combinations=0;
  for(int follow=0;follow<2;follow++)for(int globalNight=0;globalNight<2;globalNight++)for(int base=100;base<=101;base++)for(int grayRule=0;grayRule<3;grayRule++)for(int nightRule=0;nightRule<3;nightRule++)for(int custom=0;custom<2;custom++)for(NSNumber *percent in @[@0,@25,@77,@100]){
   TestApp *t=[TestApp new];FakeFilter *fe=[FakeFilter new];fe.on=globalNight;fe.state=(NSBlueStatus){.mode=0,.available=YES};FakeWarmth *fw=[FakeWarmth new];t.engine=fe;t.warmth=fw;t.exclusion=[ExclusionPolicy new];t.policy=[SwitchingPolicy new];t.policy.known=YES;t.policy.nightShiftOn=globalNight;t.policy.automatic=follow;t.automatic=follow;t.policy.overrideMode=-1;t.selectedMode=base;[d setInteger:base forKey:@"nightMode"];t.grayOverride=grayRule;t.nightOverride=nightRule;t.excludeNight=nightRule!=0;t.customWarmth=custom;t.appWarmth=percent.doubleValue;t.animateAppearance=YES;
@@ -183,5 +194,5 @@ int main(){@autoreleasepool{
  }
  printf("PASS: %lu combined following/global-state/base/grayscale/Night-Shift/warmth cases and restoration.\n",(unsigned long)combinations);
  check(e.nativeWrites==0,"no native filter toggles / HUD requests");
- puts("PASS: website exception from the menu; Grayscale off for a while, Peek effects, shortcut suggestions; preference migration; update check version/build/compatibility parsing; Peek in color (plain display while held, release restores, nothing saved, shortcut rules); Pause Less Pull (plain display, rules ignored, settings kept, relaunch, expiry); inheritance, independent gray/warmth, Night Shift on/off, own versus genuine transitions, manual off, timed-off precedence/expiry, schedule cutoff, recovery, rapid rule switches.");
+ puts("PASS: Use this exception on/off with auto-enable; Grayscale off for a while, Peek effects, shortcut suggestions; preference migration; update check version/build/compatibility parsing; Peek in color (plain display while held, release restores, nothing saved, shortcut rules); Pause Less Pull (plain display, rules ignored, settings kept, relaunch, expiry); inheritance, independent gray/warmth, Night Shift on/off, own versus genuine transitions, manual off, timed-off precedence/expiry, schedule cutoff, recovery, rapid rule switches.");
 }}
