@@ -1023,7 +1023,16 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  }
  self.loginButton.state=SMAppService.mainAppService.status==SMAppServiceStatusEnabled;[self rebuildExclusionsList];[self sync];[NSApp activateIgnoringOtherApps:YES];[self.settings makeKeyAndOrderFront:nil];
 }
+// Before anything is installed: what the extension can see, in plain words.
+- (BOOL)confirmExtensionData {
+ NSAlert *a=[NSAlert new];a.messageText=@"What the browser extension can see";
+ a.informativeText=@"The extension reads the address and title of your tabs, so Less Pull knows which website is in front. Your browser will call this “browsing history”.\n\nIt cannot read or change what is on a page, see what you type, or reach your passwords, cookies or forms. It has no buttons and no network connection of its own; it talks only to the Less Pull app on this Mac. Private tabs are never reported.\n\nWhat is kept: the website exceptions you save, on this Mac. The address of the site in front stays in memory and is dropped when the browser disconnects.";
+ [a addButtonWithTitle:@"Continue"];[a addButtonWithTitle:@"Cancel"];[a addButtonWithTitle:@"Read the Privacy Page"];[NSApp activateIgnoringOtherApps:YES];NSModalResponse r=[a runModal];
+ if(r==NSAlertThirdButtonReturn){[NSWorkspace.sharedWorkspace openURL:[NSURL URLWithString:@"https://github.com/Archangeloi89/less-pull/blob/main/docs/PRIVACY.md"]];return NO;}
+ return r==NSAlertFirstButtonReturn;
+}
 - (void)installBrowserExtension:(id)sender {
+ if(![self confirmExtensionData])return;
  NSAlert *choose=[NSAlert new];choose.messageText=@"Install Browser Extension";choose.informativeText=@"Choose your browser. Less Pull will connect to it and open its extensions page. Until the extension is in the stores, it is loaded from the folder inside the app. Less Pull must stay open for website exceptions to work.";[choose addButtonWithTitle:@"Safari"];[choose addButtonWithTitle:@"Brave"];[choose addButtonWithTitle:@"Chrome"];[choose addButtonWithTitle:@"Firefox"];[choose addButtonWithTitle:@"Opera"];[choose addButtonWithTitle:@"Edge"];[choose addButtonWithTitle:@"Cancel"];[NSApp activateIgnoringOtherApps:YES];NSModalResponse choice=[choose runModal];
  if(choice==NSAlertFirstButtonReturn){[self installSafariExtension];return;}choice-=1;
  NSArray *browsers=@[@[@"Brave",@"com.brave.Browser",@"brave://extensions"],@[@"Chrome",@"com.google.Chrome",@"chrome://extensions"],@[@"Firefox",@"org.mozilla.firefox",@"about:debugging#/runtime/this-firefox"],@[@"Opera",@"com.operasoftware.Opera",@"opera://extensions"],@[@"Edge",@"com.microsoft.edgemac",@"edge://extensions"]];NSInteger index=choice-NSAlertFirstButtonReturn;if(index<0||index>4)return;
