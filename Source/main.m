@@ -472,6 +472,8 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  [NSWorkspace.sharedWorkspace.notificationCenter addObserver:self selector:@selector(pipelineChanged:) name:NSWorkspaceDidWakeNotification object:nil];
  [NSWorkspace.sharedWorkspace.notificationCenter addObserver:self selector:@selector(pipelineChanged:) name:NSWorkspaceSessionDidBecomeActiveNotification object:nil];
  [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(displaysChanged:) name:NSApplicationDidChangeScreenParametersNotification object:nil];
+ [NSWorkspace.sharedWorkspace.notificationCenter addObserver:self selector:@selector(pipelineChanged:) name:NSWorkspaceScreensDidWakeNotification object:nil];
+ [NSDistributedNotificationCenter.defaultCenter addObserver:self selector:@selector(pipelineChanged:) name:@"com.apple.screenIsUnlocked" object:nil];
  [NSWorkspace.sharedWorkspace.notificationCenter addObserver:self selector:@selector(frontmostChanged:) name:NSWorkspaceDidActivateApplicationNotification object:nil];
  [NSWorkspace.sharedWorkspace.notificationCenter addObserver:self selector:@selector(frontmostChanged:) name:NSWorkspaceDidTerminateApplicationNotification object:nil];
  [self restoreLessPullPause];[self scheduleLessPullPauseTimer];[self restoreGrayscaleOff];[self scheduleGrayscaleOffTimer];[self registerPeekShortcut];[self scheduleUpdateChecks];[self noteFirstLaunch];[self updateForeground];[self restartTimer];[self schedulePauseTimer];[self sync];
@@ -516,9 +518,12 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  image.template=NO;image.accessibilityDescription=[NSString stringWithFormat:@"Less Pull: %@%@",gray?@"grayscale":@"color",strength>0?[NSString stringWithFormat:@", warmth %.0f%%",strength/3*100]:@""];return image;
 }
 - (void)restartTimer {
- [self.timer invalidate];double t=60;self.timer=[NSTimer timerWithTimeInterval:t target:self selector:@selector(sync) userInfo:nil repeats:YES];
+ [self.timer invalidate];double t=60;self.timer=[NSTimer timerWithTimeInterval:t target:self selector:@selector(periodicSync) userInfo:nil repeats:YES];
  [NSRunLoop.mainRunLoop addTimer:self.timer forMode:NSRunLoopCommonModes];
 }
+// Once a minute the matrix is sent again even if nothing changed: the system can replace
+// it without telling us, and the display then shows color while Grayscale is ticked.
+- (void)periodicSync {if(!self.warmth.transitioning)[self.warmth invalidate];[self sync];}
 - (void)pipelineChanged:(id)sender {
  if(self.quitting)return;
  self.pipelineEvents++;
