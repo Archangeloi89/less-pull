@@ -292,7 +292,7 @@ static NSString *const LessPullOldBundleIdentifier=@"local.nightshiftfilters.app
 // The base a website inherits: the global settings as they stand, then the browser's own app exception.
 - (NSDictionary *)browserBaseForBundle:(NSString *)browser {
  BOOL night=NO;[self logicalNightShift:&night];NSInteger gray=(self.selectedMode==1||self.selectedMode==100)?1:2,nightMode=night?1:2;double warmth=[self currentWarmth]/3*100;
- NSDictionary *app=self.exclusionRules[browser];if([app[@"grayMode"] integerValue])gray=[app[@"grayMode"] integerValue];if([app[@"nightMode"] integerValue])nightMode=[app[@"nightMode"] integerValue];if([app[@"customWarmth"] boolValue])warmth=[app[@"warmth"] doubleValue];
+ NSDictionary *app=browser?self.exclusionRules[browser]:nil;if([app[@"grayMode"] integerValue])gray=[app[@"grayMode"] integerValue];if([app[@"nightMode"] integerValue])nightMode=[app[@"nightMode"] integerValue];if([app[@"customWarmth"] boolValue])warmth=[app[@"warmth"] doubleValue];
  return @{@"grayMode":@(gray),@"nightMode":@(nightMode),@"warmth":@(warmth)};
 }
 - (NSString *)exclusionSummary {
@@ -312,9 +312,9 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  if([sender isKindOfClass:NSSegmentedControl.class])rule[sender.tag==0?@"grayMode":@"nightMode"]=@([(NSSegmentedControl *)sender selectedSegment]);
  else if(sender.tag==2)rule[@"customWarmth"]=@([(NSButton *)sender state]==NSControlStateValueOff);
  else if(sender.tag==4)rule[@"enabled"]=@([(NSButton *)sender state]==NSControlStateValueOn);
- else rule[@"warmth"]=@([(NSSlider *)sender doubleValue]);
+ else {rule[@"warmth"]=@([(NSSlider *)sender doubleValue]);if([(NSSlider *)sender doubleValue]>0)rule[@"customWarmth"]=@YES;}
  if(sender.tag!=4)RuleAfterChange(before,rule);
- self.exclusionRules[bundle]=rule;[self saveExclusionRules];if(sender.tag!=3)[self rebuildExclusionsList];else {NSTextField *readout=[sender.superview viewWithTag:99];readout.stringValue=[NSString stringWithFormat:@"%.0f%%",[rule[@"warmth"] doubleValue]];for(NSView *v in sender.superview.superview.subviews)for(NSView *w in v.subviews)if([w isKindOfClass:NSButton.class]&&[(NSButton *)w tag]==4)[(NSButton *)w setState:RuleEnabled(rule)];}
+ self.exclusionRules[bundle]=rule;[self saveExclusionRules];if(sender.tag!=3)[self rebuildExclusionsList];else {NSTextField *readout=[sender.superview viewWithTag:99];readout.stringValue=[NSString stringWithFormat:@"%.0f%%",[rule[@"warmth"] doubleValue]];for(NSView *v in sender.superview.superview.subviews)for(NSView *w in v.subviews)if([w isKindOfClass:NSButton.class]&&[(NSButton *)w tag]==4)[(NSButton *)w setState:RuleEnabled(rule)];NSButton *inherit=[sender.superview viewWithTag:2];inherit.state=![rule[@"customWarmth"] boolValue];}
 }
 - (void)removeRule:(NSButton *)sender {[self.exclusionRules removeObjectForKey:sender.identifier];[self saveExclusionRules];[self rebuildExclusionsList];}
 - (void)addAppURL:(NSURL *)url {
@@ -356,12 +356,12 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
 - (void)websiteRemove:(NSMenuItem *)sender {NSDictionary *tab=[self menuTab];if(!tab)return;NSString *key=[self websiteKeyForTab:tab];[self.browserBridge handle:@{@"type":@"remove",@"scope":[key containsString:@"://"]?@"url":@"domain",@"site":key}];}
 - (NSMenu *)websiteMenuForTab:(NSDictionary *)tab {
  NSMenu *sub=[NSMenu new];if(!self.websiteScopeExact&&!self.browserBridge.rules[tab[@"site"]]&&self.browserBridge.rules[tab[@"url"]?:@""])self.websiteScopeExact=YES;
+ NSMenuItem *enabled=[self add:@"Use this exception" action:@selector(websiteEnabled:) to:sub];enabled.state=RuleEnabled([self websiteRuleForTab:tab]);enabled.toolTip=@"Off keeps the settings below but does not apply them. Changing a setting away from default switches it on again.";[sub addItem:NSMenuItem.separatorItem];
  NSMenuItem *scopeHead=[[NSMenuItem alloc]initWithTitle:@"Apply to" action:nil keyEquivalent:@""];scopeHead.enabled=NO;[sub addItem:scopeHead];
  NSMenuItem *domain=[self add:[NSString stringWithFormat:@"Whole domain · %@",tab[@"site"]] action:@selector(websiteScope:) to:sub];domain.tag=0;domain.indentationLevel=1;domain.state=!self.websiteScopeExact;domain.toolTip=@"Also covers subdomains.";
  NSMenuItem *page=[self add:@"This exact page" action:[tab[@"url"] length]?@selector(websiteScope:):nil to:sub];page.tag=1;page.indentationLevel=1;page.state=self.websiteScopeExact;page.enabled=[tab[@"url"] length]>0;page.toolTip=[NSString stringWithFormat:@"Only this address, with its path and query; the part after # is ignored.\n%@",tab[@"url"]?:@""];
  [sub addItem:NSMenuItem.separatorItem];
- NSDictionary *rule=[self websiteRuleForTab:tab];NSString *key=[self websiteKeyForTab:tab];
- NSMenuItem *enabled=[self add:@"Use this exception" action:@selector(websiteEnabled:) to:sub];enabled.state=RuleEnabled(rule);enabled.toolTip=@"Off keeps the settings below but does not apply them. Changing a setting away from default switches it on again.";[sub addItem:NSMenuItem.separatorItem];NSDictionary *inherited=[self.browserBridge inheritedForSite:key browser:self.lastExternalApp.bundleIdentifier];NSArray *words=@[@"",@"On",@"Off"];
+ NSDictionary *rule=[self websiteRuleForTab:tab];NSString *key=[self websiteKeyForTab:tab];NSDictionary *inherited=[self.browserBridge inheritedForSite:key browser:self.lastExternalApp.bundleIdentifier];NSArray *words=@[@"",@"On",@"Off"];
  NSArray *titles=@[@"Grayscale",@"Night Shift"],*keys=@[@"grayMode",@"nightMode"];
  for(int i=0;i<2;i++){NSMenuItem *head=[[NSMenuItem alloc]initWithTitle:titles[i] action:nil keyEquivalent:@""];head.enabled=NO;[sub addItem:head];
   NSInteger resolved=[inherited[keys[i]] integerValue];NSArray *choices=@[[NSString stringWithFormat:@"Use default%@",resolved?[NSString stringWithFormat:@" (%@)",words[resolved]]:@""],@"On",@"Off"];
@@ -372,7 +372,7 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  NSMenuItem *sliderItem=[NSMenuItem new];NSView *view=[[NSView alloc]initWithFrame:NSMakeRect(0,0,260,54)];
  NSTextField *label=[NSTextField labelWithString:[NSString stringWithFormat:@"Extra Warmth for %@",self.websiteScopeExact?@"this page":tab[@"site"]]];label.font=[NSFont systemFontOfSize:12];label.frame=NSMakeRect(18,34,190,16);label.lineBreakMode=NSLineBreakByTruncatingTail;[view addSubview:label];
  NSTextField *readout=[NSTextField labelWithString:[NSString stringWithFormat:@"%.0f%%",[rule[@"warmth"] doubleValue]]];readout.tag=98;readout.font=[NSFont monospacedDigitSystemFontOfSize:12 weight:NSFontWeightRegular];readout.alignment=NSTextAlignmentRight;readout.frame=NSMakeRect(204,34,40,16);[view addSubview:readout];
- NSSlider *slider=[self warmthSliderWithValue:[rule[@"warmth"] doubleValue] action:@selector(websiteWarmthChanged:)];slider.frame=NSMakeRect(18,6,226,26);slider.enabled=custom;[self helpView:slider text:@"Extra Warmth for this website, from Off to Red." label:[NSString stringWithFormat:@"Extra Warmth for %@, percent",key]];[view addSubview:slider];
+ NSSlider *slider=[self warmthSliderWithValue:[rule[@"warmth"] doubleValue] action:@selector(websiteWarmthChanged:)];slider.frame=NSMakeRect(18,6,226,26);[self helpView:slider text:@"Extra Warmth for this website, from Off to Red." label:[NSString stringWithFormat:@"Extra Warmth for %@, percent",key]];[view addSubview:slider];
  sliderItem.view=view;[sub addItem:sliderItem];[sub addItem:NSMenuItem.separatorItem];
  if(rule){NSMenuItem *remove=[self add:@"Remove this exception" action:@selector(websiteRemove:) to:sub];remove.toolTip=@"The site then uses the inherited settings again.";}
  NSMenuItem *more=[self add:@"All website exceptions…" action:@selector(showWebsites:) to:sub];more.toolTip=@"Open Settings → Websites.";
@@ -389,7 +389,7 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  NSMenuItem *sliderItem=[NSMenuItem new];NSView *view=[[NSView alloc]initWithFrame:NSMakeRect(0,0,260,54)];
  NSTextField *label=[NSTextField labelWithString:[NSString stringWithFormat:@"Extra Warmth for %@",name]];label.font=[NSFont systemFontOfSize:12];label.frame=NSMakeRect(18,34,190,16);label.lineBreakMode=NSLineBreakByTruncatingTail;[view addSubview:label];
  NSTextField *readout=[NSTextField labelWithString:[NSString stringWithFormat:@"%.0f%%",[rule[@"warmth"] doubleValue]]];readout.tag=98;readout.font=[NSFont monospacedDigitSystemFontOfSize:12 weight:NSFontWeightRegular];readout.alignment=NSTextAlignmentRight;readout.frame=NSMakeRect(204,34,40,16);[view addSubview:readout];
- NSSlider *slider=[self warmthSliderWithValue:[rule[@"warmth"] doubleValue] action:@selector(currentAppWarmthChanged:)];slider.frame=NSMakeRect(18,6,226,26);slider.enabled=custom;[self helpView:slider text:[NSString stringWithFormat:@"Extra Warmth for %@, from Off to Red.",name] label:[NSString stringWithFormat:@"Extra Warmth for %@, percent",name]];[view addSubview:slider];
+ NSSlider *slider=[self warmthSliderWithValue:[rule[@"warmth"] doubleValue] action:@selector(currentAppWarmthChanged:)];slider.frame=NSMakeRect(18,6,226,26);[self helpView:slider text:[NSString stringWithFormat:@"Extra Warmth for %@, from Off to Red.",name] label:[NSString stringWithFormat:@"Extra Warmth for %@, percent",name]];[view addSubview:slider];
  sliderItem.view=view;[sub addItem:sliderItem];[sub addItem:NSMenuItem.separatorItem];
  NSMenuItem *more=[self add:@"More in Settings…" action:@selector(excludeCurrent:) to:sub];more.toolTip=[NSString stringWithFormat:@"Open the exception for %@ in Settings → Apps.",name];
  return sub;
@@ -405,7 +405,7 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  for(int i=0;i<2;i++){NSTextField *label=[NSTextField labelWithString:titles[i]];NSSegmentedControl *choice=[NSSegmentedControl segmentedControlWithLabels:@[@"Default",@"On",@"Off"] trackingMode:NSSegmentSwitchTrackingSelectOne target:self action:@selector(ruleChanged:)];choice.selectedSegment=[rule[i==0?@"grayMode":@"nightMode"] integerValue];choice.identifier=bundle;choice.tag=i;for(int k=0;k<3;k++)[choice setWidth:44 forSegment:k];[self helpView:choice text:[self exclusionHelp] label:[NSString stringWithFormat:@"%@ — %@",rule[@"name"],titles[i]]];[choices addObject:label];[choices addObject:choice];}
  NSStackView *modes=[self row:choices];modes.spacing=6;[modes setCustomSpacing:14 afterView:choices[1]];
  NSButton *inherit=[NSButton checkboxWithTitle:@"Use default warmth" target:self action:@selector(ruleChanged:)];inherit.identifier=bundle;inherit.tag=2;inherit.state=![rule[@"customWarmth"] boolValue];[self helpView:inherit text:@"Uncheck to give this app its own Extra Warmth. Off adds no warmth; 100% is red. Your default warmth stays saved." label:[NSString stringWithFormat:@"%@ — Use default warmth",rule[@"name"]]];
- NSSlider *slider=[self warmthSliderWithValue:[rule[@"warmth"] doubleValue] action:@selector(ruleChanged:)];slider.identifier=bundle;slider.tag=3;slider.enabled=[rule[@"customWarmth"] boolValue];[slider.widthAnchor constraintGreaterThanOrEqualToConstant:180].active=YES;[slider setContentHuggingPriority:1 forOrientation:NSLayoutConstraintOrientationHorizontal];[self helpView:slider text:@"Extra Warmth for this app, from Off to Red." label:[NSString stringWithFormat:@"%@ — Extra Warmth percent",rule[@"name"]]];
+ NSSlider *slider=[self warmthSliderWithValue:[rule[@"warmth"] doubleValue] action:@selector(ruleChanged:)];slider.identifier=bundle;slider.tag=3;[slider.widthAnchor constraintGreaterThanOrEqualToConstant:180].active=YES;[slider setContentHuggingPriority:1 forOrientation:NSLayoutConstraintOrientationHorizontal];[self helpView:slider text:@"Extra Warmth for this app, from Off to Red." label:[NSString stringWithFormat:@"%@ — Extra Warmth percent",rule[@"name"]]];
  NSTextField *percent=[NSTextField labelWithString:[NSString stringWithFormat:@"%.0f%%",[rule[@"warmth"] doubleValue]]];percent.tag=99;percent.alignment=NSTextAlignmentRight;percent.font=[NSFont monospacedDigitSystemFontOfSize:13 weight:NSFontWeightRegular];[percent.widthAnchor constraintEqualToConstant:44].active=YES;
  NSStackView *warmth=[self row:@[inherit,slider,percent]];
  NSStackView *row=[self column:@[header,modes,warmth]];row.spacing=8;row.edgeInsets=NSEdgeInsetsMake(10,10,10,10);row.identifier=bundle;
@@ -968,9 +968,9 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  self.websiteStatus=[self note:@""];
  NSButton *install=[NSButton buttonWithTitle:@"Install Browser Extension…" target:self action:@selector(installBrowserExtension:)];[self helpView:install text:@"Add the Less Pull extension to your browser so websites can have their own settings. Less Pull must stay open." label:@"Install Browser Extension"];
  NSTextField *savedTitle=[NSTextField labelWithString:@"Saved website exceptions"];savedTitle.font=[NSFont systemFontOfSize:13 weight:NSFontWeightMedium];
- NSScrollView *scroll=[NSScrollView new];scroll.hasVerticalScroller=YES;scroll.borderType=NSBezelBorder;[scroll.heightAnchor constraintEqualToConstant:220].active=YES;
+ NSScrollView *scroll=[NSScrollView new];scroll.hasVerticalScroller=YES;scroll.borderType=NSBezelBorder;[scroll.heightAnchor constraintEqualToConstant:300].active=YES;
  self.websiteRulesList=[ExceptionStack new];self.websiteRulesList.orientation=NSUserInterfaceLayoutOrientationVertical;self.websiteRulesList.alignment=NSLayoutAttributeLeading;self.websiteRulesList.spacing=0;self.websiteRulesList.translatesAutoresizingMaskIntoConstraints=NO;scroll.documentView=self.websiteRulesList;[self.websiteRulesList.widthAnchor constraintEqualToAnchor:scroll.contentView.widthAnchor].active=YES;
- NSStackView *column=[self column:@[intro,[self row:@[install,[self spacer]]],self.websiteStatus,[self separator],savedTitle,scroll,[self note:@"Set a website’s settings from the menu-bar menu while the site is in front. Remove works here even without the extension. Less Pull must stay open for website exceptions to work; private tabs are left alone."]]];
+ NSStackView *column=[self column:@[intro,[self row:@[install,[self spacer]]],self.websiteStatus,[self separator],savedTitle,scroll,[self note:@"Change a website’s settings here or from the menu while the site is in front. Less Pull must stay open for website exceptions to work; private tabs are left alone."]]];
  [column setCustomSpacing:4 afterView:column.arrangedSubviews[1]];[column setCustomSpacing:6 afterView:savedTitle];[self rebuildWebsiteRulesList];
  return column;
 }
@@ -981,19 +981,42 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  [parts addObject:[rule[@"customWarmth"] boolValue]?([rule[@"warmth"] doubleValue]>0?[NSString stringWithFormat:@"Warmth %.0f%%",[rule[@"warmth"] doubleValue]]:@"Warmth off"):@"Warmth default"];
  return [parts componentsJoinedByString:@" · "];
 }
+// A website row in Settings: the same controls as an app row; changes go through the bridge.
+- (void)websiteRowChanged:(NSControl *)sender {
+ NSString *key=sender.identifier;NSMutableDictionary *rule=[self.browserBridge.rules[key] mutableCopy];if(!rule)return;NSDictionary *before=[rule copy];
+ if([sender isKindOfClass:NSSegmentedControl.class])rule[sender.tag==0?@"grayMode":@"nightMode"]=@([(NSSegmentedControl *)sender selectedSegment]);
+ else if(sender.tag==2)rule[@"customWarmth"]=@([(NSButton *)sender state]==NSControlStateValueOff);
+ else if(sender.tag==4)rule[@"enabled"]=@([(NSButton *)sender state]==NSControlStateValueOn);
+ else {rule[@"warmth"]=@([(NSSlider *)sender doubleValue]);if([(NSSlider *)sender doubleValue]>0)rule[@"customWarmth"]=@YES;}
+ if(sender.tag!=4)RuleAfterChange(before,rule);
+ [self.browserBridge handle:@{@"type":@"set",@"scope":[key containsString:@"://"]?@"url":@"domain",@"site":key,@"rule":rule}];
+ if(sender.tag!=3)[self rebuildWebsiteRulesList];else {NSTextField *readout=[sender.superview viewWithTag:99];readout.stringValue=[NSString stringWithFormat:@"%.0f%%",[rule[@"warmth"] doubleValue]];NSButton *inherit=[sender.superview viewWithTag:2];inherit.state=![rule[@"customWarmth"] boolValue];for(NSView *v in sender.superview.superview.subviews)for(NSView *w in v.subviews)if([w isKindOfClass:NSButton.class]&&[(NSButton *)w tag]==4)[(NSButton *)w setState:RuleEnabled(rule)];}
+}
+- (NSView *)websiteRowForKey:(NSString *)key rule:(NSDictionary *)rule {
+ BOOL exact=[key containsString:@"://"];NSTextField *name=[NSTextField labelWithString:key];name.font=[NSFont systemFontOfSize:13 weight:NSFontWeightSemibold];name.lineBreakMode=NSLineBreakByTruncatingMiddle;name.toolTip=key;[name setContentCompressionResistancePriority:1 forOrientation:NSLayoutConstraintOrientationHorizontal];
+ NSImageView *icon=[NSImageView imageViewWithImage:[NSImage imageWithSystemSymbolName:exact?@"doc.text":@"globe" accessibilityDescription:exact?@"Exact page":@"Whole domain"]];[icon.widthAnchor constraintEqualToConstant:20].active=YES;
+ NSButton *enable=[NSButton checkboxWithTitle:@"Use this exception" target:self action:@selector(websiteRowChanged:)];enable.identifier=key;enable.tag=4;enable.state=RuleEnabled(rule);enable.font=[NSFont systemFontOfSize:12];[self helpView:enable text:@"Off keeps the settings below but does not apply them. Changing a setting away from default switches it on again." label:[NSString stringWithFormat:@"Use the exception for %@",key]];
+ NSButton *remove=[NSButton buttonWithTitle:@"Remove" target:self action:@selector(removeWebsiteRule:)];remove.identifier=key;remove.bezelStyle=NSBezelStyleInline;[self helpView:remove text:@"Remove this website exception. The site then uses the inherited settings." label:[NSString stringWithFormat:@"Remove exception for %@",key]];
+ NSStackView *header=[self row:@[icon,name,[self spacer],enable,remove]];
+ NSTextField *kind=[self note:exact?@"Exact page":@"Whole domain, including subdomains"];
+ NSDictionary *inherited=[self.browserBridge inheritedForSite:key browser:nil];NSArray *words=@[@"",@"On",@"Off"];NSMutableArray *choices=[NSMutableArray new];NSArray *titles=@[@"Grayscale",@"Night Shift"];
+ for(int i=0;i<2;i++){NSTextField *label=[NSTextField labelWithString:titles[i]];NSInteger resolved=[inherited[i==0?@"grayMode":@"nightMode"] integerValue];NSSegmentedControl *choice=[NSSegmentedControl segmentedControlWithLabels:@[resolved?[NSString stringWithFormat:@"Default (%@)",words[resolved]]:@"Default",@"On",@"Off"] trackingMode:NSSegmentSwitchTrackingSelectOne target:self action:@selector(websiteRowChanged:)];choice.selectedSegment=[rule[i==0?@"grayMode":@"nightMode"] integerValue];choice.identifier=key;choice.tag=i;[choice setWidth:resolved?84:50 forSegment:0];[choice setWidth:36 forSegment:1];[choice setWidth:36 forSegment:2];[self helpView:choice text:@"Default keeps what the site inherits." label:[NSString stringWithFormat:@"%@ — %@",key,titles[i]]];[choices addObject:label];[choices addObject:choice];}
+ NSStackView *modes=[self row:choices];modes.spacing=6;[modes setCustomSpacing:14 afterView:choices[1]];
+ double inheritedWarmth=[inherited[@"warmth"] doubleValue];NSButton *inherit=[NSButton checkboxWithTitle:[NSString stringWithFormat:@"Use default warmth (%@)",inheritedWarmth>0?[NSString stringWithFormat:@"%.0f%%",inheritedWarmth]:@"Off"] target:self action:@selector(websiteRowChanged:)];inherit.identifier=key;inherit.tag=2;inherit.state=![rule[@"customWarmth"] boolValue];[self helpView:inherit text:@"Uncheck, or move the slider, to give this site its own Extra Warmth." label:[NSString stringWithFormat:@"%@ — Use default warmth",key]];
+ NSSlider *slider=[self warmthSliderWithValue:[rule[@"warmth"] doubleValue] action:@selector(websiteRowChanged:)];slider.identifier=key;slider.tag=3;[slider.widthAnchor constraintGreaterThanOrEqualToConstant:160].active=YES;[slider setContentHuggingPriority:1 forOrientation:NSLayoutConstraintOrientationHorizontal];[self helpView:slider text:@"Extra Warmth for this site, from Off to Red." label:[NSString stringWithFormat:@"%@ — Extra Warmth percent",key]];
+ NSTextField *percent=[NSTextField labelWithString:[NSString stringWithFormat:@"%.0f%%",[rule[@"warmth"] doubleValue]]];percent.tag=99;percent.alignment=NSTextAlignmentRight;percent.font=[NSFont monospacedDigitSystemFontOfSize:13 weight:NSFontWeightRegular];[percent.widthAnchor constraintEqualToConstant:44].active=YES;
+ NSStackView *warmth=[self row:@[inherit,slider,percent]];
+ NSStackView *row=[self column:@[header,kind,modes,warmth]];row.spacing=6;row.edgeInsets=NSEdgeInsetsMake(10,10,10,10);row.identifier=key;[header.widthAnchor constraintEqualToAnchor:row.widthAnchor constant:-20].active=YES;
+ return row;
+}
 - (void)rebuildWebsiteRulesList {
  if(!self.websiteRulesList)return;for(NSView *v in self.websiteRulesList.arrangedSubviews.copy){[self.websiteRulesList removeArrangedSubview:v];[v removeFromSuperview];}
  NSArray *keys=[self.browserBridge.rules.allKeys sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
  if(!keys.count){NSTextField *empty=[NSTextField labelWithString:@"No website exceptions yet. With a website in front, use “Exception for …” in the menu."];empty.textColor=NSColor.secondaryLabelColor;NSStackView *pad=[self column:@[empty]];pad.edgeInsets=NSEdgeInsetsMake(10,10,10,10);[self.websiteRulesList addArrangedSubview:pad];}
  BOOL first=YES;for(NSString *key in keys){if(!first){NSBox *line=[self separator];[self.websiteRulesList addArrangedSubview:line];[line.widthAnchor constraintEqualToAnchor:self.websiteRulesList.widthAnchor].active=YES;}first=NO;
-  BOOL exact=[key containsString:@"://"];NSTextField *name=[NSTextField labelWithString:key];name.font=[NSFont systemFontOfSize:13 weight:NSFontWeightSemibold];name.lineBreakMode=NSLineBreakByTruncatingMiddle;name.toolTip=key;[name setContentCompressionResistancePriority:1 forOrientation:NSLayoutConstraintOrientationHorizontal];
-  NSTextField *kind=[self note:exact?@"Exact page":@"Whole domain, including subdomains"];NSTextField *summary=[self note:[self websiteRuleSummary:self.browserBridge.rules[key]]];
-  NSButton *enable=[NSButton checkboxWithTitle:@"Use this exception" target:self action:@selector(toggleWebsiteRule:)];enable.identifier=key;enable.state=RuleEnabled(self.browserBridge.rules[key]);enable.font=[NSFont systemFontOfSize:12];[self helpView:enable text:@"Off keeps the settings but does not apply them." label:[NSString stringWithFormat:@"Use the exception for %@",key]];
-  NSButton *remove=[NSButton buttonWithTitle:@"Remove" target:self action:@selector(removeWebsiteRule:)];remove.identifier=key;remove.bezelStyle=NSBezelStyleInline;[self helpView:remove text:@"Remove this website exception. The site then uses the inherited settings." label:[NSString stringWithFormat:@"Remove exception for %@",key]];
-  NSStackView *row=[self column:@[[self row:@[name,[self spacer],enable,remove]],kind,summary]];row.spacing=3;row.edgeInsets=NSEdgeInsetsMake(8,10,8,10);NSView *head=row.arrangedSubviews[0];[head.widthAnchor constraintEqualToAnchor:row.widthAnchor constant:-20].active=YES;
+  NSView *row=[self websiteRowForKey:key rule:self.browserBridge.rules[key]];
   [self.websiteRulesList addArrangedSubview:row];[row.widthAnchor constraintEqualToAnchor:self.websiteRulesList.widthAnchor].active=YES;}
 }
-- (void)toggleWebsiteRule:(NSButton *)sender {NSString *key=sender.identifier;NSDictionary *rule=self.browserBridge.rules[key];if(!rule)return;NSMutableDictionary *updated=[rule mutableCopy];updated[@"enabled"]=@(sender.state==NSControlStateValueOn);[self.browserBridge handle:@{@"type":@"set",@"scope":[key containsString:@"://"]?@"url":@"domain",@"site":key,@"rule":updated}];[self rebuildWebsiteRulesList];}
 - (void)removeWebsiteRule:(NSButton *)sender {NSString *key=sender.identifier;if(!key)return;[self.browserBridge handle:@{@"type":@"remove",@"scope":[key containsString:@"://"]?@"url":@"domain",@"site":key}];[self rebuildWebsiteRulesList];}
 - (NSStackView *)aboutTab {
  NSImageView *icon=[NSImageView imageViewWithImage:NSApp.applicationIconImage];[icon.widthAnchor constraintEqualToConstant:64].active=YES;[icon.heightAnchor constraintEqualToConstant:64].active=YES;icon.accessibilityLabel=@"Less Pull app icon";
