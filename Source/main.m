@@ -8,7 +8,55 @@
 #import "ExclusionPolicy.h"
 #import "BrowserBridge.h"
 #import "MenuDismissal.h"
+#import <Carbon/Carbon.h>
 #import "WarmthCurve.h"
+// Peek in color: a global shortcut held down shows the plain display. The shortcut
+// is stored as a key code plus Carbon modifiers; there is no default binding.
+@interface PeekShortcut : NSObject
++ (BOOL)isValidKeyCode:(NSInteger)keyCode modifiers:(NSEventModifierFlags)modifiers;
++ (UInt32)carbonModifiers:(NSEventModifierFlags)modifiers;
++ (NSString *)labelForKeyCode:(NSInteger)keyCode modifiers:(NSEventModifierFlags)modifiers;
+@end
+@implementation PeekShortcut
++ (BOOL)isValidKeyCode:(NSInteger)keyCode modifiers:(NSEventModifierFlags)modifiers {
+ NSEventModifierFlags m=modifiers&(NSEventModifierFlagCommand|NSEventModifierFlagControl|NSEventModifierFlagOption|NSEventModifierFlagShift);
+ if(keyCode<0||keyCode>127||keyCode==kVK_Escape)return NO;
+ return (m&(NSEventModifierFlagCommand|NSEventModifierFlagControl|NSEventModifierFlagOption))!=0; // Shift alone would clash with typing
+}
++ (UInt32)carbonModifiers:(NSEventModifierFlags)modifiers {UInt32 c=0;if(modifiers&NSEventModifierFlagCommand)c|=cmdKey;if(modifiers&NSEventModifierFlagControl)c|=controlKey;if(modifiers&NSEventModifierFlagOption)c|=optionKey;if(modifiers&NSEventModifierFlagShift)c|=shiftKey;return c;}
++ (NSString *)keyName:(NSInteger)keyCode {
+ NSDictionary *special=@{@(kVK_Space):@"Space",@(kVK_Return):@"↩",@(kVK_Tab):@"⇥",@(kVK_Delete):@"⌫",@(kVK_ForwardDelete):@"⌦",@(kVK_LeftArrow):@"←",@(kVK_RightArrow):@"→",@(kVK_UpArrow):@"↑",@(kVK_DownArrow):@"↓",@(kVK_Home):@"↖",@(kVK_End):@"↘",@(kVK_PageUp):@"⇞",@(kVK_PageDown):@"⇟",@(kVK_F1):@"F1",@(kVK_F2):@"F2",@(kVK_F3):@"F3",@(kVK_F4):@"F4",@(kVK_F5):@"F5",@(kVK_F6):@"F6",@(kVK_F7):@"F7",@(kVK_F8):@"F8",@(kVK_F9):@"F9",@(kVK_F10):@"F10",@(kVK_F11):@"F11",@(kVK_F12):@"F12"};
+ if(special[@(keyCode)])return special[@(keyCode)];
+ TISInputSourceRef source=TISCopyCurrentKeyboardLayoutInputSource();CFDataRef layout=source?TISGetInputSourceProperty(source,kTISPropertyUnicodeKeyLayoutData):NULL;NSString *name=nil;
+ if(layout){UInt32 dead=0;UniChar chars[4];UniCharCount length=0;if(UCKeyTranslate((const UCKeyboardLayout *)CFDataGetBytePtr(layout),(UInt16)keyCode,kUCKeyActionDisplay,0,LMGetKbdType(),kUCKeyTranslateNoDeadKeysBit,&dead,4,&length,chars)==noErr&&length)name=[[NSString stringWithCharacters:chars length:length] uppercaseString];}
+ if(source)CFRelease(source);return name.length?name:[NSString stringWithFormat:@"Key %ld",(long)keyCode];
+}
++ (NSString *)labelForKeyCode:(NSInteger)keyCode modifiers:(NSEventModifierFlags)modifiers {
+ NSMutableString *label=[NSMutableString new];if(modifiers&NSEventModifierFlagControl)[label appendString:@"⌃"];if(modifiers&NSEventModifierFlagOption)[label appendString:@"⌥"];if(modifiers&NSEventModifierFlagShift)[label appendString:@"⇧"];if(modifiers&NSEventModifierFlagCommand)[label appendString:@"⌘"];
+ [label appendString:[self keyName:keyCode]];return label;
+}
+@end
+// A button that records the next key combination while it has focus.
+@interface ShortcutRecorder : NSButton
+@property BOOL recording;
+@property (copy) void (^recorded)(NSInteger keyCode,NSEventModifierFlags modifiers);
+@property (copy) void (^cleared)(void);
+@end
+@implementation ShortcutRecorder
+- (BOOL)acceptsFirstResponder {return YES;}
+- (BOOL)becomeFirstResponder {return YES;}
+- (BOOL)resignFirstResponder {if(self.recording){self.recording=NO;[self sendAction:self.action to:self.target];}return [super resignFirstResponder];}
+- (BOOL)performKeyEquivalent:(NSEvent *)event {if(self.recording){[self keyDown:event];return YES;}return [super performKeyEquivalent:event];}
+- (void)keyDown:(NSEvent *)event {
+ if(!self.recording){[super keyDown:event];return;}
+ NSEventModifierFlags m=event.modifierFlags&NSEventModifierFlagDeviceIndependentFlagsMask;
+ if(event.keyCode==kVK_Escape){self.recording=NO;[self sendAction:self.action to:self.target];return;}
+ if((event.keyCode==kVK_Delete||event.keyCode==kVK_ForwardDelete)&&!(m&(NSEventModifierFlagCommand|NSEventModifierFlagControl|NSEventModifierFlagOption))){self.recording=NO;if(self.cleared)self.cleared();return;}
+ if(![PeekShortcut isValidKeyCode:event.keyCode modifiers:m]){NSBeep();return;}
+ self.recording=NO;if(self.recorded)self.recorded(event.keyCode,m);
+}
+- (void)flagsChanged:(NSEvent *)event {if(!self.recording)[super flagsChanged:event];}
+@end
 @interface ExceptionStack : NSStackView
 @end
 @implementation ExceptionStack
@@ -74,6 +122,10 @@
 @property NSString *statusImageName;
 @property NSView *welcomeCard;
 @property NSDate *pausedUntil; // nil: not paused; distantFuture: until resumed
+@property (nonatomic) BOOL peeking;
+@property EventHotKeyRef peekHotKey;
+@property ShortcutRecorder *peekRecorder;
+@property NSTextField *peekNote;
 @property NSTimer *pauseAllTimer;
 @property NSMenu *addAppMenu;
 @property NSStackView *websiteRulesList;
@@ -235,7 +287,7 @@
  [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(displaysChanged:) name:NSApplicationDidChangeScreenParametersNotification object:nil];
  [NSWorkspace.sharedWorkspace.notificationCenter addObserver:self selector:@selector(frontmostChanged:) name:NSWorkspaceDidActivateApplicationNotification object:nil];
  [NSWorkspace.sharedWorkspace.notificationCenter addObserver:self selector:@selector(frontmostChanged:) name:NSWorkspaceDidTerminateApplicationNotification object:nil];
- [self restoreLessPullPause];[self scheduleLessPullPauseTimer];[self updateForeground];[self restartTimer];[self schedulePauseTimer];[self sync];
+ [self restoreLessPullPause];[self scheduleLessPullPauseTimer];[self registerPeekShortcut];[self updateForeground];[self restartTimer];[self schedulePauseTimer];[self sync];
  if([NSProcessInfo.processInfo.arguments containsObject:@"--settings"])[self showSettings:nil];
  // First launch: Settings opens with a one-time welcome card above the real controls.
  self.welcomeWanted=firstLaunch||[NSProcessInfo.processInfo.arguments containsObject:@"--welcome"];if(self.welcomeWanted)[self showSettings:nil];
@@ -426,6 +478,30 @@
 // Pause Less Pull: the plain display for a while. Saved settings and rules stay
 // untouched; Night Shift is left alone; it resumes with the normal fade and
 // survives a relaunch.
+// Carbon hot keys deliver pressed and released events without Accessibility permission.
+static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *userData) {
+ AppDelegate *owner=(__bridge AppDelegate *)userData;UInt32 kind=GetEventKind(event);
+ dispatch_async(dispatch_get_main_queue(),^{[owner setPeeking:kind==kEventHotKeyPressed];});return noErr;
+}
+- (void)setPeeking:(BOOL)peeking {if(_peeking==peeking)return;_peeking=peeking;self.animateAppearance=YES;[self sync];}
+- (NSDictionary *)peekShortcut {NSDictionary *s=[NSUserDefaults.standardUserDefaults dictionaryForKey:@"peekShortcut"];return [PeekShortcut isValidKeyCode:[s[@"keyCode"] integerValue] modifiers:[s[@"modifiers"] unsignedIntegerValue]]?s:nil;}
+- (void)registerPeekShortcut {
+ static BOOL installed=NO;if(!installed){installed=YES;EventTypeSpec kinds[2]={{kEventClassKeyboard,kEventHotKeyPressed},{kEventClassKeyboard,kEventHotKeyReleased}};InstallApplicationEventHandler(PeekHotKeyHandler,2,kinds,(__bridge void *)self,NULL);}
+ if(self.peekHotKey){UnregisterEventHotKey(self.peekHotKey);self.peekHotKey=NULL;}self.peeking=NO;
+ NSDictionary *s=[self peekShortcut];if(!s)return;EventHotKeyID identifier={.signature='LsPl',.id=1};EventHotKeyRef ref=NULL;
+ if(RegisterEventHotKey((UInt32)[s[@"keyCode"] integerValue],[PeekShortcut carbonModifiers:[s[@"modifiers"] unsignedIntegerValue]],identifier,GetApplicationEventTarget(),0,&ref)==noErr)self.peekHotKey=ref;
+}
+- (void)savePeekShortcutKeyCode:(NSInteger)keyCode modifiers:(NSEventModifierFlags)modifiers {
+ NSUserDefaults *d=NSUserDefaults.standardUserDefaults;if(keyCode<0)[d removeObjectForKey:@"peekShortcut"];else [d setObject:@{@"keyCode":@(keyCode),@"modifiers":@(modifiers&NSEventModifierFlagDeviceIndependentFlagsMask)} forKey:@"peekShortcut"];
+ [self registerPeekShortcut];[self refreshPeekRecorder:nil];
+}
+- (void)refreshPeekRecorder:(id)sender {
+ NSDictionary *s=[self peekShortcut];
+ if(self.peekRecorder.recording){self.peekRecorder.title=@"Press keys…";self.peekNote.stringValue=@"Press the keys to use, with ⌘, ⌃ or ⌥. Esc cancels; ⌫ removes the shortcut.";}
+ else {self.peekRecorder.title=s?[PeekShortcut labelForKeyCode:[s[@"keyCode"] integerValue] modifiers:[s[@"modifiers"] unsignedIntegerValue]]:@"Record Shortcut";self.peekNote.stringValue=s?(self.peekHotKey?@"Hold the shortcut to see the plain display; let go to return. Click to change it.":@"That shortcut could not be registered; it may be taken by another app. Click to choose another."):@"Hold a shortcut to see the plain display; let go to return. No exception is made and nothing is saved.";}
+ self.peekRecorder.accessibilityLabel=[NSString stringWithFormat:@"Peek in color shortcut: %@",s?self.peekRecorder.title:@"none"];
+}
+- (void)startRecording:(ShortcutRecorder *)sender {if(sender.recording){sender.recording=NO;[self refreshPeekRecorder:nil];return;}sender.recording=YES;[sender.window makeFirstResponder:sender];[self refreshPeekRecorder:nil];}
 - (NSString *)pauseLessPullHelp {return @"Shows the plain display for a while: color and no added warmth. Night Shift is left alone. Your settings and exceptions are kept.";}
 - (void)persistLessPullPause {NSUserDefaults *d=NSUserDefaults.standardUserDefaults;if(self.pausedUntil)[d setObject:@{@"until":@([self.pausedUntil isEqualToDate:NSDate.distantFuture]?0:self.pausedUntil.timeIntervalSince1970)} forKey:@"lessPullPause"];else [d removeObjectForKey:@"lessPullPause"];}
 - (void)restoreLessPullPause {
@@ -530,6 +606,11 @@
  self.autoButton=[NSButton checkboxWithTitle:@"Extra Warmth follows Night Shift" target:self action:@selector(toggleAuto:)];[self helpView:self.autoButton text:self.autoHelp label:@"Extra Warmth follows Night Shift"];
  self.resumeButton=[NSButton buttonWithTitle:@"Resume Following" target:self action:@selector(resume:)];[self helpView:self.resumeButton text:@"Go back to following Night Shift now." label:@"Resume Following Now"];
  self.loginButton=[NSButton checkboxWithTitle:@"Launch at login" target:self action:@selector(login:)];[self helpView:self.loginButton text:@"Open Less Pull when you sign in to your Mac. Install it in Applications first." label:@"Launch at login"];
+ NSTextField *peekTitle=[NSTextField labelWithString:@"Peek in color"];peekTitle.font=[NSFont systemFontOfSize:13 weight:NSFontWeightMedium];
+ self.peekRecorder=[ShortcutRecorder new];self.peekRecorder.bezelStyle=NSBezelStyleRounded;self.peekRecorder.title=@"Record Shortcut";self.peekRecorder.target=self;self.peekRecorder.action=@selector(startRecording:);[self.peekRecorder.widthAnchor constraintGreaterThanOrEqualToConstant:150].active=YES;
+ __weak AppDelegate *weakSelf=self;self.peekRecorder.recorded=^(NSInteger keyCode,NSEventModifierFlags modifiers){[weakSelf savePeekShortcutKeyCode:keyCode modifiers:modifiers];};self.peekRecorder.cleared=^{[weakSelf savePeekShortcutKeyCode:-1 modifiers:0];};
+ [self helpView:self.peekRecorder text:@"Click, then press the keys to use. Hold them to see the plain display; let go to return." label:@"Peek in color shortcut"];
+ self.peekNote=[self note:@""];
  NSMutableArray *views=[NSMutableArray new];
  if(self.welcomeWanted){
   NSTextField *title=[NSTextField labelWithString:@"Welcome to Less Pull"];title.font=[NSFont systemFontOfSize:15 weight:NSFontWeightSemibold];
@@ -547,10 +628,11 @@
   [self row:@[self.warmthTitle,[self spacer],self.resetButton]],[self row:@[self.warmthSlider,self.warmthLabel]],tickRow,[self note:@"Adds warmth on top of Night Shift, from Off to Red."],[self separator],
   [self row:@[self.nightButton,[self spacer],self.pausePopup,self.endPauseButton]],[self note:@"Turns Night Shift on or off now; your schedule in System Settings stays as it is."],
   [self row:@[self.autoButton,[self spacer],self.resumeButton]],[self note:@"On: Extra Warmth only while Night Shift is on, none in the daytime. Off: Extra Warmth stays on all day."],[self separator],
+  [self row:@[peekTitle,[self spacer],self.peekRecorder]],self.peekNote,[self separator],
   self.loginButton]];
  NSStackView *column=[self column:views];
  tickRow.identifier=@"fixed";[tickRow.widthAnchor constraintEqualToAnchor:self.warmthSlider.widthAnchor].active=YES;
- NSUInteger base=self.welcomeCard?1:0;[column setCustomSpacing:4 afterView:self.statusText];[column setCustomSpacing:4 afterView:self.grayscaleButton];[column setCustomSpacing:6 afterView:column.arrangedSubviews[base+5]];[column setCustomSpacing:2 afterView:column.arrangedSubviews[base+6]];[column setCustomSpacing:6 afterView:tickRow];[column setCustomSpacing:4 afterView:column.arrangedSubviews[base+10]];[column setCustomSpacing:4 afterView:column.arrangedSubviews[base+12]];
+ NSUInteger base=self.welcomeCard?1:0;[column setCustomSpacing:4 afterView:self.statusText];[column setCustomSpacing:4 afterView:self.grayscaleButton];[column setCustomSpacing:6 afterView:column.arrangedSubviews[base+5]];[column setCustomSpacing:2 afterView:column.arrangedSubviews[base+6]];[column setCustomSpacing:6 afterView:tickRow];[column setCustomSpacing:4 afterView:column.arrangedSubviews[base+10]];[column setCustomSpacing:4 afterView:column.arrangedSubviews[base+12]];[column setCustomSpacing:4 afterView:column.arrangedSubviews[base+15]];[self refreshPeekRecorder:nil];
  return column;
 }
 - (NSStackView *)appsTab {
@@ -651,6 +733,7 @@
   @[@"Night Shift",@"Less Pull can turn Night Shift on or off now, or off for a while; your schedule in System Settings stays as it is. With “Extra Warmth follows Night Shift” on, the warmth you set is added only while Night Shift is on, and there is none in the daytime. With it off, Extra Warmth stays on all day. If you move the slider by hand while following, that warmth stays until Night Shift next changes, or until you choose Resume Following."],
   @[@"Exceptions for apps",@"Give an app its own settings in Settings → App Exceptions, or choose “Exception for …” in the menu. They apply while that app is in front with a window open. Each setting can keep the default or get its own value."],
   @[@"Exceptions for websites",@"Install the browser extension from Settings, for Brave or Chrome. Click its icon on a website to give that site, or one exact page, its own settings. Pages inherit from their domain, and domains from the browser’s app exception. Private tabs are left alone."],
+  @[@"Peek in color",@"Record a shortcut in Settings → General. Hold it to see the plain display; let go and Less Pull fades back. Nothing is saved and no exception is made."],
   @[@"Pausing",@"Pause Less Pull shows the plain display for 15 minutes, an hour, or until you resume: color and no added warmth, with Night Shift left alone. Your settings and exceptions are kept, and the menu-bar icon shows a pause mark."],
   @[@"Quitting",@"Quitting returns the display to normal and lets Night Shift follow its schedule again. Your settings and exceptions are kept."],
   @[@"Something not working?",@"Diagnostics shows technical details you can include when asking for help. Nothing is sent anywhere."]];
@@ -683,7 +766,7 @@
  BOOL nightOn=NO;BOOL known=[self logicalNightShift:&nightOn];
  BOOL warmthOff=self.automatic&&self.policy.overrideMode<0&&known&&!nightOn;
  double strength=self.customWarmth?self.appWarmth/100*3:((mode==100||mode==101)&&!warmthOff?[self currentWarmth]:0);
- if(self.pausedUntil){effective=101;strength=0;}
+ if(self.pausedUntil||self.peeking){effective=101;strength=0;}
  if(mode!=self.selectedMode||effective!=self.effectiveMode||strength!=self.targetStrength)self.animateAppearance=YES;
  self.targetStrength=strength;
  BOOL gray=effective==100||effective==1;
@@ -703,7 +786,7 @@
  NSMenuItem *item=[NSMenuItem new];item.tag=(self.selectedMode==1||self.selectedMode==100)?100:101;[self manual:item];
 }
 - (void)displaysChanged:(id)sender {[self pipelineChanged:sender];}
-- (void)applicationWillTerminate:(NSNotification *)note {self.quitting=YES;[self.pauseAllTimer invalidate];[self.eventTimer invalidate];[self.pipelineRecoveryTimer invalidate];[self.menuDismissal end];[self.browserBridge stop];[self.warmth cancelTransition];[self endPauseNow:nil];self.excludeNight=NO;[self reconcileExclusion];if(self.grayOverride||self.customWarmth){self.grayOverride=0;self.customWarmth=NO;self.excludeGray=NO;self.excludeWarmth=NO;self.animateAppearance=NO;[self.warmth cancelTransition];[self applyMode:self.selectedMode];}[self.warmth restore];}
+- (void)applicationWillTerminate:(NSNotification *)note {self.quitting=YES;if(self.peekHotKey)UnregisterEventHotKey(self.peekHotKey);[self.pauseAllTimer invalidate];[self.eventTimer invalidate];[self.pipelineRecoveryTimer invalidate];[self.menuDismissal end];[self.browserBridge stop];[self.warmth cancelTransition];[self endPauseNow:nil];self.excludeNight=NO;[self reconcileExclusion];if(self.grayOverride||self.customWarmth){self.grayOverride=0;self.customWarmth=NO;self.excludeGray=NO;self.excludeWarmth=NO;self.animateAppearance=NO;[self.warmth cancelTransition];[self applyMode:self.selectedMode];}[self.warmth restore];}
 - (void)quit:(id)sender {[NSApp terminate:nil];}
 @end
 int main(int argc,const char *argv[]){@autoreleasepool{

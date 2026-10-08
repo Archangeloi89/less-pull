@@ -90,6 +90,22 @@ int main(){@autoreleasepool{
   t.pausedUntil=[NSDate dateWithTimeIntervalSinceNow:-1];[t sync];check(t.pausedUntil==nil&&fw.gray&&fw.value==1.5,"expiry resumes on the next sync");
   [d removeObjectForKey:@"lessPullPause"];
  }
+
+ // Peek in color: held shortcut shows the plain display, release restores; no
+ // saved setting or exception changes. Shortcut rules: a real modifier is required.
+ {
+  TestApp *t=[TestApp new];FakeFilter *fe=[FakeFilter new];fe.on=YES;fe.state=(NSBlueStatus){.mode=0,.available=YES};FakeWarmth *fw=[FakeWarmth new];t.engine=fe;t.warmth=fw;t.exclusion=[ExclusionPolicy new];t.policy=[SwitchingPolicy new];t.policy.known=YES;t.policy.nightShiftOn=YES;t.policy.automatic=YES;t.automatic=YES;t.selectedMode=100;[d setInteger:100 forKey:@"nightMode"];[d setDouble:1.5 forKey:@"warmth"];t.exclusionRules=[NSMutableDictionary new];
+  t.grayOverride=1;t.customWarmth=YES;t.appWarmth=80;t.animateAppearance=YES;[t sync];NSDictionary *before=[d dictionaryRepresentation];
+  t.peeking=YES;check(!fw.gray&&fw.value==0&&fw.lastDuration==0.5,"peek shows the plain display with the normal fade");check(t.grayOverride==1&&t.customWarmth,"peek keeps the exception state intact");
+  t.peeking=NO;check(fw.gray&&fabs(fw.value-2.4)<1e-9&&fw.lastDuration==0.5,"release returns to the exception appearance");
+  t.grayOverride=0;t.customWarmth=NO;t.animateAppearance=YES;[t sync];t.peeking=YES;t.peeking=NO;check(fw.gray&&fw.value==1.5,"release returns to the global appearance");
+  check([[d dictionaryRepresentation] isEqualToDictionary:before]&&t.exclusionRules.count==0,"peek changes no saved setting and creates no exception");
+  check([PeekShortcut isValidKeyCode:8 modifiers:NSEventModifierFlagCommand|NSEventModifierFlagOption],"command-option shortcut valid");
+  check(![PeekShortcut isValidKeyCode:8 modifiers:0]&&![PeekShortcut isValidKeyCode:8 modifiers:NSEventModifierFlagShift],"bare key or shift-only rejected");
+  check(![PeekShortcut isValidKeyCode:53 modifiers:NSEventModifierFlagCommand],"escape rejected");
+  check([PeekShortcut carbonModifiers:NSEventModifierFlagCommand|NSEventModifierFlagControl|NSEventModifierFlagOption|NSEventModifierFlagShift]==(cmdKey|controlKey|optionKey|shiftKey),"carbon modifier mapping");
+  check([[PeekShortcut labelForKeyCode:49 modifiers:NSEventModifierFlagControl|NSEventModifierFlagOption] isEqual:@"⌃⌥Space"],"shortcut label order and key name");
+ }
  NSUInteger combinations=0;
  for(int follow=0;follow<2;follow++)for(int globalNight=0;globalNight<2;globalNight++)for(int base=100;base<=101;base++)for(int grayRule=0;grayRule<3;grayRule++)for(int nightRule=0;nightRule<3;nightRule++)for(int custom=0;custom<2;custom++)for(NSNumber *percent in @[@0,@25,@77,@100]){
   TestApp *t=[TestApp new];FakeFilter *fe=[FakeFilter new];fe.on=globalNight;fe.state=(NSBlueStatus){.mode=0,.available=YES};FakeWarmth *fw=[FakeWarmth new];t.engine=fe;t.warmth=fw;t.exclusion=[ExclusionPolicy new];t.policy=[SwitchingPolicy new];t.policy.known=YES;t.policy.nightShiftOn=globalNight;t.policy.automatic=follow;t.automatic=follow;t.policy.overrideMode=-1;t.selectedMode=base;[d setInteger:base forKey:@"nightMode"];t.grayOverride=grayRule;t.nightOverride=nightRule;t.excludeNight=nightRule!=0;t.customWarmth=custom;t.appWarmth=percent.doubleValue;t.animateAppearance=YES;
@@ -99,5 +115,5 @@ int main(){@autoreleasepool{
  }
  printf("PASS: %lu combined following/global-state/base/grayscale/Night-Shift/warmth cases and restoration.\n",(unsigned long)combinations);
  check(e.nativeWrites==0,"no native filter toggles / HUD requests");
- puts("PASS: Pause Less Pull (plain display, rules ignored, settings kept, relaunch, expiry); inheritance, independent gray/warmth, Night Shift on/off, own versus genuine transitions, manual off, timed-off precedence/expiry, schedule cutoff, recovery, rapid rule switches.");
+ puts("PASS: Peek in color (plain display while held, release restores, nothing saved, shortcut rules); Pause Less Pull (plain display, rules ignored, settings kept, relaunch, expiry); inheritance, independent gray/warmth, Night Shift on/off, own versus genuine transitions, manual off, timed-off precedence/expiry, schedule cutoff, recovery, rapid rule switches.");
 }}

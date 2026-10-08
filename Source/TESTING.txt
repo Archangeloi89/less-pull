@@ -16,7 +16,7 @@ Manual checks: Color/Grayscale at 0% and matching red endpoints at 100%; live pe
 Performance: use proc_pid_rusage with mach_timebase conversion for CPU ticks. Measure idle with settings closed and active warmth. Record physical footprint, resident size, interrupt wakeups, duration, and test state. No unchanged matrix writes should occur on backup polls.
 
 App Exceptions controller tests (fake engine; does not change system state):
-clang -fobjc-arc exception-tests.m Engine.m SwitchingPolicy.m WarmthEngine.m PausePolicy.m ExclusionPolicy.m BrowserBridge.m MenuDismissal.m -framework Cocoa -framework UniformTypeIdentifiers -framework ServiceManagement -o /tmp/less-pull-exception-tests
+clang -fobjc-arc exception-tests.m Engine.m SwitchingPolicy.m WarmthEngine.m PausePolicy.m ExclusionPolicy.m BrowserBridge.m MenuDismissal.m -framework Cocoa -framework Carbon -framework UniformTypeIdentifiers -framework ServiceManagement -o /tmp/less-pull-exception-tests
 /tmp/less-pull-exception-tests
 Fade request capture tests (no actual matrix writes):
 clang -fobjc-arc fade-tests.m WarmthEngine.m -framework Cocoa -o /tmp/less-pull-fade-tests
@@ -37,6 +37,6 @@ clang -fobjc-arc menu-tests.m MenuDismissal.m -framework Cocoa -o /tmp/less-pull
 /tmp/less-pull-menu-tests
 
 Bounded display recovery regression (captured writes; no display changes):
-clang -fobjc-arc pipeline-tests.m Engine.m SwitchingPolicy.m WarmthEngine.m PausePolicy.m ExclusionPolicy.m BrowserBridge.m MenuDismissal.m -framework Cocoa -framework UniformTypeIdentifiers -framework ServiceManagement -o /tmp/less-pull-pipeline-tests
+clang -fobjc-arc pipeline-tests.m Engine.m SwitchingPolicy.m WarmthEngine.m PausePolicy.m ExclusionPolicy.m BrowserBridge.m MenuDismissal.m -framework Cocoa -framework Carbon -framework UniformTypeIdentifiers -framework ServiceManagement -o /tmp/less-pull-pipeline-tests
 /tmp/less-pull-pipeline-tests
 Simulates a display reset after a fade finishes. Checks persistent grayscale, two recovery attempts, event coalescing, and no idle writes.
