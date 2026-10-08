@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-31"><b>Download build 31</b></a>
+  <a href="https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-32"><b>Download build 32</b></a>
   &nbsp;·&nbsp; <a href="#install">Install</a>
   &nbsp;·&nbsp; <a href="docs/EXCEPTIONS.md">App and website exceptions</a>
   &nbsp;·&nbsp; <a href="docs/README.md">All docs</a>
@@ -134,9 +134,9 @@ Less Pull changes the display at the very end of the pipeline, after the picture
 
 A session is a stretch of focused work with a gentle end. Choose a length from **Start a session** in the menu (25, 45, 60 and 90 minutes to begin with; change them under **Settings… → Sessions**). The icon gains a thin ring that fills as the session runs, with the minutes left next to it.
 
-At the end, a warm glow blooms across every display for three seconds with one line of text, and a soft gong sounds, built from pure tones on the 432 Hz reference and the solfeggio pitches, low and short. Nothing to dismiss: the count simply goes on past the end, −0, −1, −2 in the warm color, so you can see how far you have stretched, and a quieter reminder comes every five minutes if you want one (or never).
+At the end, a warm glow blooms across every display for three seconds with one line of text, and a soft gong sounds, built from pure tones on the 432 Hz reference and the solfeggio pitches, low and short. Nothing to dismiss: the count simply goes on past the end, −0, −1, −2 in the warm color, breathing gently to say it can be clicked, so you can see how far you have stretched. A quieter reminder can come every few minutes if you ask for one; by default it never does.
 
-While a session runs, a click on the icon opens a small panel under it instead of the menu; the other mouse button still opens the menu. Once the session is over, the panel offers **Keep going** and **Leaving now**. Leaving now turns into **Call me back in** with your own choices (5, 9, 13 and 33 minutes to begin with) and **Not today**. After the call back, two soft rising notes, and the session is over for good. You are called back once.
+While a session runs, a click on the icon opens a small panel under it instead of the menu; the other mouse button still opens the menu. Once the session is over, the panel asks **Leaving? Call me back in** and offers your own choices (5, 9, 13 and 33 minutes to begin with), next to **Keep going**, **Leave quietly**, and a gear that opens the Sessions tab. After the call back, two soft rising notes, and the session is over for good. You are called back once.
 
 <sub>The glow never takes focus and never blocks a click. Under Reduce Motion it appears and disappears without animation. Sound and glow can each be turned off under Sessions.</sub>
 
@@ -214,15 +214,15 @@ The app changes the display; nothing is injected into pages, and the Mac app has
 
 ## Install
 
-1. Download **Less-Pull-1.4.4-31.zip** from the [build 31 release](https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-31), unzip it, and move **Less Pull.app** to **Applications**.
-2. Open it. The Settings window greets you once; the circle in the menu bar is where you choose Grayscale and Extra Warmth from then on. macOS places it at the left end of your menu-bar icons; ⌘-drag it where you want it, for example next to the clock.
+1. Download **Less-Pull-1.4.4-32.zip** from the [build 32 release](https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-32), unzip it, and move **Less Pull.app** to **Applications**.
+2. Open it. The Settings window greets you once; the circle in the menu bar is where you choose Grayscale and Extra Warmth from then on. On the first launch the welcome opens right under it and the icon fades in and out for a moment, so there is no searching; hold ⌘ and drag it where you want it, for example next to the clock. (macOS decides where new icons start, and apps cannot choose a spot.)
 3. For website rules, open **Settings… → Websites**, choose **Install Browser Extension…**, and follow the steps for [your browser](docs/INSTALL.md#safari-brave-chrome-firefox-opera-or-edge).
 
 > [!TIP]
 > Setting up with an AI agent? The release includes an **agent pack** (`Less-Pull-Agent-Pack.zip`): a script that installs the app and the bridge, and scripts that connect Brave, Chrome, Opera, Edge and Firefox, with the instructions an agent needs. See [tools/agent-pack](tools/agent-pack/README.md).
 
 > [!NOTE]
-> Version 1.4.4 (build 31) is a test build for Apple silicon Macs. The version number stays 1.4.4 on purpose; the build number is what changes. It is ad-hoc signed and not notarized by Apple, so Gatekeeper may block a downloaded copy. It is built for macOS 13 and later and has been tested on macOS 27 only. The browser extension is loaded locally and is not in the Chrome Web Store, on addons.mozilla.org or in the App Store. See [install help](docs/INSTALL.md) and [what is still open](docs/RELEASE-PLAN.md).
+> Version 1.4.4 (build 32) is a test build for Apple silicon Macs. The version number stays 1.4.4 on purpose; the build number is what changes. It is ad-hoc signed and not notarized by Apple, so Gatekeeper may block a downloaded copy. It is built for macOS 13 and later and has been tested on macOS 27 only. The browser extension is loaded locally and is not in the Chrome Web Store, on addons.mozilla.org or in the App Store. See [install help](docs/INSTALL.md) and [what is still open](docs/RELEASE-PLAN.md).
 
 ## Private by design
 
