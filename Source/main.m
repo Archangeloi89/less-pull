@@ -210,6 +210,7 @@ static NSString *const LessPullOldBundleIdentifier=@"local.nightshiftfilters.app
 @property id sessionClickMonitor,sessionKeyMonitor;
 @property NSMutableArray<NSWindow *> *glowWindows;
 @property NSSound *sessionSound;
+@property BOOL sessionBreath,welcomePlaced;
 @property NSTextField *sessionPresetsField,*callBackPresetsField;
 @property NSTextField *exclusionText;
 @property NSRunningApplication *lastExternalApp;
@@ -602,7 +603,7 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  // New users get the two shortcuts set for them (Option-A to peek, Option-Command-G to toggle),
  // each only if it is free on this Mac and keyboard; the tour shows which ones. Changeable under Shortcuts.
  if(firstLaunch)for(NSString *key in @[@"peekShortcut",@"grayscaleShortcut"]){if(![d objectForKey:key]){NSDictionary *pick=[self suggestedShortcutFor:key];if(pick)[d setObject:pick forKey:key];}}
- [d registerDefaults:@{@"automatic":@YES,@"overrideMode":@(-1),@"warmth":@0,@"nightMode":@101,@"manualMode":@1,@"checkForUpdates":@YES,@"peekActiveDisplayOnly":@YES,@"sessionPresets":@[@25,@45,@60,@90],@"callBackPresets":@[@5,@9,@13,@33],@"sessionRemindEvery":@5,@"sessionSound":@YES,@"sessionGlow":@YES}];self.peekLockedDisplays=[NSMutableSet new];
+ [d registerDefaults:@{@"automatic":@YES,@"overrideMode":@(-1),@"warmth":@0,@"nightMode":@101,@"manualMode":@1,@"checkForUpdates":@YES,@"peekActiveDisplayOnly":@YES,@"sessionPresets":@[@25,@45,@60,@90],@"callBackPresets":@[@5,@9,@13,@33],@"sessionRemindEvery":@0,@"sessionSound":@YES,@"sessionGlow":@YES}];self.peekLockedDisplays=[NSMutableSet new];
  self.availableUpdate=[d dictionaryForKey:@"availableUpdate"];
  if([d integerForKey:@"nightMode"]==16)[d setInteger:100 forKey:@"nightMode"];
  if([d integerForKey:@"manualMode"]==16)[d setInteger:100 forKey:@"manualMode"];
@@ -652,10 +653,10 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
 - (void)updateStatusIcon {
  BOOL gray=self.effectiveMode==100||self.effectiveMode==1;double strength=round(self.targetStrength*20)/20;
  BOOL paused=self.pause!=nil||self.pausedUntil!=nil;NSDate *now=NSDate.date;NSString *label=[self.session labelAt:now];double ring=[self sessionRing:now];BOOL over=self.session.state==SessionOver,away=self.session.state==SessionAway;
- NSString *name=[NSString stringWithFormat:@"%@ update=%d session=%@ %.2f %d %d",paused?@"paused":[NSString stringWithFormat:@"gray=%d warmth=%.2f",gray,strength],self.availableUpdate!=nil,label,ring,over,away];
+ NSString *name=[NSString stringWithFormat:@"%@ update=%d session=%@ %.2f %d %d %d",paused?@"paused":[NSString stringWithFormat:@"gray=%d warmth=%.2f",gray,strength],self.availableUpdate!=nil,label,ring,over,away,self.sessionBreath];
  if([name isEqual:self.statusImageName])return;self.statusImageName=name;
  self.item.button.image=[self withUpdateDot:paused?[self menuBarImage:@"menubar-paused" symbol:@"pause.circle"]:[self statusImageGray:gray warmth:strength ring:ring over:over away:away]];
- NSColor *ink=over?[NSColor colorWithSRGBRed:.93 green:.55 blue:.28 alpha:1]:away?NSColor.secondaryLabelColor:NSColor.labelColor;
+ NSColor *ink=over?[NSColor colorWithSRGBRed:.93 green:.55 blue:.28 alpha:(self.sessionBreath?1:.55)]:away?NSColor.secondaryLabelColor:NSColor.labelColor;
  self.item.button.attributedTitle=[[NSAttributedString alloc]initWithString:label.length?[@" " stringByAppendingString:[label stringByReplacingOccurrencesOfString:@"-" withString:@"−"]]:@"" attributes:@{NSFontAttributeName:[NSFont monospacedDigitSystemFontOfSize:12 weight:NSFontWeightMedium],NSForegroundColorAttributeName:ink,NSBaselineOffsetAttributeName:@1}];
  self.item.button.accessibilityLabel=label.length?[NSString stringWithFormat:@"Less Pull, session %@ %@",over?@"over by":away?@"away, back in":@"",label]:@"Less Pull";
 }
@@ -689,7 +690,7 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
 - (void)persistSession {if(self.session.state==SessionIdle)[NSUserDefaults.standardUserDefaults removeObjectForKey:@"session"];else [NSUserDefaults.standardUserDefaults setObject:self.session.dictionary forKey:@"session"];}
 - (void)scheduleSessionTimer {[self.sessionTimer invalidate];self.sessionTimer=nil;if(self.session.state==SessionIdle)return;self.sessionTimer=[NSTimer timerWithTimeInterval:1 target:self selector:@selector(sessionTick) userInfo:nil repeats:YES];self.sessionTimer.tolerance=.2;[NSRunLoop.mainRunLoop addTimer:self.sessionTimer forMode:NSRunLoopCommonModes];}
 - (void)sessionTick {
- NSDate *now=NSDate.date;NSArray *events=[self.session eventsAt:now];
+ NSDate *now=NSDate.date;NSArray *events=[self.session eventsAt:now];if(self.session.state==SessionOver&&!self.sessionPanel.visible)self.sessionBreath=!self.sessionBreath;else self.sessionBreath=YES;
  for(NSString *e in events){
   if([e isEqual:@"ended"]){[self glow:[NSString stringWithFormat:@"That was %ld minute%@.",(long)self.session.minutes,self.session.minutes==1?@"":@"s"] sound:@"session-end"];}
   else if([e isEqual:@"reminder"]){NSInteger past=(NSInteger)floor(-[self.session remainingAt:now]/60);[self glow:[NSString stringWithFormat:@"%ld minute%@ past.",(long)past,past==1?@"":@"s"] sound:@"session-remind"];}
@@ -704,6 +705,7 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
 - (void)sessionLeaving:(id)sender {[self showSessionPanelMode:@"callback"];}
 - (void)sessionCallBack:(NSButton *)sender {[self.session leaveAt:NSDate.date callBackIn:sender.tag];[self persistSession];[self scheduleSessionTimer];[self closeSessionPanel];self.statusImageName=nil;[self updateStatusIcon];}
 - (void)sessionBack:(id)sender {[self endSession:sender];}
+- (void)showSessionsFromPanel:(id)sender {[self closeSessionPanel];[self showSessions:nil];}
 // The glow: a soft warm bloom on every display for three seconds with one line of text, no focus, no click needed.
 - (void)glow:(NSString *)text sound:(NSString *)sound {
  if([NSUserDefaults.standardUserDefaults boolForKey:@"sessionSound"]){NSString *path=[NSBundle.mainBundle pathForResource:sound ofType:@"wav"];if(path){self.sessionSound=[[NSSound alloc]initWithContentsOfFile:path byReference:YES];self.sessionSound.volume=.7;[self.sessionSound play];}}
@@ -733,7 +735,12 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
   NSStackView *chipRow=[self row:chips];chipRow.spacing=6;chipRow.distribution=NSStackViewDistributionFillEqually;[buttons addObject:chipRow];
   NSButton *none=[self panelButton:@"Not today" action:@selector(sessionCallBack:) prominent:NO];none.tag=0;none.bezelStyle=NSBezelStyleInline;none.controlSize=NSControlSizeRegular;[buttons addObject:[self row:@[[self spacer],none,[self spacer]]]];}
  else if(s.state==SessionRunning){[buttons addObject:[self row:@[[self spacer],[self panelButton:@"End session" action:@selector(endSession:) prominent:NO],[self spacer]]]];}
- else if(s.state==SessionOver){NSStackView *rowv=[self row:@[[self panelButton:@"Keep going" action:@selector(closeSessionPanel) prominent:NO],[self spacer],[self panelButton:@"Leaving now" action:@selector(sessionLeaving:) prominent:YES]]];[buttons addObject:rowv];}
+ else if(s.state==SessionOver){NSTextField *ask=[NSTextField labelWithString:@"Leaving? Call me back in"];ask.font=[NSFont systemFontOfSize:12];ask.textColor=NSColor.secondaryLabelColor;ask.alignment=NSTextAlignmentCenter;[buttons addObject:ask];
+  NSMutableArray *chips=[NSMutableArray new];for(NSNumber *m in [self sessionPresets:@"callBackPresets" fallback:@[@5,@9,@13,@33]]){NSButton *c=[self panelButton:[NSString stringWithFormat:@"%@ min",m] action:@selector(sessionCallBack:) prominent:NO];c.tag=m.integerValue;[chips addObject:c];}
+  NSStackView *chipRow=[self row:chips];chipRow.spacing=6;chipRow.distribution=NSStackViewDistributionFillEqually;[buttons addObject:chipRow];
+  NSButton *keep=[self panelButton:@"Keep going" action:@selector(closeSessionPanel) prominent:NO];NSButton *quiet=[self panelButton:@"Leave quietly" action:@selector(sessionCallBack:) prominent:NO];quiet.tag=0;quiet.bezelStyle=NSBezelStyleInline;quiet.controlSize=NSControlSizeRegular;[self helpView:quiet text:@"End the session without a call back." label:@"Leave quietly"];
+  NSButton *gear=[NSButton buttonWithImage:[NSImage imageWithSystemSymbolName:@"gearshape" accessibilityDescription:@"Session settings"] target:self action:@selector(showSessionsFromPanel:)];gear.bezelStyle=NSBezelStyleInline;gear.bordered=NO;[self helpView:gear text:@"Change the call-back times, reminders, sound and glow under Settings → Sessions." label:@"Session settings"];
+  [buttons addObject:[self row:@[keep,[self spacer],quiet,gear]]];}
  else if(s.state==SessionAway){[buttons addObject:[self row:@[[self spacer],[self panelButton:@"I’m back" action:@selector(sessionBack:) prominent:NO],[self spacer]]]];}
  NSMutableArray *parts=[NSMutableArray arrayWithObjects:time,sub,nil];[parts addObjectsFromArray:buttons];
  NSStackView *column=[self column:parts];column.alignment=NSLayoutAttributeCenterX;column.spacing=10;column.edgeInsets=NSEdgeInsetsMake(18,18,16,18);[column setCustomSpacing:2 afterView:time];[column setCustomSpacing:16 afterView:sub];
@@ -1110,9 +1117,12 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  self.pause=nil;[self.pauseTimer invalidate];self.pauseTimer=nil;[NSUserDefaults.standardUserDefaults removeObjectForKey:@"nightShiftPause"];
  BOOL before=NO;BOOL known=[self logicalNightShift:&before];
  if(!known||![self requestNightShift:!before]){[self nightShiftFailure];return;}
+ // Turning Night Shift on or off here is your doing, not the schedule's: the warmth you set by hand stays.
+ // (A scheduled change still ends the override, as "follows Night Shift" promises.)
+ NSInteger keep=self.policy.overrideMode;[self.policy observeKnown:known on:!before];if(keep>=0)self.policy.overrideMode=keep;[self savePolicy];
  [self sync];
  dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)(0.7*NSEC_PER_SEC)),dispatch_get_main_queue(),^{
- BOOL after=NO;if(![self logicalNightShift:&after]||after==before)[self nightShiftFailure];[self sync];
+ BOOL after=NO;if(![self logicalNightShift:&after]||after==before)[self nightShiftFailure];if(keep>=0&&self.policy.overrideMode<0)self.policy.overrideMode=keep;[self sync];
  });
 }
 - (NSString *)timeLabel:(NSDate *)date {NSDateFormatter *f=[NSDateFormatter new];f.dateStyle=NSDateFormatterNoStyle;f.timeStyle=NSDateFormatterShortStyle;return [f stringFromDate:date];}
@@ -1407,7 +1417,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  NSTextField *text=[NSTextField wrappingLabelWithString:texts[page]];text.preferredMaxLayoutWidth=page==0?404:346;  // next to the symbol on the tour pages
  NSMutableArray *parts=[NSMutableArray arrayWithObject:title];
  if(page==0){NSImageView *icon=[NSImageView imageViewWithImage:[self statusImageGray:YES warmth:0]];[icon.widthAnchor constraintEqualToConstant:18].active=YES;[icon.heightAnchor constraintEqualToConstant:18].active=YES;icon.accessibilityLabel=@"The Less Pull menu-bar icon";
-  NSTextField *where=[NSTextField wrappingLabelWithString:@"Less Pull lives in your menu bar and stays out of the way. A short tour shows the four things worth knowing; everything can be changed later."];where.preferredMaxLayoutWidth=376;NSStackView *iconRow=[self row:@[icon,where]];iconRow.alignment=NSLayoutAttributeTop;[parts addObjectsFromArray:@[text,iconRow]];}
+  NSTextField *where=[NSTextField wrappingLabelWithString:@"This is your icon; it is right above this window and fading in and out for a moment. Hold ⌘ and drag it to any spot in the menu bar, for example next to the clock. A short tour shows the four things worth knowing; everything can be changed later."];where.preferredMaxLayoutWidth=376;NSStackView *iconRow=[self row:@[icon,where]];iconRow.alignment=NSLayoutAttributeTop;[parts addObjectsFromArray:@[text,iconRow]];}
  else {NSStackView *body=[self row:@[[self tourSymbol:symbols[page] label:titles[page]],text]];body.alignment=NSLayoutAttributeTop;body.spacing=14;[parts addObject:body];}
  NSView *fill=[NSView new];[fill setContentHuggingPriority:1 forOrientation:NSLayoutConstraintOrientationVertical];[parts addObject:fill];
  NSButton *skip=[NSButton buttonWithTitle:@"Skip tour" target:self action:@selector(dismissWelcome:)];skip.bezelStyle=NSBezelStyleInline;skip.font=[NSFont systemFontOfSize:11];[self helpView:skip text:@"Close the welcome and the tour. You can open the tour again from the About tab." label:@"Skip tour"];
@@ -1432,6 +1442,13 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
 - (void)tourNext:(id)sender {if(self.tourPage<4)[self showTourPage:self.tourPage+1 animated:YES];}
 - (void)tourBack:(id)sender {if(self.tourPage>0)[self showTourPage:self.tourPage-1 animated:YES];}
 // Reopens the welcome and tour from the About tab: the window is rebuilt with the card in place.
+// Where the icon is: the welcome opens under it, and the icon fades in and out a few times.
+- (void)placeSettingsUnderIcon {
+ NSWindow *bar=self.item.button.window;if(!bar||!self.settings)return;NSRect icon=bar.frame;NSScreen *screen=bar.screen?:NSScreen.mainScreen;NSRect f=self.settings.frame;
+ f.origin.x=MIN(NSMaxX(screen.visibleFrame)-f.size.width-8,MAX(screen.visibleFrame.origin.x+8,NSMidX(icon)-f.size.width+60));f.origin.y=icon.origin.y-f.size.height-10;[self.settings setFrame:f display:YES];
+ NSView *button=self.item.button;if(NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceMotion)return;
+ for(int k=0;k<4;k++){dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)((0.6+k*1.2)*NSEC_PER_SEC)),dispatch_get_main_queue(),^{[NSAnimationContext runAnimationGroup:^(NSAnimationContext *c){c.duration=.5;button.animator.alphaValue=.25;} completionHandler:^{[NSAnimationContext runAnimationGroup:^(NSAnimationContext *c){c.duration=.6;button.animator.alphaValue=1;} completionHandler:nil];}];});}
+}
 - (void)showTour:(id)sender {[self.settings close];self.settings=nil;self.welcomeWanted=YES;[self showSettings:nil];}
 - (void)dismissWelcome:(id)sender {
  NSView *card=self.welcomeCard;if(!card)return;self.tourCard=nil;NSStackView *column=(NSStackView *)card.superview;
@@ -1463,7 +1480,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
   self.settings=[NSWindow windowWithContentViewController:self.settingsTabs];self.settings.styleMask=NSWindowStyleMaskTitled|NSWindowStyleMaskClosable;self.settings.title=@"Less Pull";self.settings.releasedWhenClosed=NO;if(@available(macOS 11,*))self.settings.toolbarStyle=NSWindowToolbarStylePreference;
   self.settings.initialFirstResponder=self.grayscaleButton;[self.settings center];
  }
- self.loginButton.state=SMAppService.mainAppService.status==SMAppServiceStatusEnabled;[self rebuildExclusionsList];[self sync];[NSApp activateIgnoringOtherApps:YES];[self.settings makeKeyAndOrderFront:nil];
+ self.loginButton.state=SMAppService.mainAppService.status==SMAppServiceStatusEnabled;[self rebuildExclusionsList];[self sync];[NSApp activateIgnoringOtherApps:YES];[self.settings makeKeyAndOrderFront:nil];if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.welcomePlaced=YES;if(first){dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)(0.45*NSEC_PER_SEC)),dispatch_get_main_queue(),^{[self placeSettingsUnderIcon];});}}
 }
 // Before anything is installed: what the extension can see, in plain words.
 - (BOOL)confirmExtensionData {

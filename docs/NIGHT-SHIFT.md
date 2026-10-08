@@ -1,5 +1,7 @@
 # Night Shift and warmth
 
+> Turning Night Shift on or off from Less Pull itself keeps the warmth you set by hand; only a scheduled change ends the manual override.
+
 Night Shift is the macOS feature that warms the screen in the evening. Extra Warmth is Less Pull's own slider, which can go further, through amber to red. The two are separate, and Less Pull can tie them together if you want.
 
 <p align="center">
