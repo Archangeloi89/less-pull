@@ -222,8 +222,8 @@ static NSString *const LessPullOldBundleIdentifier=@"local.nightshiftfilters.app
 @property NSTimer *updateTimer;
 @property NSButton *updateCheckbox,*updateButton;
 @property NSTextField *updateStatusLabel;
-@property NSWindow *thanksWindow;
-@property NSTimer *thanksTimer;
+@property NSView *thanksCard;
+@property BOOL thanksWanted;
 @property EventHotKeyRef peekHotKey;
 @property EventHotKeyRef grayscaleHotKey;
 @property ShortcutRecorder *peekRecorder,*grayscaleRecorder;
@@ -376,8 +376,8 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  NSTextField *readout=[NSTextField labelWithString:[NSString stringWithFormat:@"%.0f%%",[rule[@"warmth"] doubleValue]]];readout.tag=98;readout.font=[NSFont monospacedDigitSystemFontOfSize:12 weight:NSFontWeightRegular];readout.alignment=NSTextAlignmentRight;readout.frame=NSMakeRect(204,34,40,16);[view addSubview:readout];
  NSSlider *slider=[self warmthSliderWithValue:[rule[@"warmth"] doubleValue] action:@selector(websiteWarmthChanged:)];slider.frame=NSMakeRect(18,6,226,26);[self helpView:slider text:@"Extra Warmth for this website, from Off to Red." label:[NSString stringWithFormat:@"Extra Warmth for %@, percent",key]];[view addSubview:slider];
  sliderItem.view=view;[sub addItem:sliderItem];[sub addItem:NSMenuItem.separatorItem];
- if(rule){NSMenuItem *remove=[self add:@"Remove this exception" action:@selector(websiteRemove:) to:sub];}
- NSMenuItem *more=[self add:@"All website exceptions…" action:@selector(showWebsites:) to:sub];
+ if(rule){[self add:@"Remove this exception" action:@selector(websiteRemove:) to:sub];}
+ [self add:@"All website exceptions…" action:@selector(showWebsites:) to:sub];
  return sub;
 }
 - (NSMenu *)currentAppMenu {
@@ -393,7 +393,7 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  NSTextField *readout=[NSTextField labelWithString:[NSString stringWithFormat:@"%.0f%%",[rule[@"warmth"] doubleValue]]];readout.tag=98;readout.font=[NSFont monospacedDigitSystemFontOfSize:12 weight:NSFontWeightRegular];readout.alignment=NSTextAlignmentRight;readout.frame=NSMakeRect(204,34,40,16);[view addSubview:readout];
  NSSlider *slider=[self warmthSliderWithValue:[rule[@"warmth"] doubleValue] action:@selector(currentAppWarmthChanged:)];slider.frame=NSMakeRect(18,6,226,26);[self helpView:slider text:[NSString stringWithFormat:@"Extra Warmth for %@, from Off to Red.",name] label:[NSString stringWithFormat:@"Extra Warmth for %@, percent",name]];[view addSubview:slider];
  sliderItem.view=view;[sub addItem:sliderItem];[sub addItem:NSMenuItem.separatorItem];
- NSMenuItem *more=[self add:@"More in Settings…" action:@selector(excludeCurrent:) to:sub];
+ [self add:@"More in Settings…" action:@selector(excludeCurrent:) to:sub];
  return sub;
 }
 // One App Exceptions row: name and Remove, the two choices, and the app's own warmth.
@@ -474,7 +474,7 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(displaysChanged:) name:NSApplicationDidChangeScreenParametersNotification object:nil];
  [NSWorkspace.sharedWorkspace.notificationCenter addObserver:self selector:@selector(frontmostChanged:) name:NSWorkspaceDidActivateApplicationNotification object:nil];
  [NSWorkspace.sharedWorkspace.notificationCenter addObserver:self selector:@selector(frontmostChanged:) name:NSWorkspaceDidTerminateApplicationNotification object:nil];
- [self restoreLessPullPause];[self scheduleLessPullPauseTimer];[self restoreGrayscaleOff];[self scheduleGrayscaleOffTimer];[self registerPeekShortcut];[self scheduleUpdateChecks];[self scheduleThanks];[self updateForeground];[self restartTimer];[self schedulePauseTimer];[self sync];
+ [self restoreLessPullPause];[self scheduleLessPullPauseTimer];[self restoreGrayscaleOff];[self scheduleGrayscaleOffTimer];[self registerPeekShortcut];[self scheduleUpdateChecks];[self noteFirstLaunch];[self updateForeground];[self restartTimer];[self schedulePauseTimer];[self sync];
  if([NSProcessInfo.processInfo.arguments containsObject:@"--settings"])[self showSettings:nil];
  // First launch: Settings opens with a one-time welcome card above the real controls.
  self.welcomeWanted=firstLaunch||[NSProcessInfo.processInfo.arguments containsObject:@"--welcome"];if(self.welcomeWanted)[self showSettings:nil];
@@ -635,10 +635,10 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
 - (void)menuWillOpen:(NSMenu *)menu {
  if(menu!=self.statusMenu)return;if(!self.menuDismissal)self.menuDismissal=[MenuDismissal new];[self.menuDismissal begin:menu];
  [self sync];[menu removeAllItems];BOOL on=NO;BOOL known=[self logicalNightShift:&on];BOOL actualOn=NO;BOOL actualKnown=[self.engine nightShift:&actualOn];
- NSMenuItem *summary=[self add:[self menuStatusLine] action:nil to:menu];
+ [self add:[self menuStatusLine] action:nil to:menu];
  [menu addItem:NSMenuItem.separatorItem];
  NSMenuItem *gray=[self add:self.grayOverride?@"Default Grayscale":@"Grayscale" action:@selector(toggleGrayscale:) to:menu];gray.state=self.selectedMode==1||self.selectedMode==100;
- if(self.grayOffUntil){NSMenuItem *backOn=[self add:@"Grayscale back on now" action:@selector(grayscaleBackOn:) to:menu];}
+ if(self.grayOffUntil){[self add:@"Grayscale back on now" action:@selector(grayscaleBackOn:) to:menu];}
  else if(gray.state){NSMenuItem *off=[self add:@"Grayscale off for" action:nil to:menu];off.submenu=[NSMenu new];[self populateGrayscaleOff:off.submenu];}
  NSMenuItem *sliderItem=[NSMenuItem new];NSView *view=[[NSView alloc]initWithFrame:NSMakeRect(0,0,300,78)];
  NSTextField *label=[NSTextField labelWithString:self.customWarmth?@"Default Extra Warmth":(self.automatic&&self.policy.overrideMode<0&&known&&!on)?@"Extra Warmth · used at night":@"Extra Warmth"];label.frame=NSMakeRect(18,54,210,18);[self helpView:label text:self.warmthHelp label:nil];[view addSubview:label];
@@ -658,11 +658,11 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
   [night.submenu addItem:NSMenuItem.separatorItem];
   NSMenuItem *automatic=[self add:@"Extra Warmth follows Night Shift" action:@selector(toggleAuto:) to:night.submenu];automatic.state=self.automatic;automatic.enabled=actualKnown;
   if(self.automatic&&self.policy.overrideMode>=0)[self add:@"Resume Following" action:@selector(resume:) to:night.submenu];}
- if(self.pausedUntil){NSMenuItem *resume=[self add:@"Resume Less Pull" action:@selector(resumeLessPull:) to:menu];}
+ if(self.pausedUntil){[self add:@"Resume Less Pull" action:@selector(resumeLessPull:) to:menu];}
  else {NSMenuItem *pauseAll=[self add:@"Pause Less Pull" action:nil to:menu];pauseAll.submenu=[NSMenu new];for(NSArray *pair in @[@[@"For 15 minutes",@15],@[@"For 1 hour",@60],@[@"Until I resume",@0]]){NSMenuItem *i=[self add:pair[0] action:@selector(pauseLessPull:) to:pauseAll.submenu];i.tag=[pair[1] integerValue];}}
  [menu addItem:NSMenuItem.separatorItem];
  if(self.lastExternalApp.bundleIdentifier){NSDictionary *appRule=self.exclusionRules[self.lastExternalApp.bundleIdentifier];NSMenuItem *current=[self add:[NSString stringWithFormat:@"Exception for %@",self.lastExternalApp.localizedName?:@"current app"] action:nil to:menu];current.submenu=[self currentAppMenu];current.image=[self menuIconForBundle:self.lastExternalApp.bundleIdentifier];current.state=RuleEnabled(appRule)&&RuleDiffers(appRule);}
- if(self.availableUpdate){NSMenuItem *update=[self add:[NSString stringWithFormat:@"Update available: %@…",[[self updateLabel:self.availableUpdate] stringByReplacingOccurrencesOfString:@"Version " withString:@""]] action:@selector(showUpdate:) to:menu];}
+ if(self.availableUpdate){[self add:[NSString stringWithFormat:@"Update available: %@…",[[self updateLabel:self.availableUpdate] stringByReplacingOccurrencesOfString:@"Version " withString:@""]] action:@selector(showUpdate:) to:menu];}
  NSDictionary *tab=[self.browserBridge activeContextForBrowser:self.lastExternalApp.bundleIdentifier];
  if(tab){NSMenuItem *site=[self add:[NSString stringWithFormat:@"Exception for %@",tab[@"site"]] action:nil to:menu];site.submenu=[self websiteMenuForTab:tab];site.image=[NSImage imageWithSystemSymbolName:@"globe" accessibilityDescription:nil];NSDictionary *siteRule=[self websiteRuleForTab:tab];site.state=RuleEnabled(siteRule)&&RuleDiffers(siteRule);}
  [self add:@"Settings…" action:@selector(showSettings:) to:menu];
@@ -934,6 +934,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
   for(NSView *v in card.arrangedSubviews)if([v isKindOfClass:NSStackView.class])[v.widthAnchor constraintEqualToAnchor:card.widthAnchor constant:-28].active=YES;
   self.welcomeCard=card;[views addObject:card];
  }
+ if(self.thanksWanted){self.thanksCard=[self thanksCardView];[views addObject:self.thanksCard];}
  [views addObjectsFromArray:@[self.statusText,self.statusDetail,[self separator],
   [self row:@[self.grayscaleButton,[self spacer],self.grayOffPopup,self.grayOnButton]],[self note:@"Shades of gray, day and night. Exceptions for apps and websites can show color. Off for a while brings it back by itself."],
   [self row:@[self.warmthTitle,[self spacer],self.resetButton]],[self row:@[self.warmthSlider,self.warmthLabel]],tickRow,[self note:@"Adds warmth on top of Night Shift, from Off to Red."],[self separator],
@@ -942,7 +943,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
   self.loginButton,self.loginNote]];
  NSStackView *column=[self column:views];
  tickRow.identifier=@"fixed";[tickRow.widthAnchor constraintEqualToAnchor:self.warmthSlider.widthAnchor].active=YES;
- NSUInteger base=self.welcomeCard?1:0;[column setCustomSpacing:4 afterView:self.statusText];[column setCustomSpacing:4 afterView:column.arrangedSubviews[base+3]];[column setCustomSpacing:6 afterView:column.arrangedSubviews[base+5]];[column setCustomSpacing:2 afterView:column.arrangedSubviews[base+6]];[column setCustomSpacing:6 afterView:tickRow];[column setCustomSpacing:4 afterView:column.arrangedSubviews[base+10]];[column setCustomSpacing:4 afterView:column.arrangedSubviews[base+12]];
+ NSUInteger base=(self.welcomeCard?1:0)+(self.thanksCard?1:0);[column setCustomSpacing:4 afterView:self.statusText];[column setCustomSpacing:4 afterView:column.arrangedSubviews[base+3]];[column setCustomSpacing:6 afterView:column.arrangedSubviews[base+5]];[column setCustomSpacing:2 afterView:column.arrangedSubviews[base+6]];[column setCustomSpacing:6 afterView:tickRow];[column setCustomSpacing:4 afterView:column.arrangedSubviews[base+10]];[column setCustomSpacing:4 afterView:column.arrangedSubviews[base+12]];
  return column;
 }
 - (NSStackView *)shortcutsTab {
@@ -1034,6 +1035,31 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
   [self.websiteRulesList addArrangedSubview:row];[row.widthAnchor constraintEqualToAnchor:self.websiteRulesList.widthAnchor].active=YES;}
 }
 - (void)removeWebsiteRule:(NSButton *)sender {NSString *key=sender.identifier;if(!key)return;[self.browserBridge handle:@{@"type":@"remove",@"scope":[key containsString:@"://"]?@"url":@"domain",@"site":key}];[self rebuildWebsiteRulesList];}
+// A thank-you card in Settings → General: the first time Settings is opened after 14
+// days of use, never on its own. Support and Remind me are the prominent choices;
+// Don't show again is quiet. Remind me repeats monthly; the others end it.
+- (void)noteFirstLaunch {NSUserDefaults *d=NSUserDefaults.standardUserDefaults;if(![d objectForKey:@"firstLaunchDate"])[d setObject:NSDate.date forKey:@"firstLaunchDate"];}
+- (BOOL)thanksDue {
+ NSUserDefaults *d=NSUserDefaults.standardUserDefaults;if([NSProcessInfo.processInfo.arguments containsObject:@"--thanks"])return YES;if([d boolForKey:@"thanksDismissed"])return NO;
+ NSDate *first=[d objectForKey:@"firstLaunchDate"],*next=[d objectForKey:@"thanksNextDate"];NSDate *due=[next isKindOfClass:NSDate.class]?next:[[first isKindOfClass:NSDate.class]?first:NSDate.date dateByAddingTimeInterval:14*86400];
+ return [NSDate.date compare:due]!=NSOrderedAscending;
+}
+- (NSView *)thanksCardView {
+ NSTextField *title=[NSTextField labelWithString:@"Are you enjoying Less Pull?"];title.font=[NSFont systemFontOfSize:15 weight:NSFontWeightSemibold];
+ NSTextField *body=[NSTextField wrappingLabelWithString:@"This app is a gift from the universe to you. It has been fully funded by life.\n\nMy future projects and my work are still being developed, and they benefit from any kind of support: a contribution, telling a friend, or whatever you choose. Thanks for being part of life and making it more beautiful for everyone.\n\n— Jiri Arion Rose"];body.preferredMaxLayoutWidth=404;
+ NSButton *support=[NSButton buttonWithTitle:@"Support Less Pull" target:self action:@selector(thanksSupport:)];support.keyEquivalent=@"\r";[self helpView:support text:@"Open buymeacoffee.com/HsERf62fiZ in your default browser." label:@"Support Less Pull — Buy me a coffee"];
+ NSButton *later=[NSButton buttonWithTitle:@"Remind me in a month" target:self action:@selector(thanksLater:)];[self helpView:later text:@"Hide this and show it again in about a month." label:@"Remind me in a month"];
+ NSButton *never=[NSButton buttonWithTitle:@"Don’t show this again" target:self action:@selector(thanksNever:)];never.bezelStyle=NSBezelStyleInline;never.font=[NSFont systemFontOfSize:11];[self helpView:never text:@"Hide this for good." label:@"Don’t show this again"];
+ NSMutableArray *links=[NSMutableArray new];for(NSButton *b in [self authorLinkButtons])if(![b.identifier isEqual:LessPullCoffee]){b.font=[NSFont systemFontOfSize:11];[links addObject:b];}
+ [links addObject:[self spacer]];[links addObject:never];NSStackView *linkRow=[self row:links];linkRow.spacing=4;NSStackView *buttons=[self row:@[support,later]];buttons.spacing=10;
+ NSStackView *card=[self column:@[title,body,buttons,linkRow]];card.spacing=10;card.edgeInsets=NSEdgeInsetsMake(14,14,12,14);card.wantsLayer=YES;card.layer.cornerRadius=8;card.layer.backgroundColor=[NSColor.labelColor colorWithAlphaComponent:.06].CGColor;
+ for(NSView *v in card.arrangedSubviews)if([v isKindOfClass:NSStackView.class])[v.widthAnchor constraintEqualToAnchor:card.widthAnchor constant:-28].active=YES;
+ return card;
+}
+- (void)removeThanksCard {NSView *card=self.thanksCard;if(!card)return;NSStackView *column=(NSStackView *)card.superview;[column removeArrangedSubview:card];[card removeFromSuperview];self.thanksCard=nil;self.thanksWanted=NO;[column layoutSubtreeIfNeeded];self.settingsTabs.tabViewItems.firstObject.viewController.preferredContentSize=NSMakeSize(500,column.fittingSize.height);self.settingsTabs.selectedTabViewItemIndex=1;self.settingsTabs.selectedTabViewItemIndex=0;}
+- (void)thanksSupport:(id)sender {[NSUserDefaults.standardUserDefaults setBool:YES forKey:@"thanksDismissed"];[NSWorkspace.sharedWorkspace openURL:[NSURL URLWithString:LessPullCoffee]];[self removeThanksCard];}
+- (void)thanksLater:(id)sender {[NSUserDefaults.standardUserDefaults setObject:[NSDate.date dateByAddingTimeInterval:30*86400] forKey:@"thanksNextDate"];[self removeThanksCard];}
+- (void)thanksNever:(id)sender {[NSUserDefaults.standardUserDefaults setBool:YES forKey:@"thanksDismissed"];[NSUserDefaults.standardUserDefaults removeObjectForKey:@"thanksNextDate"];[self removeThanksCard];}
 - (NSStackView *)aboutTab {
  NSImageView *icon=[NSImageView imageViewWithImage:NSApp.applicationIconImage];[icon.widthAnchor constraintEqualToConstant:64].active=YES;[icon.heightAnchor constraintEqualToConstant:64].active=YES;icon.accessibilityLabel=@"Less Pull app icon";
  NSTextField *name=[NSTextField labelWithString:@"Less Pull"];name.font=[NSFont systemFontOfSize:20 weight:NSFontWeightSemibold];
@@ -1066,6 +1092,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
 - (void)showLicenses:(id)sender {NSURL *folder=NSBundle.mainBundle.resourceURL;[NSWorkspace.sharedWorkspace activateFileViewerSelectingURLs:@[[folder URLByAppendingPathComponent:@"LICENSE-APP.txt"],[folder URLByAppendingPathComponent:@"LICENSE-SOURCE.txt"]]];}
 - (void)showSettings:(id)sender {
  if(!self.settings){
+  self.thanksWanted=!self.welcomeWanted&&[self thanksDue];
   self.settingsTabs=[NSTabViewController new];self.settingsTabs.tabStyle=NSTabViewControllerTabStyleToolbar;self.settingsTabs.transitionOptions=NSViewControllerTransitionNone;
   [self.settingsTabs addTabViewItem:[self tab:@"General" symbol:@"circle.lefthalf.filled" content:[self generalTab]]];
   [self.settingsTabs addTabViewItem:[self tab:@"Shortcuts" symbol:@"keyboard" content:[self shortcutsTab]]];
@@ -1116,39 +1143,6 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
   if(![link[1] length])continue;NSButton *b=[NSButton buttonWithTitle:link[0] target:self action:@selector(openLink:)];b.identifier=link[1];b.bezelStyle=NSBezelStyleInline;b.contentTintColor=NSColor.linkColor;[self helpView:b text:link[2] label:link[3]];[buttons addObject:b];}
  return buttons;
 }
-// A thank-you after 30 days of use: shown once, Later asks again in 90 days,
-// Don't show again never does. Nothing is sent anywhere.
-- (void)scheduleThanks {
- NSUserDefaults *d=NSUserDefaults.standardUserDefaults;if(![d objectForKey:@"firstLaunchDate"])[d setObject:NSDate.date forKey:@"firstLaunchDate"];
- [self.thanksTimer invalidate];self.thanksTimer=[NSTimer timerWithTimeInterval:3600 target:self selector:@selector(maybeShowThanks) userInfo:nil repeats:YES];[NSRunLoop.mainRunLoop addTimer:self.thanksTimer forMode:NSRunLoopCommonModes];
- if([NSProcessInfo.processInfo.arguments containsObject:@"--thanks"])[self showThanks:nil];else [self performSelector:@selector(maybeShowThanks) withObject:nil afterDelay:120];
-}
-- (void)maybeShowThanks {
- NSUserDefaults *d=NSUserDefaults.standardUserDefaults;if([d boolForKey:@"thanksDismissed"]||self.thanksWindow.visible)return;
- NSDate *first=[d objectForKey:@"firstLaunchDate"],*next=[d objectForKey:@"thanksNextDate"];NSDate *due=[next isKindOfClass:NSDate.class]?next:[[first isKindOfClass:NSDate.class]?first:NSDate.date dateByAddingTimeInterval:30*86400];
- if([NSDate.date compare:due]==NSOrderedAscending)return;[self showThanks:nil];
-}
-- (void)showThanks:(id)sender {
- if(!self.thanksWindow){
-  self.thanksWindow=[[NSWindow alloc]initWithContentRect:NSMakeRect(0,0,460,380) styleMask:NSWindowStyleMaskTitled|NSWindowStyleMaskClosable backing:NSBackingStoreBuffered defer:NO];self.thanksWindow.title=@"Thank you";self.thanksWindow.releasedWhenClosed=NO;
-  NSImageView *icon=[NSImageView imageViewWithImage:NSApp.applicationIconImage];[icon.widthAnchor constraintEqualToConstant:56].active=YES;[icon.heightAnchor constraintEqualToConstant:56].active=YES;icon.accessibilityLabel=@"Less Pull app icon";
-  NSTextField *title=[NSTextField labelWithString:@"Are you enjoying Less Pull?"];title.font=[NSFont systemFontOfSize:18 weight:NSFontWeightSemibold];
-  NSTextField *body=[NSTextField wrappingLabelWithString:@"This app is a gift from the universe to you. It has been fully funded by life.\n\nMy future projects and my work are still being developed, and they benefit from any kind of support: a contribution, telling a friend, or whatever you choose.\n\nThanks for being part of life and making it more beautiful for everyone.\n\n— Jiri Arion Rose"];body.preferredMaxLayoutWidth=412;
-  NSStackView *links=[self row:[self authorLinkButtons]];links.spacing=6;
-  NSButton *later=[NSButton buttonWithTitle:@"Later" target:self action:@selector(thanksLater:)];[self helpView:later text:@"Close this and show it again in about three months." label:@"Later"];
-  NSButton *never=[NSButton buttonWithTitle:@"Don’t Show Again" target:self action:@selector(thanksNever:)];[self helpView:never text:@"Close this and never show it again." label:@"Don’t show again"];
-  NSButton *done=[NSButton buttonWithTitle:@"Thanks" target:self action:@selector(thanksNever:)];done.keyEquivalent=@"\r";[self helpView:done text:@"Close this window; it will not come back." label:@"Thanks"];
-  NSStackView *buttons=[self row:@[never,[self spacer],later,done]];
-  NSStackView *header=[self row:@[icon,title]];header.spacing=14;
-  NSStackView *stack=[self column:@[header,body,links,buttons]];stack.spacing=16;stack.edgeInsets=NSEdgeInsetsMake(22,24,20,24);stack.translatesAutoresizingMaskIntoConstraints=NO;[stack setCustomSpacing:10 afterView:body];
-  NSView *content=self.thanksWindow.contentView;[content addSubview:stack];
-  [NSLayoutConstraint activateConstraints:@[[stack.topAnchor constraintEqualToAnchor:content.topAnchor],[stack.leadingAnchor constraintEqualToAnchor:content.leadingAnchor],[stack.trailingAnchor constraintEqualToAnchor:content.trailingAnchor],[stack.bottomAnchor constraintEqualToAnchor:content.bottomAnchor],[content.widthAnchor constraintEqualToConstant:460],[buttons.widthAnchor constraintEqualToAnchor:stack.widthAnchor constant:-48]]];
-  [content layoutSubtreeIfNeeded];[self.thanksWindow setContentSize:content.fittingSize];[self.thanksWindow center];
- }
- [NSApp activateIgnoringOtherApps:YES];[self.thanksWindow makeKeyAndOrderFront:nil];
-}
-- (void)thanksLater:(id)sender {[NSUserDefaults.standardUserDefaults setObject:[NSDate.date dateByAddingTimeInterval:90*86400] forKey:@"thanksNextDate"];[self.thanksWindow close];}
-- (void)thanksNever:(id)sender {[NSUserDefaults.standardUserDefaults setBool:YES forKey:@"thanksDismissed"];[NSUserDefaults.standardUserDefaults removeObjectForKey:@"thanksNextDate"];[self.thanksWindow close];}
 - (NSArray<NSArray<NSString *> *> *)helpSections {
  return @[
   @[@"What Less Pull does",@"Less Pull takes the color out of your screen so it pulls at your attention less. You can add warmth, from amber to red, and keep color where you need it."],

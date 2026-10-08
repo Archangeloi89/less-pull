@@ -130,7 +130,7 @@ Choose **Settings…** in the menu. This is the window on the right, with five t
 - **Websites**: the browser extension and the saved website exceptions.
 - **About**: version, links, Help, Diagnostics, licenses, and the update check.
 
-On the very first launch this window opens by itself with a short welcome.
+On the very first launch this window opens by itself with a short welcome. After two weeks of use, the next time you open Settings, a small card asks whether you enjoy Less Pull and how to support the author; it never pops up on its own.
 
 <p align="center">
   <img src="docs/assets/settings-tabs.png" width="100%" alt="Four screenshots of the Settings window on a plain backdrop. Shortcuts: Peek in color with the shortcut Option-A, what peeking turns off, a Toggle Grayscale shortcut Option-Command-G, and what clicking the menu-bar icon does. Apps: three app exceptions, Music, Photos and TextEdit, each with its icon, a Use this exception checkbox, Default, On and Off segments for Grayscale and Night Shift, and a warmth slider on the ramp. Websites: the Install Browser Extension button, the extension connected in Firefox, Brave and Opera, and two saved exceptions for example.com and one exact page with the same controls. About: the app icon, version 1.4.4 build 16, the author's links, Help, Diagnostics and Licenses, and the automatic update check.">

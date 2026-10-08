@@ -34,8 +34,8 @@ if which == 'interfaces':
     st = stage(W, H); st = shadow(st, PAD, PAD, mm); st.paste(menu, (PAD, PAD), mm)
     x = PAD + menu.width + GAP; st = shadow(st, x, PAD + 56, gm); st.paste(general, (x, PAD + 56), gm)
 elif which == 'exceptions':
-    app, am = panel('menu-app.png', [(135, 62, 753, 709), (755, 523, 1304, 1268)])
-    site, sm = panel('menu-site.png', [(67, 62, 685, 758), (687, 571, 1236, 1481)])
+    app, am = panel('menu-app.png', [(135, 62, 753, 709), (755, 523, 1304, 1268)], pill=(145, 4, 228, 54))
+    site, sm = panel('menu-site.png', [(67, 62, 685, 758), (687, 571, 1236, 1481)], pill=(78, 4, 160, 54))
     PAD, GAP = 96, 96; W = PAD + app.width + GAP + site.width + PAD; H = PAD + max(app.height, site.height) + PAD
     st = stage(W, H); st = shadow(st, PAD, PAD, am); st.paste(app, (PAD, PAD), am)
     x = PAD + app.width + GAP; st = shadow(st, x, PAD, sm); st.paste(site, (x, PAD), sm)
