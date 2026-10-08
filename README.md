@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4"><b>Download 1.4.4</b></a>
+  <a href="https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-16"><b>Download build 16</b></a>
   &nbsp;·&nbsp; <a href="#install">Install</a>
   &nbsp;·&nbsp; <a href="docs/EXCEPTIONS.md">App and website exceptions</a>
   &nbsp;·&nbsp; <a href="docs/README.md">All docs</a>
@@ -31,11 +31,11 @@ Set your defaults once. Then make exceptions for the places that need something 
 
 An exception can be as broad or as narrow as you like:
 
-- **An app.** Add it under **App Exceptions…**, or choose **Customize [current app]…** in the menu to jump straight to the app you are using.
+- **An app.** Open **Exception for [current app]** in the menu and set it right there, or add any app under **Settings… → Apps**.
 - **A whole website.** A domain rule also covers its subdomains.
 - **One exact URL.** For a single page, with its path and query string.
 
-Website rules are set from the toolbar of Brave or Chrome with the [optional extension](#website-exceptions-in-brave-or-chrome).
+Website rules are set from the toolbar of Brave, Chrome or Firefox with the [optional extension](#website-exceptions-in-brave-chrome-or-firefox), and listed under **Settings… → Websites**.
 
 ### Change one thing, keep the rest
 
@@ -90,6 +90,7 @@ Turn on **Extra Warmth follows Night Shift** if you want warmth only at night. W
 - **You can still change the moment.** Moving the slider overrides following until Night Shift next switches, or until you choose **Resume Following**. The new amount is saved for the night.
 - **Following is optional.** Leave it off and warmth stays wherever you put it.
 - **Night Shift itself is in the menu too.** Turn it on or off, or off for an hour, four hours, or until morning.
+- **Following, in one sentence.** On: Extra Warmth only while Night Shift is on, none in the daytime. Off: Extra Warmth stays on all day.
 
 More in [Night Shift and warmth](docs/NIGHT-SHIFT.md).
 
@@ -98,54 +99,55 @@ More in [Night Shift and warmth](docs/NIGHT-SHIFT.md).
 Less Pull has two interfaces on the Mac and a third in the browser.
 
 <p align="center">
-  <img src="docs/assets/interfaces.png" width="100%" alt="Two screenshots of Less Pull side by side. On the left, the menu-bar dropdown under its half-filled circle icon: the current state, a Grayscale toggle, the Extra Warmth slider at 55 percent with stops labeled Off, 25, 50, 75 and Red, Night Shift controls, Extra Warmth follows Night Shift, Resume Following, App Exceptions, Customize System Settings, Install Browser Extension, Settings, Help, About and Quit. On the right, the settings window: the heading Grayscale, Warmth 56 percent, a Grayscale checkbox, the Extra Warmth slider with a Reset button, Night Shift with a Turn Night Shift off for menu, Extra Warmth follows Night Shift with a Resume Following button, Launch at login, an App Exceptions button, an Install Browser Extension button, Help, and links to jiriarion.com and Buy me a coffee.">
+  <img src="docs/assets/interfaces.png" width="100%" alt="Two screenshots of Less Pull side by side. On the left, the menu-bar dropdown under its half-filled circle icon: one status line, Grayscale, the Extra Warmth slider drawn as a ramp from neutral through amber to red with stops labeled Off, 25, 50, 75 and Red, Night Shift with a submenu, Pause Less Pull, Exception for the current app with its icon, Settings and Quit. On the right, the Settings window on its General tab, with the toolbar tabs General, Apps, Websites and About: the heading Grayscale, Warmth 40 percent, a Grayscale checkbox, the Extra Warmth ramp slider with a Reset button, Night Shift with a Turn Night Shift off for menu, Extra Warmth follows Night Shift, Peek in color with a Record Shortcut button, and Launch at login, each with a short explanation underneath.">
 </p>
 
-<sub>Two real screenshots of version 1.4.4, placed side by side on a plain backdrop.</sub>
+<sub>Two real screenshots of build 16, placed side by side on a plain backdrop.</sub>
 
 ### The menu bar, for quick changes
 
-Click the half-filled circle in the menu bar. This is the dropdown on the left.
+Click the circle in the menu bar. This is the dropdown on the left. The icon itself tells you the state: its left half fills while grayscale is showing, its right half warms as you add warmth, and it shows a pause mark while Less Pull or Night Shift is paused.
 
 - The first line tells you what is applied right now.
-- **Grayscale** and the **Extra Warmth** slider change your defaults.
-- **Night Shift** can be switched, or paused for a while.
-- **Customize [current app]…** opens the rule for the app you were just using. In this screenshot that app happened to be System Settings.
-- **App Exceptions…** lists every app rule.
+- **Grayscale** and the **Extra Warmth** slider change your defaults. The slider's track shows the real ramp from neutral through amber to red.
+- **Night Shift** holds everything about Night Shift: on or off now, off for a while, and whether Extra Warmth follows it.
+- **Pause Less Pull** shows the plain display for 15 minutes, an hour, or until you resume.
+- **Exception for [current app]** sets the rule for the app you were just using, right in the menu.
 
 ### The settings window, for everything in one place
 
-Choose **Settings…** in the menu. This is the window on the right.
+Choose **Settings…** in the menu. This is the window on the right, with four tabs.
 
-- The same controls as the menu, with room to breathe.
-- **Launch at login**.
-- **App Exceptions…**, where you add an app and choose its Grayscale, Night Shift and warmth.
-- **Install Browser Extension…** to set up website rules.
-- Hover over any control for a short explanation.
+- **General**: the same controls as the menu, with a short line under each one, plus **Peek in color** (a shortcut you hold to see the plain display) and **Launch at login**.
+- **Apps**: every app exception, with the app's icon and Default / On / Off for Grayscale and Night Shift.
+- **Websites**: the browser extension and the saved website exceptions.
+- **About**: version, links, Help, Diagnostics, licenses, and the update check.
 
-### Website exceptions, in Brave or Chrome
+On the very first launch this window opens by itself with a short welcome.
+
+### Website exceptions, in Brave, Chrome or Firefox
 
 Website rules live where you browse. Click the Less Pull icon in the browser toolbar and the popup already knows which site you are on. Choose **Whole domain** or **This exact URL**, set only what you want to change, and save.
 
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="docs/assets/website-popup-dark.png">
-    <img src="docs/assets/website-popup-light.png" width="620" alt="The Less Pull Website Exceptions popup open from a browser toolbar on example.com/reading. Apply to is set to This exact URL. Grayscale and Night Shift are set to Use inherited setting. Extra Warmth is 70 percent. Buttons read Save exception and Remove.">
+    <img src="docs/assets/website-popup-light.png" width="620" alt="The Less Pull Website Exceptions popup open from a browser toolbar on example.com/reading. Apply to is set to This exact URL. Grayscale and Night Shift are set to Use default, each showing what the default resolves to. Extra Warmth is 70 percent. Buttons read Save exception and Remove.">
   </picture>
 </p>
 
-<sub>The popup is the shipped extension code, rendered with example data. The browser window around it is a drawing, and menus and sliders look a little different in Brave and Chrome on a Mac.</sub>
+<sub>The popup is the shipped extension code, rendered with example data. The browser window around it is a drawing, and menus and sliders look a little different in Brave, Chrome and Firefox on a Mac.</sub>
 
-The extension tells the Mac app which site is in front, and the app changes the display. It does not inject anything into pages, and the Mac app has to be running. Brave is confirmed working. Chrome is implemented but has not yet been through a clean install test. Safari, Firefox, Edge and Opera are not supported.
+The extension tells the Mac app which site is in front, and the app changes the display. It does not inject anything into pages, and the Mac app has to be running. Brave is confirmed working. Chrome and Firefox are implemented but have not yet been through a clean install test. Safari, Edge and Opera are not supported.
 
 ## Install
 
-1. Download **Less.Pull.1.4.4.zip** from the [1.4.4 release](https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4), unzip it, and move **Less Pull.app** to **Applications**.
-2. Open it. Click the half-filled circle in the menu bar and choose Grayscale and Extra Warmth.
-3. For website rules, choose **Install Browser Extension…** and follow the steps for [Brave or Chrome](docs/INSTALL.md#brave-or-chrome).
+1. Download **Less.Pull.1.4.4.zip** from the [build 16 release](https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-16), unzip it, and move **Less Pull.app** to **Applications**.
+2. Open it. The Settings window greets you once; the circle in the menu bar is where you choose Grayscale and Extra Warmth from then on.
+3. For website rules, open **Settings… → Websites**, choose **Install Browser Extension…**, and follow the steps for [Brave, Chrome or Firefox](docs/INSTALL.md#brave-chrome-or-firefox).
 
 > [!NOTE]
-> Version 1.4.4 (build 15) is a test build for Apple silicon Macs. It is ad-hoc signed and not notarized by Apple, so Gatekeeper may block a downloaded copy. It is built for macOS 13 and later and has been tested on macOS 27 only. The browser extension is loaded locally and is not in the Chrome Web Store. See [install help](docs/INSTALL.md) and [what is still open](docs/RELEASE-PLAN.md).
+> Version 1.4.4 (build 16) is a test build for Apple silicon Macs. The version number stays 1.4.4 on purpose; the build number is what changes. It is ad-hoc signed and not notarized by Apple, so Gatekeeper may block a downloaded copy. It is built for macOS 13 and later and has been tested on macOS 27 only. The browser extension is loaded locally and is not in the Chrome Web Store or on addons.mozilla.org. See [install help](docs/INSTALL.md) and [what is still open](docs/RELEASE-PLAN.md).
 
 ## Private by design
 
@@ -165,7 +167,7 @@ The app is Objective-C on Apple frameworks. The extension is plain JavaScript on
 zsh Source/build.sh
 ```
 
-See [testing](Source/TESTING.txt), the [1.4.4 notes](docs/1.4.4-release.txt) and the [release plan](docs/RELEASE-PLAN.md). Less Pull relies on private macOS display interfaces, so each macOS version needs its own check.
+See [testing](Source/TESTING.txt), the [build 16 notes](docs/1.4.4-16-release.txt) and the [release plan](docs/RELEASE-PLAN.md). Less Pull relies on private macOS display interfaces, so each macOS version needs its own check.
 
 ## Documentation
 
