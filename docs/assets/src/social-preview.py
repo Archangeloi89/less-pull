@@ -38,9 +38,8 @@ def font(size, bold=False):
 d = ImageDraw.Draw(im)
 d.text((80, 34), 'A quieter screen.', font=font(96, True), fill=(248, 248, 250))
 d.text((1010, 48), 'Less Pull', font=font(34, True), fill=(170, 172, 178)); d.text((1010, 88), 'for macOS · free', font=font(28), fill=(140, 143, 150))
-for i, line in enumerate(['Take the color out of your screen, so it pulls at you less.', 'Add warmth when you like, and keep color only where it truly matters.', 'Every app and website can have its own settings.']):
-    d.text((84, 478 + i * 44), line, font=font(34), fill=(214, 216, 222))
-scale = 0.80; sw2, sh2 = int(sw * scale), int(sh * scale); sx, sy = 80, 156
+# The sentences live in the repository description (Open Graph text); the card shows what text cannot.
+scale = 1.0; sw2, sh2 = int(sw * scale), int(sh * scale); sx, sy = 80, 190
 mask = Image.new('L', (sw2, sh2), 0); ImageDraw.Draw(mask).rounded_rectangle((0, 0, sw2 - 1, sh2 - 1), 24, fill=255)
 shadow = Image.new('RGBA', im.size, (0, 0, 0, 0)); ImageDraw.Draw(shadow).rounded_rectangle((sx, sy + 18, sx + sw2, sy + sh2 + 18), 24, fill=(0, 0, 0, 170)); shadow = shadow.filter(ImageFilter.GaussianBlur(28)); im = Image.alpha_composite(im, shadow)
 im.paste(screen.resize((sw2, sh2), Image.LANCZOS), (sx, sy), mask)
