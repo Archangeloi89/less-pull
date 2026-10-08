@@ -214,6 +214,8 @@ static NSString *const LessPullOldBundleIdentifier=@"local.nightshiftfilters.app
 @property NSDate *pausedUntil; // nil: not paused; distantFuture: until resumed
 @property BOOL websiteScopeExact; // menu: whole domain (NO) or this exact page (YES)
 @property (nonatomic) BOOL peeking;
+@property BOOL peekLocked,peekIgnoreRelease;
+@property NSTimeInterval lastPeekPress;
 @property NSDictionary *availableUpdate;
 @property NSString *updateStatus;
 @property BOOL checkingUpdates;
@@ -670,6 +672,7 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
 - (NSString *)menuStatusLine {
  NSString *line=[self appearanceSummary];
  if(self.pausedUntil)return [self lessPullPauseLabel];
+ if(self.peekLocked)return @"Peeking · press the shortcut to return";
  if(self.grayOffUntil)line=[NSString stringWithFormat:@"%@ · %@",line,[self grayOffLabel]];
  if(self.pause)return [line stringByAppendingFormat:@" · Night Shift off until %@",[self timeLabel:self.pause.expiry]];
  if(self.grayOverride||self.nightOverride||self.customWarmth)return [line stringByAppendingFormat:@" · %@ exception",self.foregroundName];
@@ -682,9 +685,19 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
 // Carbon hot keys deliver pressed and released events without Accessibility permission.
 static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *userData) {
  AppDelegate *owner=(__bridge AppDelegate *)userData;UInt32 kind=GetEventKind(event);EventHotKeyID hotKeyID={0};GetEventParameter(event,kEventParamDirectObject,typeEventHotKeyID,NULL,sizeof(hotKeyID),NULL,&hotKeyID);
- dispatch_async(dispatch_get_main_queue(),^{if(hotKeyID.id==2){if(kind==kEventHotKeyPressed)[owner toggleGrayscale:nil];}else [owner setPeeking:kind==kEventHotKeyPressed];});return noErr;
+ dispatch_async(dispatch_get_main_queue(),^{if(hotKeyID.id==2){if(kind==kEventHotKeyPressed)[owner toggleGrayscale:nil];}else [owner peekKeyPressed:kind==kEventHotKeyPressed at:NSDate.timeIntervalSinceReferenceDate];});return noErr;
 }
 - (void)setPeeking:(BOOL)peeking {if(_peeking==peeking)return;_peeking=peeking;self.animateAppearance=YES;[self sync];}
+// Hold the shortcut to peek; a quick double press keeps the peek on; one more press lets go.
+- (void)peekKeyPressed:(BOOL)pressed at:(NSTimeInterval)now {
+ if(pressed){
+  if(self.peekLocked){self.peekLocked=NO;self.peekIgnoreRelease=YES;self.peeking=NO;return;}
+  if(now-self.lastPeekPress<0.45)self.peekLocked=YES;
+  self.lastPeekPress=now;self.peeking=YES;return;
+ }
+ if(self.peekIgnoreRelease){self.peekIgnoreRelease=NO;return;}
+ if(!self.peekLocked)self.peeking=NO;
+}
 // Two global shortcuts: Peek in color (held) and Toggle Grayscale (pressed). Both
 // are optional and recorded by the user; Suggest picks a free combination.
 - (NSDictionary *)shortcutForKey:(NSString *)key {NSDictionary *s=[NSUserDefaults.standardUserDefaults dictionaryForKey:key];return [PeekShortcut isValidKeyCode:[s[@"keyCode"] integerValue] modifiers:[s[@"modifiers"] unsignedIntegerValue]]?s:nil;}
@@ -692,7 +705,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
 - (EventHotKeyRef)registerShortcut:(NSDictionary *)s identifier:(UInt32)identifier {if(!s)return NULL;EventHotKeyID hotKeyID={.signature='LsPl',.id=identifier};EventHotKeyRef ref=NULL;return RegisterEventHotKey((UInt32)[s[@"keyCode"] integerValue],[PeekShortcut carbonModifiers:[s[@"modifiers"] unsignedIntegerValue]],hotKeyID,GetApplicationEventTarget(),0,&ref)==noErr?ref:NULL;}
 - (void)registerPeekShortcut {
  static BOOL installed=NO;if(!installed){installed=YES;EventTypeSpec kinds[2]={{kEventClassKeyboard,kEventHotKeyPressed},{kEventClassKeyboard,kEventHotKeyReleased}};InstallApplicationEventHandler(PeekHotKeyHandler,2,kinds,(__bridge void *)self,NULL);}
- if(self.peekHotKey){UnregisterEventHotKey(self.peekHotKey);self.peekHotKey=NULL;}if(self.grayscaleHotKey){UnregisterEventHotKey(self.grayscaleHotKey);self.grayscaleHotKey=NULL;}self.peeking=NO;
+ if(self.peekHotKey){UnregisterEventHotKey(self.peekHotKey);self.peekHotKey=NULL;}if(self.grayscaleHotKey){UnregisterEventHotKey(self.grayscaleHotKey);self.grayscaleHotKey=NULL;}self.peekLocked=NO;self.peekIgnoreRelease=NO;self.peeking=NO;
  self.peekHotKey=[self registerShortcut:[self peekShortcut] identifier:1];self.grayscaleHotKey=[self registerShortcut:[self shortcutForKey:@"grayscaleShortcut"] identifier:2];
 }
 - (void)saveShortcut:(NSString *)key keyCode:(NSInteger)keyCode modifiers:(NSEventModifierFlags)modifiers {
@@ -703,8 +716,9 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
 - (NSSet *)takenShortcutKeysExcept:(NSString *)key {NSMutableSet *taken=[NSMutableSet new];for(NSString *k in @[@"peekShortcut",@"grayscaleShortcut"]){if([k isEqual:key])continue;NSDictionary *s=[self shortcutForKey:k];if(s)[taken addObject:[PeekShortcut keyForKeyCode:[s[@"keyCode"] integerValue] modifiers:[s[@"modifiers"] unsignedIntegerValue]]];}return taken;}
 - (NSDictionary *)suggestedShortcutFor:(NSString *)key {
  // Left-hand only: Control and Option under the left pinky and ring finger, the key under the index finger.
- NSEventModifierFlags co=NSEventModifierFlagControl|NSEventModifierFlagOption;NSArray *peek=@[@{@"keyCode":@(kVK_ANSI_C),@"modifiers":@(co)},@{@"keyCode":@(kVK_ANSI_V),@"modifiers":@(co)},@{@"keyCode":@(kVK_ANSI_X),@"modifiers":@(co)},@{@"keyCode":@(kVK_ANSI_C),@"modifiers":@(co|NSEventModifierFlagShift)}];
- NSArray *gray=@[@{@"keyCode":@(kVK_ANSI_G),@"modifiers":@(co)},@{@"keyCode":@(kVK_ANSI_F),@"modifiers":@(co)},@{@"keyCode":@(kVK_ANSI_D),@"modifiers":@(co)},@{@"keyCode":@(kVK_ANSI_G),@"modifiers":@(co|NSEventModifierFlagShift)}];
+ // The author's own choices first (Option-A to peek, Option-Command-G to toggle), then left-hand fallbacks.
+ NSEventModifierFlags co=NSEventModifierFlagControl|NSEventModifierFlagOption,oc=NSEventModifierFlagOption|NSEventModifierFlagCommand;NSArray *peek=@[@{@"keyCode":@(kVK_ANSI_A),@"modifiers":@(NSEventModifierFlagOption)},@{@"keyCode":@(kVK_ANSI_C),@"modifiers":@(co)},@{@"keyCode":@(kVK_ANSI_V),@"modifiers":@(co)},@{@"keyCode":@(kVK_ANSI_X),@"modifiers":@(co)}];
+ NSArray *gray=@[@{@"keyCode":@(kVK_ANSI_G),@"modifiers":@(oc)},@{@"keyCode":@(kVK_ANSI_G),@"modifiers":@(co)},@{@"keyCode":@(kVK_ANSI_F),@"modifiers":@(co)},@{@"keyCode":@(kVK_ANSI_D),@"modifiers":@(co)}];
  return [PeekShortcut suggestionAvoiding:[self takenShortcutKeysExcept:key] preferring:[key isEqual:@"peekShortcut"]?peek:gray];
 }
 - (void)suggestShortcut:(NSButton *)sender {NSString *key=sender.identifier;NSDictionary *s=[self suggestedShortcutFor:key];if(!s){NSBeep();return;}[self saveShortcut:key keyCode:[s[@"keyCode"] integerValue] modifiers:[s[@"modifiers"] unsignedIntegerValue]];}
@@ -715,7 +729,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  recorder.accessibilityLabel=[NSString stringWithFormat:@"%@ shortcut: %@",name,s?recorder.title:@"none"];
 }
 - (void)refreshPeekRecorder:(id)sender {
- [self refreshRecorder:self.peekRecorder key:@"peekShortcut" registered:self.peekHotKey!=NULL note:self.peekNote idle:@"Hold a shortcut to see the plain display; let go to return. No exception is made and nothing is saved." active:@"Hold the shortcut to see the plain display; let go to return. Click to change it." name:@"Peek in color"];
+ [self refreshRecorder:self.peekRecorder key:@"peekShortcut" registered:self.peekHotKey!=NULL note:self.peekNote idle:@"Hold a shortcut to see the plain display; let go to return. Press it twice quickly to keep the plain display until you press it again. Nothing is saved." active:@"Hold the shortcut to see the plain display; let go to return. Press it twice quickly to keep it; press once more to return. Click to change it." name:@"Peek in color"];
  [self refreshRecorder:self.grayscaleRecorder key:@"grayscaleShortcut" registered:self.grayscaleHotKey!=NULL note:self.grayscaleShortcutNote idle:@"Press a shortcut to turn Grayscale on or off from anywhere." active:@"Press the shortcut to turn Grayscale on or off from anywhere. Click to change it." name:@"Toggle Grayscale"];
  NSDictionary *effects=[self peekEffects];self.peekGrayButton.state=[effects[@"grayscale"] boolValue];self.peekWarmthButton.state=[effects[@"warmth"] boolValue];self.peekNightButton.state=[effects[@"nightShift"] boolValue];
 }
@@ -1141,7 +1155,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
   @[@"Night Shift",@"Less Pull can turn Night Shift on or off now, or off for a while; your schedule in System Settings stays as it is. With “Extra Warmth follows Night Shift” on, the warmth you set is added only while Night Shift is on, and there is none in the daytime. With it off, Extra Warmth stays on all day. If you move the slider by hand while following, that warmth stays until Night Shift next changes, or until you choose Resume Following."],
   @[@"Exceptions for apps",@"Give an app its own settings in Settings → Apps, or choose “Exception for …” in the menu. They apply while that app is in front with a window open. Each setting can keep the default or get its own value. “Use this exception” switches a rule off and keeps its settings; changing a setting away from default switches it on again."],
   @[@"Exceptions for websites",@"Install the browser extension from Settings, for Safari, Brave, Chrome, Firefox, Opera or Edge. It only connects the browser; it has no buttons. With a website in front, the menu offers “Exception for that site”, for the whole domain or one exact page. Pages inherit from their domain, and domains from the browser’s app exception. Several browsers can use it at the same time; private tabs are left alone."],
-  @[@"Peek in color",@"Record a shortcut in Settings → Shortcuts, or let Suggest pick one that is free. Hold it to see the plain display; let go and Less Pull fades back. Choose there what peeking turns off: Grayscale, Extra Warmth, and Night Shift if you like. Nothing is saved and no exception is made."],
+  @[@"Peek in color",@"Record a shortcut in Settings → Shortcuts, or let Suggest pick one that is free. Hold it to see the plain display; let go and Less Pull fades back. Press it twice quickly to keep the plain display; one more press returns. Choose there what peeking turns off: Grayscale, Extra Warmth, and Night Shift if you like. Nothing is saved and no exception is made."],
   @[@"Grayscale off for a while",@"In the menu or in Settings, turn Grayscale off for 1 hour, 4 hours, or until Night Shift next changes. It comes back by itself; your setting stays saved."],
   @[@"The menu-bar icon and shortcuts",@"By default a click opens the menu and a right-click (or Control-click) toggles Grayscale; Settings → Shortcuts can swap the two. A Toggle Grayscale shortcut can be recorded there as well."],
   @[@"Pausing",@"Pause Less Pull shows the plain display for 15 minutes, an hour, or until you resume: color and no added warmth, with Night Shift left alone. Your settings and exceptions are kept, and the menu-bar icon shows a pause mark."],

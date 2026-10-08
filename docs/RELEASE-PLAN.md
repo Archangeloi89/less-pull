@@ -11,7 +11,7 @@ Less Pull 1.4.4 build 16 is a private test release. This repository stays privat
 - Earlier live checks confirmed that Grayscale survives Night Shift turning off, that Color survives Night Shift turning on, and that saved warmth is restored.
 - Since version 1.4.2, returning from an exception fades smoothly instead of switching at once. The author confirmed that the fade works as intended.
 
-See [Publishing safely](PUBLISHING.md) for how signing and store hosting protect the release path.
+See [Publishing safely](PUBLISHING.md) for how signing and store hosting protect the release path. Until then, the release carries an [agent pack](../tools/agent-pack/README.md) so an AI agent can install the app and connect the browsers for a user.
 
 ## Still open before a public release
 
