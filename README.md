@@ -192,7 +192,7 @@ The app changes the display; nothing is injected into pages, and the Mac app has
 
 ## Private by design
 
-No account, no analytics, no cloud sync. The extension reads the address of the active tab, passes it to the app on your Mac, and never reads or changes page content. Private tabs are excluded. Your rules stay on your Mac. The only thing the app sends anywhere is one request to GitHub once a day to ask whether a newer build exists; it carries nothing about you and can be turned off in Settings → About. [Privacy details](docs/PRIVACY.md).
+No account, no analytics, no cloud sync. The extension reads the address of the active tab, passes it to the app on your Mac, and never reads or changes page content. Private tabs are excluded. **The addresses of the sites you visit are never stored.** They pass through memory only: the app keeps the one address in front, overwrites it with the next, and drops it a minute after the browser stops reporting or as soon as it disconnects. Nothing about them is written to disk, not in preferences and not in logs. Only the exceptions you save yourself are kept, on your Mac. The only thing the app sends anywhere is one request to GitHub once a day to ask whether a newer build exists; it carries nothing about you and can be turned off in Settings → About. [Privacy details](docs/PRIVACY.md).
 
 ## Free to use, including at work
 

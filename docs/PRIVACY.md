@@ -21,7 +21,7 @@ The extension asks for two permissions:
 | `tabs` | To know which website is in the active tab |
 | `nativeMessaging` | To talk to the Less Pull app on the same Mac |
 
-The domain and URL of the active public tab are sent through a small helper and a local Unix socket to the Mac app. Private tabs are excluded. The app keeps the active site in memory only. It is cleared when the browser disconnects or the information expires.
+The domain and URL of the active public tab are sent through a small helper and a local Unix socket (or, for Safari, a local Mach port) to the Mac app. Private tabs are excluded. The app keeps the active site in memory only: one entry per connected browser, overwritten by the next report, removed a minute after the last report or as soon as the browser disconnects. It is never written to disk, not to preferences, logs or diagnostics, and the extension and the helper keep no copy either. A browser's native-messaging channel and the socket carry it between processes on the same Mac and store nothing.
 
 ## The update check
 
@@ -41,6 +41,10 @@ The honest risk is the release path, not the running code: a tampered update cou
 - **Update check.** The date of the last check and, if one was found, the newer version's number, release notes and download page.
 
 Removing an exception removes its stored entry. Deleting the app does not delete its preferences.
+
+## What is never stored
+
+The addresses of the websites you visit. They stream from the browser to the app, live in the app's memory while that tab is in front, and are overwritten or dropped as described above. The only addresses on disk are the ones you save as exceptions yourself. Like any process, the app's memory is managed by macOS, which encrypts swapped memory by default.
 
 ## Logs and diagnostics
 
