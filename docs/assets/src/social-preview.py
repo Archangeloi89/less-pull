@@ -5,8 +5,8 @@
 import math, sys
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 import numpy as np
-out = sys.argv[1]; plain = '--plain' in sys.argv; peek = '--peek' in sys.argv
-W, H = (1280, 370) if peek else (1280, 520) if plain else (1280, 640)
+out = sys.argv[1]; plain = '--plain' in sys.argv; peek = '--peek' in sys.argv; shots = '--shots' in sys.argv
+W, H = (1280, 480) if shots else (1280, 370) if peek else (1280, 520) if plain else (1280, 640)
 def font(size, bold=False):
     for path in ['/System/Library/Fonts/HelveticaNeue.ttc', '/System/Library/Fonts/Helvetica.ttc']:
         try: return ImageFont.truetype(path, size, index=1 if bold else 0)
@@ -78,6 +78,19 @@ def place(src, x, y, w, h, radius=14):
     m = Image.new('L', (w, h), 0); ImageDraw.Draw(m).rounded_rectangle((0, 0, w - 1, h - 1), radius, fill=255)
     sh_ = Image.new('RGBA', im.size, (0, 0, 0, 0)); ImageDraw.Draw(sh_).rounded_rectangle((x, y + 10, x + w, y + h + 10), radius, fill=(0, 0, 0, 160)); im = Image.alpha_composite(im, sh_.filter(ImageFilter.GaussianBlur(16)))
     im.paste(src.resize((w, h), Image.LANCZOS), (x, y), m)
+if shots:
+    # left: the display, as Less Pull shows it; right: the screenshot taken of it, in full color
+    fw, fh = 540, int(540 * sh / sw); y0 = 118; xl, xr = 60, W - 60 - fw
+    d.text((60, 34), 'What you see', font=font(28, True), fill=INK if False else (248, 248, 250)); d.text((60, 72), 'the display, quiet', font=font(20), fill=(150, 153, 160))
+    d.text((xr, 34), 'What you share', font=font(28, True), fill=(248, 248, 250)); d.text((xr, 72), 'the screenshot of that same screen', font=font(20), fill=(150, 153, 160))
+    # a monitor: bezel and stand
+    d.rounded_rectangle((xl - 14, y0 - 14, xl + fw + 14, y0 + fh + 14), 22, fill=(30, 31, 36), outline=(70, 72, 80), width=2); place(quiet, xl, y0, fw, fh, radius=10)
+    d = ImageDraw.Draw(im); d.rounded_rectangle((xl + fw // 2 - 50, y0 + fh + 14, xl + fw // 2 + 50, y0 + fh + 40), 6, fill=(60, 62, 70)); d.rounded_rectangle((xl + fw // 2 - 110, y0 + fh + 38, xl + fw // 2 + 110, y0 + fh + 48), 5, fill=(60, 62, 70))
+    # a screenshot file: white border, slight tilt-free, with the camera mark
+    d.rounded_rectangle((xr - 10, y0 - 10, xr + fw + 10, y0 + fh + 10), 12, fill=(245, 245, 247)); place(color, xr, y0, fw, fh, radius=6)
+    d = ImageDraw.Draw(im); cx, cy = xr + fw - 26, y0 + fh - 26; d.ellipse((cx - 26, cy - 26, cx + 26, cy + 26), fill=(236, 140, 72)); d.rounded_rectangle((cx - 13, cy - 7, cx + 13, cy + 10), 4, fill=(30, 20, 12)); d.ellipse((cx - 6, cy - 4, cx + 6, cy + 8), fill=(236, 140, 72)); d.rectangle((cx - 5, cy - 11, cx + 2, cy - 7), fill=(30, 20, 12))
+    cap = font(20); d.text((xl, y0 + fh + 62), 'Less Pull changes the display itself, after the picture is made.', font=cap, fill=(190, 192, 198)); d.text((xl, y0 + fh + 90), 'Screenshots, recordings and screen sharing keep their normal colors.', font=cap, fill=(190, 192, 198))
+    im.convert('RGB').save(out, optimize=True); print(out, im.size); sys.exit()
 if peek:
     fw, fh = 392, int(392 * sh / sw); gap = 32; x0 = (W - 3 * fw - 2 * gap) // 2; y0 = 128
     frames = [(quiet, 'Your screen, as usual'), (color, 'Color while you hold the Peek shortcut'), (quiet, 'Let go, and it is quiet again')]
