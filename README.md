@@ -132,6 +132,12 @@ Less Pull changes the display at the very end of the pipeline, after the picture
 
 ## Sessions
 
+<p align="center">
+  <img src="docs/assets/sessions.png" width="100%" alt="A session, in the menu bar. Five icon states in a row: at rest; a 25-minute session starts, with a thin ring and the number 25; the ring fills as it runs, 11 left; past the end the ring is orange and the count reads minus 4; away, until the call back, dimmed with 9. Below, two panels: A session, with chips 25, 45, 60 and 90 min, a slider at 35 min, Add to presets and Start 35 min; and the panel after the end: minus 4:12, That was 25 minutes, Leaving? Call me back in, chips 5, 9, 13 and 33 min, a slider at 7 min, Keep going and Leave quietly. Between them, a glow and a soft gong.">
+</p>
+
+<sub>Drawn in the style of the app; the panels are what the icon opens.</sub>
+
 A session is a stretch of focused work with a gentle end. Choose **Start a session…**, the first item in the menu: a small panel grows out of the icon with your lengths (25, 45, 60 and 90 minutes to begin with; change them under **Settings… → Sessions**), and folds back into the icon once you choose. Any other length: scrub the slider below the chips, the number follows, and one button starts it; tick Add to presets to keep it. A right-click on a chip removes it from the presets. The icon gains a thin ring that fills as the session runs, with the minutes left next to it.
 
 At the end, a warm glow blooms across every display for three seconds with one line of text, and a soft gong sounds, built from pure tones on the 432 Hz reference and the solfeggio pitches, low and short. Two sound styles are tuned by ear, "two strokes" and "one chord", or none; they live with the glow switch, a preview of each sound and a volume slider under the advanced options on the Sessions tab. Nothing to dismiss: the count simply goes on past the end, −0, −1, −2 in the warm color, breathing gently to say it can be clicked, so you can see how far you have stretched. A quieter reminder can come every few minutes if you ask for one; by default it never does.
@@ -238,6 +244,10 @@ Anyone may use the unmodified app and extension for free, at home or in a busine
 
 Less Pull is source-available, not open source. The [app license](LICENSE-APP.txt) and the [source license](LICENSE-SOURCE.txt) are the terms that count, and [the licensing overview](docs/LICENSING.md) summarizes them.
 
+## Make it yours
+
+You may change your own copy as you like; the author's name and links on the About tab stay, and you can add your own beside them. What survives updates is written down: preferences, hook scripts and replaceable sounds need no rebuild and survive every update; a few folders in the source are never rewritten by updates; the rest is internal. The [customizing guide](docs/CUSTOMIZING.md) and the machine-readable [`compat.json`](docs/compat.json) are the contract, and `tools/compat-check.sh` tells you, or your agent, which of your changes are in the compatible range.
+
 ## Build it yourself
 
 The app is Objective-C on Apple frameworks. The extension is plain JavaScript on Manifest V3. Neither has third-party runtime dependencies. On an Apple silicon Mac with Apple's Command Line Tools (Xcode as well, if the Safari companion app should be included):
@@ -257,6 +267,7 @@ See [testing](Source/TESTING.txt), the [build 19 notes](docs/1.4.4-19-release.tx
 | [Night Shift and warmth](docs/NIGHT-SHIFT.md) | Following, overrides and timed pauses |
 | [Privacy](docs/PRIVACY.md) | What is read, stored and logged |
 | [Licensing](docs/LICENSING.md) | What you may do, in a table |
+| [Customizing](docs/CUSTOMIZING.md) | Changing your copy, and what survives updates |
 | [Release plan](docs/RELEASE-PLAN.md) | What is verified and what is still open |
 
 ---

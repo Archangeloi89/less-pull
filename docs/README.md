@@ -8,6 +8,7 @@ Start with the [project page](../README.md) for an overview and pictures.
 | [App and website exceptions](EXCEPTIONS.md) | Giving an app, a website or one page its own settings |
 | [Night Shift and warmth](NIGHT-SHIFT.md) | How warmth can follow Night Shift, overrides and timed pauses |
 | [Privacy](PRIVACY.md) | What the app and extension read, store and log |
+| [Customizing](CUSTOMIZING.md) | Changing your copy; the compatibility contract and `compat.json` |
 | [Licensing](LICENSING.md) | What you may do with the app and the source |
 
 For people working on Less Pull:

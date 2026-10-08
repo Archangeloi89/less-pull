@@ -13,6 +13,7 @@ The table is a summary. The license texts are what count.
 | Deploy the unmodified app to employees | Yes, free |
 | Share the complete, unmodified app free of charge | Yes, with the license and copyright notices |
 | Read the source, or build it unchanged for your own use | Yes |
+| Change your own copy to your heart's content | Yes. The author's name and links on the About tab stay; add your own beside them. See [Customizing](CUSTOMIZING.md) for what survives updates |
 | Modify the code and share it for noncommercial purposes | Yes, with the notices and clear labels on what you changed |
 | Adapt the code into a commercial product, or sell a derivative | Only with the author's written permission |
 | Sell or commercially bundle the original app | Only with the author's written permission |

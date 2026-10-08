@@ -752,6 +752,14 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
   [ink setStroke];outline.lineWidth=1.5;[outline stroke];return YES;}];
  image.template=NO;image.accessibilityDescription=[NSString stringWithFormat:@"Less Pull: %@%@",gray?@"grayscale":@"color",strength>0?[NSString stringWithFormat:@", warmth %.0f%%",strength/3*100]:@""];return image;
 }
+// ---- Customization, tier 1 (docs/CUSTOMIZING.md): hooks and replaceable sounds under Application Support.
+- (NSString *)supportPath:(NSString *)sub {return [NSHomeDirectory() stringByAppendingPathComponent:[@"Library/Application Support/Less Pull/" stringByAppendingString:sub]];}
+// An executable named after the event, started and not waited for. Its output is ignored.
+- (void)runHook:(NSString *)event args:(NSArray<NSString *> *)args {
+ NSString *path=[[self supportPath:@"hooks"] stringByAppendingPathComponent:event];if(![NSFileManager.defaultManager isExecutableFileAtPath:path])return;
+ NSTask *task=[NSTask new];task.executableURL=[NSURL fileURLWithPath:path];task.arguments=[@[event] arrayByAddingObjectsFromArray:args?:@[]];task.standardOutput=NSFileHandle.fileHandleWithNullDevice;task.standardError=NSFileHandle.fileHandleWithNullDevice;task.standardInput=NSFileHandle.fileHandleWithNullDevice;
+ NSError *error=nil;if(![task launchAndReturnError:&error])NSLog(@"Less Pull hook %@ did not start: %@",event,error.localizedDescription);
+}
 // ---- Sessions: a length you choose, a gentle end, time counted past it, one call back after you leave.
 - (double)sessionRing:(NSDate *)now {Session *s=self.session;if(s.state==SessionRunning)return 1-MAX(0,[s remainingAt:now])/MAX(1,s.minutes*60.0);if(s.state==SessionOver)return 1;if(s.state==SessionAway)return 1-MAX(0,[s remainingAt:now])/MAX(1,[s.callBackAt timeIntervalSinceDate:s.leftAt?:now]);return -1;}
 - (NSArray<NSNumber *> *)sessionPresets:(NSString *)key fallback:(NSArray *)fallback {NSArray *a=[NSUserDefaults.standardUserDefaults arrayForKey:key];NSMutableArray *out=[NSMutableArray new];for(id n in a)if([n respondsToSelector:@selector(integerValue)]&&[n integerValue]>0&&[n integerValue]<=24*60)[out addObject:@([n integerValue])];return out.count?out:fallback;}
@@ -761,9 +769,9 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
 - (void)sessionTick {
  NSDate *now=NSDate.date;NSArray *events=[self.session eventsAt:now];if(self.session.state==SessionOver&&!self.sessionPanel.visible)self.sessionBreath=!self.sessionBreath;else self.sessionBreath=YES;
  for(NSString *e in events){
-  if([e isEqual:@"ended"]){[self glow:[NSString stringWithFormat:@"That was %ld minute%@.",(long)self.session.minutes,self.session.minutes==1?@"":@"s"] sound:@"session-end"];}
-  else if([e isEqual:@"reminder"]){NSInteger past=(NSInteger)floor(-[self.session remainingAt:now]/60);[self glow:[NSString stringWithFormat:@"%ld minute%@ past.",(long)past,past==1?@"":@"s"] sound:@"session-remind"];}
-  else if([e isEqual:@"callBack"]){[self glow:@"Welcome back." sound:@"session-back"];[self closeSessionPanel];}}
+  if([e isEqual:@"ended"]){[self glow:[NSString stringWithFormat:@"That was %ld minute%@.",(long)self.session.minutes,self.session.minutes==1?@"":@"s"] sound:@"session-end"];[self runHook:@"session-ended" args:@[[NSString stringWithFormat:@"%ld",(long)self.session.minutes]]];}
+  else if([e isEqual:@"reminder"]){NSInteger past=(NSInteger)floor(-[self.session remainingAt:now]/60);[self glow:[NSString stringWithFormat:@"%ld minute%@ past.",(long)past,past==1?@"":@"s"] sound:@"session-remind"];[self runHook:@"session-reminder" args:@[[NSString stringWithFormat:@"%ld",(long)past]]];}
+  else if([e isEqual:@"callBack"]){[self glow:@"Welcome back." sound:@"session-back"];[self closeSessionPanel];[self runHook:@"session-call-back" args:@[]];}}
  if(events.count)[self persistSession];[self updateStatusIcon];if(self.sessionPanel.visible){if(events.count&&self.session.state!=SessionIdle)[self showSessionPanelMode:nil];else [self refreshSessionPanel];}if(self.session.state==SessionIdle)[self scheduleSessionTimer];
 }
 - (ChipButton *)chip:(NSInteger)minutes key:(NSString *)key action:(SEL)action {ChipButton *c=[ChipButton buttonWithTitle:[NSString stringWithFormat:@"%ld min",(long)minutes] target:self action:action];c.bezelStyle=NSBezelStyleRounded;c.controlSize=NSControlSizeLarge;c.tag=minutes;c.minutes=minutes;c.presetsKey=key;c.removeTarget=self;[self helpView:c text:[NSString stringWithFormat:@"%ld minutes. Right-click to remove it from the presets.",(long)minutes] label:[NSString stringWithFormat:@"%ld minutes",(long)minutes]];return c;}
@@ -775,7 +783,7 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
 - (void)startCustomSession:(id)sender {NSInteger m=self.customMinutes;if(self.customSave.state==NSControlStateValueOn){NSMutableArray *list=[[self sessionPresets:@"sessionPresets" fallback:@[@25,@45,@60,@90]] mutableCopy];if(![list containsObject:@(m)]){[list addObject:@(m)];[list sortUsingSelector:@selector(compare:)];[NSUserDefaults.standardUserDefaults setObject:list forKey:@"sessionPresets"];self.sessionPresetsField.stringValue=[self minutesList:@"sessionPresets" fallback:@[@25,@45,@60,@90]];}}[self startSessionMinutes:m];[self closeSessionPanel];}
 - (void)startSession:(NSMenuItem *)sender {[self startSessionMinutes:sender.tag];[self closeSessionPanel];}
 - (void)openStartPanel:(id)sender {dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)(0.15*NSEC_PER_SEC)),dispatch_get_main_queue(),^{[self showSessionPanelMode:@"start"];});}
-- (void)startSessionMinutes:(NSInteger)minutes {[self.session startMinutes:minutes at:NSDate.date];self.session.remindEvery=[NSUserDefaults.standardUserDefaults integerForKey:@"sessionRemindEvery"];[self persistSession];[self scheduleSessionTimer];self.statusImageName=nil;[self updateStatusIcon];}
+- (void)startSessionMinutes:(NSInteger)minutes {[self.session startMinutes:minutes at:NSDate.date];[self runHook:@"session-started" args:@[[NSString stringWithFormat:@"%ld",(long)self.session.minutes]]];self.session.remindEvery=[NSUserDefaults.standardUserDefaults integerForKey:@"sessionRemindEvery"];[self persistSession];[self scheduleSessionTimer];self.statusImageName=nil;[self updateStatusIcon];}
 - (void)endSession:(id)sender {[self.session stop];[self persistSession];[self scheduleSessionTimer];[self closeSessionPanel];self.statusImageName=nil;[self updateStatusIcon];}
 - (void)extendSession:(id)sender {[self.session extendMinutes:10];[self persistSession];self.statusImageName=nil;[self updateStatusIcon];[self refreshSessionPanel];}
 - (void)sessionQuiet:(id)sender {[self.session quietFor:5 at:NSDate.date];[self persistSession];[self closeSessionPanel];}
@@ -786,7 +794,7 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
 // The glow: a soft warm bloom on every display for three seconds with one line of text, no focus, no click needed.
 - (void)glow:(NSString *)text sound:(NSString *)sound {
  NSUserDefaults *d=NSUserDefaults.standardUserDefaults;NSInteger style=[d objectForKey:@"sessionSound"]&&![d boolForKey:@"sessionSound"]?0:[d integerForKey:@"sessionSoundStyle"];
- if(style){NSString *path=[NSBundle.mainBundle pathForResource:[NSString stringWithFormat:@"%@-%@",sound,style==1?@"strokes":@"chord"] ofType:@"wav"];if(path){self.sessionSound=[[NSSound alloc]initWithContentsOfFile:path byReference:YES];self.sessionSound.volume=MAX(0,MIN(1,[d integerForKey:@"sessionVolume"]/100.0));[self.sessionSound play];}}
+ if(style){NSString *custom=[[self supportPath:@"sounds"] stringByAppendingPathComponent:[sound stringByAppendingString:@".wav"]];NSString *path=[NSFileManager.defaultManager fileExistsAtPath:custom]?custom:[NSBundle.mainBundle pathForResource:[NSString stringWithFormat:@"%@-%@",sound,style==1?@"strokes":@"chord"] ofType:@"wav"];if(path){self.sessionSound=[[NSSound alloc]initWithContentsOfFile:path byReference:YES];self.sessionSound.volume=MAX(0,MIN(1,[d integerForKey:@"sessionVolume"]/100.0));[self.sessionSound play];}}
  if(![NSUserDefaults.standardUserDefaults boolForKey:@"sessionGlow"])return;
  for(NSWindow *w in self.glowWindows)[w orderOut:nil];self.glowWindows=[NSMutableArray new];BOOL reduce=NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceMotion;
  for(NSScreen *screen in NSScreen.screens){
@@ -1714,7 +1722,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  BOOL ok=[self.warmth applyStrength:strength grayscale:gray];
  if(ok){self.selectedMode=mode;self.effectiveMode=effective;}return ok;
 }
-- (void)toggleGrayscale:(id)sender {NSMenuItem *item=[NSMenuItem new];item.tag=(self.selectedMode==1||self.selectedMode==100)?101:100;[self manual:item];}
+- (void)toggleGrayscale:(id)sender {NSMenuItem *item=[NSMenuItem new];item.tag=(self.selectedMode==1||self.selectedMode==100)?101:100;[self manual:item];[self runHook:@"grayscale-changed" args:@[item.tag==100?@"on":@"off"]];}
 - (void)refreshProfiles {self.grayscaleButton.state=self.selectedMode==1||self.selectedMode==100;
  self.grayscaleButton.title=self.grayOverride?@"Default Grayscale":@"Grayscale";}
 - (void)warmthChanged:(NSSlider *)sender {
