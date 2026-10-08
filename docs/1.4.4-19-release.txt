@@ -24,4 +24,6 @@ Build 26 (same day): "Peek on every display" per app exception, separate from "O
 
 Build 27 (same day): "Peek toggles" per app exception replaces "Peek on every display": the display under the pointer, all displays, or any set of connected displays (stored by display UUID). A double press keeps that whole set; the next press lets it go.
 
+Build 28 (same day): an app's own Peek toggles choice wins over the global Peek scope (All displays) on the Shortcuts tab.
+
 Verified: the ten automated suites pass, including new per-display engine tests (apply, cache, independent fades, invalidate). Per-display color was confirmed live on the author's Mac with a second display. Browser support and everything else is as in build 17.
