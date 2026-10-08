@@ -18,11 +18,18 @@ y, x = np.mgrid[0:sh, 0:sw]
 wall = np.stack([120 + 110 * np.sin(x / 260 + 1.2), 80 + 120 * np.cos(y / 180 + .4), 150 + 100 * np.sin((x + y) / 320)], -1).clip(0, 255).astype('uint8')
 screen = Image.fromarray(wall, 'RGB').convert('RGBA')
 d = ImageDraw.Draw(screen)
-cards = [((60, 50, 520, 330), (255, 94, 77)), ((560, 50, 1060, 180), (66, 181, 255)), ((560, 205, 790, 330), (255, 203, 60)), ((820, 205, 1060, 330), (84, 220, 120))]
-for (x0, y0, x1, y1), col in cards:
-    d.rounded_rectangle((x0, y0, x1, y1), 22, fill=col)
-    d.rounded_rectangle((x0 + 24, y0 + 24, x1 - 24, y0 + 44), 8, fill=(255, 255, 255, 230))
-    for i in range(3): d.rounded_rectangle((x0 + 24, y0 + 64 + i * 26, x1 - 24 - i * 60, y0 + 78 + i * 26), 6, fill=(255, 255, 255, 150))
+# the same window on each half, so the only difference is what Less Pull does to it
+def window(x0, y0, x1, y1):
+    d.rounded_rectangle((x0, y0, x1, y1), 22, fill=(255, 255, 255, 235))
+    d.rounded_rectangle((x0, y0, x1, y0 + 44), 22, fill=(236, 238, 242, 255)); d.rectangle((x0, y0 + 22, x1, y0 + 44), fill=(236, 238, 242, 255))
+    for i, c in enumerate([(255, 95, 86), (255, 189, 46), (39, 201, 63)]): d.ellipse((x0 + 18 + i * 22, y0 + 14, x0 + 34 + i * 22, y0 + 30), fill=c)
+    tiles = [(255, 94, 77), (66, 181, 255), (255, 203, 60), (84, 220, 120), (170, 100, 255), (255, 140, 60)]
+    tw = (x1 - x0 - 24 * 4) // 3
+    for i, c in enumerate(tiles):
+        tx = x0 + 24 + (i % 3) * (tw + 24); ty = y0 + 68 + (i // 3) * 118
+        d.rounded_rectangle((tx, ty, tx + tw, ty + 94), 14, fill=c)
+        d.rounded_rectangle((tx + 16, ty + 58, tx + tw - 16, ty + 70), 5, fill=(255, 255, 255, 190))
+for (x0, y0, x1, y1) in [(50, 40, 530, 340), (590, 40, 1070, 340)]: window(x0, y0, x1, y1)
 arr = np.asarray(screen.convert('RGB')).astype(float)
 right = arr[:, sw // 2:] @ matrix(0.5, True).T  # grayscale with a light amber, an everyday setting
 arr[:, sw // 2:] = right.clip(0, 255)
