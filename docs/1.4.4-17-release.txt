@@ -1,0 +1,10 @@
+Less Pull 1.4.4 — build 17
+
+The version number stays 1.4.4 for good; the build number is what changes. Build 17 follows build 16 by a few hours and changes two things.
+
+- The display matrix is sent again once a minute, and right after the screen unlocks or a display wakes. macOS can replace the matrix without telling the app; the screen then showed color while Grayscale was ticked until it was toggled. Build 16 only re-sent after system wake, display changes and Night Shift changes.
+- Visited website addresses are never stored. The app already kept the address of the tab in front in memory only; it now also drops a browser's entry a minute after the browser last reported it, not only when the browser disconnects. The extension notice, the README and PRIVACY.md say so explicitly.
+
+Also: the project page gained an at-a-glance list, a before/after figure and a Peek in color section.
+
+Verified: the ten automated suites pass (policy, warmth matrix, pause and daylight-saving handling, exceptions, pipeline, browser bridge, extension identity, and the rest); the author's Mac runs this build. Browser support and everything else is as in build 16 (see 1.4.4-16-release.txt).
