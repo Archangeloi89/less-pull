@@ -9,6 +9,7 @@ Start with the [project page](../README.md) for an overview and pictures.
 | [Night Shift and warmth](NIGHT-SHIFT.md) | How warmth can follow Night Shift, overrides and timed pauses |
 | [Privacy](PRIVACY.md) | What the app and extension read, store and log |
 | [Chrome Web Store listing](STORE-CHROME.md) | The package, the texts, the privacy answers and the steps |
+| [Firefox Add-ons listing](STORE-FIREFOX.md) | The package, the texts and the steps for addons.mozilla.org |
 | [Customizing](CUSTOMIZING.md) | Changing your copy; the compatibility contract and `compat.json` |
 | [Licensing](LICENSING.md) | What you may do with the app and the source |
 
