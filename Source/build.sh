@@ -27,7 +27,7 @@ if [[ -d /Applications/Xcode.app && "${LESS_PULL_SKIP_SAFARI:-0}" != 1 ]]; then
  cp Safari/SafariWebExtensionHandler.swift "$SAFARI_PROJECT/Less Pull for Safari/Less Pull for Safari Extension/SafariWebExtensionHandler.swift"
  # The converter derives the app's identifier from its name; the extension must sit under the app's.
  sed -i '' 's/com\.jiriarion\.lesspull\.Less-Pull-for-Safari/com.jiriarion.lesspull.safari/g' "$SAFARI_PROJECT/Less Pull for Safari/Less Pull for Safari.xcodeproj/project.pbxproj"
- xcodebuild -project "$SAFARI_PROJECT/Less Pull for Safari/Less Pull for Safari.xcodeproj" -scheme "Less Pull for Safari" -configuration Release -derivedDataPath "$SAFARI_BUILD" CODE_SIGN_IDENTITY=- CODE_SIGNING_REQUIRED=NO DEVELOPMENT_TEAM= -quiet build
+ xcodebuild -project "$SAFARI_PROJECT/Less Pull for Safari/Less Pull for Safari.xcodeproj" -scheme "Less Pull for Safari" -configuration Release -derivedDataPath "$SAFARI_BUILD" CODE_SIGN_IDENTITY=- CODE_SIGNING_REQUIRED=NO DEVELOPMENT_TEAM= CODE_SIGN_ENTITLEMENTS="$PWD/Safari/LessPullSafari.entitlements" -quiet build
  ditto --norsrc "$SAFARI_BUILD/Build/Products/Release/Less Pull for Safari.app" "$APP/Contents/Resources/Less Pull for Safari.app"
  unset DEVELOPER_DIR
 else
@@ -35,7 +35,11 @@ else
 fi
 cp Info.plist "$APP/Contents/Info.plist"
 xattr -cr "$APP"
-[[ -d "$APP/Contents/Resources/Less Pull for Safari.app" ]] && codesign --force --deep --sign - "$APP/Contents/Resources/Less Pull for Safari.app"
+if [[ -d "$APP/Contents/Resources/Less Pull for Safari.app" ]]; then
+ # Ad-hoc signing through xcodebuild drops entitlements; sign the extension here so it is sandboxed.
+ codesign --force --sign - --entitlements Safari/LessPullSafari.entitlements "$APP/Contents/Resources/Less Pull for Safari.app/Contents/PlugIns/Less Pull for Safari Extension.appex"
+ codesign --force --sign - "$APP/Contents/Resources/Less Pull for Safari.app"
+fi
 codesign --force --sign - "$APP"
 codesign --verify --strict "$APP"
 rm -rf "../Less Pull.app"

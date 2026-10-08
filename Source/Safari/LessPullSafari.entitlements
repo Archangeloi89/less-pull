@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- macOS only loads sandboxed app extensions. The one exception lets the extension
+	     reach the Less Pull app's message port; nothing else is opened up. -->
+	<key>com.apple.security.app-sandbox</key>
+	<true/>
+	<key>com.apple.security.temporary-exception.mach-lookup.global-name</key>
+	<array>
+		<string>com.jiriarion.lesspull.bridge</string>
+	</array>
+</dict>
+</plist>

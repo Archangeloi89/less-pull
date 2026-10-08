@@ -8,6 +8,13 @@ static NSString *siteName(id value){if(![value isKindOfClass:NSString.class]||[v
 static NSString *pageURL(id value){if(![value isKindOfClass:NSString.class]||[value length]>8192)return nil;NSURLComponents *c=[NSURLComponents componentsWithString:value];if(![@[@"http",@"https"] containsObject:c.scheme.lowercaseString]||!siteName(c.host)||c.user||c.password)return nil;c.scheme=c.scheme.lowercaseString;c.host=c.host.lowercaseString;c.fragment=nil;if(!c.path.length)c.path=@"/";return c.string;}
 @implementation BrowserBridge
 + (NSString *)socketPath {return [NSHomeDirectory() stringByAppendingPathComponent:@"Library/Application Support/Less Pull/browser.sock"];}
++ (NSString *)portName {return @"com.jiriarion.lesspull.bridge";}
+// Second doorway, for the sandboxed Safari extension: a Mach message port with the same
+// JSON requests and replies. Only this app's bundle can answer the name while it runs.
+static CFDataRef BridgePortCallback(CFMessagePortRef port,SInt32 msgid,CFDataRef data,void *info) {
+ BrowserBridge *bridge=(__bridge BrowserBridge *)info;id request=data&&CFDataGetLength(data)<=65536?[NSJSONSerialization JSONObjectWithData:(__bridge NSData *)data options:0 error:nil]:nil;
+ NSDictionary *reply=[bridge handle:request]?:@{@"ok":@NO,@"error":@"Invalid request"};NSData *out=[NSJSONSerialization dataWithJSONObject:reply options:0 error:nil];return out?CFDataCreate(NULL,out.bytes,out.length):NULL;
+}
 - (instancetype)init {if((self=[super init])){self.rules=[[NSUserDefaults.standardUserDefaults dictionaryForKey:@"websiteRules"] mutableCopy]?:[NSMutableDictionary new];self.contexts=[NSMutableDictionary new];self.listener=-1;}return self;}
 - (NSDictionary *)handle:(NSDictionary *)m {
  if(![m isKindOfClass:NSDictionary.class])return @{@"ok":@NO,@"error":@"Invalid message"};NSString *type=m[@"type"],*site=[m[@"scope"] isEqual:@"url"]?pageURL(m[@"site"]):siteName(m[@"site"]);NSString *browser=m[@"browser"];
@@ -34,9 +41,14 @@ static NSString *pageURL(id value){if(![value isKindOfClass:NSString.class]||[va
  for(NSString *key in keys){NSDictionary *r=self.rules[key];if([r[@"grayMode"] integerValue])gray=[r[@"grayMode"] integerValue];if([r[@"nightMode"] integerValue])night=[r[@"nightMode"] integerValue];if([r[@"customWarmth"] boolValue])warmth=[r[@"warmth"] doubleValue];}
  return @{@"grayMode":@(gray),@"nightMode":@(night),@"warmth":@(warmth)};
 }
+- (void)startPort {
+ if(self.port)return;CFMessagePortContext context={0,(__bridge void *)self,NULL,NULL,NULL};CFMessagePortRef port=CFMessagePortCreateLocal(NULL,(__bridge CFStringRef)BrowserBridge.portName,BridgePortCallback,&context,NULL);if(!port)return;
+ CFRunLoopSourceRef source=CFMessagePortCreateRunLoopSource(NULL,port,0);CFRunLoopAddSource(CFRunLoopGetMain(),source,kCFRunLoopCommonModes);CFRelease(source);self.port=port;
+}
 - (void)start {
+ [self startPort];
  NSString *path=BrowserBridge.socketPath;[NSFileManager.defaultManager createDirectoryAtPath:path.stringByDeletingLastPathComponent withIntermediateDirectories:YES attributes:@{NSFilePosixPermissions:@0700} error:nil];struct sockaddr_un address={.sun_family=AF_UNIX};if([path lengthOfBytesUsingEncoding:NSUTF8StringEncoding]>=sizeof(address.sun_path))return;strlcpy(address.sun_path,path.fileSystemRepresentation,sizeof(address.sun_path));struct stat st;if(lstat(address.sun_path,&st)==0){if(st.st_uid!=getuid()||!S_ISSOCK(st.st_mode))return;unlink(address.sun_path);}int fd=socket(AF_UNIX,SOCK_STREAM,0);if(fd<0)return;if(bind(fd,(void *)&address,sizeof(address))||chmod(address.sun_path,0600)||listen(fd,8)){close(fd);return;}self.listener=fd;
  __weak BrowserBridge *weak=self;dispatch_async(dispatch_get_global_queue(QOS_CLASS_UTILITY,0),^{while(weak.listener==fd){int client=accept(fd,NULL,NULL);if(client<0)break;int noPipe=1;setsockopt(client,SOL_SOCKET,SO_NOSIGPIPE,&noPipe,sizeof(noPipe));struct timeval timeout={.tv_sec=3};setsockopt(client,SOL_SOCKET,SO_RCVTIMEO,&timeout,sizeof(timeout));setsockopt(client,SOL_SOCKET,SO_SNDTIMEO,&timeout,sizeof(timeout));uint32_t size=0;NSDictionary *reply=@{@"ok":@NO,@"error":@"Invalid request"};if(bytes(client,&size,4,NO)&&size>0&&size<=65536){NSMutableData *data=[NSMutableData dataWithLength:size];if(bytes(client,data.mutableBytes,size,NO)){id request=[NSJSONSerialization JSONObjectWithData:data options:0 error:nil];__block NSDictionary *response;dispatch_sync(dispatch_get_main_queue(),^{response=[weak handle:request];});reply=response?:reply;}}NSData *out=[NSJSONSerialization dataWithJSONObject:reply options:0 error:nil];uint32_t n=(uint32_t)out.length;bytes(client,&n,4,YES);bytes(client,(void *)out.bytes,n,YES);close(client);}});
 }
-- (void)stop {int fd=self.listener;self.listener=-1;if(fd>=0){shutdown(fd,SHUT_RDWR);close(fd);unlink(BrowserBridge.socketPath.fileSystemRepresentation);}}
+- (void)stop {if(self.port){CFMessagePortInvalidate(self.port);CFRelease(self.port);self.port=NULL;}int fd=self.listener;self.listener=-1;if(fd>=0){shutdown(fd,SHUT_RDWR);close(fd);unlink(BrowserBridge.socketPath.fileSystemRepresentation);}}
 @end

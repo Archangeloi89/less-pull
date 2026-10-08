@@ -6,6 +6,8 @@
 @property (copy) NSDictionary *(^defaults)(NSString *browser);
 - (NSDictionary *)inheritedForSite:(NSString *)site browser:(NSString *)browser;
 @property int listener;
+@property CFMessagePortRef port;
++ (NSString *)portName;
 - (void)start;
 - (void)stop;
 - (NSDictionary *)handle:(NSDictionary *)message;
