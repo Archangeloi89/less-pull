@@ -18,5 +18,6 @@ For people working on Less Pull:
 | [Build 15 release notes](1.4.4-release.txt) | The previous build |
 | [Release metadata](lesspull-update.json) | The file to attach to each GitHub release so the app can tell which macOS versions a build is made for |
 | [Release plan](RELEASE-PLAN.md) | What is done and what is still open before a public release |
+| [Publishing safely](PUBLISHING.md) | Signing, stores, and account protection for the app and the extension |
 | [Testing](../Source/TESTING.txt) | How to build and run the test suites |
 | [About the pictures](assets/README.md) | Which images are screenshots, which are illustrations, and how they are made |
