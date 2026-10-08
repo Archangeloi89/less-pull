@@ -7,6 +7,7 @@
 | `settings-tabs.png` | Four window captures of build 16 (Shortcuts, Apps, Websites, About) with example rules, placed on a drawn backdrop by `src/settings-figure.py` |
 | `before-after.png` | The same drawn web page as it is and as Less Pull shows it, with captions, for the project page (`src/social-preview.py --plain`) |
 | `peek.png` | Three frames of the same drawn page: quiet, in color while the Peek shortcut is held, quiet again (`src/social-preview.py --peek`) |
+| `privacy.png` | Where a website address goes and where it never goes, drawn (`src/privacy-figure.py`) |
 | `social-preview.png` | The card GitHub shows in link previews: a drawn screen, color on the left and Less Pull's grayscale with a light amber on the right, computed with the app's own matrix (`src/social-preview.py`) |
 | `src/raw/*` | The original captures, untouched |
 | `hero-*.svg` | Animated illustration of one display changing with the app in front. It respects Reduce Motion |
@@ -37,6 +38,7 @@ python3 settings-figure.py raw ../settings-tabs.png shortcuts.jpg apps.jpg websi
 python3 social-preview.py ../social-preview.png          # the link-preview card
 python3 social-preview.py ../before-after.png --plain    # the same screen with captions
 python3 social-preview.py ../peek.png --peek             # Peek in color, three frames
+python3 privacy-figure.py ../privacy.png                 # where a website address goes
 ```
 
 Text in the SVG files is converted to outlines, because GitHub shows README images without web fonts. The typefaces are Schibsted Grotesk and IBM Plex Mono, both under the SIL Open Font License.
