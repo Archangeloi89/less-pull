@@ -10,4 +10,6 @@ The version number stays 1.4.4 for good; the build number is what changes. Build
 
 Build 20 (same day) adds Settings → General → Displays: every connected display, by name, with Follows what is on it / Always your defaults / Always plain, in color, stored by display UUID; and the Shortcuts wording "Left-clicking the menu-bar icon".
 
+Build 21 (same day): Peek works per display by default, on the display with the window you are using; a double press keeps that display plain, another display can be kept the same way later, and a press on a kept display lets only that one go. "All displays" remains a choice under Shortcuts. A two-display test covers it.
+
 Verified: the ten automated suites pass, including new per-display engine tests (apply, cache, independent fades, invalidate). Per-display color was confirmed live on the author's Mac with a second display. Browser support and everything else is as in build 17.

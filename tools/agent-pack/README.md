@@ -7,7 +7,7 @@ Requirements: Apple silicon Mac, macOS 13 or later (tested on macOS 27), the rel
 ## 1. Install the app
 
 ```sh
-zsh install.sh "/path/to/Less-Pull-1.4.4-20.zip" "/path/to/SHA256SUMS.txt"
+zsh install.sh "/path/to/Less-Pull-1.4.4-21.zip" "/path/to/SHA256SUMS.txt"
 ```
 
 The script verifies the checksum, extracts a clean copy (synced folders add metadata that breaks signature checks), checks the signature, quits a running copy, replaces `/Applications/Less Pull.app` (keeping the user's settings), registers the browser bridge for Chrome, Brave, Firefox, Opera and Edge, installs the Safari companion app, and launches Less Pull. Gatekeeper may ask the user to allow an app that is not notarized; that is expected until the signed build exists.
