@@ -14,6 +14,14 @@ Extra Warmth is optional. Use it during the day, in the evening, or let it follo
 
 <img src="docs/assets/comparison.svg" alt="Illustrative comparison of original colour, grayscale, warm grayscale at 50%, and red at 100%." width="100%">
 
+## Quick controls from the menu bar
+
+Click the Less Pull menu-bar icon to toggle grayscale, adjust Extra Warmth, control or briefly pause Night Shift, and resume warmth following. **App Exceptions…** opens individual app settings; **Customize [current app]…** takes you directly to the foreground app. The menu also provides browser-extension setup, Settings, Help, and Diagnostics.
+
+<img src="docs/assets/menu-bar.svg" alt="Illustration of Less Pull's menu-bar menu, including grayscale, warmth slider, Night Shift, following, app exceptions, current-app customization, and browser-extension setup." width="100%">
+
+*Illustration based on the current app menu. Labels, checkmarks, and available actions change with your settings and foreground app. Website exceptions are configured in the browser extension.*
+
 ## Global defaults. Individual app and website settings.
 
 <table><tr><td width="48%"><img src="docs/assets/settings.png" alt="Actual Less Pull 1.4.4 settings window showing grayscale and independent warmth following." width="440"></td><td valign="top">
