@@ -12,7 +12,9 @@
   &nbsp;·&nbsp; <a href="docs/README.md">All docs</a>
 </p>
 
-Less Pull is a small menu-bar app for macOS by [Jiri Arion Rose](https://jiriarion.com). It takes the color out of your screen so there is a little less reason to keep looking. You can add warmth on top, from a touch of amber all the way to red. And because some things need color, every app and every website can have its own settings.
+**Somewhere quieter.** Less Pull is a small menu-bar app for macOS by [Jiri Arion Rose](https://jiriarion.com). It takes the color out of your screen, so it pulls at you less — a little like stepping out of a loud room into a still one. What matters is still there; it just stops shouting.
+
+Warmth is the second step: from a touch of amber all the way to red, it takes the blue out of the light and puts you back in charge of how your screen speaks to you. And because a few things truly need color, every app and every website can have its own settings.
 
 <sub>The picture above is an illustration, not a screen recording. Its three looks are calculated with the same color matrix the app uses. The apps and the site are examples, not presets.</sub>
 
