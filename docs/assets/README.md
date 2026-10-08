@@ -2,12 +2,13 @@
 
 | File | What it is |
 | :-- | :-- |
-| `settings.png` | Real screenshot of the Less Pull 1.4.4 settings window |
-| `menu-bar.png` | Real screenshot of the Less Pull 1.4.4 menu-bar dropdown |
+| `settings.png` | Real screenshot of the Less Pull 1.4.4 settings window, cropped to the window and placed on a drawn backdrop |
+| `menu-bar.png` | Real screenshot of the Less Pull 1.4.4 menu-bar dropdown and its icon, cropped and placed on a drawn backdrop |
+| `src/raw/*.png` | The two original captures, untouched |
 | `website-popup-light.png`, `website-popup-dark.png` | The shipped extension popup (`Browser Extension/popup.html`) rendered in Chromium with example data. The browser window around it is drawn. It is not a screenshot taken inside Brave or Chrome |
 | `hero-*.svg` | Animated illustration of one display changing with the app in front. It respects Reduce Motion |
 | `warmth-*.svg` | Illustration of Extra Warmth from Off to Red, in color and grayscale |
-| `cascade-*.svg` | Diagram of how each setting inherits through Global, App, Domain and Exact URL |
+| `levels-*.svg` | Three example levels, from your defaults to one website to one page, showing what each one sets and what it keeps |
 | `nightshift-*.svg` | Timeline of warmth following Night Shift |
 
 Each illustration comes in a light and a dark version. GitHub picks one to match the reader's theme.
@@ -27,6 +28,7 @@ cd docs/assets/src
 npm install
 node build.mjs        # writes the SVG files
 node popshot.mjs      # renders the popup images
+python3 stage.py raw ..   # frames the two screenshots (needs Pillow and NumPy)
 ```
 
 Text in the SVG files is converted to outlines, because GitHub shows README images without web fonts. The typefaces are Schibsted Grotesk and IBM Plex Mono, both under the SIL Open Font License.

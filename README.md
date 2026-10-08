@@ -37,18 +37,18 @@ An exception can be as broad or as narrow as you like:
 
 Website rules are set from the toolbar of Brave or Chrome with the [optional extension](#website-exceptions-in-brave-or-chrome).
 
-### Each setting inherits on its own
+### Change one thing, keep the rest
 
-An exception does not have to replace everything. Grayscale, Extra Warmth and Night Shift are separate choices, and each one either sets a value or inherits it from the level above.
+An exception does not have to replace everything. Grayscale, Extra Warmth and Night Shift are separate settings. Set the one you want to change, and the others carry over from the broader level.
 
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/cascade-dark.svg">
-    <img src="docs/assets/cascade-light.svg" width="100%" alt="How a website tab resolves its settings. Grayscale, Extra Warmth and Night Shift each inherit separately through four levels: Global, App, Domain and Exact URL. In this example the domain example.com turns Grayscale off, the exact URL example.com/reading sets Warmth to 70 percent, and Night Shift stays on from the global setting. The tab shows in color, at 70 percent warmth, with Night Shift on.">
+    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/levels-dark.svg">
+    <img src="docs/assets/levels-light.svg" width="100%" alt="Three cards from broad to narrow. Everywhere: Grayscale on, Extra Warmth off, Night Shift on, so the picture is gray. On example.com: Grayscale is set to off, so the picture is in color, and the other two settings are kept. On the single page example.com/reading: Extra Warmth is set to 30 percent, so the picture is in warm color, and the other two settings are kept.">
   </picture>
 </p>
 
-<sub>Example values. Apps other than a browser use only the first two levels, Global and App.</sub>
+<sub>Example values. App exceptions work the same way: an app keeps whatever its rule does not change.</sub>
 
 A few things to know before you rely on it:
 
@@ -101,7 +101,7 @@ Less Pull has two interfaces on the Mac and a third in the browser.
 
 Click the half-filled circle in the menu bar.
 
-<img src="docs/assets/menu-bar.png" align="right" width="410" alt="Screenshot of the Less Pull menu-bar dropdown. It shows the current state, a Grayscale toggle, the Extra Warmth slider at 55 percent with stops labeled Off, 25, 50, 75 and Red, Night Shift controls, Extra Warmth follows Night Shift, Resume Following, App Exceptions, Customize System Settings, Install Browser Extension, Settings, Help, About and Quit.">
+<img src="docs/assets/menu-bar.png" align="right" width="440" alt="Screenshot of the Less Pull menu-bar dropdown. It shows the current state, a Grayscale toggle, the Extra Warmth slider at 55 percent with stops labeled Off, 25, 50, 75 and Red, Night Shift controls, Extra Warmth follows Night Shift, Resume Following, App Exceptions, Customize System Settings, Install Browser Extension, Settings, Help, About and Quit.">
 
 
 - The first line tells you what is applied right now.
@@ -110,7 +110,7 @@ Click the half-filled circle in the menu bar.
 - **Customize [current app]…** opens the rule for the app you were just using. In this screenshot that app happened to be System Settings.
 - **App Exceptions…** lists every app rule.
 
-<sub>Real screenshot of version 1.4.4.</sub>
+<sub>Real screenshot of version 1.4.4, placed on a plain backdrop.</sub>
 
 <br clear="right">
 
@@ -118,7 +118,7 @@ Click the half-filled circle in the menu bar.
 
 Choose **Settings…** in the menu.
 
-<img src="docs/assets/settings.png" align="right" width="410" alt="Screenshot of the Less Pull settings window. The heading reads Grayscale, Warmth 56 percent. Below are a Grayscale checkbox, the Extra Warmth slider with a Reset button, Night Shift with a Turn Night Shift off for menu, Extra Warmth follows Night Shift with a Resume Following button, Launch at login, an App Exceptions button, an Install Browser Extension button, Help, and links to jiriarion.com and Buy me a coffee.">
+<img src="docs/assets/settings.png" align="right" width="440" alt="Screenshot of the Less Pull settings window. The heading reads Grayscale, Warmth 56 percent. Below are a Grayscale checkbox, the Extra Warmth slider with a Reset button, Night Shift with a Turn Night Shift off for menu, Extra Warmth follows Night Shift with a Resume Following button, Launch at login, an App Exceptions button, an Install Browser Extension button, Help, and links to jiriarion.com and Buy me a coffee.">
 
 
 - The same controls as the menu, with room to breathe.
@@ -127,7 +127,7 @@ Choose **Settings…** in the menu.
 - **Install Browser Extension…** to set up website rules.
 - Hover over any control for a short explanation.
 
-<sub>Real screenshot of version 1.4.4.</sub>
+<sub>Real screenshot of version 1.4.4, placed on a plain backdrop.</sub>
 
 <br clear="right">
 

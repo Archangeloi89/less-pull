@@ -4,8 +4,8 @@ Less Pull has one set of global settings: Grayscale, Extra Warmth and Night Shif
 
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="assets/cascade-dark.svg">
-    <img src="assets/cascade-light.svg" width="100%" alt="How a website tab resolves its settings. Grayscale, Extra Warmth and Night Shift each inherit separately through four levels: Global, App, Domain and Exact URL. In this example the domain example.com turns Grayscale off, the exact URL example.com/reading sets Warmth to 70 percent, and Night Shift stays on from the global setting. The tab shows in color, at 70 percent warmth, with Night Shift on.">
+    <source media="(prefers-color-scheme: dark)" srcset="assets/levels-dark.svg">
+    <img src="assets/levels-light.svg" width="100%" alt="Three cards from broad to narrow. Everywhere: Grayscale on, Extra Warmth off, Night Shift on, so the picture is gray. On example.com: Grayscale is set to off, so the picture is in color, and the other two settings are kept. On the single page example.com/reading: Extra Warmth is set to 30 percent, so the picture is in warm color, and the other two settings are kept.">
   </picture>
 </p>
 
@@ -20,7 +20,7 @@ There are four levels, from broad to narrow:
 3. **Domain.** A rule for a website. It also covers the site's subdomains. If rules exist for both a domain and one of its subdomains, the more specific one wins.
 4. **Exact URL.** A rule for one page.
 
-Each of the three settings is resolved on its own. For each one, Less Pull uses the narrowest level that sets a value and skips the levels that inherit. So a rule can change only warmth and leave Grayscale and Night Shift to follow whatever is above it.
+Each of the three settings is resolved on its own. For each one, Less Pull uses the narrowest level that sets a value and skips the levels that inherit. So a rule can change only warmth and leave Grayscale and Night Shift to follow whatever is above it. The picture above leaves out the App level to stay simple.
 
 Apps other than Brave and Chrome use only the first two levels.
 
