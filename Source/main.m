@@ -243,7 +243,33 @@ static NSString *const LessPullReleasesPage=@"https://github.com/Archangeloi89/l
  NSOpenPanel *panel=[NSOpenPanel openPanel];panel.title=@"Add an app exception";panel.directoryURL=[NSURL fileURLWithPath:@"/Applications"];panel.canChooseDirectories=NO;panel.canChooseFiles=YES;panel.allowedContentTypes=@[UTTypeApplicationBundle];panel.treatsFilePackagesAsDirectories=NO;
  [panel beginSheetModalForWindow:self.settings completionHandler:^(NSModalResponse result){if(result==NSModalResponseOK)[self addAppURL:panel.URL];}];
 }
-- (void)excludeCurrent:(id)sender {NSURL *url=self.lastExternalApp.bundleURL;[self showExclusions:nil];if(url)[self addAppURL:url];}
+- (void)excludeCurrent:(id)sender {NSURL *url=self.lastExternalApp.bundleURL;NSString *bundle=self.lastExternalApp.bundleIdentifier;[self showExclusions:nil];if(url)[self addAppURL:url];
+ for(NSView *row in self.exclusionsList.arrangedSubviews)if([row.identifier isEqual:bundle]){[self.exclusionsList layoutSubtreeIfNeeded];[row scrollRectToVisible:row.bounds];break;}}
+// "Exception for <App>" in the menu: change the rule for the app in front without
+// opening Settings. The first change creates the rule.
+- (NSMutableDictionary *)currentAppRuleCreating:(BOOL)create {
+ NSString *bundle=self.lastExternalApp.bundleIdentifier;if(!bundle)return nil;if(!self.exclusionRules[bundle]){if(!create)return nil;NSURL *url=self.lastExternalApp.bundleURL;if(url)[self addAppURL:url];}
+ return [self.exclusionRules[bundle] mutableCopy];
+}
+- (void)storeCurrentAppRule:(NSDictionary *)rule {self.exclusionRules[self.lastExternalApp.bundleIdentifier]=rule;[self saveExclusionRules];[self rebuildExclusionsList];}
+- (void)currentAppChoice:(NSMenuItem *)sender {NSMutableDictionary *rule=[self currentAppRuleCreating:YES];if(!rule)return;rule[sender.tag/10==0?@"grayMode":@"nightMode"]=@(sender.tag%10);[self storeCurrentAppRule:rule];}
+- (void)currentAppWarmthDefault:(NSMenuItem *)sender {NSMutableDictionary *rule=[self currentAppRuleCreating:YES];if(!rule)return;rule[@"customWarmth"]=@(![rule[@"customWarmth"] boolValue]);[self storeCurrentAppRule:rule];}
+- (void)currentAppWarmthChanged:(NSSlider *)sender {NSMutableDictionary *rule=[self currentAppRuleCreating:YES];if(!rule)return;rule[@"customWarmth"]=@YES;rule[@"warmth"]=@(sender.doubleValue);[self storeCurrentAppRule:rule];NSTextField *readout=[sender.superview viewWithTag:98];readout.stringValue=[NSString stringWithFormat:@"%.0f%%",sender.doubleValue];}
+- (NSMenu *)currentAppMenu {
+ NSMenu *sub=[NSMenu new];NSDictionary *rule=[self currentAppRuleCreating:NO];NSString *name=self.lastExternalApp.localizedName?:@"this app";
+ NSArray *titles=@[@"Grayscale",@"Night Shift"],*keys=@[@"grayMode",@"nightMode"],*choices=@[@"Use default",@"On",@"Off"];
+ for(int i=0;i<2;i++){NSMenuItem *head=[[NSMenuItem alloc]initWithTitle:titles[i] action:nil keyEquivalent:@""];head.enabled=NO;[sub addItem:head];
+  for(int j=0;j<3;j++){NSMenuItem *item=[self add:choices[j] action:@selector(currentAppChoice:) to:sub];item.tag=i*10+j;item.indentationLevel=1;item.state=[rule[keys[i]] integerValue]==j;item.toolTip=[NSString stringWithFormat:@"%@ for %@ while it is in front.",titles[i],name];}
+  [sub addItem:NSMenuItem.separatorItem];}
+ BOOL custom=[rule[@"customWarmth"] boolValue];NSMenuItem *inherit=[self add:@"Use default warmth" action:@selector(currentAppWarmthDefault:) to:sub];inherit.state=!custom;inherit.toolTip=[NSString stringWithFormat:@"Uncheck to give %@ its own Extra Warmth.",name];
+ NSMenuItem *sliderItem=[NSMenuItem new];NSView *view=[[NSView alloc]initWithFrame:NSMakeRect(0,0,260,54)];
+ NSTextField *label=[NSTextField labelWithString:[NSString stringWithFormat:@"Extra Warmth for %@",name]];label.font=[NSFont systemFontOfSize:12];label.frame=NSMakeRect(18,34,190,16);label.lineBreakMode=NSLineBreakByTruncatingTail;[view addSubview:label];
+ NSTextField *readout=[NSTextField labelWithString:[NSString stringWithFormat:@"%.0f%%",[rule[@"warmth"] doubleValue]]];readout.tag=98;readout.font=[NSFont monospacedDigitSystemFontOfSize:12 weight:NSFontWeightRegular];readout.alignment=NSTextAlignmentRight;readout.frame=NSMakeRect(204,34,40,16);[view addSubview:readout];
+ NSSlider *slider=[self warmthSliderWithValue:[rule[@"warmth"] doubleValue] action:@selector(currentAppWarmthChanged:)];slider.frame=NSMakeRect(18,6,226,26);slider.enabled=custom;[self helpView:slider text:[NSString stringWithFormat:@"Extra Warmth for %@, from Off to Red.",name] label:[NSString stringWithFormat:@"Extra Warmth for %@, percent",name]];[view addSubview:slider];
+ sliderItem.view=view;[sub addItem:sliderItem];[sub addItem:NSMenuItem.separatorItem];
+ NSMenuItem *more=[self add:@"More in Settings…" action:@selector(excludeCurrent:) to:sub];more.toolTip=[NSString stringWithFormat:@"Open the exception for %@ in Settings → Apps.",name];
+ return sub;
+}
 // One App Exceptions row: name and Remove, the two choices, and the app's own warmth.
 - (NSView *)exceptionRowForBundle:(NSString *)bundle rule:(NSDictionary *)rule {
  NSTextField *name=[NSTextField labelWithString:rule[@"name"]?:bundle];name.font=[NSFont systemFontOfSize:13 weight:NSFontWeightSemibold];name.toolTip=bundle;
@@ -257,9 +283,10 @@ static NSString *const LessPullReleasesPage=@"https://github.com/Archangeloi89/l
  NSSlider *slider=[self warmthSliderWithValue:[rule[@"warmth"] doubleValue] action:@selector(ruleChanged:)];slider.identifier=bundle;slider.tag=3;slider.enabled=[rule[@"customWarmth"] boolValue];[slider.widthAnchor constraintGreaterThanOrEqualToConstant:180].active=YES;[slider setContentHuggingPriority:1 forOrientation:NSLayoutConstraintOrientationHorizontal];[self helpView:slider text:@"Extra Warmth for this app, from Off to Red." label:[NSString stringWithFormat:@"%@ — Extra Warmth percent",rule[@"name"]]];
  NSTextField *percent=[NSTextField labelWithString:[NSString stringWithFormat:@"%.0f%%",[rule[@"warmth"] doubleValue]]];percent.tag=99;percent.alignment=NSTextAlignmentRight;percent.font=[NSFont monospacedDigitSystemFontOfSize:13 weight:NSFontWeightRegular];[percent.widthAnchor constraintEqualToConstant:44].active=YES;
  NSStackView *warmth=[self row:@[inherit,slider,percent]];
- NSStackView *row=[self column:@[header,modes,warmth]];row.spacing=8;row.edgeInsets=NSEdgeInsetsMake(10,10,10,10);
+ NSStackView *row=[self column:@[header,modes,warmth]];row.spacing=8;row.edgeInsets=NSEdgeInsetsMake(10,10,10,10);row.identifier=bundle;
  return row;
 }
+- (NSImage *)menuIconForBundle:(NSString *)bundle {NSImage *icon=[[self iconForBundle:bundle] copy];icon.size=NSMakeSize(16,16);return icon;}
 - (NSImage *)iconForBundle:(NSString *)bundle {
  NSURL *url=[NSWorkspace.sharedWorkspace URLForApplicationWithBundleIdentifier:bundle];NSImage *icon=url?[NSWorkspace.sharedWorkspace iconForFile:url.path]:[NSWorkspace.sharedWorkspace iconForContentType:UTTypeApplicationBundle];return icon;
 }
@@ -499,7 +526,7 @@ static NSString *const LessPullReleasesPage=@"https://github.com/Archangeloi89/l
  if(self.pausedUntil){NSMenuItem *resume=[self add:@"Resume Less Pull" action:@selector(resumeLessPull:) to:menu];resume.toolTip=@"Bring Grayscale and Extra Warmth back now, with the normal fade.";}
  else {NSMenuItem *pauseAll=[self add:@"Pause Less Pull" action:nil to:menu];pauseAll.toolTip=[self pauseLessPullHelp];pauseAll.submenu=[NSMenu new];for(NSArray *pair in @[@[@"For 15 minutes",@15],@[@"For 1 hour",@60],@[@"Until I resume",@0]]){NSMenuItem *i=[self add:pair[0] action:@selector(pauseLessPull:) to:pauseAll.submenu];i.tag=[pair[1] integerValue];i.toolTip=[self pauseLessPullHelp];}}
  [menu addItem:NSMenuItem.separatorItem];
- if(self.lastExternalApp.bundleIdentifier){NSMenuItem *current=[self add:[NSString stringWithFormat:@"Exception for %@…",self.lastExternalApp.localizedName?:@"current app"] action:@selector(excludeCurrent:) to:menu];current.toolTip=[self exclusionSummary];}
+ if(self.lastExternalApp.bundleIdentifier){NSMenuItem *current=[self add:[NSString stringWithFormat:@"Exception for %@",self.lastExternalApp.localizedName?:@"current app"] action:nil to:menu];current.toolTip=[self exclusionSummary];current.submenu=[self currentAppMenu];current.image=[self menuIconForBundle:self.lastExternalApp.bundleIdentifier];}
  if(self.availableUpdate){NSMenuItem *update=[self add:[NSString stringWithFormat:@"Update available: %@…",self.availableUpdate[@"version"]] action:@selector(showUpdate:) to:menu];update.toolTip=@"See what is new and open the download page.";}
  [self add:@"Settings…" action:@selector(showSettings:) to:menu];
  [menu addItem:NSMenuItem.separatorItem];
@@ -659,7 +686,8 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
 - (NSBox *)separator {NSBox *b=[NSBox new];b.boxType=NSBoxSeparator;return b;}
 - (NSTabViewItem *)tab:(NSString *)title symbol:(NSString *)symbol content:(NSStackView *)content {
  content.edgeInsets=NSEdgeInsetsMake(20,24,20,24);content.translatesAutoresizingMaskIntoConstraints=NO;
- NSViewController *controller=[NSViewController new];NSView *root=[NSView new];[root addSubview:content];
+ // The standard window material: translucent like System Settings when transparency is on, solid under Reduce transparency.
+ NSViewController *controller=[NSViewController new];NSVisualEffectView *root=[NSVisualEffectView new];root.material=NSVisualEffectMaterialWindowBackground;root.blendingMode=NSVisualEffectBlendingModeBehindWindow;root.state=NSVisualEffectStateFollowsWindowActiveState;[root addSubview:content];
  [NSLayoutConstraint activateConstraints:@[[content.topAnchor constraintEqualToAnchor:root.topAnchor],[content.leadingAnchor constraintEqualToAnchor:root.leadingAnchor],[content.trailingAnchor constraintEqualToAnchor:root.trailingAnchor],[content.bottomAnchor constraintEqualToAnchor:root.bottomAnchor],[root.widthAnchor constraintEqualToConstant:500]]];
  // Rows, separators and lists span the column; a view marked fixed keeps its own width.
  for(NSView *v in content.arrangedSubviews)if(([v isKindOfClass:NSStackView.class]&&![v.identifier isEqual:@"fixed"])||[v isKindOfClass:NSBox.class]||[v isKindOfClass:NSScrollView.class])[v.widthAnchor constraintEqualToAnchor:content.widthAnchor constant:-48].active=YES;
