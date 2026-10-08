@@ -12,11 +12,11 @@ BUILD_ROOT=$(mktemp -d /tmp/lesspull.XXXXXX)
 trap 'rm -rf "$BUILD_ROOT"' EXIT
 APP="$BUILD_ROOT/Less Pull.app"
 mkdir -p "$APP/Contents/MacOS"
-clang -fobjc-arc -O2 -Wall -Wextra -Wno-unused-parameter -mmacosx-version-min=13.0 -arch arm64 main.m Engine.m SwitchingPolicy.m WarmthEngine.m PausePolicy.m ExclusionPolicy.m BrowserBridge.m MenuDismissal.m -framework CoreVideo -framework UniformTypeIdentifiers -framework Cocoa -framework Carbon -framework ServiceManagement -o "$APP/Contents/MacOS/LessPull"
+clang -fobjc-arc -O2 -Wall -Wextra -Wno-unused-parameter -mmacosx-version-min=13.0 -arch arm64 main.m Engine.m SwitchingPolicy.m WarmthEngine.m PausePolicy.m ExclusionPolicy.m BrowserBridge.m MenuDismissal.m Session.m -framework CoreVideo -framework QuartzCore -framework UniformTypeIdentifiers -framework Cocoa -framework Carbon -framework ServiceManagement -o "$APP/Contents/MacOS/LessPull"
 clang -fobjc-arc -O2 -Wall -mmacosx-version-min=13.0 -arch arm64 BrowserHost.m -framework Foundation -o "$APP/Contents/MacOS/LessPullBrowserHost"
 sign "$APP/Contents/MacOS/LessPullBrowserHost"
 mkdir -p "$APP/Contents/Resources"
-cp ../LICENSE-APP.txt ../LICENSE-SOURCE.txt AppIcon.icns MenuBar/menubar-*.png "$APP/Contents/Resources/"
+cp ../LICENSE-APP.txt ../LICENSE-SOURCE.txt AppIcon.icns MenuBar/menubar-*.png Sounds/session-*.wav "$APP/Contents/Resources/"
 ditto --norsrc "../Browser Extension" "$APP/Contents/Resources/Browser Extension"
 rm -f "$APP/Contents/Resources/Browser Extension/manifest.firefox.json"
 # Firefox loads the same code with its own manifest (event page, add-on id).

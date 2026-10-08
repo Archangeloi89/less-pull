@@ -41,3 +41,7 @@ Bounded display recovery regression (captured writes; no display changes):
 clang -fobjc-arc pipeline-tests.m Engine.m SwitchingPolicy.m WarmthEngine.m PausePolicy.m ExclusionPolicy.m BrowserBridge.m MenuDismissal.m -framework Cocoa -framework Carbon -framework UniformTypeIdentifiers -framework ServiceManagement -o /tmp/less-pull-pipeline-tests
 /tmp/less-pull-pipeline-tests
 Simulates a display reset after a fade finishes. Checks persistent grayscale, two recovery attempts, event coalescing, and no idle writes.
+
+--session <minutes>   starts a session at launch (for trying the end, the glow and the sound; 1 minute is handy).
+--session-panel       opens the session panel under the icon 1.5 s after launch (needs a session).
+--session-soon        starts a 1-minute session that ends about 6 s after launch.

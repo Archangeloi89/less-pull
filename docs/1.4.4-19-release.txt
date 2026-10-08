@@ -18,7 +18,7 @@ Build 23 (same day): the Displays section and the install help explain the hardw
 
 Build 24 (same day): "On every display" per app exception (menu and Settings → Apps): while that app is in front, its settings and Peek cover all displays, for apps whose picture shows on another display (3D players, presenters). Works whether or not the exception is used.
 
-Build 25 (same day): the menu-bar icon is placed at the left end of the menu-bar items on a new install (and once on the first launch of this build), where it stays visible on a crowded MacBook menu bar; ⌘-drag moves it, and macOS remembers the place.
+Build 25 (same day): an attempt to place the menu-bar icon by preference; build 31 removes it, since current macOS ignores the "Preferred Position" preference (tested with many values) and always puts a new item at the left end of the third-party items. ⌘-drag moves it, and macOS remembers the place.
 
 Build 26 (same day): "Peek on every display" per app exception, separate from "On every display": while that app is in front, Peek covers all displays instead of the one under the pointer.
 
@@ -27,5 +27,7 @@ Build 27 (same day): "Peek toggles" per app exception replaces "Peek on every di
 Build 28 (same day) was meant to make an app's own Peek toggles choice win over the global Peek scope (All displays) on the Shortcuts tab, but shipped without that change; build 29 has it.
 
 Build 30 (same day): Settings show what is relevant. Display options (the Displays section, Peek on, On every display, Peek toggles) appear only with two or more displays connected; the fine-tuning (what Peek turns off, mouse buttons, display options with one display) sits behind Show advanced options at the bottom of General. App and website rows are two lines with More for warmth and display choices; a row opens by itself the first time when something is set there. Website exceptions have the same display choices as apps (On every display, Peek toggles), kept by the bridge. Choices stay saved while hidden; a display keeps its choices when plugged in again (tested).
+
+Build 31 (same day): Sessions. Start a session from the menu (lengths under Settings → Sessions); the icon shows a filling ring and the minutes left; at the end a warm glow on every display with one line of text and a soft gong (pure tones on 432 Hz and the solfeggio pitches 132/198/264/396 Hz), then the count goes on past the end (−0, −1, …) with optional reminders every 3/5/10/15 minutes or never; a click on the icon opens a panel under it (the other button opens the menu): End session while running; Keep going / Leaving now once over; Leaving now offers Call me back in (your presets) and Not today; the call back comes once, with two rising notes, and the session ends. Sound and glow can be turned off; Try it previews both. A twelfth suite tests the session model. Also: the one-display option counts only with Show advanced options on; the Displays rows keep a fixed width.
 
 Verified: the ten automated suites pass, including new per-display engine tests (apply, cache, independent fades, invalidate). Per-display color was confirmed live on the author's Mac with a second display. Browser support and everything else is as in build 17.
