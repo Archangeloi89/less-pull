@@ -1,5 +1,7 @@
 # Firefox Add-ons (addons.mozilla.org) listing
 
+**Status:** submitted on 9 October 2026 as version 0.4.2, listed name "Less Pull Extension", awaiting Mozilla review. Product page: https://addons.mozilla.org/firefox/addon/less-pull-firefox-extension/ (the slug keeps an early name; it can be changed under Describe Add-on → Add-on URL → Edit). Mozilla does not allow "Firefox" or "Mozilla" in add-on names.
+
 Firefox installs the extension from addons.mozilla.org (AMO). Mozilla signs it on upload; no Apple or Google account is involved. The add-on id `lesspull@jiriarion.com` is fixed in the manifest, so the Mac app already allows it: nothing in the app changes for Firefox.
 
 ## Package
