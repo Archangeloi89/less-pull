@@ -40,7 +40,7 @@ def write(name, sig, gain=0.2):
 # The end, like a small gong: 132, 198 and 264 Hz (2 : 3 : 4, a fifth and a fourth, an octave down), a slow bloom,
 # the 264 a breath later, a faint 396 shimmer on top, and a long even fall.
 write('session-end.wav', mix(tone(132.0, 6.5, attack=0.16, decay=3.8), tone(198.0, 6.0, attack=0.16, decay=3.4, gain=0.7, start=0.06), tone(264.0, 5.6, attack=0.2, decay=3.0, gain=0.5, start=0.55), tone(396.0, 4.5, attack=0.3, decay=2.2, gain=0.16, start=0.9)), gain=0.24)
-# A reminder: 396 Hz alone with its octave, quieter, from the next room.
-write('session-remind.wav', mix(tone(396.0, 3.4, decay=1.8, gain=0.8), tone(792.0, 2.6, decay=1.2, gain=0.18)), gain=0.12)
-# The call back: 396, 528, 792 Hz rising (3 : 4 : 6), a welcome rather than an alarm.
-write('session-back.wav', mix(tone(396.0, 3.4, decay=1.8, gain=0.8), tone(528.0, 3.2, decay=1.8, gain=0.75, start=0.45), tone(792.0, 3.8, decay=2.4, gain=0.6, start=0.9)), gain=0.17)
+# A reminder: the same gong, quieter and shorter, from the next room.
+write('session-remind.wav', mix(tone(132.0, 4.2, attack=0.16, decay=2.4), tone(198.0, 3.8, attack=0.16, decay=2.2, gain=0.7, start=0.06), tone(264.0, 3.4, attack=0.2, decay=2.0, gain=0.5, start=0.5)), gain=0.13)
+# The call back: the same gong as the end. One sound to know.
+write('session-back.wav', mix(tone(132.0, 6.5, attack=0.16, decay=3.8), tone(198.0, 6.0, attack=0.16, decay=3.4, gain=0.7, start=0.06), tone(264.0, 5.6, attack=0.2, decay=3.0, gain=0.5, start=0.55), tone(396.0, 4.5, attack=0.3, decay=2.2, gain=0.16, start=0.9)), gain=0.24)

@@ -12,7 +12,7 @@ int main(){@autoreleasepool{
  [s quietFor:10 at:at(36*60)];check([s eventsAt:at(40*60)].count==0&&[s eventsAt:at(46*60)].count==1,"a few more minutes postpones the reminder");
  s.remindEvery=0;check([s eventsAt:at(120*60)].count==0,"never remind when asked");
  [s leaveAt:at(50*60) callBackIn:9];check(s.state==SessionAway&&[[s labelAt:at(50*60)] isEqual:@"9"]&&[[s labelAt:at(58*60+30)] isEqual:@"1"],"away counts to the call back");
- check([s eventsAt:at(58*60)].count==0,"not yet");e=[s eventsAt:at(59*60)];check(e.count==1&&[e[0] isEqual:@"callBack"]&&s.state==SessionIdle,"called back once, then over for good");check([s eventsAt:at(70*60)].count==0,"nothing after");
+ check([s.leftAt isEqualToDate:at(50*60)],"remembers when you left");check([s eventsAt:at(58*60)].count==0,"not yet");e=[s eventsAt:at(59*60)];check(e.count==1&&[e[0] isEqual:@"callBack"]&&s.state==SessionIdle,"called back once, then over for good");check([s eventsAt:at(70*60)].count==0,"nothing after");
  [s startMinutes:10 at:at(0)];[s extendMinutes:5];check([[s labelAt:at(0)] isEqual:@"15"]&&s.minutes==15,"extend moves the end");[s eventsAt:at(15*60)];[s extendMinutes:10];check(s.state==SessionRunning&&[[s labelAt:at(15*60)] isEqual:@"10"],"extending an over session runs it again");
  [s leaveAt:at(20*60) callBackIn:0];check(s.state==SessionIdle,"leaving without a call back ends it");
  [s startMinutes:45 at:at(0)];Session *back=[Session fromDictionary:s.dictionary];check(back.state==SessionRunning&&[[back labelAt:at(60)] isEqual:@"44"],"survives a relaunch");check([Session fromDictionary:@{@"state":@7}].state==SessionIdle&&[Session fromDictionary:@{@"state":@1}].state==SessionIdle,"bad saved state is idle");
