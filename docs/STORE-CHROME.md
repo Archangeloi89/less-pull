@@ -18,7 +18,7 @@ The zip holds the Chromium manifest without the local `key` (the store assigns t
 
 ## Listing texts
 
-**Name:** Less Pull — Website Exceptions
+**Name:** Less Pull Extension (from the manifest; the store shows it read-only)
 
 **Summary (132 characters max):**
 Connects your browser to the Less Pull Mac app, so websites can have their own display settings. Set them from the Less Pull menu.

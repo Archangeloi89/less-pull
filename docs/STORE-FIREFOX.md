@@ -1,6 +1,6 @@
 # Firefox Add-ons (addons.mozilla.org) listing
 
-**Status:** submitted on 9 October 2026 as version 0.4.2, listed name "Less Pull Extension", awaiting Mozilla review. Product page: https://addons.mozilla.org/firefox/addon/less-pull-firefox-extension/ (the slug keeps an early name; it can be changed under Describe Add-on → Add-on URL → Edit). Mozilla does not allow "Firefox" or "Mozilla" in add-on names.
+**Status:** submitted on 9 October 2026 as version 0.4.3, listed name "Less Pull Extension", awaiting Mozilla review. Product page: https://addons.mozilla.org/firefox/addon/less-pull-firefox-extension/ (the slug keeps an early name; it can be changed under Describe Add-on → Add-on URL → Edit). Mozilla does not allow "Firefox" or "Mozilla" in add-on names.
 
 Firefox installs the extension from addons.mozilla.org (AMO). Mozilla signs it on upload; no Apple or Google account is involved. The add-on id `lesspull@jiriarion.com` is fixed in the manifest, so the Mac app already allows it: nothing in the app changes for Firefox.
 
@@ -23,7 +23,7 @@ The extension sends the address of the active tab to the Less Pull app on the sa
 
 ## Listing texts
 
-**Name:** Less Pull — Website Exceptions
+**Name:** Less Pull Extension (from the manifest; the store shows it read-only)
 
 **Summary (250 characters max):**
 Connects Firefox to the Less Pull Mac app, so websites can have their own display settings: full color for a photo site, a little warmth for a reading site, your quiet defaults everywhere else. No buttons; set exceptions from the Less Pull menu.
