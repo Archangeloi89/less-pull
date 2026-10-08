@@ -214,6 +214,8 @@ int main(){@autoreleasepool{
  }
  printf("PASS: %lu combined following/global-state/base/grayscale/Night-Shift/warmth cases and restoration.\n",(unsigned long)combinations);
  check(e.nativeWrites==0,"no native filter toggles / HUD requests");
+ {// A display's choice is stored by its identity and survives disconnect and return.
+  TestApp *t=[TestApp new];FakeWarmth *fw=[FakeWarmth new];t.warmth=fw;NSString *key=[t displayUUID:11];[d setObject:@{key:@2} forKey:@"displayModes"];check([t displayMode:11]==2&&[t displayMode:12]==0,"display choice read by identity");[d removeObjectForKey:@"displayModes"];}
  {// Peek per display: a press peeks the active display only; a double press keeps it; each display is toggled on its own.
   TestApp *t=[TestApp new];FakeFilter *fe=[FakeFilter new];fe.on=YES;fe.state=(NSBlueStatus){.mode=0,.available=YES};TwoDisplays *tw=[TwoDisplays new];t.engine=fe;t.warmth=tw;t.exclusion=[ExclusionPolicy new];t.policy=[SwitchingPolicy new];t.selectedMode=100;t.peekLockedDisplays=[NSMutableSet new];[d setBool:YES forKey:@"peekActiveDisplayOnly"];
   t.activeDisplay=11;t.animateAppearance=YES;[t sync];check([tw.grayOn[@11] boolValue]&&[tw.grayOn[@22] boolValue],"both displays gray at rest");

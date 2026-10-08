@@ -1,10 +1,10 @@
 # Install
 
-Version 1.4.4 (build 29) is a test build. Read [what to expect](#what-to-expect-from-this-build) before you install. The version number stays 1.4.4 on purpose; the build number is what changes.
+Version 1.4.4 (build 30) is a test build. Read [what to expect](#what-to-expect-from-this-build) before you install. The version number stays 1.4.4 on purpose; the build number is what changes.
 
 ## The Mac app
 
-1. Download **Less-Pull-1.4.4-29.zip** from the [build 29 release](https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-29).
+1. Download **Less-Pull-1.4.4-30.zip** from the [build 30 release](https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-30).
 2. Unzip it and move **Less Pull.app** to **Applications**.
 3. Open it. A half-filled circle appears in the menu bar, and on the first launch the Settings window opens with a short welcome.
 4. Click the circle and choose Grayscale and Extra Warmth. Turn on **Extra Warmth follows Night Shift** if you want warmth only at night. The icon fills on the left while grayscale is showing and warms on the right as you add warmth.

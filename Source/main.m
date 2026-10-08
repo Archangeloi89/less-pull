@@ -198,6 +198,9 @@ static NSString *const LessPullOldBundleIdentifier=@"local.nightshiftfilters.app
 @property NSTabViewController *settingsTabs;
 @property NSTextField *websiteStatus;
 @property NSStackView *exclusionsList,*displaysList;
+// Progressive disclosure: views shown only with several displays, and views shown only with Show advanced options.
+@property NSMutableArray<NSView *> *multiDisplayViews,*advancedViews;
+@property NSMutableSet<NSString *> *expandedRules,*seenRules;
 @property NSTextField *exclusionText;
 @property NSRunningApplication *lastExternalApp;
 @property SwitchingPolicy *policy;
@@ -311,6 +314,28 @@ static NSString *const LessPullOldBundleIdentifier=@"local.nightshiftfilters.app
 - (NSString *)displayUUID:(uint32_t)display {CFUUIDRef u=CGDisplayCreateUUIDFromDisplayID(display);if(!u)return [NSString stringWithFormat:@"%u",display];NSString *s=CFBridgingRelease(CFUUIDCreateString(NULL,u));CFRelease(u);return s;}
 - (NSInteger)displayMode:(uint32_t)display {return [[NSUserDefaults.standardUserDefaults dictionaryForKey:@"displayModes"][[self displayUUID:display]] integerValue];}
 - (NSString *)displayName:(uint32_t)display {for(NSScreen *s in NSScreen.screens)if([s.deviceDescription[@"NSScreenNumber"] unsignedIntValue]==display)return s.localizedName;return [NSString stringWithFormat:@"Display %u",display];}
+// What to show: multi-display controls with two or more displays (or when asked for), the fine-tuning
+// only with Show advanced options. Choices stay saved either way.
+- (BOOL)multiDisplay {return [self.warmth displays].count>1||[NSUserDefaults.standardUserDefaults boolForKey:@"alwaysShowDisplays"];}
+- (BOOL)advanced {return [NSUserDefaults.standardUserDefaults boolForKey:@"showAdvanced"];}
+- (NSView *)multi:(NSView *)v {if(!self.multiDisplayViews)self.multiDisplayViews=[NSMutableArray new];[self.multiDisplayViews addObject:v];v.hidden=![self multiDisplay];return v;}
+- (NSView *)adv:(NSView *)v {if(!self.advancedViews)self.advancedViews=[NSMutableArray new];[self.advancedViews addObject:v];v.hidden=![self advanced];return v;}
+- (void)applyVisibility {
+ BOOL multi=[self multiDisplay],adv=[self advanced];for(NSView *v in self.multiDisplayViews)v.hidden=!multi;for(NSView *v in self.advancedViews)v.hidden=!adv;
+ [self rebuildExclusionsList];[self rebuildWebsiteRulesList];[self relayoutSettings];
+}
+// Hidden views leave the stacks; the tabs then take their new height.
+- (void)relayoutSettings {
+ if(!self.settingsTabs)return;for(NSTabViewItem *item in self.settingsTabs.tabViewItems){NSView *root=item.viewController.view;NSView *content=root.subviews.firstObject;[content layoutSubtreeIfNeeded];item.viewController.preferredContentSize=NSMakeSize(500,content.fittingSize.height);}
+ NSInteger i=self.settingsTabs.selectedTabViewItemIndex;self.settingsTabs.selectedTabViewItemIndex=i==0?1:0;self.settingsTabs.selectedTabViewItemIndex=i;
+}
+- (void)toggleAdvanced:(NSButton *)sender {[NSUserDefaults.standardUserDefaults setBool:sender.state==NSControlStateValueOn forKey:@"showAdvanced"];[self applyVisibility];}
+- (void)toggleAlwaysDisplays:(NSButton *)sender {[NSUserDefaults.standardUserDefaults setBool:sender.state==NSControlStateValueOn forKey:@"alwaysShowDisplays"];[self refreshDisplayRows];[self applyVisibility];}
+- (NSView *)advancedBlock {
+ NSButton *show=[NSButton checkboxWithTitle:@"Show advanced options" target:self action:@selector(toggleAdvanced:)];show.state=[self advanced];[self helpView:show text:@"Shows the fine-tuning in every tab: what Peek turns off, what the mouse buttons do, and display options with one display. Everything keeps working as set when hidden." label:@"Show advanced options"];
+ NSButton *always=[NSButton checkboxWithTitle:@"Show display options with one display" target:self action:@selector(toggleAlwaysDisplays:)];always.state=[NSUserDefaults.standardUserDefaults boolForKey:@"alwaysShowDisplays"];[self helpView:always text:@"Display options appear by themselves when two or more displays are connected. Tick this to keep them visible with one display." label:@"Show display options with one display"];
+ NSStackView *column=[self column:@[show,[self adv:always],[self adv:[self note:@"Choices for apps, websites and displays stay saved while hidden, and a display keeps its choices when it is plugged in again."]]]];column.spacing=6;return column;
+}
 - (NSView *)displaysSection {
  NSTextField *title=[NSTextField labelWithString:@"Displays"];title.font=[NSFont systemFontOfSize:13 weight:NSFontWeightMedium];
  self.displaysList=[self column:@[]];self.displaysList.spacing=6;[self refreshDisplayRows];
@@ -336,7 +361,7 @@ static NSString *const LessPullOldBundleIdentifier=@"local.nightshiftfilters.app
 // app whose window is on top decides (its exception, if it has one, or the defaults); an empty display
 // shows the defaults. Only the frontmost app's own display carries a website rule.
 - (void)updateDisplayMap:(pid_t)frontPid {
- NSArray *displays=[self.warmth displays];self.activeDisplay=CGMainDisplayID();self.frontSpansAll=[self.exclusionRules[self.foregroundID][@"allDisplays"] boolValue];id targets=[self peekTargetsOfRule:self.exclusionRules[self.foregroundID]];self.frontPeekSpansAll=[targets isEqual:@"all"];self.frontPeekDisplays=nil;
+ NSArray *displays=[self.warmth displays];self.activeDisplay=CGMainDisplayID();NSDictionary *siteRule=self.website?self.browserBridge.rules[self.website]:nil;self.frontSpansAll=[self.exclusionRules[self.foregroundID][@"allDisplays"] boolValue]||[siteRule[@"allDisplays"] boolValue];id targets=[self peekTargetsOfRule:siteRule]?:[self peekTargetsOfRule:self.exclusionRules[self.foregroundID]];self.frontPeekSpansAll=[targets isEqual:@"all"];self.frontPeekDisplays=nil;
  if([targets isKindOfClass:NSArray.class]){NSMutableSet *ids=[NSMutableSet new];for(NSNumber *dn in displays){uint32_t d=dn.unsignedIntValue;if(d&&[targets containsObject:[self displayUUID:d]])[ids addObject:dn];}self.frontPeekDisplays=ids.count?ids:nil;}if(displays.count<2||![displays.firstObject unsignedIntValue]){self.frontDisplays=nil;self.displayOverrides=@{};return;}
  if(self.frontSpansAll){self.frontDisplays=[NSSet setWithArray:displays];self.displayOverrides=@{};return;}  // this app shows on every display: its settings everywhere
  CFArrayRef array=CGWindowListCopyWindowInfo(kCGWindowListOptionOnScreenOnly|kCGWindowListExcludeDesktopElements,kCGNullWindowID);NSArray *windows=array?CFBridgingRelease(array):@[];
@@ -379,8 +404,15 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  else if(sender.tag==5)rule[@"allDisplays"]=@([(NSButton *)sender state]==NSControlStateValueOn);
  else {rule[@"warmth"]=@([(NSSlider *)sender doubleValue]);if([(NSSlider *)sender doubleValue]>0)rule[@"customWarmth"]=@YES;}
  if(sender.tag!=4&&sender.tag!=5)RuleAfterChange(before,rule);
- self.exclusionRules[bundle]=rule;[self saveExclusionRules];if(sender.tag!=3)[self rebuildExclusionsList];else {NSTextField *readout=[sender.superview viewWithTag:99];readout.stringValue=[NSString stringWithFormat:@"%.0f%%",[rule[@"warmth"] doubleValue]];for(NSView *v in sender.superview.superview.subviews)for(NSView *w in v.subviews)if([w isKindOfClass:NSButton.class]&&[(NSButton *)w tag]==4)[(NSButton *)w setState:RuleEnabled(rule)];NSButton *inherit=[sender.superview viewWithTag:2];inherit.state=![rule[@"customWarmth"] boolValue];}
+ self.exclusionRules[bundle]=rule;[self saveExclusionRules];if(sender.tag!=3)[self rebuildExclusionsList];else {NSTextField *readout=[sender.superview viewWithTag:99];readout.stringValue=[NSString stringWithFormat:@"%.0f%%",[rule[@"warmth"] doubleValue]];NSView *top=sender;while(top&&![top.identifier isEqual:bundle])top=top.superview;NSButton *en=[top viewWithTag:4];if([en isKindOfClass:NSButton.class])en.state=RuleEnabled(rule);NSButton *inherit=[sender.superview viewWithTag:2];inherit.state=![rule[@"customWarmth"] boolValue];}
 }
+// A row opens by itself the first time it is shown with something set in its details; after that the user decides.
+- (BOOL)ruleOpen:(NSString *)key rule:(NSDictionary *)rule {
+ if(!self.seenRules)self.seenRules=[NSMutableSet new];if(!self.expandedRules)self.expandedRules=[NSMutableSet new];
+ if(![self.seenRules containsObject:key]){[self.seenRules addObject:key];if([rule[@"customWarmth"] boolValue]||[rule[@"allDisplays"] boolValue]||[self peekTargetsOfRule:rule]!=nil)[self.expandedRules addObject:key];}
+ return [self.expandedRules containsObject:key];
+}
+- (void)toggleRuleDetails:(NSButton *)sender {NSString *key=sender.identifier;if([self.expandedRules containsObject:key])[self.expandedRules removeObject:key];else [self.expandedRules addObject:key];[self rebuildExclusionsList];[self rebuildWebsiteRulesList];}
 - (void)removeRule:(NSButton *)sender {[self.exclusionRules removeObjectForKey:sender.identifier];[self saveExclusionRules];[self rebuildExclusionsList];}
 - (void)addAppURL:(NSURL *)url {
  NSBundle *bundle=[NSBundle bundleWithURL:url];NSString *identifier=bundle.bundleIdentifier;if(!identifier||[identifier isEqual:NSBundle.mainBundle.bundleIdentifier])return;
@@ -410,7 +442,7 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
 - (NSDictionary *)websiteRuleForTab:(NSDictionary *)tab {return self.browserBridge.rules[[self websiteKeyForTab:tab]];}
 - (void)storeWebsiteRule:(NSDictionary *)rule forTab:(NSDictionary *)tab {
  NSString *key=[self websiteKeyForTab:tab];BOOL exact=[key containsString:@"://"];
- [self.browserBridge handle:@{@"type":@"set",@"scope":exact?@"url":@"domain",@"site":key,@"rule":@{@"grayMode":rule[@"grayMode"]?:@0,@"nightMode":rule[@"nightMode"]?:@0,@"customWarmth":rule[@"customWarmth"]?:@NO,@"warmth":rule[@"warmth"]?:@0,@"enabled":@(RuleEnabled(rule))}}];
+ [self.browserBridge handle:@{@"type":@"set",@"scope":exact?@"url":@"domain",@"site":key,@"rule":@{@"grayMode":rule[@"grayMode"]?:@0,@"nightMode":rule[@"nightMode"]?:@0,@"customWarmth":rule[@"customWarmth"]?:@NO,@"warmth":rule[@"warmth"]?:@0,@"enabled":@(RuleEnabled(rule)),@"allDisplays":@([rule[@"allDisplays"] boolValue]),@"peekDisplays":rule[@"peekDisplays"]?:NSNull.null}}];
 }
 - (NSDictionary *)menuTab {return [self.browserBridge activeContextForBrowser:self.lastExternalApp.bundleIdentifier];}
 - (void)websiteScope:(NSMenuItem *)sender {self.websiteScopeExact=sender.tag==1;}
@@ -439,6 +471,8 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  NSTextField *readout=[NSTextField labelWithString:[NSString stringWithFormat:@"%.0f%%",[rule[@"warmth"] doubleValue]]];readout.tag=98;readout.font=[NSFont monospacedDigitSystemFontOfSize:12 weight:NSFontWeightRegular];readout.alignment=NSTextAlignmentRight;readout.frame=NSMakeRect(204,34,40,16);[view addSubview:readout];
  NSSlider *slider=[self warmthSliderWithValue:[rule[@"warmth"] doubleValue] action:@selector(websiteWarmthChanged:)];slider.frame=NSMakeRect(18,6,226,26);[self helpView:slider text:@"Extra Warmth for this website, from Off to Red." label:[NSString stringWithFormat:@"Extra Warmth for %@, percent",key]];[view addSubview:slider];
  sliderItem.view=view;[sub addItem:sliderItem];[sub addItem:NSMenuItem.separatorItem];
+ if([self multiDisplay]){NSMenuItem *span=[self add:@"On every display" action:@selector(websiteAllDisplays:) to:sub];span.state=[rule[@"allDisplays"] boolValue];
+  NSMenuItem *peekSpan=[self add:[NSString stringWithFormat:@"Peek toggles: %@",[self peekTargetsLabel:rule]] action:nil to:sub];peekSpan.submenu=[self peekDisplaysMenuForKey:key website:YES];[sub addItem:NSMenuItem.separatorItem];}
  if(rule){[self add:@"Remove this exception" action:@selector(websiteRemove:) to:sub];}
  [self add:@"All website exceptions…" action:@selector(showWebsites:) to:sub];
  return sub;
@@ -456,8 +490,8 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  NSTextField *readout=[NSTextField labelWithString:[NSString stringWithFormat:@"%.0f%%",[rule[@"warmth"] doubleValue]]];readout.tag=98;readout.font=[NSFont monospacedDigitSystemFontOfSize:12 weight:NSFontWeightRegular];readout.alignment=NSTextAlignmentRight;readout.frame=NSMakeRect(204,34,40,16);[view addSubview:readout];
  NSSlider *slider=[self warmthSliderWithValue:[rule[@"warmth"] doubleValue] action:@selector(currentAppWarmthChanged:)];slider.frame=NSMakeRect(18,6,226,26);[self helpView:slider text:[NSString stringWithFormat:@"Extra Warmth for %@, from Off to Red.",name] label:[NSString stringWithFormat:@"Extra Warmth for %@, percent",name]];[view addSubview:slider];
  sliderItem.view=view;[sub addItem:sliderItem];[sub addItem:NSMenuItem.separatorItem];
- NSMenuItem *span=[self add:@"On every display" action:@selector(currentAppAllDisplays:) to:sub];span.state=[rule[@"allDisplays"] boolValue];
- NSMenuItem *peekSpan=[self add:[NSString stringWithFormat:@"Peek toggles: %@",[self peekTargetsLabel:rule]] action:nil to:sub];peekSpan.submenu=[self peekDisplaysMenuForBundle:self.lastExternalApp.bundleIdentifier];[sub addItem:NSMenuItem.separatorItem];
+ if([self multiDisplay]){NSMenuItem *span=[self add:@"On every display" action:@selector(currentAppAllDisplays:) to:sub];span.state=[rule[@"allDisplays"] boolValue];
+  NSMenuItem *peekSpan=[self add:[NSString stringWithFormat:@"Peek toggles: %@",[self peekTargetsLabel:rule]] action:nil to:sub];peekSpan.submenu=[self peekDisplaysMenuForBundle:self.lastExternalApp.bundleIdentifier];[sub addItem:NSMenuItem.separatorItem];}
  [self add:@"More in Settings…" action:@selector(excludeCurrent:) to:sub];
  return sub;
 }
@@ -467,30 +501,36 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
 - (NSString *)peekTargetsLabel:(NSDictionary *)rule {id t=[self peekTargetsOfRule:rule];if(!t)return @"The display under the pointer";if([t isEqual:@"all"])return @"All displays";
  NSMutableArray *names=[NSMutableArray new];for(NSNumber *dn in [self.warmth displays]){uint32_t d=dn.unsignedIntValue;if(d&&[t containsObject:[self displayUUID:d]])[names addObject:[self displayName:d]];}
  NSUInteger missing=[t count]-names.count;if(missing)[names addObject:[NSString stringWithFormat:@"%lu not connected",(unsigned long)missing]];return names.count?[names componentsJoinedByString:@", "]:@"The display under the pointer";}
-- (NSMenu *)peekDisplaysMenuForBundle:(NSString *)bundle {
- NSMenu *m=[NSMenu new];NSDictionary *rule=self.exclusionRules[bundle];id t=[self peekTargetsOfRule:rule];
- NSMenuItem *pointer=[self add:@"The display under the pointer" action:@selector(peekDisplaysChoice:) to:m];pointer.representedObject=@"pointer";pointer.identifier=bundle;pointer.state=t==nil;
- NSMenuItem *all=[self add:@"All displays" action:@selector(peekDisplaysChoice:) to:m];all.representedObject=@"all";all.identifier=bundle;all.state=[t isEqual:@"all"];[m addItem:NSMenuItem.separatorItem];
+- (NSMenu *)peekDisplaysMenuForBundle:(NSString *)bundle {return [self peekDisplaysMenuForKey:bundle website:NO];}
+- (NSMenu *)peekDisplaysMenuForKey:(NSString *)key website:(BOOL)website {
+ NSMenu *m=[NSMenu new];NSDictionary *rule=website?self.browserBridge.rules[key]:self.exclusionRules[key];id t=[self peekTargetsOfRule:rule];
+ NSMenuItem *pointer=[self add:@"The display under the pointer" action:@selector(peekDisplaysChoice:) to:m];pointer.representedObject=@"pointer";pointer.identifier=key;pointer.tag=website;pointer.state=t==nil;
+ NSMenuItem *all=[self add:@"All displays" action:@selector(peekDisplaysChoice:) to:m];all.representedObject=@"all";all.identifier=key;all.tag=website;all.state=[t isEqual:@"all"];[m addItem:NSMenuItem.separatorItem];
  NSMenuItem *head=[[NSMenuItem alloc]initWithTitle:@"Or any of these" action:nil keyEquivalent:@""];head.enabled=NO;[m addItem:head];
- for(NSNumber *dn in [self.warmth displays]){uint32_t d=dn.unsignedIntValue;if(!d)continue;NSString *uuid=[self displayUUID:d];NSMenuItem *item=[self add:[self displayName:d] action:@selector(peekDisplaysChoice:) to:m];item.representedObject=uuid;item.identifier=bundle;item.indentationLevel=1;item.state=[t isKindOfClass:NSArray.class]&&[t containsObject:uuid];}
+ for(NSNumber *dn in [self.warmth displays]){uint32_t d=dn.unsignedIntValue;if(!d)continue;NSString *uuid=[self displayUUID:d];NSMenuItem *item=[self add:[self displayName:d] action:@selector(peekDisplaysChoice:) to:m];item.representedObject=uuid;item.identifier=key;item.tag=website;item.indentationLevel=1;item.state=[t isKindOfClass:NSArray.class]&&[t containsObject:uuid];}
  return m;
 }
 - (void)peekDisplaysChoice:(NSMenuItem *)sender {
- NSString *bundle=sender.identifier;NSMutableDictionary *rule=[self.exclusionRules[bundle] mutableCopy];if(!rule){if(![bundle isEqual:self.lastExternalApp.bundleIdentifier])return;rule=[self currentAppRuleCreating:YES];if(!rule)return;}
+ NSString *key=sender.identifier;BOOL website=sender.tag==1;NSMutableDictionary *rule=[(website?self.browserBridge.rules[key]:self.exclusionRules[key]) mutableCopy];
+ if(!rule){if(website){NSDictionary *tab=[self menuTab];if(!tab||![[self websiteKeyForTab:tab] isEqual:key])return;rule=[NSMutableDictionary new];}else {if(![key isEqual:self.lastExternalApp.bundleIdentifier])return;rule=[self currentAppRuleCreating:YES];if(!rule)return;}}
  id choice=sender.representedObject;[rule removeObjectForKey:@"peekAllDisplays"];
  if([choice isEqual:@"pointer"])[rule removeObjectForKey:@"peekDisplays"];
  else if([choice isEqual:@"all"])rule[@"peekDisplays"]=@"all";
  else {NSMutableArray *set=[[self peekTargetsOfRule:rule] isKindOfClass:NSArray.class]?[rule[@"peekDisplays"] mutableCopy]:[NSMutableArray new];if([set containsObject:choice])[set removeObject:choice];else [set addObject:choice];if(set.count)rule[@"peekDisplays"]=set;else [rule removeObjectForKey:@"peekDisplays"];}
- self.exclusionRules[bundle]=rule;[self saveExclusionRules];[self rebuildExclusionsList];
+ if(website){[self.browserBridge handle:@{@"type":@"set",@"scope":[key containsString:@"://"]?@"url":@"domain",@"site":key,@"rule":rule}];[self rebuildWebsiteRulesList];}
+ else {self.exclusionRules[key]=rule;[self saveExclusionRules];[self rebuildExclusionsList];}
 }
+- (void)websiteAllDisplays:(NSMenuItem *)sender {NSDictionary *tab=[self menuTab];if(!tab)return;NSMutableDictionary *rule=[[self websiteRuleForTab:tab] mutableCopy]?:[NSMutableDictionary new];rule[@"allDisplays"]=@(![rule[@"allDisplays"] boolValue]);[self storeWebsiteRule:rule forTab:tab];}
 - (void)currentAppAllDisplays:(NSMenuItem *)sender {NSMutableDictionary *rule=[self currentAppRuleCreating:YES];if(!rule)return;rule[@"allDisplays"]=@(![rule[@"allDisplays"] boolValue]);[self storeCurrentAppRule:rule];}
 // One App Exceptions row: name and Remove, the two choices, and the app's own warmth.
 - (NSView *)exceptionRowForBundle:(NSString *)bundle rule:(NSDictionary *)rule {
- NSTextField *name=[NSTextField labelWithString:rule[@"name"]?:bundle];name.font=[NSFont systemFontOfSize:13 weight:NSFontWeightSemibold];name.toolTip=bundle;
+ NSTextField *name=[NSTextField labelWithString:rule[@"name"]?:bundle];name.font=[NSFont systemFontOfSize:13 weight:NSFontWeightSemibold];name.toolTip=bundle;name.lineBreakMode=NSLineBreakByTruncatingTail;[name setContentCompressionResistancePriority:1 forOrientation:NSLayoutConstraintOrientationHorizontal];
  NSImageView *icon=[NSImageView imageViewWithImage:[self iconForBundle:bundle]];[icon.widthAnchor constraintEqualToConstant:28].active=YES;[icon.heightAnchor constraintEqualToConstant:28].active=YES;icon.accessibilityLabel=[NSString stringWithFormat:@"%@ icon",rule[@"name"]];
  NSButton *remove=[NSButton buttonWithTitle:@"Remove" target:self action:@selector(removeRule:)];remove.identifier=bundle;remove.bezelStyle=NSBezelStyleInline;[self helpView:remove text:@"Remove this exception. The app then uses your default settings." label:[NSString stringWithFormat:@"Remove %@ exception",rule[@"name"]]];
  NSButton *enable=[NSButton checkboxWithTitle:@"Use this exception" target:self action:@selector(ruleChanged:)];enable.identifier=bundle;enable.tag=4;enable.state=RuleEnabled(rule);enable.font=[NSFont systemFontOfSize:12];[self helpView:enable text:@"Off keeps the settings below but does not apply them. Changing a setting away from default switches it on again." label:[NSString stringWithFormat:@"Use the exception for %@",rule[@"name"]]];enable.tag=4;
- NSStackView *header=[self row:@[icon,name,[self spacer],enable,remove]];
+ BOOL open=[self ruleOpen:bundle rule:rule];
+ NSButton *more=[NSButton buttonWithTitle:open?@"Less":@"More" target:self action:@selector(toggleRuleDetails:)];more.identifier=bundle;more.tag=7;more.bezelStyle=NSBezelStyleInline;more.font=[NSFont systemFontOfSize:11];[self helpView:more text:@"Warmth for this app and, with several displays, which displays it covers." label:[NSString stringWithFormat:@"%@ — more settings",rule[@"name"]]];
+ NSStackView *header=[self row:@[icon,name,[self spacer],enable,more,remove]];
  NSMutableArray *choices=[NSMutableArray new];NSArray *titles=@[@"Grayscale",@"Night Shift"];
  for(int i=0;i<2;i++){NSTextField *label=[NSTextField labelWithString:titles[i]];NSSegmentedControl *choice=[NSSegmentedControl segmentedControlWithLabels:@[@"Default",@"On",@"Off"] trackingMode:NSSegmentSwitchTrackingSelectOne target:self action:@selector(ruleChanged:)];choice.selectedSegment=[rule[i==0?@"grayMode":@"nightMode"] integerValue];choice.identifier=bundle;choice.tag=i;for(int k=0;k<3;k++)[choice setWidth:44 forSegment:k];[self helpView:choice text:[self exclusionHelp] label:[NSString stringWithFormat:@"%@ — %@",rule[@"name"],titles[i]]];[choices addObject:label];[choices addObject:choice];}
  NSStackView *modes=[self row:choices];modes.spacing=6;[modes setCustomSpacing:14 afterView:choices[1]];
@@ -503,8 +543,9 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  NSPopUpButton *peekPick=[[NSPopUpButton alloc]initWithFrame:NSZeroRect pullsDown:YES];peekPick.font=[NSFont systemFontOfSize:12];[peekPick.widthAnchor constraintEqualToConstant:200].active=YES;
  NSMenu *pickMenu=[self peekDisplaysMenuForBundle:bundle];[pickMenu insertItem:[[NSMenuItem alloc]initWithTitle:[self peekTargetsLabel:rule] action:nil keyEquivalent:@""] atIndex:0];peekPick.menu=pickMenu;
  [self helpView:peekPick text:@"Which displays Peek toggles while this app is in front: the display under the pointer, all displays, or any set of connected displays you tick. Works whether or not the exception is used." label:[NSString stringWithFormat:@"%@ — Peek toggles",rule[@"name"]]];
- NSStackView *spans=[self row:@[span,[self spacer],peekLabel,peekPick]];spans.spacing=6;
- NSStackView *row=[self column:@[header,modes,warmth,spans]];row.spacing=8;row.edgeInsets=NSEdgeInsetsMake(10,10,10,10);row.identifier=bundle;
+ NSStackView *spans=[self row:@[span,[self spacer],peekLabel,peekPick]];spans.spacing=6;spans.hidden=![self multiDisplay];
+ NSStackView *details=[self column:@[warmth,spans]];details.spacing=8;details.hidden=!open;
+ NSStackView *row=[self column:@[header,modes,details]];row.spacing=8;row.edgeInsets=NSEdgeInsetsMake(10,10,10,10);row.identifier=bundle;[header.widthAnchor constraintEqualToAnchor:row.widthAnchor constant:-20].active=YES;[details.widthAnchor constraintEqualToAnchor:row.widthAnchor constant:-20].active=YES;[warmth.widthAnchor constraintEqualToAnchor:details.widthAnchor].active=YES;[spans.widthAnchor constraintEqualToAnchor:details.widthAnchor].active=YES;
  return row;
 }
 - (NSImage *)menuIconForBundle:(NSString *)bundle {NSImage *icon=[[self iconForBundle:bundle] copy];icon.size=NSMakeSize(16,16);return icon;}
@@ -1054,7 +1095,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
   [self row:@[self.warmthTitle,[self spacer],self.resetButton]],[self row:@[self.warmthSlider,self.warmthLabel]],tickRow,[self note:@"Adds warmth on top of Night Shift, from Off to Red."],[self separator],
   [self row:@[self.nightButton,[self spacer],self.pausePopup,self.endPauseButton]],[self note:@"Turns Night Shift on or off now; your schedule in System Settings stays as it is."],
   [self row:@[self.autoButton,[self spacer],self.resumeButton]],[self note:@"On: Extra Warmth only while Night Shift is on, none in the daytime. Off: Extra Warmth stays on all day."],[self separator],
-  self.loginButton,self.loginNote,[self separator],[self displaysSection]]];
+  self.loginButton,self.loginNote,[self multi:[self separator]],[self multi:[self displaysSection]],[self separator],[self advancedBlock]]];
  NSStackView *column=[self column:views];
  tickRow.identifier=@"fixed";[tickRow.widthAnchor constraintEqualToAnchor:self.warmthSlider.widthAnchor].active=YES;
  NSUInteger base=(self.welcomeCard?1:0)+(self.thanksCard?1:0);[column setCustomSpacing:4 afterView:self.statusText];[column setCustomSpacing:4 afterView:column.arrangedSubviews[base+3]];[column setCustomSpacing:6 afterView:column.arrangedSubviews[base+5]];[column setCustomSpacing:2 afterView:column.arrangedSubviews[base+6]];[column setCustomSpacing:6 afterView:tickRow];[column setCustomSpacing:4 afterView:column.arrangedSubviews[base+10]];[column setCustomSpacing:4 afterView:column.arrangedSubviews[base+12]];
@@ -1080,10 +1121,10 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  __weak AppDelegate *weakSelf=self;self.peekRecorder.recorded=^(NSInteger keyCode,NSEventModifierFlags modifiers){[weakSelf savePeekShortcutKeyCode:keyCode modifiers:modifiers];};self.peekRecorder.cleared=^{[weakSelf savePeekShortcutKeyCode:-1 modifiers:0];};
  [self helpView:self.peekRecorder text:@"Click, then press the keys to use. Hold them to see the plain display; let go to return." label:@"Peek in color shortcut"];
  self.peekNote=[self note:@""];
- NSStackView *column=[self column:@[[self row:@[peekTitle,[self spacer],suggestPeek,self.peekRecorder]],self.peekNote,[self row:@[peekEffectsLabel,self.peekGrayButton,self.peekWarmthButton,self.peekNightButton]],[self row:@[peekScopeLabel,self.peekScopePopup]],[self separator],
-  [self row:@[grayShortcutTitle,[self spacer],suggestGray,self.grayscaleRecorder]],self.grayscaleShortcutNote,[self separator],
-  [self row:@[clickTitle,[self spacer],self.clickPopup]],[self note:@"With Opens the menu, a right-click (or Control-click) toggles Grayscale. With Toggles Grayscale, a right-click opens the menu."]]];
- [column setCustomSpacing:4 afterView:column.arrangedSubviews[0]];[column setCustomSpacing:6 afterView:column.arrangedSubviews[1]];[column setCustomSpacing:4 afterView:column.arrangedSubviews[4]];[column setCustomSpacing:4 afterView:column.arrangedSubviews[7]];[self refreshPeekRecorder:nil];
+ NSStackView *column=[self column:@[[self row:@[peekTitle,[self spacer],suggestPeek,self.peekRecorder]],self.peekNote,[self adv:[self row:@[peekEffectsLabel,self.peekGrayButton,self.peekWarmthButton,self.peekNightButton]]],[self multi:[self row:@[peekScopeLabel,self.peekScopePopup]]],[self separator],
+  [self row:@[grayShortcutTitle,[self spacer],suggestGray,self.grayscaleRecorder]],self.grayscaleShortcutNote,[self adv:[self separator]],
+  [self adv:[self row:@[clickTitle,[self spacer],self.clickPopup]]],[self adv:[self note:@"With Opens the menu, a right-click (or Control-click) toggles Grayscale. With Toggles Grayscale, a right-click opens the menu."]]]];
+ [column setCustomSpacing:4 afterView:column.arrangedSubviews[0]];[column setCustomSpacing:6 afterView:column.arrangedSubviews[1]];[column setCustomSpacing:4 afterView:column.arrangedSubviews[5]];[column setCustomSpacing:4 afterView:column.arrangedSubviews[8]];[self refreshPeekRecorder:nil];
  return column;
 }
 - (NSStackView *)appsTab {
@@ -1120,17 +1161,20 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  if([sender isKindOfClass:NSSegmentedControl.class])rule[sender.tag==0?@"grayMode":@"nightMode"]=@([(NSSegmentedControl *)sender selectedSegment]);
  else if(sender.tag==2)rule[@"customWarmth"]=@([(NSButton *)sender state]==NSControlStateValueOff);
  else if(sender.tag==4)rule[@"enabled"]=@([(NSButton *)sender state]==NSControlStateValueOn);
+ else if(sender.tag==5)rule[@"allDisplays"]=@([(NSButton *)sender state]==NSControlStateValueOn);
  else {rule[@"warmth"]=@([(NSSlider *)sender doubleValue]);if([(NSSlider *)sender doubleValue]>0)rule[@"customWarmth"]=@YES;}
- if(sender.tag!=4)RuleAfterChange(before,rule);
+ if(sender.tag!=4&&sender.tag!=5)RuleAfterChange(before,rule);
  [self.browserBridge handle:@{@"type":@"set",@"scope":[key containsString:@"://"]?@"url":@"domain",@"site":key,@"rule":rule}];
- if(sender.tag!=3)[self rebuildWebsiteRulesList];else {NSTextField *readout=[sender.superview viewWithTag:99];readout.stringValue=[NSString stringWithFormat:@"%.0f%%",[rule[@"warmth"] doubleValue]];NSButton *inherit=[sender.superview viewWithTag:2];inherit.state=![rule[@"customWarmth"] boolValue];for(NSView *v in sender.superview.superview.subviews)for(NSView *w in v.subviews)if([w isKindOfClass:NSButton.class]&&[(NSButton *)w tag]==4)[(NSButton *)w setState:RuleEnabled(rule)];}
+ if(sender.tag!=3)[self rebuildWebsiteRulesList];else {NSTextField *readout=[sender.superview viewWithTag:99];readout.stringValue=[NSString stringWithFormat:@"%.0f%%",[rule[@"warmth"] doubleValue]];NSButton *inherit=[sender.superview viewWithTag:2];inherit.state=![rule[@"customWarmth"] boolValue];NSView *top=sender;while(top&&![top.identifier isEqual:key])top=top.superview;NSButton *en=[top viewWithTag:4];if([en isKindOfClass:NSButton.class])en.state=RuleEnabled(rule);}
 }
 - (NSView *)websiteRowForKey:(NSString *)key rule:(NSDictionary *)rule {
  BOOL exact=[key containsString:@"://"];NSTextField *name=[NSTextField labelWithString:key];name.font=[NSFont systemFontOfSize:13 weight:NSFontWeightSemibold];name.lineBreakMode=NSLineBreakByTruncatingMiddle;name.toolTip=key;[name setContentCompressionResistancePriority:1 forOrientation:NSLayoutConstraintOrientationHorizontal];
  NSImageView *icon=[NSImageView imageViewWithImage:[NSImage imageWithSystemSymbolName:exact?@"doc.text":@"globe" accessibilityDescription:exact?@"Exact page":@"Whole domain"]];[icon.widthAnchor constraintEqualToConstant:20].active=YES;
  NSButton *enable=[NSButton checkboxWithTitle:@"Use this exception" target:self action:@selector(websiteRowChanged:)];enable.identifier=key;enable.tag=4;enable.state=RuleEnabled(rule);enable.font=[NSFont systemFontOfSize:12];[self helpView:enable text:@"Off keeps the settings below but does not apply them. Changing a setting away from default switches it on again." label:[NSString stringWithFormat:@"Use the exception for %@",key]];
  NSButton *remove=[NSButton buttonWithTitle:@"Remove" target:self action:@selector(removeWebsiteRule:)];remove.identifier=key;remove.bezelStyle=NSBezelStyleInline;[self helpView:remove text:@"Remove this website exception. The site then uses the inherited settings." label:[NSString stringWithFormat:@"Remove exception for %@",key]];
- NSStackView *header=[self row:@[icon,name,[self spacer],enable,remove]];
+ BOOL open=[self ruleOpen:key rule:rule];
+ NSButton *more=[NSButton buttonWithTitle:open?@"Less":@"More" target:self action:@selector(toggleRuleDetails:)];more.identifier=key;more.tag=7;more.bezelStyle=NSBezelStyleInline;more.font=[NSFont systemFontOfSize:11];[self helpView:more text:@"Warmth for this site and, with several displays, which displays it covers." label:[NSString stringWithFormat:@"%@ — more settings",key]];
+ NSStackView *header=[self row:@[icon,name,[self spacer],enable,more,remove]];
  NSTextField *kind=[self note:exact?@"Exact page":@"Whole domain, including subdomains"];
  NSDictionary *inherited=[self.browserBridge inheritedForSite:key browser:nil];NSArray *words=@[@"",@"On",@"Off"];NSMutableArray *choices=[NSMutableArray new];NSArray *titles=@[@"Grayscale",@"Night Shift"];
  for(int i=0;i<2;i++){NSTextField *label=[NSTextField labelWithString:titles[i]];NSInteger resolved=[inherited[i==0?@"grayMode":@"nightMode"] integerValue];NSSegmentedControl *choice=[NSSegmentedControl segmentedControlWithLabels:@[resolved?[NSString stringWithFormat:@"Default (%@)",words[resolved]]:@"Default",@"On",@"Off"] trackingMode:NSSegmentSwitchTrackingSelectOne target:self action:@selector(websiteRowChanged:)];choice.selectedSegment=[rule[i==0?@"grayMode":@"nightMode"] integerValue];choice.identifier=key;choice.tag=i;choice.controlSize=NSControlSizeSmall;choice.font=[NSFont systemFontOfSize:11];[choice setWidth:resolved?70:46 forSegment:0];[choice setWidth:30 forSegment:1];[choice setWidth:30 forSegment:2];[self helpView:choice text:@"Default keeps what the site inherits." label:[NSString stringWithFormat:@"%@ — %@",key,titles[i]]];[choices addObject:label];[choices addObject:choice];}
@@ -1139,7 +1183,13 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  NSSlider *slider=[self warmthSliderWithValue:[rule[@"warmth"] doubleValue] action:@selector(websiteRowChanged:)];slider.identifier=key;slider.tag=3;[slider.widthAnchor constraintGreaterThanOrEqualToConstant:160].active=YES;[slider setContentHuggingPriority:1 forOrientation:NSLayoutConstraintOrientationHorizontal];[self helpView:slider text:@"Extra Warmth for this site, from Off to Red." label:[NSString stringWithFormat:@"%@ — Extra Warmth percent",key]];
  NSTextField *percent=[NSTextField labelWithString:[NSString stringWithFormat:@"%.0f%%",[rule[@"warmth"] doubleValue]]];percent.tag=99;percent.alignment=NSTextAlignmentRight;percent.font=[NSFont monospacedDigitSystemFontOfSize:13 weight:NSFontWeightRegular];[percent.widthAnchor constraintEqualToConstant:44].active=YES;
  NSStackView *warmth=[self row:@[inherit,slider,percent]];
- NSStackView *row=[self column:@[header,kind,modes,warmth]];row.spacing=6;row.edgeInsets=NSEdgeInsetsMake(10,10,10,10);row.identifier=key;[header.widthAnchor constraintEqualToAnchor:row.widthAnchor constant:-20].active=YES;
+ NSButton *span=[NSButton checkboxWithTitle:@"On every display" target:self action:@selector(websiteRowChanged:)];span.identifier=key;span.tag=5;span.state=[rule[@"allDisplays"] boolValue];span.font=[NSFont systemFontOfSize:12];[self helpView:span text:@"While this site is in front, its settings cover every display, not only the one the browser window is on." label:[NSString stringWithFormat:@"%@ — On every display",key]];
+ NSTextField *peekLabel=[NSTextField labelWithString:@"Peek toggles:"];peekLabel.font=[NSFont systemFontOfSize:12];
+ NSPopUpButton *peekPick=[[NSPopUpButton alloc]initWithFrame:NSZeroRect pullsDown:YES];peekPick.font=[NSFont systemFontOfSize:12];[peekPick.widthAnchor constraintEqualToConstant:200].active=YES;
+ NSMenu *pickMenu=[self peekDisplaysMenuForKey:key website:YES];[pickMenu insertItem:[[NSMenuItem alloc]initWithTitle:[self peekTargetsLabel:rule] action:nil keyEquivalent:@""] atIndex:0];peekPick.menu=pickMenu;[self helpView:peekPick text:@"Which displays Peek toggles while this site is in front." label:[NSString stringWithFormat:@"%@ — Peek toggles",key]];
+ NSStackView *spans=[self row:@[span,[self spacer],peekLabel,peekPick]];spans.spacing=6;spans.hidden=![self multiDisplay];
+ NSStackView *details=[self column:@[warmth,spans]];details.spacing=8;details.hidden=!open;
+ NSStackView *row=[self column:@[header,kind,modes,details]];row.spacing=6;row.edgeInsets=NSEdgeInsetsMake(10,10,10,10);row.identifier=key;[header.widthAnchor constraintEqualToAnchor:row.widthAnchor constant:-20].active=YES;[details.widthAnchor constraintEqualToAnchor:row.widthAnchor constant:-20].active=YES;[warmth.widthAnchor constraintEqualToAnchor:details.widthAnchor].active=YES;[spans.widthAnchor constraintEqualToAnchor:details.widthAnchor].active=YES;
  return row;
 }
 - (void)rebuildWebsiteRulesList {
@@ -1268,6 +1318,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
 - (void)showSettings:(id)sender {
  if(!self.settings){
   self.thanksWanted=!self.welcomeWanted&&[self thanksDue];
+  self.multiDisplayViews=[NSMutableArray new];self.advancedViews=[NSMutableArray new];if(!self.expandedRules)self.expandedRules=[NSMutableSet new];
   self.settingsTabs=[NSTabViewController new];self.settingsTabs.tabStyle=NSTabViewControllerTabStyleToolbar;self.settingsTabs.transitionOptions=NSViewControllerTransitionNone;
   [self.settingsTabs addTabViewItem:[self tab:@"General" symbol:@"circle.lefthalf.filled" content:[self generalTab]]];
   [self.settingsTabs addTabViewItem:[self tab:@"Shortcuts" symbol:@"keyboard" content:[self shortcutsTab]]];
@@ -1400,7 +1451,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  [self.policy selectManual:self.selectedMode];[self savePolicy];
  NSMenuItem *item=[NSMenuItem new];item.tag=(self.selectedMode==1||self.selectedMode==100)?100:101;[self manual:item];
 }
-- (void)displaysChanged:(id)sender {[self pipelineChanged:sender];[self refreshDisplayRows];}
+- (void)displaysChanged:(id)sender {[self pipelineChanged:sender];[self refreshDisplayRows];[self applyVisibility];}
 - (void)applicationWillTerminate:(NSNotification *)note {self.quitting=YES;if(self.peekHotKey)UnregisterEventHotKey(self.peekHotKey);if(self.grayscaleHotKey)UnregisterEventHotKey(self.grayscaleHotKey);[self.grayOffTimer invalidate];[self.pauseAllTimer invalidate];[self.eventTimer invalidate];[self.pipelineRecoveryTimer invalidate];[self.menuDismissal end];[self.browserBridge stop];[self.warmth cancelTransition];[self endPauseNow:nil];self.excludeNight=NO;[self reconcileExclusion];if(self.grayOverride||self.customWarmth){self.grayOverride=0;self.customWarmth=NO;self.excludeGray=NO;self.excludeWarmth=NO;self.animateAppearance=NO;[self.warmth cancelTransition];[self applyMode:self.selectedMode];}[self.warmth restore];}
 - (void)quit:(id)sender {[NSApp terminate:nil];}
 @end
