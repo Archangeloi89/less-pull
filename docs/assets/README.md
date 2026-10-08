@@ -8,6 +8,7 @@
 | `before-after.png` | The same drawn web page as it is and as Less Pull shows it, with captions, for the project page (`src/social-preview.py --plain`) |
 | `peek.png` | Three frames of the same drawn page: quiet, in color while the Peek shortcut is held, quiet again (`src/social-preview.py --peek`) |
 | `screenshots.png` | What you see (the display, quiet) next to what you share (the screenshot, in color), drawn (`src/social-preview.py --shots`) |
+| `sessions.png` | A session in the menu bar: the icon through its states and the two panels, drawn (`src/sessions-figure.py`) |
 | `privacy.png` | Where a website address goes and where it never goes, drawn (`src/privacy-figure.py`) |
 | `social-preview.png` | The card GitHub shows in link previews: a drawn screen, color on the left and Less Pull's grayscale with a light amber on the right, computed with the app's own matrix (`src/social-preview.py`) |
 | `src/raw/*` | The original captures, untouched |
@@ -40,6 +41,7 @@ python3 social-preview.py ../social-preview.png          # the link-preview card
 python3 social-preview.py ../before-after.png --plain    # the same screen with captions
 python3 social-preview.py ../peek.png --peek             # Peek in color, three frames
 python3 privacy-figure.py ../privacy.png                 # where a website address goes
+python3 sessions-figure.py ../sessions.png               # a session in the menu bar
 python3 social-preview.py ../screenshots.png --shots     # display vs screenshot
 ```
 

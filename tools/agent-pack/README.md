@@ -44,3 +44,13 @@ Check: `pgrep -fl LessPullBrowserHost` lists one helper per connected Chromium/F
 - `install.sh` — install or update the app, register the bridge, install the Safari companion.
 - `chromium-load.mjs` — load the unpacked extension into a Chromium browser through its debugging port (Playwright over CDP; `npm i playwright` or set `NODE_PATH` to a copy).
 - `firefox-load.mjs` — install the unpacked extension into Firefox through WebDriver BiDi (no dependencies).
+
+## 4. Customizing (what survives updates)
+
+The user may change their copy as they like; the author's name and links on the About tab stay. Before changing anything, read `docs/compat.json` in the repository (or the copy in this pack if present) and `docs/CUSTOMIZING.md`:
+
+- **Tier 1, no rebuild:** preferences in `com.jiriarion.lesspull` (the listed keys), hook scripts in `~/Library/Application Support/Less Pull/hooks/`, and replacement sounds in `~/Library/Application Support/Less Pull/sounds/`. These survive every update. Prefer them.
+- **Tier 2, a rebuild:** `Source/Sounds/`, `Source/MenuBar/`, `docs/`, `tools/`, `README.md`. Updates do not rewrite these.
+- **Tier 3:** everything else is internal.
+
+After any change to a fork, run `zsh tools/compat-check.sh <fork> <release tag>` and tell the user, in plain words, which changes are in the compatible range and which are not, so the choice to keep a tier 3 change is theirs. Record what you changed and why in `docs/MY-CHANGES.md` in the fork.

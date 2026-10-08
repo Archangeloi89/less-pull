@@ -1,0 +1,52 @@
+{
+  "contract": 1,
+  "note": "What a customized copy of Less Pull may rely on. Tier 1 needs no rebuild and survives every update. Tier 2 is a folder in the source that updates do not touch. Everything else is internal: it may change in any build.",
+  "tier1": {
+    "preferences": {
+      "domain": "com.jiriarion.lesspull",
+      "keys": {
+        "nightMode": "100 = grayscale on, 101 = off (the saved choice)",
+        "warmth": "Extra Warmth as a strength 0–3 (0 = Off, 3 = Red; 1.5 = 50 %)",
+        "automatic": "true = Extra Warmth follows Night Shift",
+        "appExclusions": "dictionary bundle id → {name, grayMode 0/1/2, nightMode 0/1/2, customWarmth, warmth 0–100, enabled, allDisplays, peekDisplays}",
+        "websiteRules": "dictionary domain or exact URL → the same shape without name",
+        "peekShortcut": "{keyCode, modifiers} for Peek in color; grayscaleShortcut likewise",
+        "peekEffects": "{grayscale, warmth, nightShift} booleans: what Peek turns off",
+        "peekActiveDisplayOnly": "true = Peek acts on the display under the pointer",
+        "iconClick": "0 = left click opens the menu, 1 = left click toggles Grayscale",
+        "displayModes": "dictionary display UUID → 1 (always defaults) or 2 (always plain)",
+        "sessionPresets": "array of minutes offered under Start a session",
+        "callBackPresets": "array of minutes offered after a session",
+        "sessionRemindEvery": "minutes between reminders past the end; 0 = never",
+        "sessionSoundStyle": "0 = off, 1 = two strokes, 2 = one chord",
+        "sessionVolume": "0–100",
+        "sessionGlow": "true = the glow at the end",
+        "showAdvanced": "true = the advanced options are shown",
+        "checkForUpdates": "true = the daily update check"
+      }
+    },
+    "hooks": {
+      "directory": "~/Library/Application Support/Less Pull/hooks",
+      "events": {
+        "session-started": "$1 = event, $2 = minutes",
+        "session-ended": "$1 = event, $2 = minutes",
+        "session-reminder": "$1 = event, $2 = minutes past the end",
+        "session-call-back": "$1 = event",
+        "grayscale-changed": "$1 = event, $2 = on or off"
+      },
+      "note": "An executable file named after the event. It is started and not waited for; its output is ignored."
+    },
+    "resources": {
+      "directory": "~/Library/Application Support/Less Pull/sounds",
+      "files": ["session-end.wav", "session-remind.wav", "session-back.wav"],
+      "note": "A file here replaces the sound of that name in every style. WAV, any length."
+    }
+  },
+  "tier2": {
+    "paths": ["Source/Sounds/", "Source/MenuBar/", "docs/", "README.md", "tools/"],
+    "note": "Updates may add files here but do not rewrite yours; a fork that changes only these paths merges cleanly. A Source/Customization/ folder with code override points is planned."
+  },
+  "tier3": {
+    "note": "Source/main.m and every other file: internal. A change here may conflict with any future build."
+  }
+}
