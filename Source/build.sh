@@ -1,5 +1,12 @@
 #!/bin/zsh
+# Builds Less Pull. Ad hoc by default; with a Developer ID the build is signed with the
+# hardened runtime and, if a notarytool keychain profile is given, notarized and stapled:
+#   LESS_PULL_SIGN_IDENTITY="Developer ID Application: Jiri Arion Rose (TEAMID)" \
+#   LESS_PULL_NOTARY_PROFILE=lesspull zsh Source/build.sh
+# The certificate and the notarization password live in the keychain, never in the repository.
 set -eu
+SIGN="${LESS_PULL_SIGN_IDENTITY:--}"
+sign() { if [[ "$SIGN" == "-" ]]; then codesign --force --sign - "$@"; else codesign --force --sign "$SIGN" --options runtime --timestamp "$@"; fi; }
 cd "$(dirname "$0")"
 BUILD_ROOT=$(mktemp -d /tmp/lesspull.XXXXXX)
 trap 'rm -rf "$BUILD_ROOT"' EXIT
@@ -7,7 +14,7 @@ APP="$BUILD_ROOT/Less Pull.app"
 mkdir -p "$APP/Contents/MacOS"
 clang -fobjc-arc -O2 -Wall -Wextra -Wno-unused-parameter -mmacosx-version-min=13.0 -arch arm64 main.m Engine.m SwitchingPolicy.m WarmthEngine.m PausePolicy.m ExclusionPolicy.m BrowserBridge.m MenuDismissal.m -framework UniformTypeIdentifiers -framework Cocoa -framework Carbon -framework ServiceManagement -o "$APP/Contents/MacOS/LessPull"
 clang -fobjc-arc -O2 -Wall -mmacosx-version-min=13.0 -arch arm64 BrowserHost.m -framework Foundation -o "$APP/Contents/MacOS/LessPullBrowserHost"
-codesign --force --sign - "$APP/Contents/MacOS/LessPullBrowserHost"
+sign "$APP/Contents/MacOS/LessPullBrowserHost"
 mkdir -p "$APP/Contents/Resources"
 cp ../LICENSE-APP.txt ../LICENSE-SOURCE.txt AppIcon.icns MenuBar/menubar-*.png "$APP/Contents/Resources/"
 ditto --norsrc "../Browser Extension" "$APP/Contents/Resources/Browser Extension"
@@ -37,11 +44,18 @@ cp Info.plist "$APP/Contents/Info.plist"
 xattr -cr "$APP"
 if [[ -d "$APP/Contents/Resources/Less Pull for Safari.app" ]]; then
  # Ad-hoc signing through xcodebuild drops entitlements; sign the extension here so it is sandboxed.
- codesign --force --sign - --entitlements Safari/LessPullSafari.entitlements "$APP/Contents/Resources/Less Pull for Safari.app/Contents/PlugIns/Less Pull for Safari Extension.appex"
- codesign --force --sign - "$APP/Contents/Resources/Less Pull for Safari.app"
+ sign --entitlements Safari/LessPullSafari.entitlements "$APP/Contents/Resources/Less Pull for Safari.app/Contents/PlugIns/Less Pull for Safari Extension.appex"
+ sign "$APP/Contents/Resources/Less Pull for Safari.app"
 fi
-codesign --force --sign - "$APP"
+sign "$APP"
 codesign --verify --strict "$APP"
+if [[ -n "${LESS_PULL_NOTARY_PROFILE:-}" ]]; then
+ # Notarize the whole app (it contains the host and the Safari companion) and staple the ticket.
+ NOTARIZE_ZIP="$BUILD_ROOT/notarize.zip"; ditto -c -k --keepParent --norsrc "$APP" "$NOTARIZE_ZIP"
+ xcrun notarytool submit "$NOTARIZE_ZIP" --keychain-profile "$LESS_PULL_NOTARY_PROFILE" --wait
+ xcrun stapler staple "$APP"; [[ -d "$APP/Contents/Resources/Less Pull for Safari.app" ]] && xcrun stapler staple "$APP/Contents/Resources/Less Pull for Safari.app" || true
+ spctl --assess --type execute --verbose=2 "$APP"
+fi
 rm -rf "../Less Pull.app"
 ditto --norsrc "$APP" "../Less Pull.app"
 ditto -c -k --keepParent --norsrc "$APP" "../Less Pull.zip"

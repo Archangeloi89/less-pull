@@ -12,6 +12,7 @@ The code is small and readable, and the extension asks for the least it can (`ta
 - Without it, only an "Apple Development" certificate from a free Apple ID exists: fine for the author's own Macs (and it removes Safari's *Allow Unsigned Extensions* step locally), not for distribution.
 - Signing happens on the author's Mac from the keychain. Certificates and keys never go into the repository or a build service.
 - Once releases are signed, update phase 2 can verify a download's signature before installing it (see the release plan).
+- How a signed build is made: `LESS_PULL_SIGN_IDENTITY="Developer ID Application: … (TEAMID)" LESS_PULL_NOTARY_PROFILE=lesspull zsh Source/build.sh`. The identity comes from the keychain; the notarization profile is created once with `xcrun notarytool store-credentials lesspull --apple-id … --team-id … --password <app-specific password>`. Without the variables the build is ad hoc, as before.
 
 ## The browser extension
 
