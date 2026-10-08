@@ -1,10 +1,12 @@
 # Social preview: one screen, left in color, right as Less Pull shows it (grayscale with
 # some warmth), computed with the same matrix as Source/WarmthCurve.h. Drawn, not a photo.
+# --plain draws the same screen with captions for the project page; --peek draws three
+# frames of it (quiet, in color while the Peek shortcut is held, quiet again).
 import math, sys
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 import numpy as np
-out = sys.argv[1]; plain = '--plain' in sys.argv  # --plain: the screen alone, for the project page
-W, H = (1280, 520) if plain else (1280, 640)
+out = sys.argv[1]; plain = '--plain' in sys.argv; peek = '--peek' in sys.argv
+W, H = (1280, 370) if peek else (1280, 520) if plain else (1280, 640)
 def font(size, bold=False):
     for path in ['/System/Library/Fonts/HelveticaNeue.ttc', '/System/Library/Fonts/Helvetica.ttc']:
         try: return ImageFont.truetype(path, size, index=1 if bold else 0)
@@ -62,6 +64,8 @@ for k in range(6):                                                              
     hx, hy = cx0 + 208, cy0 + 100; d.ellipse((hx, hy, hx + 9, hy + 9), fill=(255, 59, 48)); d.ellipse((hx + 7, hy, hx + 16, hy + 9), fill=(255, 59, 48)); d.polygon([(hx, hy + 5), (hx + 16, hy + 5), (hx + 8, hy + 15)], fill=(255, 59, 48))
     d.text((cx0 + 230, cy0 + 96), '%d' % rnd.randint(120, 980), font=font(15, True), fill=(255, 59, 48))
 arr = np.asarray(screen.convert('RGB')).astype(float)
+quiet = Image.fromarray((arr @ matrix(0.35, True).T).clip(0, 255).astype('uint8'), 'RGB')  # the whole screen as Less Pull shows it
+color = screen.convert('RGB')
 right = arr[:, sw // 2:] @ matrix(0.35, True).T  # grayscale with a light amber, an everyday setting
 arr[:, sw // 2:] = right.clip(0, 255)
 screen = Image.fromarray(arr.astype('uint8'), 'RGB')
@@ -69,6 +73,35 @@ screen = Image.fromarray(arr.astype('uint8'), 'RGB')
 g = np.linspace(0, 1, H)[:, None]; top, bot = np.array([44, 46, 52]), np.array([24, 25, 29])
 im = Image.fromarray((top * (1 - g) + bot * g)[:, None, :].repeat(W, 1).reshape(H, W, 3).astype('uint8'), 'RGB').convert('RGBA')
 d = ImageDraw.Draw(im)
+def place(src, x, y, w, h, radius=14):
+    global im
+    m = Image.new('L', (w, h), 0); ImageDraw.Draw(m).rounded_rectangle((0, 0, w - 1, h - 1), radius, fill=255)
+    sh_ = Image.new('RGBA', im.size, (0, 0, 0, 0)); ImageDraw.Draw(sh_).rounded_rectangle((x, y + 10, x + w, y + h + 10), radius, fill=(0, 0, 0, 160)); im = Image.alpha_composite(im, sh_.filter(ImageFilter.GaussianBlur(16)))
+    im.paste(src.resize((w, h), Image.LANCZOS), (x, y), m)
+if peek:
+    fw, fh = 392, int(392 * sh / sw); gap = 32; x0 = (W - 3 * fw - 2 * gap) // 2; y0 = 128
+    frames = [(quiet, 'Your screen, as usual'), (color, 'Color while you hold the Peek shortcut'), (quiet, 'Let go, and it is quiet again')]
+    for k, (src, cap) in enumerate(frames):
+        x = x0 + k * (fw + gap); place(src, x, y0, fw, fh); d = ImageDraw.Draw(im)
+        f = font(22); words = cap.split(' '); line, lines_ = '', []
+        for wd in words:
+            if d.textlength((line + ' ' + wd).strip(), font=f) > fw - 8: lines_.append(line); line = wd
+            else: line = (line + ' ' + wd).strip()
+        lines_.append(line)
+        for j, ln in enumerate(lines_): d.text((x + (fw - d.textlength(ln, font=f)) / 2, y0 + fh + 20 + j * 30), ln, font=f, fill=(190, 192, 198) if k == 1 else (150, 153, 160))
+    # the key, held, above the middle frame: an example shortcut
+    kx, ky = x0 + fw + gap + fw // 2, 60; keys = [('⌥', 44), ('A', 44)]; tw = sum(k[1] for k in keys) + 12; cx0 = kx - tw // 2
+    for t, kw in keys:
+        d.rounded_rectangle((cx0, ky - 22, cx0 + kw, ky + 22), 9, fill=(236, 140, 72), outline=(255, 200, 160), width=2)
+        if t == '⌥':  # the Option glyph, drawn: a slash with a flat top-left and top-right stroke
+            ox, oy = cx0 + kw // 2, ky; d.line([(ox - 11, oy - 8), (ox - 4, oy - 8), (ox + 4, oy + 8), (ox + 11, oy + 8)], fill=(30, 20, 12), width=3); d.line([(ox + 4, oy - 8), (ox + 11, oy - 8)], fill=(30, 20, 12), width=3)
+        else:
+            f = font(24, True); bb = d.textbbox((0, 0), t, font=f); d.text((cx0 + (kw - (bb[2] - bb[0])) / 2 - bb[0], ky - (bb[3] - bb[1]) / 2 - bb[1]), t, font=f, fill=(30, 20, 12))
+        cx0 += kw + 12
+    d.text((kx + tw // 2 + 18, ky - 13), 'held', font=font(22), fill=(190, 192, 198))
+    d.text((x0, ky - 13), 'Peek in color', font=font(26, True), fill=(248, 248, 250))
+    d.text((W - x0 - d.textlength('an example shortcut; you choose your own', font=font(20)), ky - 11), 'an example shortcut; you choose your own', font=font(20), fill=(130, 133, 140))
+    im.convert('RGB').save(out, optimize=True); print(out, im.size); sys.exit()
 if not plain:
     d.text((80, 34), 'A quieter screen.', font=font(96, True), fill=(248, 248, 250))
     d.text((1010, 48), 'Less Pull', font=font(34, True), fill=(170, 172, 178)); d.text((1010, 88), 'for macOS · free', font=font(28), fill=(140, 143, 150))

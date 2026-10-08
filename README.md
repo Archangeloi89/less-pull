@@ -18,6 +18,17 @@ Warmth is the second step: from a touch of amber all the way to red, it takes th
 
 <sub>The picture above is an illustration, not a screen recording. Its three looks are calculated with the same color matrix the app uses. The apps and the site are examples, not presets.</sub>
 
+## At a glance
+
+- **Grayscale**, on or off, from the menu bar, a shortcut, or a right-click on the icon.
+- **Extra Warmth**, a slider from a touch of amber to red, with or without grayscale.
+- **[Peek in color](#peek-in-color)**: hold a shortcut and the screen is in color for exactly as long as you hold it. Press it twice to keep it.
+- **[Exceptions](#every-app-and-website-can-have-its-own-settings)** for any app, any website or one exact page, set right in the menu.
+- **Time off**: Grayscale off for an hour, four hours, or until Night Shift changes; Pause Less Pull for a while.
+- **[Night Shift](#night-shift-can-set-the-rhythm)** can set the rhythm, so warmth comes only at night.
+- **A menu-bar icon that shows the state**: its left half fills while grayscale is on, its right half warms with the warmth.
+- **[Private by design](#private-by-design)**: no account, no analytics, nothing leaves your Mac except an optional daily update check.
+
 ## Every app and website can have its own settings
 
 Set your defaults once. Then make exceptions for the places that need something else. Whatever is in front decides how the screen looks, and the change fades in over half a second.
@@ -81,6 +92,21 @@ The [exceptions guide](docs/EXCEPTIONS.md) has the details.
 
 The percentage is a relative control. It is not a Kelvin value and not a measured reduction in blue light. Less Pull is about what feels calmer to you, and it makes no promises about sleep, eyes or health.
 
+## Peek in color
+
+Sometimes you need color for a moment: to tell two lines in a chart apart, to check a photo, to find the red button. You do not have to change anything for that. Record a shortcut under **Settings… → Shortcuts** (or let **Suggest** pick a free one), then hold it. The screen is in color for exactly as long as you hold the keys, and quiet again the moment you let go.
+
+<p align="center">
+  <img src="docs/assets/peek.png" width="100%" alt="Three drawings of the same busy web page in a row. Left: the page as Less Pull shows it, in grayscale with a little warmth, captioned Your screen, as usual. Middle, under two keys drawn as held, Option and A: the page in full color, captioned Color while you hold the Peek shortcut. Right: the page quiet again, captioned Let go, and it is quiet again.">
+</p>
+
+<sub>Drawn with the app's own color matrix. Option-A is an example; Less Pull ships without a shortcut, and Suggest offers one that is free on your Mac.</sub>
+
+- **Press it twice quickly to keep the peek.** The plain display then stays until you press the shortcut once more. Nothing is saved and no exception is made.
+- **Choose what peeking turns off.** Grayscale and Extra Warmth by default; Night Shift too, if you like.
+- **Toggle Grayscale** is the second shortcut, for switching your default on and off without opening the menu. A right-click on the menu-bar icon does the same.
+- **For longer than a moment**, there is **Grayscale off for** an hour, four hours, or until Night Shift next changes, and **Pause Less Pull** for 15 minutes, an hour, or until you resume. Both are in the menu.
+
 ## Night Shift can set the rhythm
 
 Turn on **Extra Warmth follows Night Shift** if you want warmth only at night. While Night Shift is off, the warmth you inherit from your defaults is removed. When Night Shift turns on, your saved amount comes back.
@@ -133,7 +159,7 @@ Click the circle in the menu bar (a right-click toggles Grayscale straight away)
 Choose **Settings…** in the menu. This is the window on the right, with five tabs.
 
 - **General**: the same controls as the menu, with a short line under each one, plus **Launch at login**.
-- **Shortcuts**: **Peek in color** (a shortcut you hold to see the plain display, and what it turns off), a **Toggle Grayscale** shortcut, and what clicking the menu-bar icon does. **Suggest** picks a free shortcut for you.
+- **Shortcuts**: [**Peek in color**](#peek-in-color) (a shortcut you hold to see the plain display, and what it turns off), a **Toggle Grayscale** shortcut, and what a left and a right click on the menu-bar icon do. **Suggest** picks a free shortcut for you.
 - **Apps**: every app exception, with the app's icon and Default / On / Off for Grayscale and Night Shift.
 - **Websites**: the browser extension and the saved website exceptions.
 - **About**: version, links, Help, Diagnostics, licenses, and the update check.
