@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-23"><b>Download build 23</b></a>
+  <a href="https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-24"><b>Download build 24</b></a>
   &nbsp;·&nbsp; <a href="#install">Install</a>
   &nbsp;·&nbsp; <a href="docs/EXCEPTIONS.md">App and website exceptions</a>
   &nbsp;·&nbsp; <a href="docs/README.md">All docs</a>
@@ -117,6 +117,8 @@ With more than one display, each one gets its own matrix and its own fade, on it
 > [!TIP]
 > **Arrow pointer still in color on one display?** Some displays draw the small arrow pointer in hardware, on top of the finished picture, so no color filter reaches it; the hand and the other pointers are drawn into the picture and turn quiet. Make the pointer one notch larger under **System Settings → Accessibility → Display → Pointer size** and the arrow is drawn into the picture too. The Displays section in Settings has a button that takes you there.
 
+An app whose picture also shows on another display, such as a 3D player or a presenter, can be marked **On every display** in its exception, in the menu or under Apps. While it is in front, its settings and Peek cover all displays, whether or not the exception itself is used.
+
 Each connected display is listed under **Settings… → General → Displays** with a choice of its own: **Follows what is on it** (the rule above), **Always your defaults** (exceptions never apply there), or **Always plain, in color** (never grayscale or warmth there, for a TV or a pair of glasses). A display keeps its choice when it is plugged in again. Night Shift, Pause, Grayscale off for a while and the Toggle shortcut stay global, since Night Shift is system wide anyway. Peek works on the display under the mouse pointer, with its own double-press lock per display; "All displays" is the other choice under **Settings… → Shortcuts**.
 
 ## Screenshots keep their colors
@@ -200,7 +202,7 @@ The app changes the display; nothing is injected into pages, and the Mac app has
 
 ## Install
 
-1. Download **Less-Pull-1.4.4-23.zip** from the [build 23 release](https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-23), unzip it, and move **Less Pull.app** to **Applications**.
+1. Download **Less-Pull-1.4.4-24.zip** from the [build 24 release](https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-24), unzip it, and move **Less Pull.app** to **Applications**.
 2. Open it. The Settings window greets you once; the circle in the menu bar is where you choose Grayscale and Extra Warmth from then on.
 3. For website rules, open **Settings… → Websites**, choose **Install Browser Extension…**, and follow the steps for [your browser](docs/INSTALL.md#safari-brave-chrome-firefox-opera-or-edge).
 
@@ -208,7 +210,7 @@ The app changes the display; nothing is injected into pages, and the Mac app has
 > Setting up with an AI agent? The release includes an **agent pack** (`Less-Pull-Agent-Pack.zip`): a script that installs the app and the bridge, and scripts that connect Brave, Chrome, Opera, Edge and Firefox, with the instructions an agent needs. See [tools/agent-pack](tools/agent-pack/README.md).
 
 > [!NOTE]
-> Version 1.4.4 (build 23) is a test build for Apple silicon Macs. The version number stays 1.4.4 on purpose; the build number is what changes. It is ad-hoc signed and not notarized by Apple, so Gatekeeper may block a downloaded copy. It is built for macOS 13 and later and has been tested on macOS 27 only. The browser extension is loaded locally and is not in the Chrome Web Store, on addons.mozilla.org or in the App Store. See [install help](docs/INSTALL.md) and [what is still open](docs/RELEASE-PLAN.md).
+> Version 1.4.4 (build 24) is a test build for Apple silicon Macs. The version number stays 1.4.4 on purpose; the build number is what changes. It is ad-hoc signed and not notarized by Apple, so Gatekeeper may block a downloaded copy. It is built for macOS 13 and later and has been tested on macOS 27 only. The browser extension is loaded locally and is not in the Chrome Web Store, on addons.mozilla.org or in the App Store. See [install help](docs/INSTALL.md) and [what is still open](docs/RELEASE-PLAN.md).
 
 ## Private by design
 

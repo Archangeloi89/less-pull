@@ -44,7 +44,7 @@ For each app you can set:
 Things to know:
 
 - The rule applies while the app is frontmost and has a visible window that is not minimized.
-- It changes the display that app's window is on, not only the window. Other displays follow the app on top there, or your defaults.
+- It changes the display that app's window is on, not only the window. Other displays follow the app on top there, or your defaults. An app marked On every display (a 3D player, a presenter) covers all displays while it is in front.
 - Your global settings are kept. They return when you switch to an app without a rule.
 - If you have turned Night Shift off for a set time, that pause wins over an app rule that says Night Shift: On.
 - With Grayscale off, an app's own warmth still mutes colors as it rises. Color with warmth is not calibrated color.

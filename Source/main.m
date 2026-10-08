@@ -221,6 +221,8 @@ static NSString *const LessPullOldBundleIdentifier=@"local.nightshiftfilters.app
 @property BOOL peekLocked,peekIgnoreRelease;
 // Per display: the display with the window you are using, and the displays whose peek is kept by a double press.
 @property uint32_t activeDisplay,peekDisplay;
+// The app in front shows on every display (a 3D player, a presenter): its settings and Peek cover all displays.
+@property BOOL frontSpansAll;
 @property NSMutableSet<NSNumber *> *peekLockedDisplays;
 @property NSTimeInterval lastPeekPress;
 @property NSDictionary *availableUpdate;
@@ -333,7 +335,8 @@ static NSString *const LessPullOldBundleIdentifier=@"local.nightshiftfilters.app
 // app whose window is on top decides (its exception, if it has one, or the defaults); an empty display
 // shows the defaults. Only the frontmost app's own display carries a website rule.
 - (void)updateDisplayMap:(pid_t)frontPid {
- NSArray *displays=[self.warmth displays];self.activeDisplay=CGMainDisplayID();if(displays.count<2||![displays.firstObject unsignedIntValue]){self.frontDisplays=nil;self.displayOverrides=@{};return;}
+ NSArray *displays=[self.warmth displays];self.activeDisplay=CGMainDisplayID();self.frontSpansAll=[self.exclusionRules[self.foregroundID][@"allDisplays"] boolValue];if(displays.count<2||![displays.firstObject unsignedIntValue]){self.frontDisplays=nil;self.displayOverrides=@{};return;}
+ if(self.frontSpansAll){self.frontDisplays=[NSSet setWithArray:displays];self.displayOverrides=@{};return;}  // this app shows on every display: its settings everywhere
  CFArrayRef array=CGWindowListCopyWindowInfo(kCGWindowListOptionOnScreenOnly|kCGWindowListExcludeDesktopElements,kCGNullWindowID);NSArray *windows=array?CFBridgingRelease(array):@[];
  NSMutableDictionary *top=[NSMutableDictionary new];NSMutableSet *front=[NSMutableSet new];
  for(NSDictionary *w in windows){if([w[(id)kCGWindowLayer] intValue]!=0||[w[(id)kCGWindowAlpha] doubleValue]<=0)continue;CGRect rect=CGRectZero;if(!CGRectMakeWithDictionaryRepresentation((__bridge CFDictionaryRef)w[(id)kCGWindowBounds],&rect)||rect.size.width<160||rect.size.height<100)continue;
@@ -371,8 +374,9 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  if([sender isKindOfClass:NSSegmentedControl.class])rule[sender.tag==0?@"grayMode":@"nightMode"]=@([(NSSegmentedControl *)sender selectedSegment]);
  else if(sender.tag==2)rule[@"customWarmth"]=@([(NSButton *)sender state]==NSControlStateValueOff);
  else if(sender.tag==4)rule[@"enabled"]=@([(NSButton *)sender state]==NSControlStateValueOn);
+ else if(sender.tag==5)rule[@"allDisplays"]=@([(NSButton *)sender state]==NSControlStateValueOn);
  else {rule[@"warmth"]=@([(NSSlider *)sender doubleValue]);if([(NSSlider *)sender doubleValue]>0)rule[@"customWarmth"]=@YES;}
- if(sender.tag!=4)RuleAfterChange(before,rule);
+ if(sender.tag!=4&&sender.tag!=5)RuleAfterChange(before,rule);
  self.exclusionRules[bundle]=rule;[self saveExclusionRules];if(sender.tag!=3)[self rebuildExclusionsList];else {NSTextField *readout=[sender.superview viewWithTag:99];readout.stringValue=[NSString stringWithFormat:@"%.0f%%",[rule[@"warmth"] doubleValue]];for(NSView *v in sender.superview.superview.subviews)for(NSView *w in v.subviews)if([w isKindOfClass:NSButton.class]&&[(NSButton *)w tag]==4)[(NSButton *)w setState:RuleEnabled(rule)];NSButton *inherit=[sender.superview viewWithTag:2];inherit.state=![rule[@"customWarmth"] boolValue];}
 }
 - (void)removeRule:(NSButton *)sender {[self.exclusionRules removeObjectForKey:sender.identifier];[self saveExclusionRules];[self rebuildExclusionsList];}
@@ -450,9 +454,11 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  NSTextField *readout=[NSTextField labelWithString:[NSString stringWithFormat:@"%.0f%%",[rule[@"warmth"] doubleValue]]];readout.tag=98;readout.font=[NSFont monospacedDigitSystemFontOfSize:12 weight:NSFontWeightRegular];readout.alignment=NSTextAlignmentRight;readout.frame=NSMakeRect(204,34,40,16);[view addSubview:readout];
  NSSlider *slider=[self warmthSliderWithValue:[rule[@"warmth"] doubleValue] action:@selector(currentAppWarmthChanged:)];slider.frame=NSMakeRect(18,6,226,26);[self helpView:slider text:[NSString stringWithFormat:@"Extra Warmth for %@, from Off to Red.",name] label:[NSString stringWithFormat:@"Extra Warmth for %@, percent",name]];[view addSubview:slider];
  sliderItem.view=view;[sub addItem:sliderItem];[sub addItem:NSMenuItem.separatorItem];
+ NSMenuItem *span=[self add:@"On every display" action:@selector(currentAppAllDisplays:) to:sub];span.state=[rule[@"allDisplays"] boolValue];[sub addItem:NSMenuItem.separatorItem];
  [self add:@"More in Settings…" action:@selector(excludeCurrent:) to:sub];
  return sub;
 }
+- (void)currentAppAllDisplays:(NSMenuItem *)sender {NSMutableDictionary *rule=[self currentAppRuleCreating:YES];if(!rule)return;rule[@"allDisplays"]=@(![rule[@"allDisplays"] boolValue]);[self storeCurrentAppRule:rule];}
 // One App Exceptions row: name and Remove, the two choices, and the app's own warmth.
 - (NSView *)exceptionRowForBundle:(NSString *)bundle rule:(NSDictionary *)rule {
  NSTextField *name=[NSTextField labelWithString:rule[@"name"]?:bundle];name.font=[NSFont systemFontOfSize:13 weight:NSFontWeightSemibold];name.toolTip=bundle;
@@ -467,7 +473,8 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  NSSlider *slider=[self warmthSliderWithValue:[rule[@"warmth"] doubleValue] action:@selector(ruleChanged:)];slider.identifier=bundle;slider.tag=3;[slider.widthAnchor constraintGreaterThanOrEqualToConstant:180].active=YES;[slider setContentHuggingPriority:1 forOrientation:NSLayoutConstraintOrientationHorizontal];[self helpView:slider text:@"Extra Warmth for this app, from Off to Red." label:[NSString stringWithFormat:@"%@ — Extra Warmth percent",rule[@"name"]]];
  NSTextField *percent=[NSTextField labelWithString:[NSString stringWithFormat:@"%.0f%%",[rule[@"warmth"] doubleValue]]];percent.tag=99;percent.alignment=NSTextAlignmentRight;percent.font=[NSFont monospacedDigitSystemFontOfSize:13 weight:NSFontWeightRegular];[percent.widthAnchor constraintEqualToConstant:44].active=YES;
  NSStackView *warmth=[self row:@[inherit,slider,percent]];
- NSStackView *row=[self column:@[header,modes,warmth]];row.spacing=8;row.edgeInsets=NSEdgeInsetsMake(10,10,10,10);row.identifier=bundle;
+ NSButton *span=[NSButton checkboxWithTitle:@"On every display" target:self action:@selector(ruleChanged:)];span.identifier=bundle;span.tag=5;span.state=[rule[@"allDisplays"] boolValue];span.font=[NSFont systemFontOfSize:12];[self helpView:span text:@"For an app whose picture also shows on another display, such as a 3D player or a presenter: while it is in front, its settings and Peek cover every display, not only the one its window is on. Works whether or not the exception is used." label:[NSString stringWithFormat:@"%@ — On every display",rule[@"name"]]];
+ NSStackView *row=[self column:@[header,modes,warmth,span]];row.spacing=8;row.edgeInsets=NSEdgeInsetsMake(10,10,10,10);row.identifier=bundle;
  return row;
 }
 - (NSImage *)menuIconForBundle:(NSString *)bundle {NSImage *icon=[[self iconForBundle:bundle] copy];icon.size=NSMakeSize(16,16);return icon;}
@@ -1334,7 +1341,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
    NSInteger g=o?[o[@"grayMode"] integerValue]:self.grayOverride;BOOL custom=o?[o[@"customWarmth"] boolValue]:self.customWarmth;double w=o?[o[@"warmth"] doubleValue]:self.appWarmth;
    NSInteger eff=g==1?100:g==2?101:(self.grayOffUntil?101:mode);double str=custom?w/100*3:((mode==100||mode==101)&&!warmthOff?[self currentWarmth]:0);
    if([o[@"plain"] boolValue]){eff=101;str=0;}
-   BOOL peekHere=(self.peeking&&(!peekActiveOnly||d==self.peekDisplay))||[self.peekLockedDisplays containsObject:dn];
+   BOOL peekHere=(self.peeking&&(!peekActiveOnly||self.frontSpansAll||d==self.peekDisplay))||[self.peekLockedDisplays containsObject:dn];
    if(self.pausedUntil){eff=101;str=0;}else if(peekHere){NSDictionary *e=[self peekEffects];if([e[@"grayscale"] boolValue])eff=101;if([e[@"warmth"] boolValue])str=0;}
    BOOL grayHere=eff==100||eff==1;NSArray *last=[self.warmth stateForDisplay:d];
    if(last&&([last[0] doubleValue]!=str||[last[1] boolValue]!=grayHere)&&!self.quitting){__weak AppDelegate *weak=self;[self.warmth transitionStrength:str grayscale:grayHere display:d reduceMotion:reduce duration:0.5 completion:^{[weak.warmth applyStrength:str grayscale:grayHere display:d];}];}
