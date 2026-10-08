@@ -73,6 +73,7 @@
 @property NSWindow *helpWindow;
 @property NSString *statusImageName;
 @property NSView *welcomeCard;
+@property NSMenu *addAppMenu;
 @property BOOL welcomeWanted;
 @end
 @implementation AppDelegate
@@ -135,7 +136,7 @@
 - (void)saveExclusionRules {[NSUserDefaults.standardUserDefaults setObject:self.exclusionRules forKey:@"appExclusions"];[self sync];}
 - (void)ruleChanged:(NSControl *)sender {
  NSString *bundle=sender.identifier;NSMutableDictionary *rule=[self.exclusionRules[bundle] mutableCopy];
- if([sender isKindOfClass:NSPopUpButton.class])rule[sender.tag==0?@"grayMode":@"nightMode"]=@([(NSPopUpButton *)sender indexOfSelectedItem]);
+ if([sender isKindOfClass:NSSegmentedControl.class])rule[sender.tag==0?@"grayMode":@"nightMode"]=@([(NSSegmentedControl *)sender selectedSegment]);
  else if(sender.tag==2)rule[@"customWarmth"]=@([(NSButton *)sender state]==NSControlStateValueOff);
  else rule[@"warmth"]=@([(NSSlider *)sender doubleValue]);
  self.exclusionRules[bundle]=rule;[self saveExclusionRules];if(sender.tag!=3)[self rebuildExclusionsList];else {NSTextField *readout=[sender.superview viewWithTag:99];readout.stringValue=[NSString stringWithFormat:@"%.0f%%",[rule[@"warmth"] doubleValue]];}
@@ -154,11 +155,12 @@
 // One App Exceptions row: name and Remove, the two choices, and the app's own warmth.
 - (NSView *)exceptionRowForBundle:(NSString *)bundle rule:(NSDictionary *)rule {
  NSTextField *name=[NSTextField labelWithString:rule[@"name"]?:bundle];name.font=[NSFont systemFontOfSize:13 weight:NSFontWeightSemibold];name.toolTip=bundle;
+ NSImageView *icon=[NSImageView imageViewWithImage:[self iconForBundle:bundle]];[icon.widthAnchor constraintEqualToConstant:28].active=YES;[icon.heightAnchor constraintEqualToConstant:28].active=YES;icon.accessibilityLabel=[NSString stringWithFormat:@"%@ icon",rule[@"name"]];
  NSButton *remove=[NSButton buttonWithTitle:@"Remove" target:self action:@selector(removeRule:)];remove.identifier=bundle;remove.bezelStyle=NSBezelStyleInline;[self helpView:remove text:@"Remove this exception. The app then uses your default settings." label:[NSString stringWithFormat:@"Remove %@ exception",rule[@"name"]]];
- NSStackView *header=[self row:@[name,[self spacer],remove]];
+ NSStackView *header=[self row:@[icon,name,[self spacer],remove]];
  NSMutableArray *choices=[NSMutableArray new];NSArray *titles=@[@"Grayscale",@"Night Shift"];
- for(int i=0;i<2;i++){NSTextField *label=[NSTextField labelWithString:titles[i]];NSPopUpButton *choice=[[NSPopUpButton alloc]initWithFrame:NSZeroRect pullsDown:NO];[choice addItemsWithTitles:@[@"Use default",@"On",@"Off"]];[choice selectItemAtIndex:[rule[i==0?@"grayMode":@"nightMode"] integerValue]];choice.target=self;choice.action=@selector(ruleChanged:);choice.identifier=bundle;choice.tag=i;[choice.widthAnchor constraintEqualToConstant:130].active=YES;[self helpView:choice text:[self exclusionHelp] label:[NSString stringWithFormat:@"%@ — %@",rule[@"name"],titles[i]]];[choices addObject:label];[choices addObject:choice];}
- NSStackView *modes=[self row:choices];[modes setCustomSpacing:20 afterView:choices[1]];
+ for(int i=0;i<2;i++){NSTextField *label=[NSTextField labelWithString:titles[i]];NSSegmentedControl *choice=[NSSegmentedControl segmentedControlWithLabels:@[@"Default",@"On",@"Off"] trackingMode:NSSegmentSwitchTrackingSelectOne target:self action:@selector(ruleChanged:)];choice.selectedSegment=[rule[i==0?@"grayMode":@"nightMode"] integerValue];choice.identifier=bundle;choice.tag=i;for(int k=0;k<3;k++)[choice setWidth:44 forSegment:k];[self helpView:choice text:[self exclusionHelp] label:[NSString stringWithFormat:@"%@ — %@",rule[@"name"],titles[i]]];[choices addObject:label];[choices addObject:choice];}
+ NSStackView *modes=[self row:choices];modes.spacing=6;[modes setCustomSpacing:14 afterView:choices[1]];
  NSButton *inherit=[NSButton checkboxWithTitle:@"Use default warmth" target:self action:@selector(ruleChanged:)];inherit.identifier=bundle;inherit.tag=2;inherit.state=![rule[@"customWarmth"] boolValue];[self helpView:inherit text:@"Uncheck to give this app its own Extra Warmth. Off adds no warmth; 100% is red. Your default warmth stays saved." label:[NSString stringWithFormat:@"%@ — Use default warmth",rule[@"name"]]];
  NSSlider *slider=[self warmthSliderWithValue:[rule[@"warmth"] doubleValue] action:@selector(ruleChanged:)];slider.identifier=bundle;slider.tag=3;slider.enabled=[rule[@"customWarmth"] boolValue];[slider.widthAnchor constraintGreaterThanOrEqualToConstant:180].active=YES;[slider setContentHuggingPriority:1 forOrientation:NSLayoutConstraintOrientationHorizontal];[self helpView:slider text:@"Extra Warmth for this app, from Off to Red." label:[NSString stringWithFormat:@"%@ — Extra Warmth percent",rule[@"name"]]];
  NSTextField *percent=[NSTextField labelWithString:[NSString stringWithFormat:@"%.0f%%",[rule[@"warmth"] doubleValue]]];percent.tag=99;percent.alignment=NSTextAlignmentRight;percent.font=[NSFont monospacedDigitSystemFontOfSize:13 weight:NSFontWeightRegular];[percent.widthAnchor constraintEqualToConstant:44].active=YES;
@@ -166,6 +168,19 @@
  NSStackView *row=[self column:@[header,modes,warmth]];row.spacing=8;row.edgeInsets=NSEdgeInsetsMake(10,10,10,10);
  return row;
 }
+- (NSImage *)iconForBundle:(NSString *)bundle {
+ NSURL *url=[NSWorkspace.sharedWorkspace URLForApplicationWithBundleIdentifier:bundle];NSImage *icon=url?[NSWorkspace.sharedWorkspace iconForFile:url.path]:[NSWorkspace.sharedWorkspace iconForContentType:UTTypeApplicationBundle];return icon;
+}
+// "Add app…" lists the apps running now, with icons, then the file picker.
+- (void)menuNeedsUpdate:(NSMenu *)menu {
+ if(menu!=self.addAppMenu)return;[menu removeAllItems];[menu addItemWithTitle:@"Add app…" action:nil keyEquivalent:@""];
+ NSArray *running=[NSWorkspace.sharedWorkspace.runningApplications sortedArrayUsingComparator:^NSComparisonResult(NSRunningApplication *a,NSRunningApplication *b){return [a.localizedName?:@"" localizedCaseInsensitiveCompare:b.localizedName?:@""];}];
+ for(NSRunningApplication *app in running){if(app.activationPolicy!=NSApplicationActivationPolicyRegular||!app.bundleIdentifier||!app.bundleURL||[app.bundleIdentifier isEqual:NSBundle.mainBundle.bundleIdentifier]||self.exclusionRules[app.bundleIdentifier])continue;
+  NSMenuItem *item=[[NSMenuItem alloc]initWithTitle:app.localizedName?:app.bundleIdentifier action:@selector(addRunningApp:) keyEquivalent:@""];item.target=self;item.representedObject=app.bundleURL;NSImage *icon=[app.icon copy];icon.size=NSMakeSize(16,16);item.image=icon;[menu addItem:item];}
+ if(menu.numberOfItems>1)[menu addItem:NSMenuItem.separatorItem];
+ NSMenuItem *other=[[NSMenuItem alloc]initWithTitle:@"Choose another app…" action:@selector(addExclusionApp:) keyEquivalent:@""];other.target=self;[menu addItem:other];
+}
+- (void)addRunningApp:(NSMenuItem *)sender {if(sender.representedObject)[self addAppURL:sender.representedObject];}
 - (void)rebuildExclusionsList {
  if(!self.exclusionsList)return;for(NSView *v in self.exclusionsList.arrangedSubviews.copy){[self.exclusionsList removeArrangedSubview:v];[v removeFromSuperview];}
  NSArray *keys=[self.exclusionRules.allKeys sortedArrayUsingComparator:^NSComparisonResult(NSString *a,NSString *b){return [self.exclusionRules[a][@"name"] localizedCaseInsensitiveCompare:self.exclusionRules[b][@"name"]];}];
@@ -356,9 +371,9 @@
 - (void)populatePausePopup {
  [self.pausePopup removeAllItems];[self.pausePopup addItemWithTitle:@"Turn Night Shift off for…"];[self populatePauses:self.pausePopup.menu];
 }
-- (void)menuDidClose:(NSMenu *)menu {[self.menuDismissal end];}
+- (void)menuDidClose:(NSMenu *)menu {if(menu!=self.item.menu)return;[self.menuDismissal end];}
 - (void)menuWillOpen:(NSMenu *)menu {
- if(!self.menuDismissal)self.menuDismissal=[MenuDismissal new];[self.menuDismissal begin:menu];
+ if(menu!=self.item.menu)return;if(!self.menuDismissal)self.menuDismissal=[MenuDismissal new];[self.menuDismissal begin:menu];
  [self sync];[menu removeAllItems];BOOL on=NO;BOOL known=[self logicalNightShift:&on];BOOL actualOn=NO;BOOL actualKnown=[self.engine nightShift:&actualOn];
  NSMenuItem *summary=[self add:[self menuStatusLine] action:nil to:menu];summary.toolTip=[NSString stringWithFormat:@"%@\n%@",[self automationSummaryKnown:known nightOn:on],[self exclusionSummary]];
  [menu addItem:NSMenuItem.separatorItem];
@@ -511,7 +526,7 @@
  self.exclusionText=[self note:@"Using your default settings"];
  NSScrollView *scroll=[NSScrollView new];scroll.hasVerticalScroller=YES;scroll.borderType=NSBezelBorder;[scroll.heightAnchor constraintEqualToConstant:300].active=YES;
  self.exclusionsList=[ExceptionStack new];self.exclusionsList.orientation=NSUserInterfaceLayoutOrientationVertical;self.exclusionsList.alignment=NSLayoutAttributeLeading;self.exclusionsList.spacing=0;self.exclusionsList.translatesAutoresizingMaskIntoConstraints=NO;scroll.documentView=self.exclusionsList;[self.exclusionsList.widthAnchor constraintEqualToAnchor:scroll.contentView.widthAnchor].active=YES;
- NSButton *add=[NSButton buttonWithTitle:@"Add app…" target:self action:@selector(addExclusionApp:)];[self helpView:add text:@"Choose an app to give its own display settings." label:@"Add an app exception"];
+ NSPopUpButton *add=[[NSPopUpButton alloc]initWithFrame:NSZeroRect pullsDown:YES];self.addAppMenu=add.menu;add.menu.delegate=self;[add.menu addItemWithTitle:@"Add app…" action:nil keyEquivalent:@""];[add.widthAnchor constraintEqualToConstant:150].active=YES;[self helpView:add text:@"Pick one of the apps running now, or choose another app." label:@"Add an app exception"];
  NSStackView *column=[self column:@[intro,self.exclusionText,scroll,[self row:@[add,[self spacer]]],[self note:@"If Night Shift is turned off for a while, that wins over an app’s Night Shift On. Grayscale Off, warmth Off and Night Shift Off together show the plain display."]]];
  [column setCustomSpacing:6 afterView:intro];
  return column;
