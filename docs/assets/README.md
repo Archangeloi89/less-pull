@@ -5,6 +5,7 @@
 | `interfaces.png` | Two real screenshots of Less Pull 1.4.4 build 16, the menu-bar dropdown with its icon and the Settings window on General, cropped and placed side by side on a drawn backdrop (`src/menu-figures.py`) |
 | `exceptions.png` | Two real screenshots of the menu with the Exception for Finder and Exception for mubi.com submenus open, on a drawn backdrop |
 | `settings-tabs.png` | Four window captures of build 16 (Shortcuts, Apps, Websites, About) with example rules, placed on a drawn backdrop by `src/settings-figure.py` |
+| `before-after.png` | The same drawn web page as it is and as Less Pull shows it, with captions, for the project page (`src/social-preview.py --plain`) |
 | `social-preview.png` | The card GitHub shows in link previews: a drawn screen, color on the left and Less Pull's grayscale with a light amber on the right, computed with the app's own matrix (`src/social-preview.py`) |
 | `src/raw/*` | The original captures, untouched |
 | `hero-*.svg` | Animated illustration of one display changing with the app in front. It respects Reduce Motion |

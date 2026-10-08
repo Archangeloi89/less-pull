@@ -3,7 +3,8 @@
 import math, sys
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 import numpy as np
-out = sys.argv[1]; W, H = 1280, 640
+out = sys.argv[1]; plain = '--plain' in sys.argv  # --plain: the screen alone, for the project page
+W, H = (1280, 520) if plain else (1280, 640)
 def font(size, bold=False):
     for path in ['/System/Library/Fonts/HelveticaNeue.ttc', '/System/Library/Fonts/Helvetica.ttc']:
         try: return ImageFont.truetype(path, size, index=1 if bold else 0)
@@ -68,10 +69,11 @@ screen = Image.fromarray(arr.astype('uint8'), 'RGB')
 g = np.linspace(0, 1, H)[:, None]; top, bot = np.array([44, 46, 52]), np.array([24, 25, 29])
 im = Image.fromarray((top * (1 - g) + bot * g)[:, None, :].repeat(W, 1).reshape(H, W, 3).astype('uint8'), 'RGB').convert('RGBA')
 d = ImageDraw.Draw(im)
-d.text((80, 34), 'A quieter screen.', font=font(96, True), fill=(248, 248, 250))
-d.text((1010, 48), 'Less Pull', font=font(34, True), fill=(170, 172, 178)); d.text((1010, 88), 'for macOS · free', font=font(28), fill=(140, 143, 150))
+if not plain:
+    d.text((80, 34), 'A quieter screen.', font=font(96, True), fill=(248, 248, 250))
+    d.text((1010, 48), 'Less Pull', font=font(34, True), fill=(170, 172, 178)); d.text((1010, 88), 'for macOS · free', font=font(28), fill=(140, 143, 150))
 # The sentences live in the repository description (Open Graph text); the card shows what text cannot.
-scale = 1.0; sw2, sh2 = int(sw * scale), int(sh * scale); sx, sy = 80, 190
+scale = 1.0; sw2, sh2 = int(sw * scale), int(sh * scale); sx, sy = 80, (56 if plain else 190)
 mask = Image.new('L', (sw2, sh2), 0); ImageDraw.Draw(mask).rounded_rectangle((0, 0, sw2 - 1, sh2 - 1), 24, fill=255)
 shadow = Image.new('RGBA', im.size, (0, 0, 0, 0)); ImageDraw.Draw(shadow).rounded_rectangle((sx, sy + 18, sx + sw2, sy + sh2 + 18), 24, fill=(0, 0, 0, 170)); shadow = shadow.filter(ImageFilter.GaussianBlur(28)); im = Image.alpha_composite(im, shadow)
 im.paste(screen.resize((sw2, sh2), Image.LANCZOS), (sx, sy), mask)
@@ -83,4 +85,6 @@ d.ellipse((cx - r - 6, cy - r - 6, cx + r + 6, cy + r + 6), fill=(36, 37, 42, 25
 d.pieslice((cx - r, cy - r, cx + r, cy + r), 90, 270, fill=(245, 245, 247, 255))
 d.pieslice((cx - r, cy - r, cx + r, cy + r), 270, 450, fill=(236, 140, 72, 255))
 d.ellipse((cx - r, cy - r, cx + r, cy + r), outline=(245, 245, 247, 255), width=5)
+if plain:
+    d.text((sx + 24, sy + sh2 + 22), 'The screen as it is', font=font(26), fill=(170, 172, 178)); d.text((cx + 24, sy + sh2 + 22), 'With Less Pull: grayscale and a little warmth', font=font(26), fill=(170, 172, 178))
 im.convert('RGB').save(out, optimize=True); print(out, im.size)
