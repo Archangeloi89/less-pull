@@ -1,0 +1,31 @@
+{
+  "manifest_version": 3,
+  "name": "Less Pull \u2014 Website Exceptions",
+  "version": "0.1.1",
+  "description": "Set website display exceptions for the Less Pull Mac app.",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxAjycv/1KlpneMrBNxEsNyRwFp8Zw2xG6nsTWoFnB31HLnOh7zXAMGjsb6Q8MFlME4QbAxIArgegOI0cnnAjLVST93faTQJS41q5oJgTWU2MXpMjjg1rOFEGO7ja0yabKIN8se17bm3KMyP2T/QijEHfcMee7GAvELI4mUT0CcIXFlv8xI3hSU4RzB4NEWnWFZacf9PHF1Lz9GWBhxqvog8HLic4yb2KV7+/uIbkJZLGLSajp1pUYsQ1G5EfII8dra+JE95hNDEIYyh5RHYp6ddiz/Fzmn+WVpYFxpMHio4I0z8sEsBeMXWtgdAOcYdr/wCqkmzfqtcUFT2ARa7AsQIDAQAB",
+  "permissions": [
+    "tabs",
+    "nativeMessaging"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Less Pull website settings",
+    "default_icon": {
+      "16": "icon16.png",
+      "32": "icon32.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icon16.png",
+    "32": "icon32.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  }
+}

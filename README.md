@@ -1,17 +1,63 @@
-# Less Pull
+<p align="center"><img src="docs/assets/hero.svg" alt="Less Pull. Less colour. Less pull. A quieter screen, on your terms." width="100%"></p>
 
-A calm macOS menu-bar app by Jiri Arion Rose for grayscale, extra warmth, and app/website appearance exceptions.
+<p align="center"><strong>A calm macOS menu-bar app by Jiri Arion Rose.</strong><br>Grayscale to reduce the pull of colour. Optional extra warmth, from neutral to red.</p>
 
-Current test build: **1.4.2 (13)**, for Apple silicon. Normal appearance changes, including returns from exceptions, use a smooth half-second fade. Reduce Motion remains immediate.
+<p align="center"><a href="https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4">Download 1.4.4</a> · <a href="docs/INSTALL.md">Install</a> · <a href="docs/LICENSING.md">Licensing</a> · <a href="https://jiriarion.com">About the author</a></p>
 
-## Release preparation
+## A little less invitation to keep looking
 
-This repository is private while licensing, Developer ID signing, notarization, and Chrome Web Store publication are prepared. Mac App Store distribution is out of scope. Chrome and Brave are currently implemented; other browsers require ports and testing.
+Colour makes a screen lively. Less Pull lets you remove it when you want a quieter place to read, write, or work. Keep grayscale on throughout the day and night, then bring colour back for the apps and websites where you need it.
 
-The app affects the whole display. The browser extension supplies current-site context and local rules; it does not inject webpage styling.
+Extra Warmth is optional. Use it during the day, in the evening, or let it follow macOS Night Shift. It extends the available warmth through amber all the way to red, progressively reducing the blue channel. The percentage is a relative control, not a Kelvin value or a measured blue-light reduction. Less Pull is designed around personal preference; it makes no medical or sleep-outcome promises.
 
-## Rights
+<img src="docs/assets/comparison.svg" alt="Illustrative comparison of original colour, grayscale, warm grayscale at 50%, and red at 100%." width="100%">
 
-Copyright © 2026 Jiri Arion Rose. All rights reserved pending selection of release terms. No commercial reuse permission is granted. This project is not presented as open source.
+## Small controls. Room for exceptions.
 
-[jiriarion.com](https://jiriarion.com) · [Support the author](https://buymeacoffee.com/HsERf62fiZ)
+<table><tr><td width="48%"><img src="docs/assets/settings.png" alt="Actual Less Pull 1.4.4 settings window showing grayscale and independent warmth following." width="440"></td><td valign="top">
+
+**Grayscale stays your choice.** Night Shift ending never turns it off. App and website exceptions can still override it.
+
+**Warmth has its own rhythm.** Follow Night Shift to remove inherited warmth during the day and restore your saved amount at night. Or leave following off and choose warmth whenever you want.
+
+**Change the moment, keep the schedule.** A manual warmth adjustment temporarily overrides following. Resume Following returns to the current Night Shift state.
+
+**Colour where it matters.** Set independent grayscale, warmth, and Night Shift exceptions for a foreground app, a whole website, or an exact URL.
+
+**A gentle return.** Appearance changes fade over half a second. Reduce Motion uses immediate changes.
+
+</td></tr></table>
+
+*The settings image is an actual app screenshot. The comparison above is an illustrative matrix rendering, not a photograph or an optical measurement.*
+
+## Get started
+
+1. Download the app ZIP from the [1.4.4 release](https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4), unzip, and move **Less Pull.app** to **Applications**.
+2. Open it and choose Grayscale and Extra Warmth. Enable warmth following if you want Night Shift to control warmth timing.
+3. For website exceptions, choose **Install Browser Extension…** in the app and follow the [Chrome/Brave setup](docs/INSTALL.md).
+
+Current build: **1.4.4 (15)** · **Apple silicon** · macOS 13+ build target, tested on macOS 27. This is an **ad-hoc signed, unnotarized test build**; Gatekeeper may block downloaded copies. The browser extension is installed locally and has not been store-approved. [Distribution status and remaining validation](docs/RELEASE-PLAN.md).
+
+## Local by design
+
+No account, analytics, or webpage injection. The optional extension uses tab-address access to pass the active public tab to the Mac app through local native messaging. Saved website exceptions stay on this Mac; exact-URL rules can include paths and query strings. Private tabs are excluded. [Privacy details](docs/PRIVACY.md).
+
+## Free to use, including at work
+
+Everyone may use the unmodified app and extension for free, including professionally and in businesses. Source inspection and noncommercial development are permitted. Commercial adaptation, code reuse in commercial products, and sale require the author's written permission.
+
+The [app license](LICENSE-APP.txt) and [source license](LICENSE-SOURCE.txt) govern different rights. This is **source-available with commercial restrictions**. [Permission table and legal-review status](docs/LICENSING.md).
+
+## Development
+
+Objective-C and Apple frameworks; plain JavaScript MV3 extension, with no third-party runtime dependencies. Build on Apple silicon with Apple's Command Line Tools:
+
+```sh
+zsh Source/build.sh
+```
+
+See [testing instructions](Source/TESTING.txt), [1.4.4 changes](docs/1.4.4-release.txt), and the [release plan](docs/RELEASE-PLAN.md). The app relies on private macOS display interfaces, so compatibility needs validation on each supported OS. Chrome and Brave are implemented; Safari, Firefox, Opera, and Edge ports remain future work.
+
+---
+
+Created by [Jiri Arion Rose](https://jiriarion.com). If Less Pull helps you, [support its development](https://buymeacoffee.com/HsERf62fiZ).

@@ -1,0 +1,29 @@
+Less Pull Source-Available Noncommercial License, version 1.0
+Copyright © 2026 Jiri Arion Rose. All rights reserved except as granted below.
+
+1. Scope and definitions
+This license governs the Less Pull source code, tests, build scripts, and original repository assets supplied by Jiri Arion Rose (the Author), unless a file expressly carries different terms. “Source” includes human-readable JavaScript distributed in the browser extension. “Commercial exploitation” includes selling or licensing the Source or a modified version, incorporating it into a commercial product or paid service, or adapting it for a purpose primarily directed toward commercial advantage or monetary compensation. A donation to the Author does not buy commercial rights.
+
+2. Inspection, original builds, and noncommercial development
+You may inspect the Source for any purpose. You may compile or package the unmodified Source and run the resulting unmodified app or extension under LICENSE-APP.txt, including at work. You may copy, modify, compile, and redistribute the Source and your modifications solely for noncommercial purposes, subject to the notice and distribution requirements below. The app-use permission does not grant commercial rights in modifications or derivative works.
+
+3. Reserved commercial rights
+Commercial exploitation of the Source or of modifications or derivative works requires a separate written license from the Author. In particular, you may not adapt the code and sell the adapted app, extension, code, product, or service without that permission. This restriction also applies to noncommercial organizations engaging in commercial exploitation; their organizational status alone creates no exception. Running the unmodified app or extension in a business, for paid work, or in any other organization is expressly allowed under LICENSE-APP.txt and is not prohibited commercial exploitation.
+
+4. Noncommercial redistribution and attribution
+When redistributing Source or permitted modified builds, include this license, LICENSE-APP.txt where applicable, and the Author's copyright notices. Identify modifications and their dates clearly. Do not remove author attribution. You may license your independently authored additions on compatible terms, but may not relicense the Author's work or grant permissions broader than this license. Recipients receive permissions for the Author's work directly from the Author under these terms. Modified builds must be labelled as modified/unofficial and must not imply endorsement.
+
+5. Original app distribution and browser stores
+Distribution and running of unmodified official app or extension packages are governed by LICENSE-APP.txt. Its permissions to copy and run human-readable extension files for normal installation and operation do not grant rights to modify or commercially exploit those files. Store delivery and automatic updates of the Author's official packages are authorized; third-party commercial repackaging is not.
+
+6. Ownership and third-party material
+The Author retains ownership of the licensed work and may offer other licenses. This is a source-available license with commercial restrictions; it is not an open-source license. Trademark rights are reserved; accurate references to Less Pull and the Author, including reviews and links, are permitted. Third-party components, if any, remain subject to their own identified licenses. This license grants only rights the Author controls and does not restrict independent work that does not copy protected material.
+
+7. Compliance and termination
+Rights under this source license terminate upon a material breach. If the Author gives written notice of a first breach and you cure it within 30 days, including stopping unauthorized distribution, source permissions are restored unless the notice concerns deliberate infringement. Termination does not remove rights that applicable law provides independently. The separate app-use license remains governed by its own terms.
+
+8. Warranty and liability
+To the extent permitted by applicable law, the work is provided “as is,” without warranties of merchantability, fitness for a particular purpose, noninfringement, compatibility, availability, or accuracy. To the extent permitted by law, the Author is not liable for losses or damages arising from use or distribution. No clause excludes rights or liabilities that applicable law does not allow to be excluded, or limits statutory exceptions and mandatory rights.
+
+9. Permissions and contact
+For commercial licensing or permission beyond these terms, contact Jiri Arion Rose through https://jiriarion.com. Donations and access to public source do not imply additional permission. If any provision is unenforceable, the remaining provisions continue to the extent permitted by law.

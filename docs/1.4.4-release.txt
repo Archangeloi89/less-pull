@@ -1,0 +1,13 @@
+Less Pull 1.4.4 — build 15
+
+Grayscale stays selected day and night. Extra Warmth follows Night Shift controls warmth only. Manual warmth changes temporarily override following; Resume Following ends the override. Independent app/site rules and smooth half-second transitions are retained.
+
+Build 15 repairs a reproduced display-recovery race: a fade could complete before a late display reset, marking the matrix cache valid prematurely. Recovery now invalidates at the two bounded restoration times, coalesces bursts, and does not add idle matrix writes. Normal foreground changes retain smooth fades. Diagnostics expose global/effective grayscale, exception status, and recovery counts without logging app IDs or website URLs. This race could explain the reported grayscale disappearance; its actual cause has not been established.
+
+Verified: policy, matrix, pause/DST, 576 combined exception cases, fade, browser, menu, extension-worker, and display-recovery tests passed. The new regression fails with the old recovery scheduling and passes with the fix. Previous live Night Shift independence checks passed. Extended sleep/reconnect, optical calibration, and other macOS versions remain unverified.
+
+Separate app-use and source licenses are included in the repository, app resources, extension and installer package. Free original-app use includes workplaces; commercial source exploitation requires written permission. Custom legal terms have not been reviewed by counsel.
+
+Apple silicon; macOS 13+ build target, macOS 27 tested. Ad-hoc signed, not notarized. Private Apple interfaces may change.
+
+© 2026 Jiri Arion Rose — jiriarion.com

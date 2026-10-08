@@ -1,0 +1,13 @@
+.DS_Store
+*.app/
+*.zip
+*.dmg
+*.pkg
+*.p12
+*.p8
+*.pem
+*.key
+.env*
+work/
+build/
+*test-state*.json

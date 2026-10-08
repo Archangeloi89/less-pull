@@ -1,0 +1,20 @@
+Less Pull App Use and Distribution License, version 1.0
+Copyright © 2026 Jiri Arion Rose. All rights reserved except as granted below.
+
+1. Free use, including at work
+Jiri Arion Rose (the Author) grants every individual and organization a worldwide, royalty-free, nonexclusive license to install, copy for installation and backup, and run unmodified official Less Pull app and browser-extension packages. This includes personal, educational, workplace, professional, and commercial use, without a per-user or per-device charge. Organizations may deploy them to their devices and staff. Donations are optional. Unmodified builds you compile from the Author's Source under LICENSE-SOURCE.txt have the same running permissions.
+
+2. Unmodified sharing
+You may redistribute complete, unmodified official packages free of charge with this license and the Author's copyright notices. Do not claim authorship, endorsement, or official publisher status. Selling, charging for access to, or commercially bundling the packages requires separate written permission. Charging for your independent work performed using the app is expressly allowed. Official browser stores may deliver and update packages submitted by the Author under their distribution arrangements.
+
+3. Source and modifications
+This license grants app-use and unmodified-distribution rights. It does not grant permission to modify the code, distribute modified builds, extract code for other products, or sell derivatives. Those activities are governed by LICENSE-SOURCE.txt or a separate written commercial license. The browser extension contains human-readable files: copying or executing them for normal installation and operation is allowed by this app license; modification and code reuse are governed by the source license. Where the licenses overlap, this license's explicit permission for running and unmodified installation controls; it does not expand modification rights.
+
+4. Ownership and mandatory rights
+The Author retains copyright and trademark rights. Third-party components retain their own identified terms. Nothing here restricts independent work, statutory exceptions, interoperability rights, or other rights that applicable law does not allow to be restricted. This license grants only rights the Author controls.
+
+5. Warranty and liability
+To the extent permitted by applicable law, the software is provided “as is” without warranties of merchantability, fitness for a particular purpose, noninfringement, compatibility, availability, or accuracy. It modifies display appearance and is not a medical device or a guarantee of sleep, eye-health, or optical safety outcomes. To the extent permitted by law, the Author is not liable for losses or damages arising from use. Mandatory rights and liabilities remain unaffected.
+
+6. Compliance and contact
+These permissions apply while you comply with their conditions. Material breach may terminate the affected permissions; a first breach cured within 30 days after the Author's written notice restores permissions unless it involved deliberate infringement. Use by compliant users is not time-limited. If a provision is unenforceable, the remainder continues to the extent permitted by law. For permissions or commercial licensing, contact the Author through https://jiriarion.com.

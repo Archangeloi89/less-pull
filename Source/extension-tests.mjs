@@ -1,0 +1,17 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+const event=()=>({listeners:[],addListener(fn){this.listeners.push(fn)}});
+const messages=[];let tab={url:'https://example.com/path?q=1#part',active:true,windowId:1,incognito:false},focused=true,heartbeat;
+globalThis.setInterval=fn=>{heartbeat=fn};
+const nativePort={onMessage:event(),onDisconnect:event(),postMessage(m){messages.push(m);queueMicrotask(()=>nativePort.onMessage.listeners.forEach(fn=>fn({ok:true,id:m.id})))}};
+globalThis.chrome={runtime:{id:'test',connectNative:()=>nativePort,onStartup:event(),onInstalled:event(),onMessage:event()},tabs:{query:async()=>[tab],onActivated:event(),onUpdated:event(),onRemoved:event()},windows:{get:async()=>({focused}),onFocusChanged:event()}};
+const source=fs.readFileSync('Browser Extension/background.js','utf8');const module=await import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'));
+const settle=()=>new Promise(r=>setTimeout(r,10));await settle();
+assert.deepEqual(module.identity(tab.url),{domain:'example.com',url:'https://example.com/path?q=1'});
+assert.equal(messages.at(-1).focused,true);assert.equal(messages.at(-1).url,'https://example.com/path?q=1');
+focused=false;await chrome.windows.onFocusChanged.listeners[0]();await settle();assert.equal(messages.at(-1).focused,true);
+focused=true;tab={...tab,url:'https://other.example/p',incognito:true};await heartbeat();await settle();assert.equal(messages.at(-1).url,'');assert.equal(messages.at(-1).site,'');assert.equal(messages.at(-1).focused,false);
+for(const url of ['chrome://settings','file:///tmp/x','https://user:pass@example.com/'])assert.equal(module.identity(url),null);
+chrome.tabs.query=async()=>{throw new Error('Window unavailable')};await heartbeat();await settle();assert.equal(messages.at(-1).focused,false);assert.equal(messages.at(-1).url,'');
+const before=messages.length;assert.equal(chrome.runtime.onMessage.listeners[0]({type:'set'},{id:'different'},()=>{}),false);assert.equal(messages.length,before);
+console.log('PASS: active tab identity, exact URL/fragment handling, popup-safe active context, private-tab exclusion, unsupported pages, heartbeat, and sender validation.');

@@ -1,0 +1,40 @@
+From Source, with Apple Command Line Tools installed:
+
+clang -fobjc-arc policy-tests.m SwitchingPolicy.m -framework Foundation -o /tmp/nightshift-policy-tests
+/tmp/nightshift-policy-tests
+clang -fobjc-arc matrix-tests.m -framework Foundation -o /tmp/nightshift-matrix-tests
+/tmp/nightshift-matrix-tests
+clang -fobjc-arc pause-tests.m PausePolicy.m -framework Foundation -o /tmp/nightshift-pause-tests
+/tmp/nightshift-pause-tests
+
+Reversible system filter integration test: quit app first; start in Grayscale, Color Tint, or Natural. Test switches filters then restores the starting type. Saved tint hue/intensity must remain unchanged.
+clang -fobjc-arc verify.m Engine.m -framework Foundation -framework CoreGraphics -o /tmp/nightshift-filter-tests
+/tmp/nightshift-filter-tests
+
+Manual checks: Color/Grayscale at 0% and matching red endpoints at 100%; live percentage and aligned references; independent Night Shift/Follow Night Shift; transition/Resume Following Now; daytime warmth off with saved nighttime percentage retained; pause creation/cancel/restart/expiry; wake/display reconnect; normal Quit/restoration; optional login registration after installing in Applications.
+
+Performance: use proc_pid_rusage with mach_timebase conversion for CPU ticks. Measure idle with settings closed and active warmth. Record physical footprint, resident size, interrupt wakeups, duration, and test state. No unchanged matrix writes should occur on backup polls.
+
+App Exceptions controller tests (fake engine; does not change system state):
+clang -fobjc-arc exception-tests.m Engine.m SwitchingPolicy.m WarmthEngine.m PausePolicy.m ExclusionPolicy.m BrowserBridge.m MenuDismissal.m -framework Cocoa -framework UniformTypeIdentifiers -framework ServiceManagement -o /tmp/less-pull-exception-tests
+/tmp/less-pull-exception-tests
+Fade request capture tests (no actual matrix writes):
+clang -fobjc-arc fade-tests.m WarmthEngine.m -framework Cocoa -o /tmp/less-pull-fade-tests
+/tmp/less-pull-fade-tests
+Optional runtime observation: --test-state-path /absolute/scratch/state.json writes effective/logical/actual state only when explicitly passed for testing. Production launches do not write this file.
+
+Expanded exception suite also checks 576 combinations of following, global state/base, independent app rules, warmth inheritance/endpoints, and restoration.
+
+Website rule tests (separate CLI defaults domain; no system changes):
+clang -fobjc-arc browser-tests.m BrowserBridge.m -framework Foundation -o /tmp/less-pull-browser-tests
+/tmp/less-pull-browser-tests
+Browser extension worker tests: node extension-tests.mjs from Source, using its included Browser Extension folder. Native framing integration requires the app running; use BrowserHost with its allowlisted origin and length-prefixed messages. Actual browser installation remains a manual check.
+
+Menu dismissal geometry tests:
+clang -fobjc-arc menu-tests.m MenuDismissal.m -framework Cocoa -o /tmp/less-pull-menu-tests
+/tmp/less-pull-menu-tests
+
+Bounded display recovery regression (captured writes; no display changes):
+clang -fobjc-arc pipeline-tests.m Engine.m SwitchingPolicy.m WarmthEngine.m PausePolicy.m ExclusionPolicy.m BrowserBridge.m MenuDismissal.m -framework Cocoa -framework UniformTypeIdentifiers -framework ServiceManagement -o /tmp/less-pull-pipeline-tests
+/tmp/less-pull-pipeline-tests
+Simulates a display reset after a fade finishes. Checks persistent grayscale, two recovery attempts, event coalescing, and no idle writes.
