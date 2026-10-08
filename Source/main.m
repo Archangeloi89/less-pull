@@ -531,7 +531,10 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  self.policy.overrideMode=[d integerForKey:@"overrideMode"];
  self.policy.known=[d boolForKey:@"lastNightShiftKnown"];self.policy.nightShiftOn=[d boolForKey:@"lastNightShiftOn"];
  self.browserBridge=[BrowserBridge new];__weak AppDelegate *browserOwner=self;self.browserBridge.changed=^{[browserOwner sync];[browserOwner rebuildWebsiteRulesList];};self.browserBridge.defaults=^NSDictionary *(NSString *browser){return [browserOwner browserBaseForBundle:browser];};[self.browserBridge start];
- self.item=[NSStatusBar.systemStatusBar statusItemWithLength:NSSquareStatusItemLength];
+ // A new install puts the icon at the left end of the menu-bar items, where it stays visible on a
+ // crowded MacBook menu bar. macOS keeps the position under this name; the user can still ⌘-drag it.
+ if(![d objectForKey:@"NSStatusItem Preferred Position LessPull"])[d setDouble:100000 forKey:@"NSStatusItem Preferred Position LessPull"];
+ self.item=[NSStatusBar.systemStatusBar statusItemWithLength:NSSquareStatusItemLength];self.item.autosaveName=@"LessPull";
  self.item.button.image=[self menuBarImage:@"menubar-grayscale" symbol:@"circle.lefthalf.filled"];
  self.item.button.toolTip=@"Less Pull";
  NSMenu *menu=[NSMenu new];menu.delegate=self;self.statusMenu=menu;self.item.button.target=self;self.item.button.action=@selector(statusItemClicked:);[self.item.button sendActionOn:NSEventMaskLeftMouseUp|NSEventMaskRightMouseUp];
