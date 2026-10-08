@@ -1,6 +1,6 @@
 # Release plan
 
-Less Pull 1.4.4 build 16 is a private test release. This repository stays private until a public release is explicitly approved. The version number stays 1.4.4 for good; releases are tagged `v1.4.4-<build>`.
+Less Pull 1.4.4 build 16 is a test release shared with friends; the repository went public on 8 October 2026 at the author's request. The version number stays 1.4.4 for good; releases are tagged `v1.4.4-<build>`.
 
 ## Done
 
@@ -21,7 +21,7 @@ See [Publishing safely](PUBLISHING.md) for how signing and store hosting protect
 4. Register a Chrome Web Store publisher, get the production extension identity, align the native allowlist, prepare disclosures and reviewer instructions, then submit.
 5. Publish versioned, notarized downloads.
 6. Real screenshots of the Settings tabs and of the popup inside Brave, for the project page.
-7. Make the repository or a releases feed public, so the in-app update check can see releases; attach `lesspull-update.json` to each release.
+7. Attach `lesspull-update.json` to each release (the repository is public, so the in-app update check sees releases).
 8. Developer ID signing and notarization also unlock update phase 2 (download, verify and install from the menu; Sparkle 2 is the recommended route and would be the first third-party dependency, so it needs an explicit decision).
 10. Safari: sign and notarize the companion app (built by build.sh with Xcode) so the extension loads without Allow Unsigned Extensions; consider App Store distribution of the companion.
 
