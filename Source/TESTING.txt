@@ -22,6 +22,8 @@ Fade request capture tests (no actual matrix writes):
 clang -fobjc-arc fade-tests.m WarmthEngine.m -framework Cocoa -o /tmp/less-pull-fade-tests
 /tmp/less-pull-fade-tests
 Optional runtime observation: --test-state-path /absolute/scratch/state.json writes effective/logical/actual state only when explicitly passed for testing. Production launches do not write this file.
+Other launch options for testing: --settings opens Settings; --welcome opens the first-launch window again; --regular keeps a Dock icon so UI automation can reach the app; --menu-test mirrors the status menu into the app menu.
+To test without touching saved preferences, copy the built app, change CFBundleIdentifier to a test value (for example local.nightshiftfilters.test), remove LSUIElement if --regular is wanted, re-sign ad hoc, and quit the installed copy first.
 
 Expanded exception suite also checks 576 combinations of following, global state/base, independent app rules, warmth inheritance/endpoints, and restoration.
 
