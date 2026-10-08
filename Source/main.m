@@ -220,7 +220,7 @@ static NSString *const LessPullOldBundleIdentifier=@"local.nightshiftfilters.app
 @property (nonatomic) BOOL peeking;
 @property BOOL peekLocked,peekIgnoreRelease;
 // Per display: the display with the window you are using, and the displays whose peek is kept by a double press.
-@property uint32_t activeDisplay;
+@property uint32_t activeDisplay,peekDisplay;
 @property NSMutableSet<NSNumber *> *peekLockedDisplays;
 @property NSTimeInterval lastPeekPress;
 @property NSDictionary *availableUpdate;
@@ -757,9 +757,11 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
 // double press keeps that display plain; the next press there lets it go. Other displays can be
 // kept the same way later, so each one is toggled on its own. All displays: one lock for all.
 - (BOOL)peeksPerDisplay {return [NSUserDefaults.standardUserDefaults boolForKey:@"peekActiveDisplayOnly"]&&[[self.warmth displays].firstObject unsignedIntValue]!=0;}
+// The display under the mouse pointer: where you are looking, no click needed.
+- (uint32_t)displayUnderMouse {NSPoint p=NSEvent.mouseLocation;CGPoint cg=CGPointMake(p.x,CGDisplayBounds(CGMainDisplayID()).size.height-p.y);CGDirectDisplayID id=0;uint32_t n=0;if(CGGetDisplaysWithPoint(cg,1,&id,&n)==kCGErrorSuccess&&n)return id;return self.activeDisplay?:CGMainDisplayID();}
 - (void)peekKeyPressed:(BOOL)pressed at:(NSTimeInterval)now {
  if(pressed&&[self peeksPerDisplay]){
-  [self updateForeground];NSNumber *d=@(self.activeDisplay);
+  self.peekDisplay=[self displayUnderMouse];NSNumber *d=@(self.peekDisplay);
   if([self.peekLockedDisplays containsObject:d]){[self.peekLockedDisplays removeObject:d];self.peekIgnoreRelease=YES;_peeking=NO;self.animateAppearance=YES;[self sync];return;}
   if(now-self.lastPeekPress<0.45)[self.peekLockedDisplays addObject:d];
   self.lastPeekPress=now;self.animateAppearance=YES;_peeking=YES;[self sync];return;
@@ -1024,7 +1026,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  for(NSButton *b in @[self.peekGrayButton,self.peekWarmthButton,self.peekNightButton])[self helpView:b text:@"Turned off while you hold the Peek shortcut." label:[NSString stringWithFormat:@"While peeking, turn off %@",b.title]];
  NSTextField *peekEffectsLabel=[NSTextField labelWithString:@"While peeking, turn off:"];peekEffectsLabel.font=[NSFont systemFontOfSize:12];
  NSTextField *peekScopeLabel=[NSTextField labelWithString:@"Peek on:"];peekScopeLabel.font=[NSFont systemFontOfSize:12];
- self.peekScopePopup=[[NSPopUpButton alloc]initWithFrame:NSZeroRect pullsDown:NO];[self.peekScopePopup addItemsWithTitles:@[@"All displays",@"The display with the window you are using"]];self.peekScopePopup.target=self;self.peekScopePopup.action=@selector(peekScopeChanged:);[self.peekScopePopup selectItemAtIndex:[NSUserDefaults.standardUserDefaults boolForKey:@"peekActiveDisplayOnly"]?1:0];[self helpView:self.peekScopePopup text:@"With more than one display: peek only where the window you are using is (a double press keeps that display plain; the next press there lets go, so each display is toggled on its own), or everywhere at once." label:@"Peek on"];
+ self.peekScopePopup=[[NSPopUpButton alloc]initWithFrame:NSZeroRect pullsDown:NO];[self.peekScopePopup addItemsWithTitles:@[@"All displays",@"The display under the mouse pointer"]];self.peekScopePopup.target=self;self.peekScopePopup.action=@selector(peekScopeChanged:);[self.peekScopePopup selectItemAtIndex:[NSUserDefaults.standardUserDefaults boolForKey:@"peekActiveDisplayOnly"]?1:0];[self helpView:self.peekScopePopup text:@"With more than one display: peek only on the display under the mouse pointer (a double press keeps that display plain; the next press there lets go, so each display is toggled on its own), or everywhere at once." label:@"Peek on"];
  NSTextField *peekTitle=[NSTextField labelWithString:@"Peek in color"];peekTitle.font=[NSFont systemFontOfSize:13 weight:NSFontWeightMedium];
  self.peekRecorder=[ShortcutRecorder new];self.peekRecorder.bezelStyle=NSBezelStyleRounded;self.peekRecorder.title=@"Record Shortcut";self.peekRecorder.target=self;self.peekRecorder.action=@selector(startRecording:);[self.peekRecorder.widthAnchor constraintGreaterThanOrEqualToConstant:150].active=YES;
  __weak AppDelegate *weakSelf=self;self.peekRecorder.recorded=^(NSInteger keyCode,NSEventModifierFlags modifiers){[weakSelf savePeekShortcutKeyCode:keyCode modifiers:modifiers];};self.peekRecorder.cleared=^{[weakSelf savePeekShortcutKeyCode:-1 modifiers:0];};
@@ -1327,7 +1329,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
    NSInteger g=o?[o[@"grayMode"] integerValue]:self.grayOverride;BOOL custom=o?[o[@"customWarmth"] boolValue]:self.customWarmth;double w=o?[o[@"warmth"] doubleValue]:self.appWarmth;
    NSInteger eff=g==1?100:g==2?101:(self.grayOffUntil?101:mode);double str=custom?w/100*3:((mode==100||mode==101)&&!warmthOff?[self currentWarmth]:0);
    if([o[@"plain"] boolValue]){eff=101;str=0;}
-   BOOL peekHere=(self.peeking&&(!peekActiveOnly||d==self.activeDisplay))||[self.peekLockedDisplays containsObject:dn];
+   BOOL peekHere=(self.peeking&&(!peekActiveOnly||d==self.peekDisplay))||[self.peekLockedDisplays containsObject:dn];
    if(self.pausedUntil){eff=101;str=0;}else if(peekHere){NSDictionary *e=[self peekEffects];if([e[@"grayscale"] boolValue])eff=101;if([e[@"warmth"] boolValue])str=0;}
    BOOL grayHere=eff==100||eff==1;NSArray *last=[self.warmth stateForDisplay:d];
    if(last&&([last[0] doubleValue]!=str||[last[1] boolValue]!=grayHere)&&!self.quitting){__weak AppDelegate *weak=self;[self.warmth transitionStrength:str grayscale:grayHere display:d reduceMotion:reduce duration:0.5 completion:^{[weak.warmth applyStrength:str grayscale:grayHere display:d];}];}
