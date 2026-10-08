@@ -13,12 +13,12 @@ def matrix(s, gray=True):
     g = gains(s); luma = [.30, .59, .11]; mix = 1 if gray else s / 3
     return np.array([[((1 - mix) * (1 if r == c else 0) + mix * luma[c]) * g[r] for c in range(3)] for r in range(3)])
 # a vivid "screen": wallpaper gradient plus app-like cards
-sw, sh = 1120, 460
+sw, sh = 1120, 380
 y, x = np.mgrid[0:sh, 0:sw]
 wall = np.stack([120 + 110 * np.sin(x / 260 + 1.2), 80 + 120 * np.cos(y / 180 + .4), 150 + 100 * np.sin((x + y) / 320)], -1).clip(0, 255).astype('uint8')
 screen = Image.fromarray(wall, 'RGB').convert('RGBA')
 d = ImageDraw.Draw(screen)
-cards = [((60, 60, 520, 400), (255, 94, 77)), ((560, 60, 1060, 220), (66, 181, 255)), ((560, 250, 790, 400), (255, 203, 60)), ((820, 250, 1060, 400), (84, 220, 120))]
+cards = [((60, 50, 520, 330), (255, 94, 77)), ((560, 50, 1060, 180), (66, 181, 255)), ((560, 205, 790, 330), (255, 203, 60)), ((820, 205, 1060, 330), (84, 220, 120))]
 for (x0, y0, x1, y1), col in cards:
     d.rounded_rectangle((x0, y0, x1, y1), 22, fill=col)
     d.rounded_rectangle((x0 + 24, y0 + 24, x1 - 24, y0 + 44), 8, fill=(255, 255, 255, 230))
@@ -36,11 +36,11 @@ def font(size, bold=False):
         except Exception: pass
     return ImageFont.load_default()
 d = ImageDraw.Draw(im)
-d.text((80, 36), 'A quieter screen.', font=font(96, True), fill=(248, 248, 250))
+d.text((80, 34), 'A quieter screen.', font=font(96, True), fill=(248, 248, 250))
+d.text((1010, 48), 'Less Pull', font=font(34, True), fill=(170, 172, 178)); d.text((1010, 88), 'for macOS · free', font=font(28), fill=(140, 143, 150))
 for i, line in enumerate(['Take the color out of your screen, so it pulls at you less.', 'Add warmth when you like, and keep color only where it truly matters.', 'Every app and website can have its own settings.']):
-    d.text((84, 142 + i * 42), line, font=font(34), fill=(214, 216, 222))
-d.text((1010, 44), 'Less Pull', font=font(34, True), fill=(170, 172, 178)); d.text((1010, 84), 'for macOS · free', font=font(28), fill=(140, 143, 150))
-scale = 0.70; sw2, sh2 = int(sw * scale), int(sh * scale); sx, sy = 80, 286
+    d.text((84, 478 + i * 44), line, font=font(34), fill=(214, 216, 222))
+scale = 0.80; sw2, sh2 = int(sw * scale), int(sh * scale); sx, sy = 80, 156
 mask = Image.new('L', (sw2, sh2), 0); ImageDraw.Draw(mask).rounded_rectangle((0, 0, sw2 - 1, sh2 - 1), 24, fill=255)
 shadow = Image.new('RGBA', im.size, (0, 0, 0, 0)); ImageDraw.Draw(shadow).rounded_rectangle((sx, sy + 18, sx + sw2, sy + sh2 + 18), 24, fill=(0, 0, 0, 170)); shadow = shadow.filter(ImageFilter.GaussianBlur(28)); im = Image.alpha_composite(im, shadow)
 im.paste(screen.resize((sw2, sh2), Image.LANCZOS), (sx, sy), mask)
