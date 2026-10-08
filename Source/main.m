@@ -70,9 +70,10 @@
 @property BOOL suppressPauseCancellation;
 @property NSTimer *pauseTimer,*eventTimer,*pipelineRecoveryTimer;
 @property NSUInteger pipelineEvents,pipelineRestorations;
-@property NSWindow *helpWindow,*welcomeWindow;
-@property NSButton *welcomeSwitch;
-@property NSButton *welcomeLogin;
+@property NSWindow *helpWindow;
+@property NSString *statusImageName;
+@property NSView *welcomeCard;
+@property BOOL welcomeWanted;
 @end
 @implementation AppDelegate
 - (PausePolicy *)nightGuard {
@@ -212,7 +213,8 @@
  [NSWorkspace.sharedWorkspace.notificationCenter addObserver:self selector:@selector(frontmostChanged:) name:NSWorkspaceDidTerminateApplicationNotification object:nil];
  [self updateForeground];[self restartTimer];[self schedulePauseTimer];[self sync];
  if([NSProcessInfo.processInfo.arguments containsObject:@"--settings"])[self showSettings:nil];
- if(firstLaunch||[NSProcessInfo.processInfo.arguments containsObject:@"--welcome"])[self showWelcome:nil];
+ // First launch: Settings opens with a one-time welcome card above the real controls.
+ self.welcomeWanted=firstLaunch||[NSProcessInfo.processInfo.arguments containsObject:@"--welcome"];if(self.welcomeWanted)[self showSettings:nil];
  if([NSProcessInfo.processInfo.arguments containsObject:@"--menu-test"]){[self showSettings:nil];main.itemArray.firstObject.submenu=self.item.menu;}
 
 }
@@ -222,6 +224,27 @@
 - (NSImage *)menuBarImage:(NSString *)name symbol:(NSString *)symbol {
  NSImage *image=[NSBundle.mainBundle imageForResource:name];if(image){image.template=YES;image.accessibilityDescription=@"Less Pull";return image;}
  return [NSImage imageWithSystemSymbolName:symbol accessibilityDescription:@"Less Pull"];
+}
+// Half-filled circle while grayscale is showing, outline while color is showing,
+// pause mark while Night Shift is timed off.
+- (void)updateStatusIcon {
+ BOOL gray=self.effectiveMode==100||self.effectiveMode==1;double strength=round(self.targetStrength*20)/20;
+ NSString *name=self.pause?@"paused":[NSString stringWithFormat:@"gray=%d warmth=%.2f",gray,strength];
+ if([name isEqual:self.statusImageName])return;self.statusImageName=name;
+ self.item.button.image=self.pause?[self menuBarImage:@"menubar-paused" symbol:@"pause.circle"]:[self statusImageGray:gray warmth:strength];
+}
+// Drawn rather than a template image so the right half can carry the warmth
+// color: the left half fills while grayscale shows, the right half takes the
+// ramp color (light orange to red) for the warmth in effect. Under the full red
+// filter the warm half is much darker than the white half, so both stay visible.
+- (NSImage *)statusImageGray:(BOOL)gray warmth:(double)strength {
+ NSImage *image=[NSImage imageWithSize:NSMakeSize(18,18) flipped:NO drawingHandler:^BOOL(NSRect rect){
+  NSRect circle=NSInsetRect(rect,2,2);NSColor *ink=NSColor.labelColor;NSBezierPath *outline=[NSBezierPath bezierPathWithOvalInRect:circle];
+  NSRect left=circle,right=circle;left.size.width/=2;right.size.width/=2;right.origin.x+=right.size.width;
+  if(gray){[NSGraphicsContext saveGraphicsState];[[NSBezierPath bezierPathWithRect:left] addClip];[ink setFill];[outline fill];[NSGraphicsContext restoreGraphicsState];}
+  if(strength>0){double gains[3];WarmthGains(strength,gains);[NSGraphicsContext saveGraphicsState];[[NSBezierPath bezierPathWithRect:right] addClip];[[NSColor colorWithSRGBRed:gains[0] green:gains[1] blue:gains[2] alpha:1] setFill];[outline fill];[NSGraphicsContext restoreGraphicsState];}
+  [ink setStroke];outline.lineWidth=1.5;[outline stroke];return YES;}];
+ image.template=NO;image.accessibilityDescription=[NSString stringWithFormat:@"Less Pull: %@%@",gray?@"grayscale":@"color",strength>0?[NSString stringWithFormat:@", warmth %.0f%%",strength/3*100]:@""];return image;
 }
 - (void)restartTimer {
  [self.timer invalidate];double t=60;self.timer=[NSTimer timerWithTimeInterval:t target:self selector:@selector(sync) userInfo:nil repeats:YES];
@@ -268,7 +291,7 @@
  NSSlider *slider=[NSSlider new];slider.cell=[WarmthSliderCell new];slider.minValue=0;slider.maxValue=100;slider.doubleValue=value;slider.target=self;slider.action=action;slider.continuous=YES;slider.numberOfTickMarks=5;slider.allowsTickMarkValuesOnly=NO;slider.sliderType=NSSliderTypeLinear;return slider;
 }
 - (NSString *)modeName:(NSInteger)mode {return mode==101?@"Color":mode==100?@"Grayscale":mode==0?@"Natural Colors":mode==1?@"Grayscale":mode==16?@"System Color Tint":@"Other filter";}
-- (NSString *)autoHelp {return @"Extra Warmth comes on with Night Shift and goes away when Night Shift turns off. Grayscale and your Night Shift schedule are not affected. If you move the slider yourself, that warmth stays until Night Shift next changes, or until you choose Resume Following.";}
+- (NSString *)autoHelp {return @"On: Extra Warmth is added only while Night Shift is on, and there is none in the daytime. Off: Extra Warmth stays on all day. Grayscale and your Night Shift schedule are not affected. If you move the slider yourself while following, that warmth stays until Night Shift next changes, or until you choose Resume Following.";}
 - (NSString *)followHelpKnown:(BOOL)known nightOn:(BOOL)on {
  NSString *availability=!known?@"Night Shift cannot be read right now; your choice is kept. ":@"";
  return [availability stringByAppendingString:self.autoHelp];
@@ -293,11 +316,11 @@
  BOOL failed=[self.status containsString:@"Could not"]||[self.status containsString:@"unavailable"]||[self.status containsString:@"unsupported"];
  self.statusText.stringValue=failed?self.status:summary;self.statusDetail.stringValue=detail;self.websiteStatus.stringValue=[self websiteStatusLine];self.exclusionText.stringValue=[self exclusionSummary];self.exclusionText.toolTip=[self exclusionHelp];self.exclusionText.accessibilityHelp=[self exclusionHelp];
  BOOL actualOn=NO;BOOL actualKnown=[self.engine nightShift:&actualOn];
- self.item.button.toolTip=[NSString stringWithFormat:@"%@\n%@\nClick for Grayscale, Extra Warmth and Night Shift.",summary,detail];
+ self.item.button.toolTip=[NSString stringWithFormat:@"%@\n%@\nClick for Grayscale, Extra Warmth and Night Shift.",summary,detail];[self updateStatusIcon];
  self.autoButton.state=self.automatic;self.autoButton.enabled=actualKnown;[self helpView:self.autoButton text:[self followHelpKnown:actualKnown nightOn:actualOn] label:@"Extra Warmth follows Night Shift"];self.nightButton.state=actualKnown&&actualOn;self.nightButton.enabled=known;
  self.nightButton.state=self.exclusion.active?on:(actualKnown&&actualOn);
  self.nightButton.title=known?(self.exclusion.active?(on?@"Default Night Shift: On":@"Default Night Shift: Off"):(on?@"Night Shift: On":@"Night Shift: Off")):@"Night Shift unavailable";[self helpView:self.nightButton text:self.exclusion.active?[[self exclusionHelp] stringByAppendingString:@" This changes your default; the app in front keeps its own Night Shift exception."]:self.nightHelp label:nil];
- BOOL grayscaleOn=self.selectedMode==1||self.selectedMode==100;self.grayscaleButton.state=grayscaleOn;if(self.welcomeSwitch.state!=grayscaleOn)self.welcomeSwitch.state=grayscaleOn;
+ self.grayscaleButton.state=self.selectedMode==1||self.selectedMode==100;
  self.grayscaleButton.title=self.grayOverride?@"Default Grayscale":@"Grayscale";
  self.resumeButton.hidden=!(self.automatic&&self.policy.overrideMode>=0);
  self.endPauseButton.title=[self canResumePause]?@"Turn Night Shift back on":@"End timed off";[self helpView:self.endPauseButton text:[self endPauseHelp] label:self.endPauseButton.title];self.endPauseButton.hidden=self.pause==nil;self.pausePopup.hidden=self.pause!=nil;self.pausePopup.enabled=known&&(on||actualOn);
@@ -460,14 +483,27 @@
  self.autoButton=[NSButton checkboxWithTitle:@"Extra Warmth follows Night Shift" target:self action:@selector(toggleAuto:)];[self helpView:self.autoButton text:self.autoHelp label:@"Extra Warmth follows Night Shift"];
  self.resumeButton=[NSButton buttonWithTitle:@"Resume Following" target:self action:@selector(resume:)];[self helpView:self.resumeButton text:@"Go back to following Night Shift now." label:@"Resume Following Now"];
  self.loginButton=[NSButton checkboxWithTitle:@"Launch at login" target:self action:@selector(login:)];[self helpView:self.loginButton text:@"Open Less Pull when you sign in to your Mac. Install it in Applications first." label:@"Launch at login"];
- NSStackView *column=[self column:@[self.statusText,self.statusDetail,[self separator],
+ NSMutableArray *views=[NSMutableArray new];
+ if(self.welcomeWanted){
+  NSTextField *title=[NSTextField labelWithString:@"Welcome to Less Pull"];title.font=[NSFont systemFontOfSize:15 weight:NSFontWeightSemibold];
+  NSTextField *intro=[NSTextField wrappingLabelWithString:@"Less Pull takes the color out of your screen so it pulls at your attention less. You can add warmth from amber to red, and keep color for the apps and websites that need it."];intro.preferredMaxLayoutWidth=404;
+  NSImageView *icon=[NSImageView imageViewWithImage:[self statusImageGray:YES warmth:0]];[icon.widthAnchor constraintEqualToConstant:18].active=YES;[icon.heightAnchor constraintEqualToConstant:18].active=YES;icon.accessibilityLabel=@"The Less Pull menu-bar icon";
+  NSTextField *where=[NSTextField wrappingLabelWithString:@"Less Pull lives in your menu bar, at the top right of the screen. Click this icon for Grayscale, Extra Warmth and Night Shift. Start with the two choices below; everything can be changed later."];where.preferredMaxLayoutWidth=376;
+  NSStackView *iconRow=[self row:@[icon,where]];iconRow.alignment=NSLayoutAttributeTop;
+  NSButton *done=[NSButton buttonWithTitle:@"Got it" target:self action:@selector(dismissWelcome:)];done.keyEquivalent=@"\r";[self helpView:done text:@"Hide this welcome message." label:@"Got it"];
+  NSStackView *card=[self column:@[title,intro,iconRow,[self row:@[[self spacer],done]]]];card.spacing=8;card.edgeInsets=NSEdgeInsetsMake(14,14,12,14);card.wantsLayer=YES;card.layer.cornerRadius=8;card.layer.backgroundColor=[NSColor.labelColor colorWithAlphaComponent:.06].CGColor;
+  for(NSView *v in card.arrangedSubviews)if([v isKindOfClass:NSStackView.class])[v.widthAnchor constraintEqualToAnchor:card.widthAnchor constant:-28].active=YES;
+  self.welcomeCard=card;[views addObject:card];
+ }
+ [views addObjectsFromArray:@[self.statusText,self.statusDetail,[self separator],
   self.grayscaleButton,[self note:@"Shades of gray, day and night. Exceptions for apps and websites can show color."],
   [self row:@[self.warmthTitle,[self spacer],self.resetButton]],[self row:@[self.warmthSlider,self.warmthLabel]],tickRow,[self note:@"Adds warmth on top of Night Shift, from Off to Red."],[self separator],
   [self row:@[self.nightButton,[self spacer],self.pausePopup,self.endPauseButton]],[self note:@"Turns Night Shift on or off now; your schedule in System Settings stays as it is."],
-  [self row:@[self.autoButton,[self spacer],self.resumeButton]],[self note:@"The warmth you set comes on with Night Shift and goes away when it turns off."],[self separator],
+  [self row:@[self.autoButton,[self spacer],self.resumeButton]],[self note:@"On: Extra Warmth only while Night Shift is on, none in the daytime. Off: Extra Warmth stays on all day."],[self separator],
   self.loginButton]];
+ NSStackView *column=[self column:views];
  tickRow.identifier=@"fixed";[tickRow.widthAnchor constraintEqualToAnchor:self.warmthSlider.widthAnchor].active=YES;
- [column setCustomSpacing:4 afterView:self.statusText];[column setCustomSpacing:4 afterView:self.grayscaleButton];[column setCustomSpacing:6 afterView:column.arrangedSubviews[5]];[column setCustomSpacing:2 afterView:column.arrangedSubviews[6]];[column setCustomSpacing:6 afterView:tickRow];[column setCustomSpacing:4 afterView:column.arrangedSubviews[10]];[column setCustomSpacing:4 afterView:column.arrangedSubviews[12]];
+ NSUInteger base=self.welcomeCard?1:0;[column setCustomSpacing:4 afterView:self.statusText];[column setCustomSpacing:4 afterView:self.grayscaleButton];[column setCustomSpacing:6 afterView:column.arrangedSubviews[base+5]];[column setCustomSpacing:2 afterView:column.arrangedSubviews[base+6]];[column setCustomSpacing:6 afterView:tickRow];[column setCustomSpacing:4 afterView:column.arrangedSubviews[base+10]];[column setCustomSpacing:4 afterView:column.arrangedSubviews[base+12]];
  return column;
 }
 - (NSStackView *)appsTab {
@@ -507,6 +543,14 @@
  NSMutableArray *browsers=[NSMutableArray new];for(NSString *browser in self.browserBridge.contexts){NSDictionary *c=self.browserBridge.contexts[browser];if([NSDate.date timeIntervalSinceDate:c[@"time"]?:NSDate.distantPast]<=65)[browsers addObject:[browser isEqual:@"com.brave.Browser"]?@"Brave":@"Chrome"];}
  return browsers.count?[NSString stringWithFormat:@"Extension connected in %@.",[browsers componentsJoinedByString:@" and "]]:@"The extension is not connected right now. Open the browser, or install the extension.";
 }
+- (void)dismissWelcome:(id)sender {
+ NSView *card=self.welcomeCard;if(!card)return;NSStackView *column=(NSStackView *)card.superview;
+ [column removeArrangedSubview:card];[card removeFromSuperview];self.welcomeCard=nil;self.welcomeWanted=NO;
+ // The tab's root view echoes its frame as fitting size; measure the column, then
+ // reselect the tab so the tab controller applies the smaller size to the window.
+ [column layoutSubtreeIfNeeded];self.settingsTabs.tabViewItems.firstObject.viewController.preferredContentSize=NSMakeSize(500,column.fittingSize.height);
+ self.settingsTabs.selectedTabViewItemIndex=1;self.settingsTabs.selectedTabViewItemIndex=0;
+}
 - (void)showLicenses:(id)sender {NSURL *folder=NSBundle.mainBundle.resourceURL;[NSWorkspace.sharedWorkspace activateFileViewerSelectingURLs:@[[folder URLByAppendingPathComponent:@"LICENSE-APP.txt"],[folder URLByAppendingPathComponent:@"LICENSE-SOURCE.txt"]]];}
 - (void)showSettings:(id)sender {
  if(!self.settings){
@@ -535,7 +579,7 @@
   @[@"What Less Pull does",@"Less Pull takes the color out of your screen so it pulls at your attention less. You can add warmth, from amber to red, and keep color where you need it."],
   @[@"Grayscale",@"Shows everything in shades of gray, day and night. Turn it off to see color again."],
   @[@"Extra Warmth",@"Adds warmth on top of Night Shift. Off adds none; 100% is red. The slider is in the menu and in Settings."],
-  @[@"Night Shift",@"Less Pull can turn Night Shift on or off now, or off for a while; your schedule in System Settings stays as it is. With “Extra Warmth follows Night Shift” on, the warmth you set comes on at night and goes away in the morning. If you move the slider by hand, that warmth stays until Night Shift next changes, or until you choose Resume Following."],
+  @[@"Night Shift",@"Less Pull can turn Night Shift on or off now, or off for a while; your schedule in System Settings stays as it is. With “Extra Warmth follows Night Shift” on, the warmth you set is added only while Night Shift is on, and there is none in the daytime. With it off, Extra Warmth stays on all day. If you move the slider by hand while following, that warmth stays until Night Shift next changes, or until you choose Resume Following."],
   @[@"Exceptions for apps",@"Give an app its own settings in Settings → App Exceptions, or choose “Exception for …” in the menu. They apply while that app is in front with a window open. Each setting can keep the default or get its own value."],
   @[@"Exceptions for websites",@"Install the browser extension from Settings, for Brave or Chrome. Click its icon on a website to give that site, or one exact page, its own settings. Pages inherit from their domain, and domains from the browser’s app exception. Private tabs are left alone."],
   @[@"Quitting",@"Quitting returns the display to normal and lets Night Shift follow its schedule again. Your settings and exceptions are kept."],
@@ -554,31 +598,6 @@
  }
  [NSApp activateIgnoringOtherApps:YES];[self.helpWindow makeKeyAndOrderFront:nil];
 }
-// First launch only: two sentences, where the icon is, and two choices that change
-// nothing until clicked.
-- (void)showWelcome:(id)sender {
- if(!self.welcomeWindow){
-  self.welcomeWindow=[[NSWindow alloc]initWithContentRect:NSMakeRect(0,0,440,360) styleMask:NSWindowStyleMaskTitled|NSWindowStyleMaskClosable backing:NSBackingStoreBuffered defer:NO];self.welcomeWindow.title=@"Welcome to Less Pull";self.welcomeWindow.releasedWhenClosed=NO;
-  NSTextField *title=[NSTextField labelWithString:@"Welcome to Less Pull"];title.font=[NSFont systemFontOfSize:20 weight:NSFontWeightSemibold];
-  NSTextField *intro=[NSTextField wrappingLabelWithString:@"Less Pull takes the color out of your screen so it pulls at your attention less. You can add warmth from amber to red, and keep color for the apps and websites that need it."];intro.preferredMaxLayoutWidth=392;
-  NSImageView *icon=[NSImageView imageViewWithImage:[self menuBarImage:@"menubar-grayscale" symbol:@"circle.lefthalf.filled"]];icon.imageScaling=NSImageScaleProportionallyUpOrDown;[icon.widthAnchor constraintEqualToConstant:22].active=YES;[icon.heightAnchor constraintEqualToConstant:22].active=YES;icon.accessibilityLabel=@"The Less Pull menu-bar icon";
-  NSTextField *where=[NSTextField wrappingLabelWithString:@"Less Pull lives in your menu bar, at the top right of the screen. Click this icon for Grayscale, Extra Warmth and Night Shift."];where.preferredMaxLayoutWidth=360;
-  NSStackView *iconRow=[NSStackView stackViewWithViews:@[icon,where]];iconRow.alignment=NSLayoutAttributeTop;iconRow.spacing=10;
-  self.welcomeSwitch=[NSButton checkboxWithTitle:@"Turn on Grayscale" target:self action:@selector(welcomeGrayscale:)];self.welcomeSwitch.state=(self.selectedMode==1||self.selectedMode==100);[self helpView:self.welcomeSwitch text:self.grayHelp label:@"Turn on Grayscale"];
-  NSTextField *switchNote=[NSTextField wrappingLabelWithString:@"Everything on screen turns gray. The menu-bar icon switches it back any time."];switchNote.font=[NSFont systemFontOfSize:11];switchNote.textColor=NSColor.secondaryLabelColor;switchNote.preferredMaxLayoutWidth=392;
-  NSStackView *switchRow=[NSStackView stackViewWithViews:@[self.welcomeSwitch,switchNote]];switchRow.orientation=NSUserInterfaceLayoutOrientationVertical;switchRow.alignment=NSLayoutAttributeLeading;switchRow.spacing=4;
-  self.welcomeLogin=[NSButton checkboxWithTitle:@"Launch at login" target:self action:@selector(login:)];self.welcomeLogin.state=SMAppService.mainAppService.status==SMAppServiceStatusEnabled;[self helpView:self.welcomeLogin text:@"Open Less Pull when you sign in to your Mac. Install it in Applications first." label:@"Launch at login"];
-  NSButton *done=[NSButton buttonWithTitle:@"Done" target:self.welcomeWindow action:@selector(close)];done.keyEquivalent=@"\r";[self helpView:done text:@"Close this window. You can change everything later in Settings." label:@"Done"];
-  NSView *spacer=[NSView new];[spacer setContentHuggingPriority:NSLayoutPriorityDefaultLow-1 forOrientation:NSLayoutConstraintOrientationHorizontal];[done setContentHuggingPriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];[done setContentCompressionResistancePriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
-  NSStackView *doneRow=[NSStackView stackViewWithViews:@[spacer,done]];doneRow.alignment=NSLayoutAttributeCenterY;
-  NSStackView *stack=[NSStackView stackViewWithViews:@[title,intro,iconRow,switchRow,self.welcomeLogin,doneRow]];stack.orientation=NSUserInterfaceLayoutOrientationVertical;stack.alignment=NSLayoutAttributeLeading;stack.spacing=16;stack.edgeInsets=NSEdgeInsetsMake(24,24,20,24);stack.translatesAutoresizingMaskIntoConstraints=NO;[stack setCustomSpacing:10 afterView:switchRow];
-  NSView *content=self.welcomeWindow.contentView;[content addSubview:stack];
-  [NSLayoutConstraint activateConstraints:@[[stack.topAnchor constraintEqualToAnchor:content.topAnchor],[stack.leadingAnchor constraintEqualToAnchor:content.leadingAnchor],[stack.trailingAnchor constraintEqualToAnchor:content.trailingAnchor],[stack.bottomAnchor constraintEqualToAnchor:content.bottomAnchor],[content.widthAnchor constraintEqualToConstant:440],[doneRow.widthAnchor constraintEqualToAnchor:stack.widthAnchor constant:-48]]];
-  [content layoutSubtreeIfNeeded];[self.welcomeWindow setContentSize:content.fittingSize];[self.welcomeWindow center];
- }
- self.welcomeSwitch.state=(self.selectedMode==1||self.selectedMode==100);[NSApp activateIgnoringOtherApps:YES];[self.welcomeWindow makeKeyAndOrderFront:nil];
-}
-- (void)welcomeGrayscale:(NSButton *)sender {BOOL gray=self.selectedMode==1||self.selectedMode==100;if((sender.state==NSControlStateValueOn)!=gray)[self toggleGrayscale:sender];}
 - (void)login:(NSButton *)sender {
  NSError *error=nil;
  if(sender.state==NSControlStateValueOn)[SMAppService.mainAppService registerAndReturnError:&error];else [SMAppService.mainAppService unregisterAndReturnError:&error];
