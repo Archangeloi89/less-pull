@@ -321,8 +321,13 @@ static NSString *const LessPullOldBundleIdentifier=@"local.nightshiftfilters.app
   NSPopUpButton *choice=[[NSPopUpButton alloc]initWithFrame:NSZeroRect pullsDown:NO];[choice addItemsWithTitles:@[@"Follows what is on it",@"Always your defaults",@"Always plain, in color"]];[choice selectItemAtIndex:[self displayMode:d]];choice.tag=d;choice.target=self;choice.action=@selector(displayModeChanged:);[choice.widthAnchor constraintEqualToConstant:220].active=YES;
   [self helpView:choice text:@"What this display shows. Follows what is on it: the app in front, or the app on top here, or your defaults. Always your defaults: exceptions never apply here. Always plain: never grayscale or warmth here." label:[NSString stringWithFormat:@"%@: what it shows",[self displayName:d]]];
   NSStackView *row=[self row:@[name,[self spacer],choice]];[list addArrangedSubview:row];[row.widthAnchor constraintEqualToAnchor:list.widthAnchor].active=YES;}
- if(displays.count<2){NSTextField *one=[self note:@"One display is connected. Choices for each display appear here when more are connected."];[list addArrangedSubview:one];}
+ if(displays.count<2){NSTextField *one=[self note:@"One display is connected. Choices for each display appear here when more are connected."];[list addArrangedSubview:one];return;}
+ // Some displays draw the arrow pointer in hardware, on top of the picture, so it stays in color there. A slightly larger pointer is drawn into the picture and turns quiet too.
+ NSTextField *tip=[self note:@"Arrow pointer still in color on one display? macOS draws the small arrow on top of the picture there. Make the pointer one notch larger and it turns quiet too."];
+ NSButton *open=[NSButton buttonWithTitle:@"Pointer Size…" target:self action:@selector(openPointerSize:)];open.bezelStyle=NSBezelStyleInline;[self helpView:open text:@"Opens System Settings → Accessibility → Display, where Pointer size is." label:@"Open pointer size settings"];
+ NSStackView *row=[self row:@[tip,open]];row.alignment=NSLayoutAttributeTop;[list addArrangedSubview:row];[row.widthAnchor constraintEqualToAnchor:list.widthAnchor].active=YES;
 }
+- (void)openPointerSize:(id)sender {[NSWorkspace.sharedWorkspace openURL:[NSURL URLWithString:@"x-apple.systempreferences:com.apple.preference.universalaccess?Seeing_Display"]];}
 - (void)displayModeChanged:(NSPopUpButton *)sender {NSMutableDictionary *m=[[NSUserDefaults.standardUserDefaults dictionaryForKey:@"displayModes"] mutableCopy]?:[NSMutableDictionary new];NSString *key=[self displayUUID:(uint32_t)sender.tag];if(sender.indexOfSelectedItem)m[key]=@(sender.indexOfSelectedItem);else [m removeObjectForKey:key];[NSUserDefaults.standardUserDefaults setObject:m forKey:@"displayModes"];[self updateForeground];[self sync];}
 // Which display shows what: the frontmost app's windows mark its displays. On every other display the
 // app whose window is on top decides (its exception, if it has one, or the defaults); an empty display
