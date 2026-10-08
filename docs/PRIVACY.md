@@ -29,7 +29,7 @@ Once a day at most, and when you choose **Check for Updates…**, the app reques
 
 ## What is stored
 
-- **Website exceptions.** Domains and exact URLs you save are stored in macOS user defaults under `local.nightshiftfilters.app`. Exact URLs keep their query string and drop the part after `#`. Avoid saving addresses that contain tokens or other secrets.
+- **Website exceptions.** Domains and exact URLs you save are stored in macOS user defaults under `com.jiriarion.lesspull` (builds before 16 used `local.nightshiftfilters.app`; the first launch of build 16 copies those settings over once and leaves the old entry in place). Exact URLs keep their query string and drop the part after `#`. Avoid saving addresses that contain tokens or other secrets.
 - **App exceptions.** The app's identifier and your settings for it.
 - **Your global settings.**
 - **Update check.** The date of the last check and, if one was found, the newer version's number, release notes and download page.

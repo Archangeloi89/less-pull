@@ -127,6 +127,16 @@ int main(){@autoreleasepool{
  check([UpdateCheck metadata:@{@"minimumSystemVersion":@"26.0"} allowsSystem:os]&&[UpdateCheck metadata:@{@"minimumSystemVersion":@"27.0"} allowsSystem:os]&&![UpdateCheck metadata:@{@"minimumSystemVersion":@"27.1"} allowsSystem:os],"minimum macOS respected");
  check([UpdateCheck metadata:@{@"maximumSystemVersion":@"27"} allowsSystem:os]&&[UpdateCheck metadata:@{@"maximumSystemVersion":@"27.0"} allowsSystem:os]&&![UpdateCheck metadata:@{@"maximumSystemVersion":@"26"} allowsSystem:os]&&![UpdateCheck metadata:@{@"minimumSystemVersion":@"26",@"maximumSystemVersion":@"26.4"} allowsSystem:os],"maximum macOS respected, major or major.minor");
  check([UpdateCheck metadata:nil allowsSystem:os]&&[UpdateCheck metadata:@"garbage" allowsSystem:os]&&[UpdateCheck metadata:@{} allowsSystem:os]&&[UpdateCheck metadata:@{@"minimumSystemVersion":@3} allowsSystem:os],"missing or malformed metadata does not block");
+
+ // Preferences move from the old bundle identifier once, without overwriting newer keys.
+ {
+  NSString *oldDomain=@"local.nightshiftfilters.migration-test";NSUserDefaults *fresh=[[NSUserDefaults alloc]initWithSuiteName:@"com.jiriarion.lesspull.migration-test"];[fresh removePersistentDomainForName:@"com.jiriarion.lesspull.migration-test"];
+  [fresh setPersistentDomain:@{@"nightMode":@100,@"warmth":@1.5,@"appExclusions":@{@"com.example":@{@"name":@"Example"}}} forName:oldDomain];
+  check([PreferenceMigration migrateFromDomain:oldDomain into:fresh]&&[fresh integerForKey:@"nightMode"]==100&&[fresh doubleForKey:@"warmth"]==1.5&&[fresh dictionaryForKey:@"appExclusions"][@"com.example"]!=nil&&[fresh boolForKey:@"migratedPreferences"],"old settings are copied once");
+  [fresh setInteger:101 forKey:@"nightMode"];check(![PreferenceMigration migrateFromDomain:oldDomain into:fresh]&&[fresh integerForKey:@"nightMode"]==101,"a second launch does not migrate again");
+  NSUserDefaults *empty=[[NSUserDefaults alloc]initWithSuiteName:@"com.jiriarion.lesspull.migration-empty"];[empty removePersistentDomainForName:@"com.jiriarion.lesspull.migration-empty"];check(![PreferenceMigration migrateFromDomain:@"local.nightshiftfilters.nothing-here" into:empty]&&![empty boolForKey:@"migratedPreferences"],"no old settings means a plain first launch");
+  [fresh removePersistentDomainForName:oldDomain];[fresh removePersistentDomainForName:@"com.jiriarion.lesspull.migration-test"];[empty removePersistentDomainForName:@"com.jiriarion.lesspull.migration-empty"];
+ }
  NSUInteger combinations=0;
  for(int follow=0;follow<2;follow++)for(int globalNight=0;globalNight<2;globalNight++)for(int base=100;base<=101;base++)for(int grayRule=0;grayRule<3;grayRule++)for(int nightRule=0;nightRule<3;nightRule++)for(int custom=0;custom<2;custom++)for(NSNumber *percent in @[@0,@25,@77,@100]){
   TestApp *t=[TestApp new];FakeFilter *fe=[FakeFilter new];fe.on=globalNight;fe.state=(NSBlueStatus){.mode=0,.available=YES};FakeWarmth *fw=[FakeWarmth new];t.engine=fe;t.warmth=fw;t.exclusion=[ExclusionPolicy new];t.policy=[SwitchingPolicy new];t.policy.known=YES;t.policy.nightShiftOn=globalNight;t.policy.automatic=follow;t.automatic=follow;t.policy.overrideMode=-1;t.selectedMode=base;[d setInteger:base forKey:@"nightMode"];t.grayOverride=grayRule;t.nightOverride=nightRule;t.excludeNight=nightRule!=0;t.customWarmth=custom;t.appWarmth=percent.doubleValue;t.animateAppearance=YES;
@@ -136,5 +146,5 @@ int main(){@autoreleasepool{
  }
  printf("PASS: %lu combined following/global-state/base/grayscale/Night-Shift/warmth cases and restoration.\n",(unsigned long)combinations);
  check(e.nativeWrites==0,"no native filter toggles / HUD requests");
- puts("PASS: update check version/build/compatibility parsing; Peek in color (plain display while held, release restores, nothing saved, shortcut rules); Pause Less Pull (plain display, rules ignored, settings kept, relaunch, expiry); inheritance, independent gray/warmth, Night Shift on/off, own versus genuine transitions, manual off, timed-off precedence/expiry, schedule cutoff, recovery, rapid rule switches.");
+ puts("PASS: preference migration; update check version/build/compatibility parsing; Peek in color (plain display while held, release restores, nothing saved, shortcut rules); Pause Less Pull (plain display, rules ignored, settings kept, relaunch, expiry); inheritance, independent gray/warmth, Night Shift on/off, own versus genuine transitions, manual off, timed-off precedence/expiry, schedule cutoff, recovery, rapid rule switches.");
 }}

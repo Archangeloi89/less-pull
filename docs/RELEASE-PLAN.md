@@ -21,7 +21,6 @@ Less Pull 1.4.4 build 16 is a private test release. This repository stays privat
 6. Real screenshots of the Settings tabs and of the popup inside Brave, for the project page.
 7. Make the repository or a releases feed public, so the in-app update check can see releases; attach `lesspull-update.json` to each release.
 8. Developer ID signing and notarization also unlock update phase 2 (download, verify and install from the menu; Sparkle 2 is the recommended route and would be the first third-party dependency, so it needs an explicit decision).
-9. Decide on the bundle identifier rename (`local.nightshiftfilters.app`), which needs a one-time preferences migration.
 10. Safari: a Safari web extension wrapped in an app extension built with Xcode, after signing is in place.
 
 Firefox is implemented but untested live. Safari, Edge and Opera remain separate work.

@@ -17,7 +17,7 @@ What is new, from the app improvements approved on 8 October 2026:
 - Firefox: the same extension code with a Firefox manifest, a Mozilla native-host registration and Firefox in the install flow. Untested live on this Mac.
 - A thank-you window after 30 days of use, once, with the author's links. Later asks again in 90 days.
 - Settings uses the standard window material, so it follows the macOS transparency setting.
-- The executable is now LessPull. The bundle identifier is unchanged.
+- The executable is now LessPull and the bundle identifier is com.jiriarion.lesspull. The first launch copies settings from the old local.nightshiftfilters.app domain once; Launch at login may need to be checked again.
 
 Behaviour that did not change: grayscale stays the user's choice day and night; following controls warmth only; half-second fades (immediate under Reduce Motion); the build 15 display-recovery fix; rule precedence global, app, domain, exact URL, resolved per effect; private tabs excluded; no webpage injection; no network service, analytics or third-party runtime dependencies.
 

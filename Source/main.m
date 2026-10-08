@@ -65,9 +65,9 @@ static NSString *const LessPullReleasesPage=@"https://github.com/Archangeloi89/l
 // The author's links. Empty entries are not shown; fill in Substack, YouTube and X when known.
 static NSString *const LessPullWebsite=@"https://jiriarion.com";
 static NSString *const LessPullCoffee=@"https://buymeacoffee.com/HsERf62fiZ";
-static NSString *const LessPullSubstack=@"";
-static NSString *const LessPullYouTube=@"";
-static NSString *const LessPullX=@"";
+static NSString *const LessPullSubstack=@"https://substack.com/@jiriarion";
+static NSString *const LessPullYouTube=@"https://www.youtube.com/@JiriArion";
+static NSString *const LessPullX=@"https://x.com/JiriArion";
 @interface UpdateCheck : NSObject
 + (NSString *)versionFromTag:(NSString *)tag;
 + (NSComparisonResult)compareVersion:(NSString *)a to:(NSString *)b;
@@ -112,6 +112,21 @@ static NSString *const LessPullX=@"";
  NSString *url=[release[@"html_url"] isKindOfClass:NSString.class]&&[release[@"html_url"] hasPrefix:@"https://github.com/"]?release[@"html_url"]:LessPullReleasesPage;
  NSString *notes=[release[@"body"] isKindOfClass:NSString.class]?release[@"body"]:@"";if(notes.length>2000)notes=[[notes substringToIndex:2000] stringByAppendingString:@"…"];
  NSMutableDictionary *update=[@{@"version":version,@"url":url,@"notes":notes,@"build":@(build)} mutableCopy];NSString *metadata=[self metadataURLInRelease:release];if(metadata)update[@"metadata"]=metadata;return update;
+}
+@end
+// The bundle identifier moved from local.nightshiftfilters.app to
+// com.jiriarion.lesspull in build 16. Settings are copied once from the old
+// preferences domain; the old domain is left in place.
+static NSString *const LessPullOldBundleIdentifier=@"local.nightshiftfilters.app";
+@interface PreferenceMigration : NSObject
++ (BOOL)migrateFromDomain:(NSString *)oldDomain into:(NSUserDefaults *)defaults;
+@end
+@implementation PreferenceMigration
++ (BOOL)migrateFromDomain:(NSString *)oldDomain into:(NSUserDefaults *)defaults {
+ if([defaults objectForKey:@"unifiedWarmth"]||[defaults objectForKey:@"nightMode"]||[defaults boolForKey:@"migratedPreferences"])return NO;
+ NSDictionary *old=[defaults persistentDomainForName:oldDomain];if(!old.count)return NO;
+ for(NSString *key in old)if(![defaults objectForKey:key])[defaults setObject:old[key] forKey:key];
+ [defaults setBool:YES forKey:@"migratedPreferences"];return YES;
 }
 @end
 @interface ExceptionStack : NSStackView
@@ -190,7 +205,7 @@ static NSString *const LessPullX=@"";
 @property NSTimer *thanksTimer;
 @property EventHotKeyRef peekHotKey;
 @property ShortcutRecorder *peekRecorder;
-@property NSTextField *peekNote;
+@property NSTextField *peekNote,*loginNote;
 @property NSTimer *pauseAllTimer;
 @property NSMenu *addAppMenu;
 @property NSStackView *websiteRulesList;
@@ -344,14 +359,15 @@ static NSString *const LessPullX=@"";
 - (void)showWebsites:(id)sender {[self showSettings:nil];self.settingsTabs.selectedTabViewItemIndex=2;}
 
 - (void)applicationDidFinishLaunching:(NSNotification *)n {
- if([NSRunningApplication runningApplicationsWithBundleIdentifier:NSBundle.mainBundle.bundleIdentifier].count>1){[NSApp terminate:nil];return;}
+ if([NSRunningApplication runningApplicationsWithBundleIdentifier:NSBundle.mainBundle.bundleIdentifier].count>1||[NSRunningApplication runningApplicationsWithBundleIdentifier:LessPullOldBundleIdentifier].count>0){[NSApp terminate:nil];return;}
+ BOOL migrated=[PreferenceMigration migrateFromDomain:LessPullOldBundleIdentifier into:NSUserDefaults.standardUserDefaults];
  NSMenu *main=[NSMenu new],*application=[NSMenu new];NSMenuItem *root=[NSMenuItem new];root.submenu=application;[main addItem:root];NSMenuItem *quit=[[NSMenuItem alloc]initWithTitle:@"Quit Less Pull" action:@selector(terminate:) keyEquivalent:@"q"];quit.target=NSApp;[application addItem:quit];NSMenuItem *settingsShortcut=[[NSMenuItem alloc]initWithTitle:@"Settings…" action:@selector(showSettings:) keyEquivalent:@","];settingsShortcut.target=self;[application insertItem:settingsShortcut atIndex:0];NSApp.mainMenu=main;
  self.exclusionRules=[[NSUserDefaults.standardUserDefaults dictionaryForKey:@"appExclusions"] mutableCopy]?:[NSMutableDictionary new];self.exclusion=[ExclusionPolicy fromDictionary:[NSUserDefaults.standardUserDefaults dictionaryForKey:@"exclusionRecovery"]]?:[ExclusionPolicy new];
  self.forcedNightOn=[[[NSUserDefaults.standardUserDefaults dictionaryForKey:@"exclusionRecovery"] objectForKey:@"forcedNightOn"] boolValue];self.engine=[FilterEngine new];self.warmth=[WarmthEngine new];[self.warmth restore];self.selectedMode=self.engine.currentMode;
  NSUserDefaults *d=NSUserDefaults.standardUserDefaults;
  // The welcome window is for brand-new users only. Anyone with saved settings from an
  // earlier version gets the marker silently; it is not a user setting.
- BOOL firstLaunch=![d objectForKey:@"welcomeShown"]&&![d objectForKey:@"nightMode"]&&![d objectForKey:@"unifiedWarmth"]&&![d objectForKey:@"warmth"];
+ BOOL firstLaunch=!migrated&&![d objectForKey:@"welcomeShown"]&&![d objectForKey:@"nightMode"]&&![d objectForKey:@"unifiedWarmth"]&&![d objectForKey:@"warmth"];
  [d setBool:YES forKey:@"welcomeShown"];
  [d registerDefaults:@{@"automatic":@YES,@"overrideMode":@(-1),@"warmth":@0,@"nightMode":@101,@"manualMode":@1,@"checkForUpdates":@YES}];
  self.availableUpdate=[d dictionaryForKey:@"availableUpdate"];
@@ -754,6 +770,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  self.autoButton=[NSButton checkboxWithTitle:@"Extra Warmth follows Night Shift" target:self action:@selector(toggleAuto:)];[self helpView:self.autoButton text:self.autoHelp label:@"Extra Warmth follows Night Shift"];
  self.resumeButton=[NSButton buttonWithTitle:@"Resume Following" target:self action:@selector(resume:)];[self helpView:self.resumeButton text:@"Go back to following Night Shift now." label:@"Resume Following Now"];
  self.loginButton=[NSButton checkboxWithTitle:@"Launch at login" target:self action:@selector(login:)];[self helpView:self.loginButton text:@"Open Less Pull when you sign in to your Mac. Install it in Applications first." label:@"Launch at login"];
+ self.loginNote=[self note:@"Less Pull moved its settings to a new home with this update. If you had Launch at login on, check it again here; an older entry may remain in System Settings → Login Items and can be removed there."];self.loginNote.hidden=!([NSUserDefaults.standardUserDefaults boolForKey:@"migratedPreferences"]&&SMAppService.mainAppService.status!=SMAppServiceStatusEnabled);
  NSTextField *peekTitle=[NSTextField labelWithString:@"Peek in color"];peekTitle.font=[NSFont systemFontOfSize:13 weight:NSFontWeightMedium];
  self.peekRecorder=[ShortcutRecorder new];self.peekRecorder.bezelStyle=NSBezelStyleRounded;self.peekRecorder.title=@"Record Shortcut";self.peekRecorder.target=self;self.peekRecorder.action=@selector(startRecording:);[self.peekRecorder.widthAnchor constraintGreaterThanOrEqualToConstant:150].active=YES;
  __weak AppDelegate *weakSelf=self;self.peekRecorder.recorded=^(NSInteger keyCode,NSEventModifierFlags modifiers){[weakSelf savePeekShortcutKeyCode:keyCode modifiers:modifiers];};self.peekRecorder.cleared=^{[weakSelf savePeekShortcutKeyCode:-1 modifiers:0];};
@@ -777,7 +794,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
   [self row:@[self.nightButton,[self spacer],self.pausePopup,self.endPauseButton]],[self note:@"Turns Night Shift on or off now; your schedule in System Settings stays as it is."],
   [self row:@[self.autoButton,[self spacer],self.resumeButton]],[self note:@"On: Extra Warmth only while Night Shift is on, none in the daytime. Off: Extra Warmth stays on all day."],[self separator],
   [self row:@[peekTitle,[self spacer],self.peekRecorder]],self.peekNote,[self separator],
-  self.loginButton]];
+  self.loginButton,self.loginNote]];
  NSStackView *column=[self column:views];
  tickRow.identifier=@"fixed";[tickRow.widthAnchor constraintEqualToAnchor:self.warmthSlider.widthAnchor].active=YES;
  NSUInteger base=self.welcomeCard?1:0;[column setCustomSpacing:4 afterView:self.statusText];[column setCustomSpacing:4 afterView:self.grayscaleButton];[column setCustomSpacing:6 afterView:column.arrangedSubviews[base+5]];[column setCustomSpacing:2 afterView:column.arrangedSubviews[base+6]];[column setCustomSpacing:6 afterView:tickRow];[column setCustomSpacing:4 afterView:column.arrangedSubviews[base+10]];[column setCustomSpacing:4 afterView:column.arrangedSubviews[base+12]];[column setCustomSpacing:4 afterView:column.arrangedSubviews[base+15]];[self refreshPeekRecorder:nil];
@@ -950,7 +967,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  NSError *error=nil;
  if(sender.state==NSControlStateValueOn)[SMAppService.mainAppService registerAndReturnError:&error];else [SMAppService.mainAppService unregisterAndReturnError:&error];
  if(error){NSAlert *a=[NSAlert new];a.messageText=@"Login setting needs attention";a.informativeText=error.localizedDescription;[a runModal];}
- sender.state=SMAppService.mainAppService.status==SMAppServiceStatusEnabled;
+ sender.state=SMAppService.mainAppService.status==SMAppServiceStatusEnabled;if(sender.state==NSControlStateValueOn)self.loginNote.hidden=YES;
 }
 - (void)resetWarmth:(id)sender {NSSlider *slider=[NSSlider new];slider.doubleValue=0;[self warmthChanged:slider];}
 - (void)diagnostics:(id)sender {NSAlert *a=[NSAlert new];a.messageText=@"Diagnostics";NSString *betterDisplay=[NSRunningApplication runningApplicationsWithBundleIdentifier:@"pro.betterdisplay.BetterDisplay"].count?@"\nBetterDisplay is running; it can change how displays look. HDR state is not read.":@"";a.informativeText=[NSString stringWithFormat:@"Less Pull %@ (%@)\n\n%@\n%@\nDisplay events: %lu; recoveries: %lu\nGrayscale setting: %@; grayscale showing now: %@; exception active: %@%@\n\nNight Shift drives “Extra Warmth follows Night Shift”; it does not prove the display looks warmer.",[NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"],[NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleVersion"],self.engine.diagnostics,self.warmth.diagnostics,(unsigned long)self.pipelineEvents,(unsigned long)self.pipelineRestorations,(self.selectedMode==100||self.selectedMode==1)?@"On":@"Off",(self.effectiveMode==100||self.effectiveMode==1)?@"On":@"Off",(self.grayOverride||self.customWarmth)?@"yes":@"no",betterDisplay];[NSApp activateIgnoringOtherApps:YES];[a runModal];}
