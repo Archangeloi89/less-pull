@@ -39,13 +39,13 @@
 // read from the symbolic hot keys preference so a suggestion never collides with them.
 + (NSSet<NSString *> *)systemShortcutKeys {
  NSMutableSet *keys=[NSMutableSet new];NSDictionary *all=[[NSUserDefaults.standardUserDefaults persistentDomainForName:@"com.apple.symbolichotkeys"][@"AppleSymbolicHotKeys"] isKindOfClass:NSDictionary.class]?[NSUserDefaults.standardUserDefaults persistentDomainForName:@"com.apple.symbolichotkeys"][@"AppleSymbolicHotKeys"]:@{};
- for(id entry in all.allValues){if(![entry isKindOfClass:NSDictionary.class]||![entry[@"enabled"] boolValue])continue;NSArray *p=entry[@"value"][@"parameters"];if(![p isKindOfClass:NSArray.class]||p.count<3)continue;NSInteger code=[p[1] integerValue];if(code<0||code>127)continue;[keys addObject:[self keyForKeyCode:code modifiers:[p[2] unsignedIntegerValue]]];}
+ for(id entry in all.allValues){if(![entry isKindOfClass:NSDictionary.class]||![entry[@"enabled"] boolValue])continue;NSArray *p=entry[@"value"][@"parameters"];if(![p isKindOfClass:NSArray.class]||p.count<3)continue;NSInteger code=[p[1] integerValue];if(code<0||code>127)continue;[keys addObject:[self keyForKeyCode:code modifiers:[p[2] integerValue]]];}
  return keys;
 }
 // First candidate that is neither a macOS shortcut nor already taken in Less Pull.
 + (NSDictionary *)suggestionAvoiding:(NSSet<NSString *> *)taken preferring:(NSArray<NSDictionary *> *)candidates {
  NSSet *system=[self systemShortcutKeys];
- for(NSDictionary *c in candidates){NSString *key=[self keyForKeyCode:[c[@"keyCode"] integerValue] modifiers:[c[@"modifiers"] unsignedIntegerValue]];if(![system containsObject:key]&&![taken containsObject:key]&&[self isValidKeyCode:[c[@"keyCode"] integerValue] modifiers:[c[@"modifiers"] unsignedIntegerValue]])return c;}
+ for(NSDictionary *c in candidates){NSString *key=[self keyForKeyCode:[c[@"keyCode"] integerValue] modifiers:[c[@"modifiers"] integerValue]];if(![system containsObject:key]&&![taken containsObject:key]&&[self isValidKeyCode:[c[@"keyCode"] integerValue] modifiers:[c[@"modifiers"] integerValue]])return c;}
  return nil;
 }
 + (NSString *)labelForKeyCode:(NSInteger)keyCode modifiers:(NSEventModifierFlags)modifiers {
@@ -358,10 +358,10 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
 - (void)websiteRemove:(NSMenuItem *)sender {NSDictionary *tab=[self menuTab];if(!tab)return;NSString *key=[self websiteKeyForTab:tab];[self.browserBridge handle:@{@"type":@"remove",@"scope":[key containsString:@"://"]?@"url":@"domain",@"site":key}];}
 - (NSMenu *)websiteMenuForTab:(NSDictionary *)tab {
  NSMenu *sub=[NSMenu new];if(!self.websiteScopeExact&&!self.browserBridge.rules[tab[@"site"]]&&self.browserBridge.rules[tab[@"url"]?:@""])self.websiteScopeExact=YES;
- NSMenuItem *enabled=[self add:@"Use this exception" action:@selector(websiteEnabled:) to:sub];enabled.state=RuleEnabled([self websiteRuleForTab:tab]);enabled.toolTip=@"Off keeps the settings below but does not apply them. Changing a setting away from default switches it on again.";[sub addItem:NSMenuItem.separatorItem];
+ NSMenuItem *enabled=[self add:@"Use this exception" action:@selector(websiteEnabled:) to:sub];enabled.state=RuleEnabled([self websiteRuleForTab:tab]);[sub addItem:NSMenuItem.separatorItem];
  NSMenuItem *scopeHead=[[NSMenuItem alloc]initWithTitle:@"Apply to" action:nil keyEquivalent:@""];scopeHead.enabled=NO;[sub addItem:scopeHead];
- NSMenuItem *domain=[self add:[NSString stringWithFormat:@"Whole domain · %@",tab[@"site"]] action:@selector(websiteScope:) to:sub];domain.tag=0;domain.indentationLevel=1;domain.state=!self.websiteScopeExact;domain.toolTip=@"Also covers subdomains.";
- NSMenuItem *page=[self add:@"This exact page" action:[tab[@"url"] length]?@selector(websiteScope:):nil to:sub];page.tag=1;page.indentationLevel=1;page.state=self.websiteScopeExact;page.enabled=[tab[@"url"] length]>0;page.toolTip=[NSString stringWithFormat:@"Only this address, with its path and query; the part after # is ignored.\n%@",tab[@"url"]?:@""];
+ NSMenuItem *domain=[self add:[NSString stringWithFormat:@"Whole domain · %@",tab[@"site"]] action:@selector(websiteScope:) to:sub];domain.tag=0;domain.indentationLevel=1;domain.state=!self.websiteScopeExact;
+ NSMenuItem *page=[self add:@"This exact page" action:[tab[@"url"] length]?@selector(websiteScope:):nil to:sub];page.tag=1;page.indentationLevel=1;page.state=self.websiteScopeExact;page.enabled=[tab[@"url"] length]>0;
  [sub addItem:NSMenuItem.separatorItem];
  NSDictionary *rule=[self websiteRuleForTab:tab];NSString *key=[self websiteKeyForTab:tab];NSDictionary *inherited=[self.browserBridge inheritedForSite:key browser:self.lastExternalApp.bundleIdentifier];NSArray *words=@[@"",@"On",@"Off"];
  NSArray *titles=@[@"Grayscale",@"Night Shift"],*keys=@[@"grayMode",@"nightMode"];
@@ -376,24 +376,24 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  NSTextField *readout=[NSTextField labelWithString:[NSString stringWithFormat:@"%.0f%%",[rule[@"warmth"] doubleValue]]];readout.tag=98;readout.font=[NSFont monospacedDigitSystemFontOfSize:12 weight:NSFontWeightRegular];readout.alignment=NSTextAlignmentRight;readout.frame=NSMakeRect(204,34,40,16);[view addSubview:readout];
  NSSlider *slider=[self warmthSliderWithValue:[rule[@"warmth"] doubleValue] action:@selector(websiteWarmthChanged:)];slider.frame=NSMakeRect(18,6,226,26);[self helpView:slider text:@"Extra Warmth for this website, from Off to Red." label:[NSString stringWithFormat:@"Extra Warmth for %@, percent",key]];[view addSubview:slider];
  sliderItem.view=view;[sub addItem:sliderItem];[sub addItem:NSMenuItem.separatorItem];
- if(rule){NSMenuItem *remove=[self add:@"Remove this exception" action:@selector(websiteRemove:) to:sub];remove.toolTip=@"The site then uses the inherited settings again.";}
- NSMenuItem *more=[self add:@"All website exceptions…" action:@selector(showWebsites:) to:sub];more.toolTip=@"Open Settings → Websites.";
+ if(rule){NSMenuItem *remove=[self add:@"Remove this exception" action:@selector(websiteRemove:) to:sub];}
+ NSMenuItem *more=[self add:@"All website exceptions…" action:@selector(showWebsites:) to:sub];
  return sub;
 }
 - (NSMenu *)currentAppMenu {
  NSMenu *sub=[NSMenu new];NSDictionary *rule=[self currentAppRuleCreating:NO];NSString *name=self.lastExternalApp.localizedName?:@"this app";
- NSMenuItem *enabled=[self add:@"Use this exception" action:@selector(currentAppEnabled:) to:sub];enabled.state=RuleEnabled(rule);enabled.toolTip=@"Off keeps the settings below but does not apply them. Changing a setting away from default switches it on again.";[sub addItem:NSMenuItem.separatorItem];
+ NSMenuItem *enabled=[self add:@"Use this exception" action:@selector(currentAppEnabled:) to:sub];enabled.state=RuleEnabled(rule);[sub addItem:NSMenuItem.separatorItem];
  NSArray *titles=@[@"Grayscale",@"Night Shift"],*keys=@[@"grayMode",@"nightMode"],*choices=@[@"Use default",@"On",@"Off"];
  for(int i=0;i<2;i++){NSMenuItem *head=[[NSMenuItem alloc]initWithTitle:titles[i] action:nil keyEquivalent:@""];head.enabled=NO;[sub addItem:head];
-  for(int j=0;j<3;j++){NSMenuItem *item=[self add:choices[j] action:@selector(currentAppChoice:) to:sub];item.tag=i*10+j;item.indentationLevel=1;item.state=[rule[keys[i]] integerValue]==j;item.toolTip=[NSString stringWithFormat:@"%@ for %@ while it is in front.",titles[i],name];}
+  for(int j=0;j<3;j++){NSMenuItem *item=[self add:choices[j] action:@selector(currentAppChoice:) to:sub];item.tag=i*10+j;item.indentationLevel=1;item.state=[rule[keys[i]] integerValue]==j;}
   [sub addItem:NSMenuItem.separatorItem];}
- BOOL custom=[rule[@"customWarmth"] boolValue];NSMenuItem *inherit=[self add:@"Use default warmth" action:@selector(currentAppWarmthDefault:) to:sub];inherit.state=!custom;inherit.toolTip=[NSString stringWithFormat:@"Uncheck to give %@ its own Extra Warmth.",name];
+ BOOL custom=[rule[@"customWarmth"] boolValue];NSMenuItem *inherit=[self add:@"Use default warmth" action:@selector(currentAppWarmthDefault:) to:sub];inherit.state=!custom;
  NSMenuItem *sliderItem=[NSMenuItem new];NSView *view=[[NSView alloc]initWithFrame:NSMakeRect(0,0,260,54)];
  NSTextField *label=[NSTextField labelWithString:[NSString stringWithFormat:@"Extra Warmth for %@",name]];label.font=[NSFont systemFontOfSize:12];label.frame=NSMakeRect(18,34,190,16);label.lineBreakMode=NSLineBreakByTruncatingTail;[view addSubview:label];
  NSTextField *readout=[NSTextField labelWithString:[NSString stringWithFormat:@"%.0f%%",[rule[@"warmth"] doubleValue]]];readout.tag=98;readout.font=[NSFont monospacedDigitSystemFontOfSize:12 weight:NSFontWeightRegular];readout.alignment=NSTextAlignmentRight;readout.frame=NSMakeRect(204,34,40,16);[view addSubview:readout];
  NSSlider *slider=[self warmthSliderWithValue:[rule[@"warmth"] doubleValue] action:@selector(currentAppWarmthChanged:)];slider.frame=NSMakeRect(18,6,226,26);[self helpView:slider text:[NSString stringWithFormat:@"Extra Warmth for %@, from Off to Red.",name] label:[NSString stringWithFormat:@"Extra Warmth for %@, percent",name]];[view addSubview:slider];
  sliderItem.view=view;[sub addItem:sliderItem];[sub addItem:NSMenuItem.separatorItem];
- NSMenuItem *more=[self add:@"More in Settings…" action:@selector(excludeCurrent:) to:sub];more.toolTip=[NSString stringWithFormat:@"Open the exception for %@ in Settings → Apps.",name];
+ NSMenuItem *more=[self add:@"More in Settings…" action:@selector(excludeCurrent:) to:sub];
  return sub;
 }
 // One App Exceptions row: name and Remove, the two choices, and the app's own warmth.
@@ -618,7 +618,8 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  else if(action==@selector(showHelp:))help=@"A short guide to Less Pull.";
  else if(action==@selector(diagnostics:))help=@"Technical details for troubleshooting.";
  else if(action==@selector(quit:)){help=@"Quit Less Pull. The display returns to normal and Night Shift follows its schedule again.";i.keyEquivalent=@"q";}
- i.toolTip=help;[menu addItem:i];return i;
+ // Menu items carry no tooltips: on macOS a tooltip competes with the submenu. Settings and Help explain.
+ (void)help;[menu addItem:i];return i;
 }
 - (NSString *)morningPauseTitle {
  NSBlueStatus s={0};[self.engine readNightShiftStatus:&s];NSDate *morning=[PausePolicy nextMorningForDate:NSDate.date mode:s.mode endMinute:s.schedule.to.hour*60+s.schedule.to.minute calendar:NSCalendar.currentCalendar];
@@ -634,36 +635,36 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
 - (void)menuWillOpen:(NSMenu *)menu {
  if(menu!=self.statusMenu)return;if(!self.menuDismissal)self.menuDismissal=[MenuDismissal new];[self.menuDismissal begin:menu];
  [self sync];[menu removeAllItems];BOOL on=NO;BOOL known=[self logicalNightShift:&on];BOOL actualOn=NO;BOOL actualKnown=[self.engine nightShift:&actualOn];
- NSMenuItem *summary=[self add:[self menuStatusLine] action:nil to:menu];summary.toolTip=[NSString stringWithFormat:@"%@\n%@",[self automationSummaryKnown:known nightOn:on],[self exclusionSummary]];
+ NSMenuItem *summary=[self add:[self menuStatusLine] action:nil to:menu];
  [menu addItem:NSMenuItem.separatorItem];
  NSMenuItem *gray=[self add:self.grayOverride?@"Default Grayscale":@"Grayscale" action:@selector(toggleGrayscale:) to:menu];gray.state=self.selectedMode==1||self.selectedMode==100;
- if(self.grayOffUntil){NSMenuItem *backOn=[self add:@"Grayscale back on now" action:@selector(grayscaleBackOn:) to:menu];backOn.toolTip=[self grayOffLabel];}
- else if(gray.state){NSMenuItem *off=[self add:@"Grayscale off for" action:nil to:menu];off.toolTip=[self grayOffHelp];off.submenu=[NSMenu new];[self populateGrayscaleOff:off.submenu];}
+ if(self.grayOffUntil){NSMenuItem *backOn=[self add:@"Grayscale back on now" action:@selector(grayscaleBackOn:) to:menu];}
+ else if(gray.state){NSMenuItem *off=[self add:@"Grayscale off for" action:nil to:menu];off.submenu=[NSMenu new];[self populateGrayscaleOff:off.submenu];}
  NSMenuItem *sliderItem=[NSMenuItem new];NSView *view=[[NSView alloc]initWithFrame:NSMakeRect(0,0,300,78)];
  NSTextField *label=[NSTextField labelWithString:self.customWarmth?@"Default Extra Warmth":(self.automatic&&self.policy.overrideMode<0&&known&&!on)?@"Extra Warmth · used at night":@"Extra Warmth"];label.frame=NSMakeRect(18,54,210,18);[self helpView:label text:self.warmthHelp label:nil];[view addSubview:label];
  self.menuWarmthReadout=[NSTextField labelWithString:[NSString stringWithFormat:@"%.0f%%",[self currentWarmth]/3*100]];self.menuWarmthReadout.frame=NSMakeRect(242,54,48,18);self.menuWarmthReadout.alignment=NSTextAlignmentRight;[self helpView:self.menuWarmthReadout text:self.warmthHelp label:@"Extra Warmth percentage"];[view addSubview:self.menuWarmthReadout];
  NSSlider *slider=[self warmthSliderWithValue:[self currentWarmth]/3*100 action:@selector(warmthChanged:)];slider.frame=NSMakeRect(18,26,260,26);[self helpView:slider text:self.warmthHelp label:@"Extra Warmth, percent"];[view addSubview:slider];
  for(int i=0;i<5;i++){NSTextField *r=[NSTextField labelWithString:@[@"Off",@"25",@"50",@"75",@"Red"][i]];r.font=[NSFont systemFontOfSize:10];r.alignment=NSTextAlignmentCenter;r.frame=NSMakeRect(28+60*i-20,4,40,16);[view addSubview:r];}
- [self helpView:view text:self.warmthHelp label:nil];sliderItem.view=view;sliderItem.toolTip=self.warmthHelp;[menu addItem:sliderItem];
+ [self helpView:view text:self.warmthHelp label:nil];sliderItem.view=view;[menu addItem:sliderItem];
  [menu addItem:NSMenuItem.separatorItem];
  // Everything about Night Shift lives in one submenu: on/off now, off for a while,
  // and whether Extra Warmth follows it.
  NSString *nightTitle=known?(self.exclusion.active?(on?@"Default Night Shift: On":@"Default Night Shift: Off"):(on?@"Night Shift: On":@"Night Shift: Off")):@"Night Shift unavailable";
- NSMenuItem *night=[self add:nightTitle action:nil to:menu];night.state=known&&on;night.enabled=known;night.toolTip=self.exclusion.active?@"Your default Night Shift setting. The app in front keeps its own Night Shift exception.":self.nightHelp;
+ NSMenuItem *night=[self add:nightTitle action:nil to:menu];night.state=known&&on;night.enabled=known;
  if(known){night.submenu=[NSMenu new];
   [self add:on?@"Turn Off":@"Turn On" action:@selector(toggleNightShift:) to:night.submenu];
   if(self.pause)[self add:[self canResumePause]?@"Turn Night Shift back on":@"End timed off" action:@selector(endPauseNow:) to:night.submenu];
   else if(on||actualOn){[night.submenu addItem:NSMenuItem.separatorItem];[self populatePauses:night.submenu];}
   [night.submenu addItem:NSMenuItem.separatorItem];
-  NSMenuItem *automatic=[self add:@"Extra Warmth follows Night Shift" action:@selector(toggleAuto:) to:night.submenu];automatic.state=self.automatic;automatic.enabled=actualKnown;automatic.toolTip=[self followHelpKnown:actualKnown nightOn:actualOn];
+  NSMenuItem *automatic=[self add:@"Extra Warmth follows Night Shift" action:@selector(toggleAuto:) to:night.submenu];automatic.state=self.automatic;automatic.enabled=actualKnown;
   if(self.automatic&&self.policy.overrideMode>=0)[self add:@"Resume Following" action:@selector(resume:) to:night.submenu];}
- if(self.pausedUntil){NSMenuItem *resume=[self add:@"Resume Less Pull" action:@selector(resumeLessPull:) to:menu];resume.toolTip=@"Bring Grayscale and Extra Warmth back now, with the normal fade.";}
- else {NSMenuItem *pauseAll=[self add:@"Pause Less Pull" action:nil to:menu];pauseAll.toolTip=[self pauseLessPullHelp];pauseAll.submenu=[NSMenu new];for(NSArray *pair in @[@[@"For 15 minutes",@15],@[@"For 1 hour",@60],@[@"Until I resume",@0]]){NSMenuItem *i=[self add:pair[0] action:@selector(pauseLessPull:) to:pauseAll.submenu];i.tag=[pair[1] integerValue];i.toolTip=[self pauseLessPullHelp];}}
+ if(self.pausedUntil){NSMenuItem *resume=[self add:@"Resume Less Pull" action:@selector(resumeLessPull:) to:menu];}
+ else {NSMenuItem *pauseAll=[self add:@"Pause Less Pull" action:nil to:menu];pauseAll.submenu=[NSMenu new];for(NSArray *pair in @[@[@"For 15 minutes",@15],@[@"For 1 hour",@60],@[@"Until I resume",@0]]){NSMenuItem *i=[self add:pair[0] action:@selector(pauseLessPull:) to:pauseAll.submenu];i.tag=[pair[1] integerValue];}}
  [menu addItem:NSMenuItem.separatorItem];
- if(self.lastExternalApp.bundleIdentifier){NSDictionary *appRule=self.exclusionRules[self.lastExternalApp.bundleIdentifier];NSMenuItem *current=[self add:[NSString stringWithFormat:@"Exception for %@",self.lastExternalApp.localizedName?:@"current app"] action:nil to:menu];current.toolTip=[self exclusionSummary];current.submenu=[self currentAppMenu];current.image=[self menuIconForBundle:self.lastExternalApp.bundleIdentifier];current.state=RuleEnabled(appRule)&&RuleDiffers(appRule);}
- if(self.availableUpdate){NSMenuItem *update=[self add:[NSString stringWithFormat:@"Update available: %@…",[[self updateLabel:self.availableUpdate] stringByReplacingOccurrencesOfString:@"Version " withString:@""]] action:@selector(showUpdate:) to:menu];update.toolTip=@"See what is new and open the download page.";}
+ if(self.lastExternalApp.bundleIdentifier){NSDictionary *appRule=self.exclusionRules[self.lastExternalApp.bundleIdentifier];NSMenuItem *current=[self add:[NSString stringWithFormat:@"Exception for %@",self.lastExternalApp.localizedName?:@"current app"] action:nil to:menu];current.submenu=[self currentAppMenu];current.image=[self menuIconForBundle:self.lastExternalApp.bundleIdentifier];current.state=RuleEnabled(appRule)&&RuleDiffers(appRule);}
+ if(self.availableUpdate){NSMenuItem *update=[self add:[NSString stringWithFormat:@"Update available: %@…",[[self updateLabel:self.availableUpdate] stringByReplacingOccurrencesOfString:@"Version " withString:@""]] action:@selector(showUpdate:) to:menu];}
  NSDictionary *tab=[self.browserBridge activeContextForBrowser:self.lastExternalApp.bundleIdentifier];
- if(tab){NSMenuItem *site=[self add:[NSString stringWithFormat:@"Exception for %@",tab[@"site"]] action:nil to:menu];site.toolTip=@"Display settings for the website in front. The browser extension only connects the browser; the settings live here.";site.submenu=[self websiteMenuForTab:tab];site.image=[NSImage imageWithSystemSymbolName:@"globe" accessibilityDescription:nil];NSDictionary *siteRule=[self websiteRuleForTab:tab];site.state=RuleEnabled(siteRule)&&RuleDiffers(siteRule);}
+ if(tab){NSMenuItem *site=[self add:[NSString stringWithFormat:@"Exception for %@",tab[@"site"]] action:nil to:menu];site.submenu=[self websiteMenuForTab:tab];site.image=[NSImage imageWithSystemSymbolName:@"globe" accessibilityDescription:nil];NSDictionary *siteRule=[self websiteRuleForTab:tab];site.state=RuleEnabled(siteRule)&&RuleDiffers(siteRule);}
  [self add:@"Settings…" action:@selector(showSettings:) to:menu];
  [menu addItem:NSMenuItem.separatorItem];
  [self add:@"Quit" action:@selector(quit:) to:menu];
@@ -700,9 +701,10 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
 }
 // Two global shortcuts: Peek in color (held) and Toggle Grayscale (pressed). Both
 // are optional and recorded by the user; Suggest picks a free combination.
-- (NSDictionary *)shortcutForKey:(NSString *)key {NSDictionary *s=[NSUserDefaults.standardUserDefaults dictionaryForKey:key];return [PeekShortcut isValidKeyCode:[s[@"keyCode"] integerValue] modifiers:[s[@"modifiers"] unsignedIntegerValue]]?s:nil;}
+// Tolerates numbers stored as strings (hand-edited preferences) by reading through integerValue.
+- (NSDictionary *)shortcutForKey:(NSString *)key {NSDictionary *s=[NSUserDefaults.standardUserDefaults dictionaryForKey:key];if(![s[@"keyCode"] respondsToSelector:@selector(integerValue)]||![s[@"modifiers"] respondsToSelector:@selector(integerValue)])return nil;NSInteger code=[s[@"keyCode"] integerValue];NSEventModifierFlags mods=(NSEventModifierFlags)[s[@"modifiers"] integerValue];return [PeekShortcut isValidKeyCode:code modifiers:mods]?@{@"keyCode":@(code),@"modifiers":@(mods)}:nil;}
 - (NSDictionary *)peekShortcut {return [self shortcutForKey:@"peekShortcut"];}
-- (EventHotKeyRef)registerShortcut:(NSDictionary *)s identifier:(UInt32)identifier {if(!s)return NULL;EventHotKeyID hotKeyID={.signature='LsPl',.id=identifier};EventHotKeyRef ref=NULL;return RegisterEventHotKey((UInt32)[s[@"keyCode"] integerValue],[PeekShortcut carbonModifiers:[s[@"modifiers"] unsignedIntegerValue]],hotKeyID,GetApplicationEventTarget(),0,&ref)==noErr?ref:NULL;}
+- (EventHotKeyRef)registerShortcut:(NSDictionary *)s identifier:(UInt32)identifier {if(!s)return NULL;EventHotKeyID hotKeyID={.signature='LsPl',.id=identifier};EventHotKeyRef ref=NULL;return RegisterEventHotKey((UInt32)[s[@"keyCode"] integerValue],[PeekShortcut carbonModifiers:[s[@"modifiers"] integerValue]],hotKeyID,GetApplicationEventTarget(),0,&ref)==noErr?ref:NULL;}
 - (void)registerPeekShortcut {
  static BOOL installed=NO;if(!installed){installed=YES;EventTypeSpec kinds[2]={{kEventClassKeyboard,kEventHotKeyPressed},{kEventClassKeyboard,kEventHotKeyReleased}};InstallApplicationEventHandler(PeekHotKeyHandler,2,kinds,(__bridge void *)self,NULL);}
  if(self.peekHotKey){UnregisterEventHotKey(self.peekHotKey);self.peekHotKey=NULL;}if(self.grayscaleHotKey){UnregisterEventHotKey(self.grayscaleHotKey);self.grayscaleHotKey=NULL;}self.peekLocked=NO;self.peekIgnoreRelease=NO;self.peeking=NO;
@@ -713,7 +715,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  [self registerPeekShortcut];[self refreshPeekRecorder:nil];
 }
 - (void)savePeekShortcutKeyCode:(NSInteger)keyCode modifiers:(NSEventModifierFlags)modifiers {[self saveShortcut:@"peekShortcut" keyCode:keyCode modifiers:modifiers];}
-- (NSSet *)takenShortcutKeysExcept:(NSString *)key {NSMutableSet *taken=[NSMutableSet new];for(NSString *k in @[@"peekShortcut",@"grayscaleShortcut"]){if([k isEqual:key])continue;NSDictionary *s=[self shortcutForKey:k];if(s)[taken addObject:[PeekShortcut keyForKeyCode:[s[@"keyCode"] integerValue] modifiers:[s[@"modifiers"] unsignedIntegerValue]]];}return taken;}
+- (NSSet *)takenShortcutKeysExcept:(NSString *)key {NSMutableSet *taken=[NSMutableSet new];for(NSString *k in @[@"peekShortcut",@"grayscaleShortcut"]){if([k isEqual:key])continue;NSDictionary *s=[self shortcutForKey:k];if(s)[taken addObject:[PeekShortcut keyForKeyCode:[s[@"keyCode"] integerValue] modifiers:[s[@"modifiers"] integerValue]]];}return taken;}
 - (NSDictionary *)suggestedShortcutFor:(NSString *)key {
  // Left-hand only: Control and Option under the left pinky and ring finger, the key under the index finger.
  // The author's own choices first (Option-A to peek, Option-Command-G to toggle), then left-hand fallbacks.
@@ -721,11 +723,11 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  NSArray *gray=@[@{@"keyCode":@(kVK_ANSI_G),@"modifiers":@(oc)},@{@"keyCode":@(kVK_ANSI_G),@"modifiers":@(co)},@{@"keyCode":@(kVK_ANSI_F),@"modifiers":@(co)},@{@"keyCode":@(kVK_ANSI_D),@"modifiers":@(co)}];
  return [PeekShortcut suggestionAvoiding:[self takenShortcutKeysExcept:key] preferring:[key isEqual:@"peekShortcut"]?peek:gray];
 }
-- (void)suggestShortcut:(NSButton *)sender {NSString *key=sender.identifier;NSDictionary *s=[self suggestedShortcutFor:key];if(!s){NSBeep();return;}[self saveShortcut:key keyCode:[s[@"keyCode"] integerValue] modifiers:[s[@"modifiers"] unsignedIntegerValue]];}
+- (void)suggestShortcut:(NSButton *)sender {NSString *key=sender.identifier;NSDictionary *s=[self suggestedShortcutFor:key];if(!s){NSBeep();return;}[self saveShortcut:key keyCode:[s[@"keyCode"] integerValue] modifiers:[s[@"modifiers"] integerValue]];}
 - (void)refreshRecorder:(ShortcutRecorder *)recorder key:(NSString *)key registered:(BOOL)registered note:(NSTextField *)note idle:(NSString *)idle active:(NSString *)active name:(NSString *)name {
- NSDictionary *s=[self shortcutForKey:key];NSDictionary *suggested=[self suggestedShortcutFor:key];NSString *hint=suggested?[NSString stringWithFormat:@" Suggest picks %@, which is free of macOS shortcuts.",[PeekShortcut labelForKeyCode:[suggested[@"keyCode"] integerValue] modifiers:[suggested[@"modifiers"] unsignedIntegerValue]]]:@"";
+ NSDictionary *s=[self shortcutForKey:key];NSDictionary *suggested=[self suggestedShortcutFor:key];NSString *hint=suggested?[NSString stringWithFormat:@" Suggest picks %@, which is free of macOS shortcuts.",[PeekShortcut labelForKeyCode:[suggested[@"keyCode"] integerValue] modifiers:[suggested[@"modifiers"] integerValue]]]:@"";
  if(recorder.recording){recorder.title=@"Press keys…";note.stringValue=@"Press the keys to use, with ⌘, ⌃ or ⌥. Esc cancels; ⌫ removes the shortcut.";}
- else {recorder.title=s?[PeekShortcut labelForKeyCode:[s[@"keyCode"] integerValue] modifiers:[s[@"modifiers"] unsignedIntegerValue]]:@"Record Shortcut";note.stringValue=s?(registered?active:@"That shortcut could not be registered; it may be taken by another app. Click to choose another."):[idle stringByAppendingString:hint];}
+ else {recorder.title=s?[PeekShortcut labelForKeyCode:[s[@"keyCode"] integerValue] modifiers:[s[@"modifiers"] integerValue]]:@"Record Shortcut";note.stringValue=s?(registered?active:@"That shortcut could not be registered; it may be taken by another app. Click to choose another."):[idle stringByAppendingString:hint];}
  recorder.accessibilityLabel=[NSString stringWithFormat:@"%@ shortcut: %@",name,s?recorder.title:@"none"];
 }
 - (void)refreshPeekRecorder:(id)sender {
@@ -799,7 +801,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
 - (void)grayscaleOff:(NSMenuItem *)sender {[self grayscaleOffForMinutes:sender.tag];}
 - (void)grayscaleBackOn:(id)sender {self.grayOffUntil=nil;[self persistGrayscaleOff];[self scheduleGrayscaleOffTimer];self.animateAppearance=YES;[self sync];}
 - (NSString *)grayOffLabel {return !self.grayOffUntil?@"":[self.grayOffUntil isEqualToDate:NSDate.distantFuture]?@"Grayscale off until Night Shift changes":[NSString stringWithFormat:@"Grayscale off until %@",[self timeLabel:self.grayOffUntil]];}
-- (void)populateGrayscaleOff:(NSMenu *)menu {for(NSArray *pair in @[@[@"Off for 1 hour",@60],@[@"Off for 4 hours",@240],@[@"Off until Night Shift changes",@0]]){NSMenuItem *i=[self add:pair[0] action:@selector(grayscaleOff:) to:menu];i.tag=[pair[1] integerValue];i.toolTip=[self grayOffHelp];}}
+- (void)populateGrayscaleOff:(NSMenu *)menu {for(NSArray *pair in @[@[@"Off for 1 hour",@60],@[@"Off for 4 hours",@240],@[@"Off until Night Shift changes",@0]]){NSMenuItem *i=[self add:pair[0] action:@selector(grayscaleOff:) to:menu];i.tag=[pair[1] integerValue];}}
 - (void)populateGrayscaleOffPopup {[self.grayOffPopup removeAllItems];[self.grayOffPopup addItemWithTitle:@"Turn Grayscale off for…"];[self populateGrayscaleOff:self.grayOffPopup.menu];}
 // Clicking the menu-bar icon: the menu on the left button and a Grayscale toggle on the
 // right button by default; the preference swaps them.
@@ -1014,7 +1016,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  NSStackView *header=[self row:@[icon,name,[self spacer],enable,remove]];
  NSTextField *kind=[self note:exact?@"Exact page":@"Whole domain, including subdomains"];
  NSDictionary *inherited=[self.browserBridge inheritedForSite:key browser:nil];NSArray *words=@[@"",@"On",@"Off"];NSMutableArray *choices=[NSMutableArray new];NSArray *titles=@[@"Grayscale",@"Night Shift"];
- for(int i=0;i<2;i++){NSTextField *label=[NSTextField labelWithString:titles[i]];NSInteger resolved=[inherited[i==0?@"grayMode":@"nightMode"] integerValue];NSSegmentedControl *choice=[NSSegmentedControl segmentedControlWithLabels:@[resolved?[NSString stringWithFormat:@"Default (%@)",words[resolved]]:@"Default",@"On",@"Off"] trackingMode:NSSegmentSwitchTrackingSelectOne target:self action:@selector(websiteRowChanged:)];choice.selectedSegment=[rule[i==0?@"grayMode":@"nightMode"] integerValue];choice.identifier=key;choice.tag=i;[choice setWidth:resolved?84:50 forSegment:0];[choice setWidth:36 forSegment:1];[choice setWidth:36 forSegment:2];[self helpView:choice text:@"Default keeps what the site inherits." label:[NSString stringWithFormat:@"%@ — %@",key,titles[i]]];[choices addObject:label];[choices addObject:choice];}
+ for(int i=0;i<2;i++){NSTextField *label=[NSTextField labelWithString:titles[i]];NSInteger resolved=[inherited[i==0?@"grayMode":@"nightMode"] integerValue];NSSegmentedControl *choice=[NSSegmentedControl segmentedControlWithLabels:@[resolved?[NSString stringWithFormat:@"Default (%@)",words[resolved]]:@"Default",@"On",@"Off"] trackingMode:NSSegmentSwitchTrackingSelectOne target:self action:@selector(websiteRowChanged:)];choice.selectedSegment=[rule[i==0?@"grayMode":@"nightMode"] integerValue];choice.identifier=key;choice.tag=i;choice.controlSize=NSControlSizeSmall;choice.font=[NSFont systemFontOfSize:11];[choice setWidth:resolved?70:46 forSegment:0];[choice setWidth:30 forSegment:1];[choice setWidth:30 forSegment:2];[self helpView:choice text:@"Default keeps what the site inherits." label:[NSString stringWithFormat:@"%@ — %@",key,titles[i]]];[choices addObject:label];[choices addObject:choice];}
  NSStackView *modes=[self row:choices];modes.spacing=6;[modes setCustomSpacing:14 afterView:choices[1]];
  double inheritedWarmth=[inherited[@"warmth"] doubleValue];NSButton *inherit=[NSButton checkboxWithTitle:[NSString stringWithFormat:@"Use default warmth (%@)",inheritedWarmth>0?[NSString stringWithFormat:@"%.0f%%",inheritedWarmth]:@"Off"] target:self action:@selector(websiteRowChanged:)];inherit.identifier=key;inherit.tag=2;inherit.state=![rule[@"customWarmth"] boolValue];[self helpView:inherit text:@"Uncheck, or move the slider, to give this site its own Extra Warmth." label:[NSString stringWithFormat:@"%@ — Use default warmth",key]];
  NSSlider *slider=[self warmthSliderWithValue:[rule[@"warmth"] doubleValue] action:@selector(websiteRowChanged:)];slider.identifier=key;slider.tag=3;[slider.widthAnchor constraintGreaterThanOrEqualToConstant:160].active=YES;[slider setContentHuggingPriority:1 forOrientation:NSLayoutConstraintOrientationHorizontal];[self helpView:slider text:@"Extra Warmth for this site, from Off to Red." label:[NSString stringWithFormat:@"%@ — Extra Warmth percent",key]];

@@ -99,10 +99,10 @@ More in [Night Shift and warmth](docs/NIGHT-SHIFT.md).
 Less Pull has two interfaces, both on the Mac: the menu and the Settings window. The browser extension only connects the browser.
 
 <p align="center">
-  <img src="docs/assets/interfaces.png" width="100%" alt="Two screenshots of Less Pull side by side. On the left, the menu-bar dropdown under its half-filled circle icon: one status line, Grayscale, the Extra Warmth slider drawn as a ramp from neutral through amber to red with stops labeled Off, 25, 50, 75 and Red, Night Shift with a submenu, Pause Less Pull, Exception for the current app with its icon, Settings and Quit. On the right, the Settings window on its General tab, with the toolbar tabs General, Shortcuts, Apps, Websites and About: the heading Grayscale, Warmth 40 percent, a Grayscale checkbox, the Extra Warmth ramp slider with a Reset button, Night Shift with a Turn Night Shift off for menu, Extra Warmth follows Night Shift, Peek in color with a Record Shortcut button, and Launch at login, each with a short explanation underneath.">
+  <img src="docs/assets/interfaces.png" width="100%" alt="Two screenshots of Less Pull side by side. On the left, the menu-bar dropdown under its half-filled circle icon: the status line Grayscale, Warmth Off, then Grayscale with a check, Grayscale off for with a submenu, the Extra Warmth slider drawn as a ramp from neutral through amber to red at 40 percent with stops labeled Off, 25, 50, 75 and Red, Night Shift: Off with a submenu, Pause Less Pull, Exception for Finder with the Finder icon, Settings and Quit. On the right, the Settings window on its General tab, with the toolbar tabs General, Shortcuts, Apps, Websites and About: the heading Grayscale, Warmth Off, a Grayscale checkbox with a Turn Grayscale off for menu, the Extra Warmth ramp slider at 40 percent with a Reset button, Night Shift: Off with its timed-off menu, Extra Warmth follows Night Shift, and Launch at login, each with a short explanation underneath.">
 </p>
 
-<sub>Two real screenshots of build 16, placed side by side on a plain backdrop.</sub>
+<sub>Two real screenshots of build 16, placed side by side on a plain backdrop. The menu is translucent, so it carries a tint of whatever was behind it.</sub>
 
 ### The menu bar, for quick changes
 
@@ -113,6 +113,12 @@ Click the circle in the menu bar (a right-click toggles Grayscale straight away)
 - **Night Shift** holds everything about Night Shift: on or off now, off for a while, and whether Extra Warmth follows it.
 - **Pause Less Pull** shows the plain display for 15 minutes, an hour, or until you resume.
 - **Exception for [current app]** sets the rule for the app you were just using, right in the menu. With a website in front, **Exception for [that site]** does the same for the domain or the exact page.
+
+<p align="center">
+  <img src="docs/assets/exceptions.png" width="100%" alt="Two screenshots of the menu with an exception submenu open. Left: Exception for Finder, with Use this exception, Grayscale and Night Shift each as Use default, On or Off, Use default warmth, an Extra Warmth slider for Finder on the ramp, and More in Settings. Right: with Brave in front on mubi.com, Exception for mubi.com, with Use this exception, Apply to Whole domain or This exact page, Grayscale as Use default (On), On or Off, Night Shift as Use default (Off), On or Off, Use default warmth (40 percent), an Extra Warmth slider for mubi.com, and All website exceptions.">
+</p>
+
+<sub>An app exception and a website exception, set straight from the menu. The default entries show what they resolve to.</sub>
 
 ### The settings window, for everything in one place
 
@@ -125,6 +131,12 @@ Choose **Settings…** in the menu. This is the window on the right, with five t
 - **About**: version, links, Help, Diagnostics, licenses, and the update check.
 
 On the very first launch this window opens by itself with a short welcome.
+
+<p align="center">
+  <img src="docs/assets/settings-tabs.png" width="100%" alt="Four screenshots of the Settings window on a plain backdrop. Shortcuts: Peek in color with the shortcut Option-A, what peeking turns off, a Toggle Grayscale shortcut Option-Command-G, and what clicking the menu-bar icon does. Apps: three app exceptions, Music, Photos and TextEdit, each with its icon, a Use this exception checkbox, Default, On and Off segments for Grayscale and Night Shift, and a warmth slider on the ramp. Websites: the Install Browser Extension button, the extension connected in Firefox, Brave and Opera, and two saved exceptions for example.com and one exact page with the same controls. About: the app icon, version 1.4.4 build 16, the author's links, Help, Diagnostics and Licenses, and the automatic update check.">
+</p>
+
+<sub>Real screenshots of build 16 with example rules, placed on a plain backdrop.</sub>
 
 ### Website exceptions, in your browser
 
