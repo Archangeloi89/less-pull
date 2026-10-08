@@ -16,7 +16,16 @@ function connection() {
   });
   return p;
 }
+// Safari has no persistent native port: each message goes through sendNativeMessage.
 function native(message) {
+  if (typeof chrome.runtime.connectNative !== 'function') {
+    return new Promise((resolve, reject) => {
+      const id = nextId++;
+      const done = response => response && typeof response === 'object' ? resolve(response) : reject(new Error('Less Pull did not respond.'));
+      try { const result = chrome.runtime.sendNativeMessage(HOST, { ...message, id }, done); if (result && typeof result.then === 'function') result.then(done, reject); }
+      catch (error) { reject(error); }
+    });
+  }
   return new Promise((resolve, reject) => {
     const id = nextId++;
     const timer = setTimeout(() => { pending.delete(id); reject(new Error('Less Pull did not respond.')); }, 6000);
@@ -25,7 +34,7 @@ function native(message) {
     catch (error) { clearTimeout(timer); pending.delete(id); reject(error); }
   });
 }
-export function identity(url) {
+function identity(url) {
   try {
     const page = new URL(url);
     if (!['http:', 'https:'].includes(page.protocol) || page.username || page.password) return null;
@@ -71,3 +80,5 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 });
 setInterval(refresh, 20000);
 refresh();
+// Classic script (no module) so Chrome, Firefox and Safari all load it; tests reach identity through this hook.
+if (globalThis.__lessPullTest) globalThis.__lessPullTest.identity = identity;

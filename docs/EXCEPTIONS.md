@@ -22,7 +22,7 @@ There are four levels, from broad to narrow:
 
 Each of the three settings is resolved on its own. For each one, Less Pull uses the narrowest level that sets a value and skips the levels that inherit. So a rule can change only warmth and leave Grayscale and Night Shift to follow whatever is above it. The picture above leaves out the App level to stay simple.
 
-Apps other than Brave, Chrome and Firefox use only the first two levels.
+Apps other than the supported browsers use only the first two levels.
 
 ## App exceptions
 
@@ -51,7 +51,7 @@ Things to know:
 
 ## Website exceptions
 
-Website rules need the browser extension for Brave, Chrome or Firefox. See [Install](INSTALL.md#brave-chrome-or-firefox). The Mac app has to be running.
+Website rules need the browser extension, for Safari, Brave, Chrome, Firefox, Opera or Edge. See [Install](INSTALL.md#safari-brave-chrome-firefox-opera-or-edge). The Mac app has to be running.
 
 <p align="center">
   <picture>
@@ -78,7 +78,7 @@ Things to know:
 - Private tabs are excluded. The extension does not report them, so they use the browser's app rule or your global settings.
 - Avoid saving exact URLs that contain tokens or other secrets. Saved rules are stored on your Mac. See [Privacy](PRIVACY.md).
 
-Browser support in build 16: Brave is confirmed working. Chrome and Firefox are implemented, but neither has been through a clean installation test on a fresh machine. Firefox keeps a temporary add-on only until it quits unless the extension is signed. Safari, Edge and Opera are not supported.
+Browser support in build 16: Brave is confirmed working. Chrome, Firefox, Safari, Opera and Edge are implemented, but none has been through a clean installation test on a fresh machine. Firefox keeps a temporary add-on only until it quits unless the extension is signed; Safari needs Allow Unsigned Extensions until the companion app is signed by Apple. Several browsers can use the extension at once.
 
 ## Examples
 

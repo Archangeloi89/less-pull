@@ -35,7 +35,7 @@ An exception can be as broad or as narrow as you like:
 - **A whole website.** A domain rule also covers its subdomains.
 - **One exact URL.** For a single page, with its path and query string.
 
-Website rules are set from the toolbar of Brave, Chrome or Firefox with the [optional extension](#website-exceptions-in-brave-chrome-or-firefox), and listed under **Settings… → Websites**.
+Website rules are set from the browser toolbar with the [optional extension](#website-exceptions-in-your-browser), and listed under **Settings… → Websites**.
 
 ### Change one thing, keep the rest
 
@@ -126,7 +126,7 @@ Choose **Settings…** in the menu. This is the window on the right, with five t
 
 On the very first launch this window opens by itself with a short welcome.
 
-### Website exceptions, in Brave, Chrome or Firefox
+### Website exceptions, in your browser
 
 Website rules live where you browse. Click the Less Pull icon in the browser toolbar and the popup already knows which site you are on. Choose **Whole domain** or **This exact URL**, set only what you want to change, and save.
 
@@ -137,18 +137,18 @@ Website rules live where you browse. Click the Less Pull icon in the browser too
   </picture>
 </p>
 
-<sub>The popup is the shipped extension code, rendered with example data. The browser window around it is a drawing, and menus and sliders look a little different in Brave, Chrome and Firefox on a Mac.</sub>
+<sub>The popup is the shipped extension code, rendered with example data. The browser window around it is a drawing.</sub>
 
-The extension tells the Mac app which site is in front, and the app changes the display. It does not inject anything into pages, and the Mac app has to be running. Brave is confirmed working. Chrome and Firefox are implemented but have not yet been through a clean install test. Safari, Edge and Opera are not supported.
+The extension tells the Mac app which site is in front, and the app changes the display. It does not inject anything into pages, and the Mac app has to be running. Brave is confirmed working. Safari, Chrome, Firefox, Opera and Edge are implemented but have not yet been through a clean install test. Several browsers can use it at the same time.
 
 ## Install
 
 1. Download **Less.Pull.1.4.4.zip** from the [build 16 release](https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-16), unzip it, and move **Less Pull.app** to **Applications**.
 2. Open it. The Settings window greets you once; the circle in the menu bar is where you choose Grayscale and Extra Warmth from then on.
-3. For website rules, open **Settings… → Websites**, choose **Install Browser Extension…**, and follow the steps for [Brave, Chrome or Firefox](docs/INSTALL.md#brave-chrome-or-firefox).
+3. For website rules, open **Settings… → Websites**, choose **Install Browser Extension…**, and follow the steps for [your browser](docs/INSTALL.md#safari-brave-chrome-firefox-opera-or-edge).
 
 > [!NOTE]
-> Version 1.4.4 (build 16) is a test build for Apple silicon Macs. The version number stays 1.4.4 on purpose; the build number is what changes. It is ad-hoc signed and not notarized by Apple, so Gatekeeper may block a downloaded copy. It is built for macOS 13 and later and has been tested on macOS 27 only. The browser extension is loaded locally and is not in the Chrome Web Store or on addons.mozilla.org. See [install help](docs/INSTALL.md) and [what is still open](docs/RELEASE-PLAN.md).
+> Version 1.4.4 (build 16) is a test build for Apple silicon Macs. The version number stays 1.4.4 on purpose; the build number is what changes. It is ad-hoc signed and not notarized by Apple, so Gatekeeper may block a downloaded copy. It is built for macOS 13 and later and has been tested on macOS 27 only. The browser extension is loaded locally and is not in the Chrome Web Store, on addons.mozilla.org or in the App Store. See [install help](docs/INSTALL.md) and [what is still open](docs/RELEASE-PLAN.md).
 
 ## Private by design
 
@@ -162,7 +162,7 @@ Less Pull is source-available, not open source. The [app license](LICENSE-APP.tx
 
 ## Build it yourself
 
-The app is Objective-C on Apple frameworks. The extension is plain JavaScript on Manifest V3. Neither has third-party runtime dependencies. On an Apple silicon Mac with Apple's Command Line Tools:
+The app is Objective-C on Apple frameworks. The extension is plain JavaScript on Manifest V3. Neither has third-party runtime dependencies. On an Apple silicon Mac with Apple's Command Line Tools (Xcode as well, if the Safari companion app should be included):
 
 ```sh
 zsh Source/build.sh

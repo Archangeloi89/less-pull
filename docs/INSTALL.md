@@ -15,7 +15,7 @@ To start Less Pull when you sign in, open **Settings…** and check **Launch at 
 
 If you are updating from an earlier build: quit Less Pull, replace the app in Applications, and open it again. Your settings and exceptions are kept. If you use the browser extension, reload it on the browser's extensions page, because the copy inside the app has changed.
 
-## Brave, Chrome or Firefox
+## Safari, Brave, Chrome, Firefox, Opera or Edge
 
 The extension is optional. It adds [website exceptions](EXCEPTIONS.md#website-exceptions). It ships inside the app, so there is nothing else to download.
 
@@ -27,6 +27,10 @@ The extension is optional. It adds [website exceptions](EXCEPTIONS.md#website-ex
 
 In Firefox the steps differ: on the **about:debugging** page that opens, click **Load Temporary Add-on…** and select `manifest.json` in the **Browser Extension (Firefox)** folder. Firefox removes temporary add-ons when it quits, so load it again next time, or use Firefox Developer Edition with signing turned off.
 
+In Safari the extension comes as a small companion app inside Less Pull. Choosing **Safari** opens it; click **Open Safari Settings** there. Until this build is signed by Apple, Safari needs **Allow Unsigned Extensions** from the **Develop** menu (turn the Develop menu on under Settings → Advanced); that choice lasts until Safari quits. Then turn on **Less Pull** under Settings → Extensions and allow it on all websites.
+
+Opera and Edge take the same steps as Chrome on their own extensions pages. Several browsers can use the extension at the same time; whichever browser window is in front decides.
+
 Keep the Mac app running, and keep it in the place it was installed. If you move the app, run **Install Browser Extension…** again.
 
 ## What to expect from this build
@@ -35,7 +39,7 @@ Keep the Mac app running, and keep it in the place it was installed. If you move
 - **macOS 13 or later** is the build target. Only macOS 27 has been tested.
 - **Ad-hoc signed, not notarized.** Developer ID signing and notarization are planned.
 - **The extension is loaded by hand.** It is not in the Chrome Web Store yet. It asks for access to tab addresses and for a connection to the local app.
-- **Brave is confirmed working.** Chrome and Firefox are implemented but have not been through a clean install test. Safari, Edge and Opera are not supported.
+- **Brave is confirmed working.** Chrome, Firefox, Safari, Opera and Edge are implemented but have not been through a clean install test; the Safari companion app is included only in builds made with Xcode.
 - **Updates are checked, not installed.** Once a day the app asks GitHub whether a newer build exists and shows a dot on its icon if one is made for your macOS. Installing is still by hand, until the app is signed and notarized.
 - Less Pull uses private macOS display interfaces. A macOS update can change how they behave.
 

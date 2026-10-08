@@ -15,8 +15,27 @@ rm -f "$APP/Contents/Resources/Browser Extension/manifest.firefox.json"
 # Firefox loads the same code with its own manifest (event page, add-on id).
 ditto --norsrc "../Browser Extension" "$APP/Contents/Resources/Browser Extension (Firefox)"
 mv "$APP/Contents/Resources/Browser Extension (Firefox)/manifest.firefox.json" "$APP/Contents/Resources/Browser Extension (Firefox)/manifest.json"
+rm -f "$APP/Contents/Resources/Browser Extension (Firefox)/manifest.safari.json" "$APP/Contents/Resources/Browser Extension/manifest.safari.json"
+# Safari: the same extension inside a companion app. The Xcode project is generated
+# here by Apple's converter (so the file list always matches), our handler replaces the
+# template, and the app is built ad hoc when Xcode is installed.
+if [[ -d /Applications/Xcode.app && "${LESS_PULL_SKIP_SAFARI:-0}" != 1 ]]; then
+ SAFARI_SRC="$BUILD_ROOT/safari-extension"; SAFARI_PROJECT="$BUILD_ROOT/safari-project"; SAFARI_BUILD="$BUILD_ROOT/safari-build"
+ ditto --norsrc "../Browser Extension" "$SAFARI_SRC"; rm -f "$SAFARI_SRC/manifest.firefox.json"; mv "$SAFARI_SRC/manifest.safari.json" "$SAFARI_SRC/manifest.json"
+ export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer
+ xcrun safari-web-extension-converter "$SAFARI_SRC" --project-location "$SAFARI_PROJECT" --app-name "Less Pull for Safari" --bundle-identifier com.jiriarion.lesspull.safari --macos-only --no-open --no-prompt --copy-resources --force > /dev/null
+ cp Safari/SafariWebExtensionHandler.swift "$SAFARI_PROJECT/Less Pull for Safari/Less Pull for Safari Extension/SafariWebExtensionHandler.swift"
+ # The converter derives the app's identifier from its name; the extension must sit under the app's.
+ sed -i '' 's/com\.jiriarion\.lesspull\.Less-Pull-for-Safari/com.jiriarion.lesspull.safari/g' "$SAFARI_PROJECT/Less Pull for Safari/Less Pull for Safari.xcodeproj/project.pbxproj"
+ xcodebuild -project "$SAFARI_PROJECT/Less Pull for Safari/Less Pull for Safari.xcodeproj" -scheme "Less Pull for Safari" -configuration Release -derivedDataPath "$SAFARI_BUILD" CODE_SIGN_IDENTITY=- CODE_SIGNING_REQUIRED=NO DEVELOPMENT_TEAM= -quiet build
+ ditto --norsrc "$SAFARI_BUILD/Build/Products/Release/Less Pull for Safari.app" "$APP/Contents/Resources/Less Pull for Safari.app"
+ unset DEVELOPER_DIR
+else
+ echo "Xcode not found or skipped: building without the Safari companion app." >&2
+fi
 cp Info.plist "$APP/Contents/Info.plist"
 xattr -cr "$APP"
+[[ -d "$APP/Contents/Resources/Less Pull for Safari.app" ]] && codesign --force --deep --sign - "$APP/Contents/Resources/Less Pull for Safari.app"
 codesign --force --sign - "$APP"
 codesign --verify --strict "$APP"
 rm -rf "../Less Pull.app"

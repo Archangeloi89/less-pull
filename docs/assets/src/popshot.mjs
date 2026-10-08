@@ -16,7 +16,7 @@ const stub = () => {
   window.chrome = { runtime: { sendMessage: async m => {
     if (m.type === 'active') return { ok: true, tab: { domain: 'example.com', url: 'https://example.com/reading', focused: true, private: false } };
     if (m.type === 'list') return { ok: true, rules };
-    if (m.type === 'get') return { ok: true, rule: rules[m.site] };
+    if (m.type === 'get') return { ok: true, rule: rules[m.site] || null, inherited: { grayMode: 1, nightMode: 2, warmth: 30 } };
     return { ok: true };
   } } };
 };
@@ -26,8 +26,8 @@ for (const theme of ['light', 'dark']) {
   await ctx.addInitScript(stub);
   const p = await ctx.newPage(); await p.goto('http://localhost:8765/'); 
   if (theme === 'dark') await p.evaluate(() => document.documentElement.classList.add('dark'));
-  const fr = p.frames()[1]; await fr.waitForFunction(() => document.getElementById('status').textContent.includes('Choose') || document.getElementById('status').textContent.includes('Saved'));
-  await fr.selectOption('#scope', 'url'); await fr.waitForFunction(() => document.getElementById('percent').textContent === '70%');
+  const fr = p.frames()[1]; await fr.waitForFunction(() => /own settings|Set what/.test(document.getElementById('status').textContent));
+  await fr.click('#scope [data-value=url]'); await fr.waitForFunction(() => document.getElementById('percent').textContent === '70%');
   await fr.evaluate(() => { document.body.style.maxHeight = 'none'; });
   const h = await fr.evaluate(() => document.documentElement.scrollHeight);
   await p.evaluate(h => { document.querySelector('iframe').style.height = h + 'px'; document.getElementById('stage').style.height = (98 + h + 40) + 'px'; }, h);
