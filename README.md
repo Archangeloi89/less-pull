@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-29"><b>Download build 29</b></a>
+  <a href="https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-30"><b>Download build 30</b></a>
   &nbsp;·&nbsp; <a href="#install">Install</a>
   &nbsp;·&nbsp; <a href="docs/EXCEPTIONS.md">App and website exceptions</a>
   &nbsp;·&nbsp; <a href="docs/README.md">All docs</a>
@@ -117,7 +117,7 @@ With more than one display, each one gets its own matrix and its own fade, on it
 > [!TIP]
 > **Arrow pointer still in color on one display?** Some displays draw the small arrow pointer in hardware, on top of the finished picture, so no color filter reaches it; the hand and the other pointers are drawn into the picture and turn quiet. Make the pointer one notch larger under **System Settings → Accessibility → Display → Pointer size** and the arrow is drawn into the picture too. The Displays section in Settings has a button that takes you there.
 
-An app whose picture also shows on another display, such as a 3D player or a presenter, can be marked **On every display** in its exception, in the menu or under Apps: while it is in front, its settings cover all displays. **Peek toggles**, next to it, chooses which displays Peek toggles while that app is in front: the display under the pointer, all displays, or any set of connected displays you tick; an app's own choice wins over the Peek scope on the Shortcuts tab. Both work whether or not the exception itself is used.
+These options appear only while two or more displays are connected (or always, with the advanced option "Show display options with one display"), and every choice stays saved while hidden. An app or website whose picture also shows on another display, such as a 3D player or a presenter, can be marked **On every display** in its exception, in the menu or under Apps and Websites: while it is in front, its settings cover all displays. **Peek toggles**, next to it, chooses which displays Peek toggles while that app is in front: the display under the pointer, all displays, or any set of connected displays you tick; an app's own choice wins over the Peek scope on the Shortcuts tab. Both work whether or not the exception itself is used.
 
 Each connected display is listed under **Settings… → General → Displays** with a choice of its own: **Follows what is on it** (the rule above), **Always your defaults** (exceptions never apply there), or **Always plain, in color** (never grayscale or warmth there, for a TV or a pair of glasses). A display keeps its choice when it is plugged in again. Night Shift, Pause, Grayscale off for a while and the Toggle shortcut stay global, since Night Shift is system wide anyway. Peek works on the display under the mouse pointer, with its own double-press lock per display; "All displays" is the other choice under **Settings… → Shortcuts**.
 
@@ -182,11 +182,11 @@ Choose **Settings…** in the menu. This is the window on the right, with five t
 
 - **General**: the same controls as the menu, with a short line under each one, plus **Launch at login**.
 - **Shortcuts**: [**Peek in color**](#peek-in-color) (a shortcut you hold to see the plain display, and what it turns off), a **Toggle Grayscale** shortcut, and what a left and a right click on the menu-bar icon do. **Suggest** picks a free shortcut for you.
-- **Apps**: every app exception, with the app's icon and Default / On / Off for Grayscale and Night Shift.
-- **Websites**: the browser extension and the saved website exceptions.
+- **Apps**: every app exception, one row each: the app's icon, Use this exception, Default / On / Off for Grayscale and Night Shift. **More** opens the row for warmth and, with several displays, the display choices.
+- **Websites**: the browser extension and the saved website exceptions, in the same shape as the app rows.
 - **About**: version, links, Help, Diagnostics, licenses, and the update check.
 
-On the very first launch this window opens by itself with a short welcome and a four-page tour: the screen, exceptions, Peek and privacy, in the same card at the same size, with Skip tour always at hand. The two shortcuts are set for new users, ⌥A to peek and ⌥⌘G to toggle, each only if it is free on that Mac and keyboard; the tour shows which ones, and Shortcuts lets you change them. The tour can be opened again from About. After two weeks of use, the next time you open Settings, a small card asks whether you enjoy Less Pull and how to support the author; it never pops up on its own.
+The window shows what is relevant and hides the rest: display options appear only with two or more displays connected, and the fine-tuning (what Peek turns off, what the mouse buttons do, display options with one display) sits behind **Show advanced options** at the bottom of General. Everything keeps working as set while it is hidden. On the very first launch this window opens by itself with a short welcome and a four-page tour: the screen, exceptions, Peek and privacy, in the same card at the same size, with Skip tour always at hand. The two shortcuts are set for new users, ⌥A to peek and ⌥⌘G to toggle, each only if it is free on that Mac and keyboard; the tour shows which ones, and Shortcuts lets you change them. The tour can be opened again from About. After two weeks of use, the next time you open Settings, a small card asks whether you enjoy Less Pull and how to support the author; it never pops up on its own.
 
 <p align="center">
   <img src="docs/assets/settings-tabs.png" width="100%" alt="Four screenshots of the Settings window on a plain backdrop. Shortcuts: Peek in color with the shortcut Option-A, what peeking turns off, a Toggle Grayscale shortcut Option-Command-G, and what clicking the menu-bar icon does. Apps: three app exceptions, Music, Photos and TextEdit, each with its icon, a Use this exception checkbox, Default, On and Off segments for Grayscale and Night Shift, and a warmth slider on the ramp. Websites: the Install Browser Extension button, the extension connected in Firefox, Brave and Opera, and two saved exceptions for example.com and one exact page with the same controls. About: the app icon, version 1.4.4 build 16, the author's links, Help, Diagnostics and Licenses, and the automatic update check.">
@@ -202,7 +202,7 @@ The app changes the display; nothing is injected into pages, and the Mac app has
 
 ## Install
 
-1. Download **Less-Pull-1.4.4-29.zip** from the [build 29 release](https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-29), unzip it, and move **Less Pull.app** to **Applications**.
+1. Download **Less-Pull-1.4.4-30.zip** from the [build 30 release](https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-30), unzip it, and move **Less Pull.app** to **Applications**.
 2. Open it. The Settings window greets you once; the circle in the menu bar is where you choose Grayscale and Extra Warmth from then on. It sits at the left end of your menu-bar icons, where it stays visible even on a crowded MacBook menu bar; ⌘-drag it to move it.
 3. For website rules, open **Settings… → Websites**, choose **Install Browser Extension…**, and follow the steps for [your browser](docs/INSTALL.md#safari-brave-chrome-firefox-opera-or-edge).
 
@@ -210,7 +210,7 @@ The app changes the display; nothing is injected into pages, and the Mac app has
 > Setting up with an AI agent? The release includes an **agent pack** (`Less-Pull-Agent-Pack.zip`): a script that installs the app and the bridge, and scripts that connect Brave, Chrome, Opera, Edge and Firefox, with the instructions an agent needs. See [tools/agent-pack](tools/agent-pack/README.md).
 
 > [!NOTE]
-> Version 1.4.4 (build 29) is a test build for Apple silicon Macs. The version number stays 1.4.4 on purpose; the build number is what changes. It is ad-hoc signed and not notarized by Apple, so Gatekeeper may block a downloaded copy. It is built for macOS 13 and later and has been tested on macOS 27 only. The browser extension is loaded locally and is not in the Chrome Web Store, on addons.mozilla.org or in the App Store. See [install help](docs/INSTALL.md) and [what is still open](docs/RELEASE-PLAN.md).
+> Version 1.4.4 (build 30) is a test build for Apple silicon Macs. The version number stays 1.4.4 on purpose; the build number is what changes. It is ad-hoc signed and not notarized by Apple, so Gatekeeper may block a downloaded copy. It is built for macOS 13 and later and has been tested on macOS 27 only. The browser extension is loaded locally and is not in the Chrome Web Store, on addons.mozilla.org or in the App Store. See [install help](docs/INSTALL.md) and [what is still open](docs/RELEASE-PLAN.md).
 
 ## Private by design
 

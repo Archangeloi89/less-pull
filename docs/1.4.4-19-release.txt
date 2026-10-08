@@ -26,4 +26,6 @@ Build 27 (same day): "Peek toggles" per app exception replaces "Peek on every di
 
 Build 28 (same day) was meant to make an app's own Peek toggles choice win over the global Peek scope (All displays) on the Shortcuts tab, but shipped without that change; build 29 has it.
 
+Build 30 (same day): Settings show what is relevant. Display options (the Displays section, Peek on, On every display, Peek toggles) appear only with two or more displays connected; the fine-tuning (what Peek turns off, mouse buttons, display options with one display) sits behind Show advanced options at the bottom of General. App and website rows are two lines with More for warmth and display choices; a row opens by itself the first time when something is set there. Website exceptions have the same display choices as apps (On every display, Peek toggles), kept by the bridge. Choices stay saved while hidden; a display keeps its choices when plugged in again (tested).
+
 Verified: the ten automated suites pass, including new per-display engine tests (apply, cache, independent fades, invalidate). Per-display color was confirmed live on the author's Mac with a second display. Browser support and everything else is as in build 17.
