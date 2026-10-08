@@ -1,0 +1,13 @@
+{
+  "name": "less-pull-readme-assets",
+  "private": true,
+  "type": "module",
+  "description": "Generates the illustrations for the Less Pull project page.",
+  "scripts": { "build": "node build.mjs && node popshot.mjs" },
+  "dependencies": {
+    "@fontsource/ibm-plex-mono": "^5.0.0",
+    "@fontsource/schibsted-grotesk": "^5.0.0",
+    "opentype.js": "^2.0.0",
+    "playwright": "^1.56.0"
+  }
+}

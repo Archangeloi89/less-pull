@@ -1,75 +1,194 @@
-<p align="center"><img src="docs/assets/hero.svg" alt="Less Pull. Less colour. Less pull. Individual app and website settings and exceptions." width="100%"></p>
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/hero-dark.svg">
+    <img src="docs/assets/hero-light.svg" width="100%" alt="Less Pull, a macOS menu-bar app. Quiet the screen. Keep color where it matters. An illustrated display turns grayscale while a writing app is in front, returns to color for a photo editor, and turns amber for the website news.example.">
+  </picture>
+</p>
 
-<p align="center"><strong>A calm macOS menu-bar app by Jiri Arion Rose.</strong><br>Grayscale and optional warmth up to red—with individual settings and exceptions for each app and website.</p>
+<p align="center">
+  <a href="https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4"><b>Download 1.4.4</b></a>
+  &nbsp;·&nbsp; <a href="#install">Install</a>
+  &nbsp;·&nbsp; <a href="docs/EXCEPTIONS.md">App and website exceptions</a>
+  &nbsp;·&nbsp; <a href="docs/README.md">All docs</a>
+</p>
 
-<p align="center"><a href="https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4">Download 1.4.4</a> · <a href="docs/INSTALL.md">Install</a> · <a href="docs/LICENSING.md">Licensing</a> · <a href="https://jiriarion.com">About the author</a></p>
+Less Pull is a small menu-bar app for macOS by [Jiri Arion Rose](https://jiriarion.com). It takes the color out of your screen so there is a little less reason to keep looking. You can add warmth on top, from a touch of amber all the way to red. And because some things need color, every app and every website can have its own settings.
 
-## A little less invitation to keep looking
+<sub>The picture above is an illustration, not a screen recording. Its three looks are calculated with the same color matrix the app uses. The apps and the site are examples, not presets.</sub>
 
-Colour makes a screen lively. Less Pull lets you remove it when you want a quieter place to read, write, or work. Choose global settings, then customize individual apps and websites independently: grayscale on or off, your preferred Extra Warmth, and Night Shift on or off. Each effect can inherit the global setting or use its own exception. Website settings support whole domains or exact URLs through the optional Chrome/Brave extension.
+## Every app and website can have its own settings
 
-For example, keep writing apps in grayscale, allow colour in a photo editor, and give a particular website its own warmth setting. Rules take effect when their app or tab is in the foreground; they change the appearance across your displays.
+Set your defaults once. Then make exceptions for the places that need something else. Whatever is in front decides how the screen looks, and the change fades in over half a second.
 
-Extra Warmth is optional. Use it during the day, in the evening, or let it follow macOS Night Shift. It extends the available warmth through amber all the way to red, progressively reducing the blue channel. The percentage is a relative control, not a Kelvin value or a measured blue-light reduction. Less Pull is designed around personal preference; it makes no medical or sleep-outcome promises.
+| When this is in front | You set | The screen shows |
+| :-- | :-- | :-- |
+| A writing app | nothing, it uses your defaults | Grayscale |
+| A photo editor | Grayscale: Off | Color |
+| One website, such as `news.example` | Extra Warmth: 30% | Grayscale with an amber tint |
+| One exact page on that site | Night Shift: Off | The same, without Night Shift |
 
-<img src="docs/assets/comparison.svg" alt="Illustrative comparison of original colour, grayscale, warm grayscale at 50%, and red at 100%." width="100%">
+These are examples. Less Pull ships with no presets, so the rules are always yours.
 
-## Menu-bar quick access
+An exception can be as broad or as narrow as you like:
 
-Click the Less Pull menu-bar icon to toggle grayscale, adjust Extra Warmth, control or briefly pause Night Shift, and resume warmth following. **App Exceptions…** opens individual app settings; **Customize [current app]…** takes you directly to the foreground app. The menu also provides browser-extension setup, Settings, Help, and Diagnostics.
+- **An app.** Add it under **App Exceptions…**, or choose **Customize [current app]…** in the menu to jump straight to the app you are using.
+- **A whole website.** A domain rule also covers its subdomains.
+- **One exact URL.** For a single page, with its path and query string.
 
-<img src="docs/assets/menu-bar.png" alt="Actual Less Pull menu-bar dropdown showing grayscale, warmth slider, Night Shift, following, app exceptions, current-app customization, and browser-extension setup." width="470">
+Website rules are set from the toolbar of Brave or Chrome with the [optional extension](#website-exceptions-in-brave-or-chrome).
 
-*Actual menu-bar screenshot. “Customize System Settings…” refers to the foreground app in this example; the shortcut changes to match your current app. Labels, checkmarks, and available actions follow your settings. Website exceptions are configured in the browser extension.*
+### Each setting inherits on its own
 
-## Full app settings window
+An exception does not have to replace everything. Grayscale, Extra Warmth and Night Shift are separate choices, and each one either sets a value or inherits it from the level above.
 
-Open **Settings…** for the full app window below. Both interfaces are available: the menu bar gives you quick access, while this window keeps the main settings together. Individual app settings open through **App Exceptions…**; website settings open in the browser extension.
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/cascade-dark.svg">
+    <img src="docs/assets/cascade-light.svg" width="100%" alt="How a website tab resolves its settings. Grayscale, Extra Warmth and Night Shift each inherit separately through four levels: Global, App, Domain and Exact URL. In this example the domain example.com turns Grayscale off, the exact URL example.com/reading sets Warmth to 70 percent, and Night Shift stays on from the global setting. The tab shows in color, at 70 percent warmth, with Night Shift on.">
+  </picture>
+</p>
 
-<table><tr><td width="48%"><img src="docs/assets/settings.png" alt="Actual Less Pull 1.4.4 settings window showing grayscale and independent warmth following." width="440"></td><td valign="top">
+<sub>Example values. Apps other than a browser use only the first two levels, Global and App.</sub>
 
-**Grayscale stays your choice.** Night Shift ending never turns it off. App and website exceptions can still override it.
+A few things to know before you rely on it:
 
-**Warmth has its own rhythm.** Follow Night Shift to remove inherited warmth during the day and restore your saved amount at night. Or leave following off and choose warmth whenever you want.
+- A rule changes **all your displays** while its app or tab is in front. It does not tint a single window, and it never touches the web page itself.
+- An app rule applies while that app is frontmost with a visible window that is not minimized.
+- Private browser tabs are never read, so website rules do not apply there.
 
-**Change the moment, keep the schedule.** A manual warmth adjustment temporarily overrides following. Resume Following returns to the current Night Shift state.
+The [exceptions guide](docs/EXCEPTIONS.md) has the details.
 
-**Colour where it matters.** Set independent grayscale, warmth, and Night Shift exceptions for a foreground app, a whole website, or an exact URL.
+## Grayscale, and warmth from amber to red
 
-**A gentle return.** Appearance changes fade over half a second. Reduce Motion uses immediate changes.
+**Grayscale** is a checkbox. **Extra Warmth** is a slider that runs from Off to Red, and you can use it with or without grayscale. Higher settings take out more blue and green until only red is left. Color and grayscale arrive at the same red endpoint.
 
-</td></tr></table>
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/warmth-dark.svg">
+    <img src="docs/assets/warmth-light.svg" width="100%" alt="The same illustrated sunset shown ten times: in color and in grayscale, at Extra Warmth Off, 25, 50, 75 and Red. Warmth moves through amber to deep red, and both rows meet at the same red endpoint.">
+  </picture>
+</p>
 
-*The settings image is an actual app screenshot. The comparison above is an illustrative matrix rendering, not a photograph or an optical measurement.*
+<sub>Illustration calculated from the app's warmth curve. It is not a photograph of a display, and your screen will look somewhat different.</sub>
 
-## Get started
+The percentage is a relative control. It is not a Kelvin value and not a measured reduction in blue light. Less Pull is about what feels calmer to you, and it makes no promises about sleep, eyes or health.
 
-1. Download the app ZIP from the [1.4.4 release](https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4), unzip, and move **Less Pull.app** to **Applications**.
-2. Open it and choose Grayscale and Extra Warmth. Enable warmth following if you want Night Shift to control warmth timing.
-3. For website exceptions, choose **Install Browser Extension…** in the app and follow the [Chrome/Brave setup](docs/INSTALL.md).
+## Night Shift can set the rhythm
 
-Current build: **1.4.4 (15)** · **Apple silicon** · macOS 13+ build target, tested on macOS 27. This is an **ad-hoc signed, unnotarized test build**; Gatekeeper may block downloaded copies. The browser extension is installed locally and has not been store-approved. [Distribution status and remaining validation](docs/RELEASE-PLAN.md).
+Turn on **Extra Warmth follows Night Shift** if you want warmth only at night. While Night Shift is off, the warmth you inherit from your defaults is removed. When Night Shift turns on, your saved amount comes back.
 
-## Local by design
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/nightshift-dark.svg">
+    <img src="docs/assets/nightshift-light.svg" width="100%" alt="Timeline of one example day. Night Shift is on from 22:00 to 07:00. Extra Warmth, when it follows Night Shift, is 0 percent by day and returns to your saved amount at night. Grayscale stays as you set it, day and night.">
+  </picture>
+</p>
 
-No account, analytics, or webpage injection. The optional extension uses tab-address access to pass the active public tab to the Mac app through local native messaging. Saved website exceptions stay on this Mac; exact-URL rules can include paths and query strings. Private tabs are excluded. [Privacy details](docs/PRIVACY.md).
+<sub>Example schedule. Night Shift keeps the schedule you set in macOS.</sub>
+
+- **Following controls warmth only.** Grayscale stays the way you set it, day and night.
+- **You can still change the moment.** Moving the slider overrides following until Night Shift next switches, or until you choose **Resume Following**. The new amount is saved for the night.
+- **Following is optional.** Leave it off and warmth stays wherever you put it.
+- **Night Shift itself is in the menu too.** Turn it on or off, or off for an hour, four hours, or until morning.
+
+More in [Night Shift and warmth](docs/NIGHT-SHIFT.md).
+
+## Where the controls are
+
+Less Pull has two interfaces on the Mac and a third in the browser.
+
+### The menu bar, for quick changes
+
+Click the half-filled circle in the menu bar.
+
+<img src="docs/assets/menu-bar.png" align="right" width="410" alt="Screenshot of the Less Pull menu-bar dropdown. It shows the current state, a Grayscale toggle, the Extra Warmth slider at 55 percent with stops labeled Off, 25, 50, 75 and Red, Night Shift controls, Extra Warmth follows Night Shift, Resume Following, App Exceptions, Customize System Settings, Install Browser Extension, Settings, Help, About and Quit.">
+
+
+- The first line tells you what is applied right now.
+- **Grayscale** and the **Extra Warmth** slider change your defaults.
+- **Night Shift** can be switched, or paused for a while.
+- **Customize [current app]…** opens the rule for the app you were just using. In this screenshot that app happened to be System Settings.
+- **App Exceptions…** lists every app rule.
+
+<sub>Real screenshot of version 1.4.4.</sub>
+
+<br clear="right">
+
+### The settings window, for everything in one place
+
+Choose **Settings…** in the menu.
+
+<img src="docs/assets/settings.png" align="right" width="410" alt="Screenshot of the Less Pull settings window. The heading reads Grayscale, Warmth 56 percent. Below are a Grayscale checkbox, the Extra Warmth slider with a Reset button, Night Shift with a Turn Night Shift off for menu, Extra Warmth follows Night Shift with a Resume Following button, Launch at login, an App Exceptions button, an Install Browser Extension button, Help, and links to jiriarion.com and Buy me a coffee.">
+
+
+- The same controls as the menu, with room to breathe.
+- **Launch at login**.
+- **App Exceptions…**, where you add an app and choose its Grayscale, Night Shift and warmth.
+- **Install Browser Extension…** to set up website rules.
+- Hover over any control for a short explanation.
+
+<sub>Real screenshot of version 1.4.4.</sub>
+
+<br clear="right">
+
+### Website exceptions, in Brave or Chrome
+
+Website rules live where you browse. Click the Less Pull icon in the browser toolbar and the popup already knows which site you are on. Choose **Whole domain** or **This exact URL**, set only what you want to change, and save.
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/website-popup-dark.png">
+    <img src="docs/assets/website-popup-light.png" width="620" alt="The Less Pull Website Exceptions popup open from a browser toolbar on example.com/reading. Apply to is set to This exact URL. Grayscale and Night Shift are set to Use inherited setting. Extra Warmth is 70 percent. Buttons read Save exception and Remove.">
+  </picture>
+</p>
+
+<sub>The popup is the shipped extension code, rendered with example data. The browser window around it is a drawing, and menus and sliders look a little different in Brave and Chrome on a Mac.</sub>
+
+The extension tells the Mac app which site is in front, and the app changes the display. It does not inject anything into pages, and the Mac app has to be running. Brave is confirmed working. Chrome is implemented but has not yet been through a clean install test. Safari, Firefox, Edge and Opera are not supported.
+
+## Install
+
+1. Download **Less.Pull.1.4.4.zip** from the [1.4.4 release](https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4), unzip it, and move **Less Pull.app** to **Applications**.
+2. Open it. Click the half-filled circle in the menu bar and choose Grayscale and Extra Warmth.
+3. For website rules, choose **Install Browser Extension…** and follow the steps for [Brave or Chrome](docs/INSTALL.md#brave-or-chrome).
+
+> [!NOTE]
+> Version 1.4.4 (build 15) is a test build for Apple silicon Macs. It is ad-hoc signed and not notarized by Apple, so Gatekeeper may block a downloaded copy. It is built for macOS 13 and later and has been tested on macOS 27 only. The browser extension is loaded locally and is not in the Chrome Web Store. See [install help](docs/INSTALL.md) and [what is still open](docs/RELEASE-PLAN.md).
+
+## Private by design
+
+No account, no analytics, no cloud sync. The extension reads the address of the active tab, passes it to the app on your Mac, and never reads or changes page content. Private tabs are excluded. Your rules stay on your Mac. [Privacy details](docs/PRIVACY.md).
 
 ## Free to use, including at work
 
-Everyone may use the unmodified app and extension for free, including professionally and in businesses. Source inspection and noncommercial development are permitted. Commercial adaptation, code reuse in commercial products, and sale require the author's written permission.
+Anyone may use the unmodified app and extension for free, at home or in a business. You may read the source and build on it for noncommercial purposes. Commercial adaptation, reuse of the code in commercial products, and sale need the author's written permission.
 
-The [app license](LICENSE-APP.txt) and [source license](LICENSE-SOURCE.txt) govern different rights. This is **source-available with commercial restrictions**. [Permission table and legal-review status](docs/LICENSING.md).
+Less Pull is source-available, not open source. The [app license](LICENSE-APP.txt) and the [source license](LICENSE-SOURCE.txt) are the terms that count, and [the licensing overview](docs/LICENSING.md) summarizes them.
 
-## Development
+## Build it yourself
 
-Objective-C and Apple frameworks; plain JavaScript MV3 extension, with no third-party runtime dependencies. Build on Apple silicon with Apple's Command Line Tools:
+The app is Objective-C on Apple frameworks. The extension is plain JavaScript on Manifest V3. Neither has third-party runtime dependencies. On an Apple silicon Mac with Apple's Command Line Tools:
 
 ```sh
 zsh Source/build.sh
 ```
 
-See [testing instructions](Source/TESTING.txt), [1.4.4 changes](docs/1.4.4-release.txt), and the [release plan](docs/RELEASE-PLAN.md). The app relies on private macOS display interfaces, so compatibility needs validation on each supported OS. Chrome and Brave are implemented; Safari, Firefox, Opera, and Edge ports remain future work.
+See [testing](Source/TESTING.txt), the [1.4.4 notes](docs/1.4.4-release.txt) and the [release plan](docs/RELEASE-PLAN.md). Less Pull relies on private macOS display interfaces, so each macOS version needs its own check.
+
+## Documentation
+
+| Guide | What it covers |
+| :-- | :-- |
+| [Install](docs/INSTALL.md) | The Mac app, the browser extension, and troubleshooting |
+| [App and website exceptions](docs/EXCEPTIONS.md) | Scopes, inheritance, examples and limits |
+| [Night Shift and warmth](docs/NIGHT-SHIFT.md) | Following, overrides and timed pauses |
+| [Privacy](docs/PRIVACY.md) | What is read, stored and logged |
+| [Licensing](docs/LICENSING.md) | What you may do, in a table |
+| [Release plan](docs/RELEASE-PLAN.md) | What is verified and what is still open |
 
 ---
 
-Created by [Jiri Arion Rose](https://jiriarion.com). If Less Pull helps you, [support its development](https://buymeacoffee.com/HsERf62fiZ).
+<p align="center">
+  Made by <a href="https://jiriarion.com">Jiri Arion Rose</a>. If Less Pull helps you, you can <a href="https://buymeacoffee.com/HsERf62fiZ">buy me a coffee</a>.<br>
+  <sub>© 2026 Jiri Arion Rose</sub>
+</p>

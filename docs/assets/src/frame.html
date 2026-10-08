@@ -1,0 +1,35 @@
+<!doctype html><meta charset="utf-8">
+<style>
+@font-face{font-family:SG;src:url(/fonts/sg500.woff);font-weight:500}
+@font-face{font-family:PM;src:url(/fonts/pm400.woff)}
+:root{--win:#ffffff;--chrome:#eef1f4;--line:#d1d9e0;--ink:#1f2328;--sub:#59636e;--bar:#d8dee4;--pill:#ffffff;--active:#dfe5ea;--shadow:0 18px 50px rgba(31,35,40,.22),0 2px 8px rgba(31,35,40,.12)}
+.dark{--win:#0d1117;--chrome:#151b23;--line:#3d444d;--ink:#f0f6fc;--sub:#9198a1;--bar:#2a313c;--pill:#0d1117;--active:#2a313c;--shadow:0 18px 50px rgba(0,0,0,.6),0 2px 8px rgba(0,0,0,.4)}
+html,body{margin:0;background:transparent}
+#stage{width:720px;height:650px;position:relative;font-family:SG,sans-serif;color:var(--ink)}
+#win{position:absolute;inset:0 0 28px 0;border:1.5px solid var(--line);border-radius:14px;background:var(--win);overflow:hidden}
+#top{background:var(--chrome);border-bottom:1.5px solid var(--line);padding:12px 14px 10px}
+.tabs{display:flex;align-items:center;gap:8px;height:30px}
+.dot{width:11px;height:11px;border-radius:50%;background:var(--bar)}
+.tab{margin-left:14px;background:var(--win);border-radius:8px;padding:6px 14px;font-size:13px;display:flex;gap:8px;align-items:center}
+.tab i{width:12px;height:12px;border-radius:3px;background:var(--bar);display:block}
+.tool{display:flex;align-items:center;gap:10px;margin-top:10px}
+.url{flex:1;background:var(--pill);border:1.5px solid var(--line);border-radius:16px;padding:6px 14px;font:13px PM,monospace;color:var(--sub)}
+.url b{color:var(--ink);font-weight:400}
+.ico{width:32px;height:32px;border-radius:8px;display:grid;place-items:center}
+.ico.on{background:var(--active)}
+.ico svg{display:block}
+.more{display:flex;flex-direction:column;gap:3px;padding:0 6px}.more span{width:4px;height:4px;border-radius:50%;background:var(--sub)}
+#page{padding:34px 40px}
+.h{height:20px;border-radius:5px;background:var(--ink);opacity:.86;margin-bottom:10px}
+.l{height:9px;border-radius:5px;background:var(--bar);margin-top:13px}
+#pop{position:absolute;right:38px;top:98px;width:352px;border-radius:12px;overflow:hidden;box-shadow:var(--shadow);border:1.5px solid var(--line);background:var(--win)}
+#pop iframe{display:block;border:0;width:352px;height:100px}
+#note{position:absolute;right:38px;top:84px;width:0;height:0}
+</style>
+<div id="stage"><div id="win"><div id="top">
+<div class="tabs"><span class="dot"></span><span class="dot"></span><span class="dot"></span><div class="tab"><i></i>Reading</div></div>
+<div class="tool"><div class="url"><b>example.com</b>/reading</div>
+<div class="ico on"><svg width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.7" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M10 2.3a7.7 7.7 0 0 0 0 15.4z" fill="currentColor"/></svg></div>
+<div class="more"><span></span><span></span><span></span></div></div></div>
+<div id="page"><div class="h" style="width:250px"></div><div class="h" style="width:190px"></div><div class="l" style="width:260px;margin-top:26px"></div><div class="l" style="width:240px"></div><div class="l" style="width:255px"></div><div class="l" style="width:150px"></div><div class="l" style="width:250px;margin-top:30px"></div><div class="l" style="width:262px"></div><div class="l" style="width:220px"></div><div class="l" style="width:245px"></div><div class="l" style="width:120px"></div><div class="l" style="width:258px;margin-top:30px"></div><div class="l" style="width:236px"></div><div class="l" style="width:250px"></div><div class="l" style="width:200px"></div><div class="l" style="width:255px;margin-top:30px"></div><div class="l" style="width:230px"></div></div>
+</div><div id="pop"><iframe src="/ext/popup.html"></iframe></div></div>
