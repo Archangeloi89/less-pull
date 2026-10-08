@@ -20,7 +20,8 @@ const stub = () => {
     return { ok: true };
   } } };
 };
-const b = await chromium.launch();
+// A Chromium of your own can stand in for Playwright's download: CHROME_PATH=/Applications/Brave\ Browser.app/Contents/MacOS/Brave\ Browser
+const b = await chromium.launch(process.env.CHROME_PATH ? { executablePath: process.env.CHROME_PATH } : {});
 for (const theme of ['light', 'dark']) {
   const ctx = await b.newContext({ viewport: { width: 760, height: 700 }, deviceScaleFactor: 2, colorScheme: theme });
   await ctx.addInitScript(stub);
