@@ -21,7 +21,7 @@ The extension asks for two permissions:
 | `tabs` | To know which website is in the active tab |
 | `nativeMessaging` | To talk to the Less Pull app on the same Mac |
 
-The domain and URL of the active public tab are sent through a small helper and a local Unix socket (or, for Safari, a local Mach port) to the Mac app. Private tabs are excluded. The app keeps the active site in memory only: one entry per connected browser, overwritten by the next report, removed a minute after the last report or as soon as the browser disconnects. It is never written to disk, not to preferences, logs or diagnostics, and the extension and the helper keep no copy either. A browser's native-messaging channel and the socket carry it between processes on the same Mac and store nothing.
+The domain and URL of the active public tab are sent through a small helper and a local Unix socket (or, for Safari, a local Mach port) to the Mac app. Private tabs are excluded. The app keeps the active site in memory only: one entry per connected browser, overwritten by the next report, removed a minute after the last report or as soon as the browser disconnects. It is never written to disk, not to preferences, logs or diagnostics, and the extension and the helper keep no copy either. A browser's native-messaging channel and the socket carry it between processes on the same Mac and store nothing. The socket accepts only the app's own browser helper (the process on the other end must be the helper executable inside the app bundle); other programs on the Mac get no answer. Nothing the app offers over that socket returns the address of the site in front, so no other app can ask for it.
 
 ## The update check
 
