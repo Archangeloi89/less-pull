@@ -25,7 +25,7 @@ function lights(x, y, c, front) {
 }
 const shadow = (x, y, w, h, front) => `<rect x="${x - 2}" y="${y + (front ? 10 : 4)}" width="${w + 4}" height="${h}" rx="14" fill="#000" opacity="${front ? .34 : .16}" filter="url(#blur)"/>`;
 
-function writer(c, front) {
+export function writer(c, front) {
   const x = 56, y = 64, w = 420, h = 372;
   const line = (ly, lw, col = '#c3c8cf') => rect(x + 44, ly, lw, 9, c(col), 4.5);
   return shadow(x, y, w, h, front) + rect(x, y, w, h, c('#fcfbf8'), 12) + lights(x + 22, y + 22, c, front) +
@@ -33,7 +33,7 @@ function writer(c, front) {
     line(y + 134, 330) + line(y + 156, 312) + rect(x + 40, y + 172, 214, 21, c('#ffe27a'), 4) + line(y + 178, 206, '#6c5a12') + line(y + 200, 322) +
     line(y + 222, 180) + line(y + 262, 330) + line(y + 284, 150, '#2f6fed') + line(y + 306, 300) + line(y + 328, 236);
 }
-function editor(c, front) {
+export function editor(c, front) {
   const x = 372, y = 118, w = 462, h = 352;
   const sw = ['#e5484d', '#ff8a4c', '#ffd166', '#2a9d6f', '#3b82f6', '#8b5cf6'];
   return shadow(x, y, w, h, front) + rect(x, y, w, h, c('#26282d'), 12) + lights(x + 22, y + 22, c, front) +
@@ -42,7 +42,7 @@ function editor(c, front) {
     photo(x + 68, y + 52, w - 90, h - 74, c, 6) +
     rect(x + 22, y + h - 40, 24, 18, c('#3a3d44'), 5);
 }
-function browser(c, front) {
+export function browser(c, front) {
   const x = 716, y = 56, w = 400, h = 388, id = `b${uid++}`;
   const bar = (bx, by, bw, col = '#c3c8cf', bh = 9) => rect(bx, by, bw, bh, c(col), bh / 2);
   return shadow(x, y, w, h, front) + rect(x, y, w, h, c('#ffffff'), 12) +

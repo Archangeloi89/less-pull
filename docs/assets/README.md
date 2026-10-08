@@ -8,6 +8,7 @@
 | `website-popup-light.png`, `website-popup-dark.png` | The shipped extension popup (`Browser Extension/popup.html`) rendered in Chromium with example data. The browser window around it is drawn. It is not a screenshot taken inside Brave or Chrome |
 | `hero-*.svg` | Animated illustration of one display changing with the app in front. It respects Reduce Motion |
 | `warmth-*.svg` | Illustration of Extra Warmth from Off to Red, in color and grayscale |
+| `examples-*.svg` | Three example rules: what is in front, what you set, and what the screen shows |
 | `levels-*.svg` | Three example levels, from your defaults to one website to one page, showing what each one sets and what it keeps |
 | `nightshift-*.svg` | Timeline of warmth following Night Shift |
 

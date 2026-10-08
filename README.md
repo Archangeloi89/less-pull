@@ -20,14 +20,14 @@ Less Pull is a small menu-bar app for macOS by [Jiri Arion Rose](https://jiriari
 
 Set your defaults once. Then make exceptions for the places that need something else. Whatever is in front decides how the screen looks, and the change fades in over half a second.
 
-| When this is in front | You set | The screen shows |
-| :-- | :-- | :-- |
-| A writing app | nothing, it uses your defaults | Grayscale |
-| A photo editor | Grayscale: Off | Color |
-| One website, such as `news.example` | Extra Warmth: 30% | Grayscale with an amber tint |
-| One exact page on that site | Night Shift: Off | The same, without Night Shift |
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/examples-dark.svg">
+    <img src="docs/assets/examples-light.svg" width="100%" alt="Three examples. With a writing app in front and no rule set, the screen shows grayscale, your default. With a photo editor in front and Grayscale set to Off for it, the screen shows color. With the website news.example in front and Extra Warmth set to 30 percent for it, the screen shows grayscale with an amber tint.">
+  </picture>
+</p>
 
-These are examples. Less Pull ships with no presets, so the rules are always yours.
+<sub>Illustrated examples. Less Pull ships with no presets, so the rules are always yours.</sub>
 
 An exception can be as broad or as narrow as you like:
 
