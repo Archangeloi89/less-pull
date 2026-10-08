@@ -130,7 +130,7 @@ On the very first launch this window opens by itself with a short welcome.
 
 The browser extension has no buttons and no settings of its own. It only tells the Mac app which website is in front. With a website open, the Less Pull menu offers **Exception for [that site]**, just like it does for apps: choose **Whole domain** or **This exact page**, set only what you want to change, and it is saved. Saved website rules are listed under **Settings… → Websites**.
 
-The app changes the display; nothing is injected into pages, and the Mac app has to be running. Brave and Firefox are confirmed working on the author's Mac. Safari, Chrome, Opera and Edge are implemented but have not yet been through a clean install test. Several browsers can use the extension at the same time; whichever browser window is in front decides.
+The app changes the display; nothing is injected into pages, and the Mac app has to be running. Brave, Firefox and Safari are confirmed working on the author's Mac. Chrome, Opera and Edge are implemented but have not yet been through a clean install test. Several browsers can use the extension at the same time; whichever browser window is in front decides.
 
 ## Install
 

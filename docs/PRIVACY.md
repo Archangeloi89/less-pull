@@ -27,6 +27,12 @@ The domain and URL of the active public tab are sent through a small helper and 
 
 Once a day at most, and when you choose **Check for Updates…**, the app requests `https://api.github.com/repos/Archangeloi89/less-pull/releases/latest` over HTTPS. If that names a newer build, it also fetches the small `lesspull-update.json` file attached to that release, which says which macOS versions the build is made for; builds made for another macOS version are not offered. The request carries no account, identifier or settings; GitHub sees the same thing any browser visiting that address would send, including your IP address, under [GitHub's privacy statement](https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement). The reply (version, release notes, download page) is stored on your Mac so the menu can show it. Nothing is downloaded or installed by itself; installing a new version is done by you. Untick **Check for updates automatically** in Settings → About to stop the daily check; the manual button still works.
 
+## What the extension can and cannot do
+
+Safari and the other browsers warn that the extension "can see your browsing history". That is what the `tabs` permission means: the extension can read the address and title of your tabs. It uses that for one thing, telling the Less Pull app which public website is in front. It cannot read or change what is on a page (it has no content scripts and no host permissions), it cannot see what you type, your passwords, cookies or form data, it has no network code, and it has no user interface. `nativeMessaging` only lets it talk to the Less Pull app on the same Mac.
+
+The honest risk is the release path, not the running code: a tampered update could send the addresses of sites you visit somewhere. The protections are that the extension code is small and readable, that store-distributed versions are reviewed and signed by the store, and that signed, notarized app releases are the plan before a public launch. A request for new permissions is always shown before it takes effect.
+
 ## What is stored
 
 - **Website exceptions.** Domains and exact URLs you save are stored in macOS user defaults under `com.jiriarion.lesspull` (builds before 16 used `local.nightshiftfilters.app`; the first launch of build 16 copies those settings over once and leaves the old entry in place). Exact URLs keep their query string and drop the part after `#`. Avoid saving addresses that contain tokens or other secrets.

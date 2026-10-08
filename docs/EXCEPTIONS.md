@@ -70,7 +70,7 @@ Things to know:
 - Avoid saving exact pages whose address contains tokens or other secrets. Saved rules are stored on your Mac. See [Privacy](PRIVACY.md).
 - Several browsers can use the extension at once; whichever window is in front decides.
 
-Browser support in build 16: Brave and Firefox are confirmed working on the author's Mac. Safari, Chrome, Opera and Edge are implemented, but none has been through a clean installation test on a fresh machine. Firefox keeps a temporary add-on only until it quits unless the extension is signed; Safari needs Allow Unsigned Extensions until the companion app is signed by Apple.
+Browser support in build 16: Brave, Firefox and Safari are confirmed working on the author's Mac. Chrome, Opera and Edge are implemented, but none has been through a clean installation test on a fresh machine. Firefox keeps a temporary add-on only until it quits unless the extension is signed; Safari needs Allow Unsigned Extensions until the companion app is signed by Apple.
 
 ## Examples
 
