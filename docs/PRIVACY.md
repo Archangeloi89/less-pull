@@ -35,6 +35,7 @@ The honest risk is the release path, not the running code: a tampered update cou
 
 ## What is stored
 
+- **Sessions.** The running session (its start, end and call-back time) and your session preferences. Nothing about what you did during it.
 - **Website exceptions.** Domains and exact URLs you save are stored in macOS user defaults under `com.jiriarion.lesspull` (builds before 16 used `local.nightshiftfilters.app`; the first launch of build 16 copies those settings over once and leaves the old entry in place). Exact URLs keep their query string and drop the part after `#`. Avoid saving addresses that contain tokens or other secrets.
 - **App exceptions.** The app's identifier and your settings for it.
 - **Your global settings.**

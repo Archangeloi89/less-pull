@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-30"><b>Download build 30</b></a>
+  <a href="https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-31"><b>Download build 31</b></a>
   &nbsp;·&nbsp; <a href="#install">Install</a>
   &nbsp;·&nbsp; <a href="docs/EXCEPTIONS.md">App and website exceptions</a>
   &nbsp;·&nbsp; <a href="docs/README.md">All docs</a>
@@ -23,6 +23,7 @@ Warmth is the second step: from a touch of amber all the way to red, it takes th
 - **Grayscale**, on or off, from the menu bar, a shortcut, or a right-click on the icon.
 - **Extra Warmth**, a slider from a touch of amber to red, with or without grayscale.
 - **[Peek in color](#peek-in-color)**: hold a shortcut and the screen is in color for exactly as long as you hold it. Press it twice to keep it.
+- **[Sessions](#sessions)**: a stretch of focused work with a gentle end: a glow, a gong, a count past the end, and one call back after you leave.
 - **[Exceptions](#every-app-and-website-can-have-its-own-settings)** for any app, any website or one exact page, set right in the menu.
 - **Time off**: Grayscale off for an hour, four hours, or until Night Shift changes; Pause Less Pull for a while.
 - **[Night Shift](#night-shift-can-set-the-rhythm)** can set the rhythm, so warmth comes only at night.
@@ -129,6 +130,16 @@ Each connected display is listed under **Settings… → General → Displays** 
 
 Less Pull changes the display at the very end of the pipeline, after the picture is made. Screenshots, screen recordings and screen sharing read the picture before that step, so they show the normal colors. What is quiet for you is unchanged for everyone else.
 
+## Sessions
+
+A session is a stretch of focused work with a gentle end. Choose a length from **Start a session** in the menu (25, 45, 60 and 90 minutes to begin with; change them under **Settings… → Sessions**). The icon gains a thin ring that fills as the session runs, with the minutes left next to it.
+
+At the end, a warm glow blooms across every display for three seconds with one line of text, and a soft gong sounds, built from pure tones on the 432 Hz reference and the solfeggio pitches, low and short. Nothing to dismiss: the count simply goes on past the end, −0, −1, −2 in the warm color, so you can see how far you have stretched, and a quieter reminder comes every five minutes if you want one (or never).
+
+While a session runs, a click on the icon opens a small panel under it instead of the menu; the other mouse button still opens the menu. Once the session is over, the panel offers **Keep going** and **Leaving now**. Leaving now turns into **Call me back in** with your own choices (5, 9, 13 and 33 minutes to begin with) and **Not today**. After the call back, two soft rising notes, and the session is over for good. You are called back once.
+
+<sub>The glow never takes focus and never blocks a click. Under Reduce Motion it appears and disappears without animation. Sound and glow can each be turned off under Sessions.</sub>
+
 ## Night Shift can set the rhythm
 
 Turn on **Extra Warmth follows Night Shift** if you want warmth only at night. While Night Shift is off, the warmth you inherit from your defaults is removed. When Night Shift turns on, your saved amount comes back.
@@ -178,9 +189,10 @@ Click the circle in the menu bar (a right-click toggles Grayscale straight away)
 
 ### The settings window, for everything in one place
 
-Choose **Settings…** in the menu. This is the window on the right, with five tabs.
+Choose **Settings…** in the menu. This is the window on the right, with six tabs.
 
 - **General**: the same controls as the menu, with a short line under each one, plus **Launch at login**.
+- **Sessions**: session lengths, call-back choices, reminders after the end, sound and glow, and Try it.
 - **Shortcuts**: [**Peek in color**](#peek-in-color) (a shortcut you hold to see the plain display, and what it turns off), a **Toggle Grayscale** shortcut, and what a left and a right click on the menu-bar icon do. **Suggest** picks a free shortcut for you.
 - **Apps**: every app exception, one row each: the app's icon, Use this exception, Default / On / Off for Grayscale and Night Shift. **More** opens the row for warmth and, with several displays, the display choices.
 - **Websites**: the browser extension and the saved website exceptions, in the same shape as the app rows.
@@ -202,15 +214,15 @@ The app changes the display; nothing is injected into pages, and the Mac app has
 
 ## Install
 
-1. Download **Less-Pull-1.4.4-30.zip** from the [build 30 release](https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-30), unzip it, and move **Less Pull.app** to **Applications**.
-2. Open it. The Settings window greets you once; the circle in the menu bar is where you choose Grayscale and Extra Warmth from then on. It sits at the left end of your menu-bar icons, where it stays visible even on a crowded MacBook menu bar; ⌘-drag it to move it.
+1. Download **Less-Pull-1.4.4-31.zip** from the [build 31 release](https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-31), unzip it, and move **Less Pull.app** to **Applications**.
+2. Open it. The Settings window greets you once; the circle in the menu bar is where you choose Grayscale and Extra Warmth from then on. macOS places it at the left end of your menu-bar icons; ⌘-drag it where you want it, for example next to the clock.
 3. For website rules, open **Settings… → Websites**, choose **Install Browser Extension…**, and follow the steps for [your browser](docs/INSTALL.md#safari-brave-chrome-firefox-opera-or-edge).
 
 > [!TIP]
 > Setting up with an AI agent? The release includes an **agent pack** (`Less-Pull-Agent-Pack.zip`): a script that installs the app and the bridge, and scripts that connect Brave, Chrome, Opera, Edge and Firefox, with the instructions an agent needs. See [tools/agent-pack](tools/agent-pack/README.md).
 
 > [!NOTE]
-> Version 1.4.4 (build 30) is a test build for Apple silicon Macs. The version number stays 1.4.4 on purpose; the build number is what changes. It is ad-hoc signed and not notarized by Apple, so Gatekeeper may block a downloaded copy. It is built for macOS 13 and later and has been tested on macOS 27 only. The browser extension is loaded locally and is not in the Chrome Web Store, on addons.mozilla.org or in the App Store. See [install help](docs/INSTALL.md) and [what is still open](docs/RELEASE-PLAN.md).
+> Version 1.4.4 (build 31) is a test build for Apple silicon Macs. The version number stays 1.4.4 on purpose; the build number is what changes. It is ad-hoc signed and not notarized by Apple, so Gatekeeper may block a downloaded copy. It is built for macOS 13 and later and has been tested on macOS 27 only. The browser extension is loaded locally and is not in the Chrome Web Store, on addons.mozilla.org or in the App Store. See [install help](docs/INSTALL.md) and [what is still open](docs/RELEASE-PLAN.md).
 
 ## Private by design
 
