@@ -9,7 +9,7 @@ clang -fobjc-arc -O2 -Wall -Wextra -Wno-unused-parameter -mmacosx-version-min=13
 clang -fobjc-arc -O2 -Wall -mmacosx-version-min=13.0 -arch arm64 BrowserHost.m -framework Foundation -o "$APP/Contents/MacOS/LessPullBrowserHost"
 codesign --force --sign - "$APP/Contents/MacOS/LessPullBrowserHost"
 mkdir -p "$APP/Contents/Resources"
-cp ../LICENSE-APP.txt ../LICENSE-SOURCE.txt "$APP/Contents/Resources/"
+cp ../LICENSE-APP.txt ../LICENSE-SOURCE.txt AppIcon.icns MenuBar/menubar-*.png "$APP/Contents/Resources/"
 ditto --norsrc "../Browser Extension" "$APP/Contents/Resources/Browser Extension"
 cp Info.plist "$APP/Contents/Info.plist"
 xattr -cr "$APP"

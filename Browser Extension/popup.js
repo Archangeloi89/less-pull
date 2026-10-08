@@ -19,7 +19,7 @@ async function load() {
   $('gray').value = rule?.grayMode || 0; $('night').value = rule?.nightMode || 0;
   $('inherit').checked = !rule?.customWarmth; $('warmth').value = rule?.warmth || 0; warmth();
   $('remove').disabled = !rule; status(rule ? 'Saved exception ready to edit.' : 'Choose settings, then save this exception.');
- } catch (e) { status(`${e.message} Run the bridge setup if this is your first use.`, true); $('save').disabled = true; }
+ } catch (e) { status(`${e.message} Open Less Pull and choose Install Browser Extension in Settings if this is your first use.`, true); $('save').disabled = true; }
 }
 async function list() {
  const response = await ask({ type: 'list' }); rules = response.rules;
@@ -45,8 +45,8 @@ $('form').addEventListener('submit', async event => {
  catch (e) { status(e.message, true); } finally { $('save').disabled = false; }
 });
 $('remove').addEventListener('click', async () => {
- try { await ask({ type: 'remove', scope, site: ruleKey() }); await list(); await load(); status('Removed. Inherited settings apply.'); }
+ try { await ask({ type: 'remove', scope, site: ruleKey() }); await list(); await load(); status('Removed. Default settings apply.'); }
  catch (e) { status(e.message, true); }
 });
 try { current = (await ask({ type: 'active' })).tab; target = current.private ? null : current; await list(); await load(); }
-catch (e) { status(`${e.message} Open Less Pull and run the bridge setup.`, true); $('save').disabled = true; $('remove').disabled = true; }
+catch (e) { status(`${e.message} Open Less Pull and choose Install Browser Extension in Settings.`, true); $('save').disabled = true; $('remove').disabled = true; }
