@@ -4,7 +4,7 @@
 typedef NS_ENUM(NSInteger,SessionState){SessionIdle,SessionRunning,SessionOver,SessionAway};
 @interface Session : NSObject
 @property(readonly) SessionState state;
-@property(readonly) NSDate *start,*end,*callBackAt;
+@property(readonly) NSDate *start,*end,*callBackAt,*leftAt;  // leftAt: when you chose a call back
 @property(readonly) NSInteger minutes;       // the length chosen
 @property NSInteger remindEvery;             // minutes between reminders after the end; 0 = never
 @property(readonly) NSDate *lastReminder;
