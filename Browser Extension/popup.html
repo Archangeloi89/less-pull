@@ -1,10 +1,24 @@
 <!doctype html><html lang="en"><meta charset="utf-8"><title>Less Pull</title><link rel="stylesheet" href="popup.css">
-<body><header><h1><img src="icon32.png" width="22" height="22" alt="">Less Pull</h1><p>Website Exceptions</p></header>
-<p id="status" role="status">Connecting to Less Pull…</p>
-<section><label for="saved">Website Exceptions</label><select id="saved"><option value="">Choose a saved exception…</option></select><button id="current" class="secondary" hidden>Back to the current website</button></section>
-<form id="form"><label for="scope">Apply to</label><select id="scope"><option value="domain">Whole domain</option><option value="url">This exact URL</option></select><p id="site" class="site"></p>
-<div class="modes"><div><label for="gray">Grayscale</label><select id="gray"><option value="0" id="gray-default">Use default</option><option value="1">On</option><option value="2">Off</option></select>
-</div><div><label for="night">Night Shift</label><select id="night"><option value="0" id="night-default">Use default</option><option value="1">On</option><option value="2">Off</option></select>
-</div></div><label class="check"><input type="checkbox" id="inherit" checked><span id="inherit-label">Use default warmth</span></label><div class="warm"><label for="warmth">Extra Warmth</label><button id="reset" type="button" class="secondary" disabled>Reset</button><output id="percent">0%</output></div><input id="warmth" type="range" min="0" max="100" value="0" disabled><div class="ends"><span>Off</span><span>25</span><span>50</span><span>75</span><span>Red</span></div>
-<div class="buttons"><button id="save" type="submit" class="primary">Save exception</button><button id="remove" type="button" class="secondary">Remove</button></div></form>
-<details><summary>How these rules work</summary><p class="help">An exact page uses its domain’s settings unless you change them here; a domain covers its subdomains and uses the browser’s app exception. Settings apply on all your displays while this tab is in front. Private tabs are left alone.</p></details><footer>© 2026 Jiri Arion Rose</footer><script src="popup.js" type="module"></script></body></html>
+<body>
+<header><img src="icon32.png" width="24" height="24" alt=""><div><h1>Less Pull</h1><p class="sub">Website exceptions</p></div></header>
+<p id="status" role="status" class="note">Connecting to Less Pull…</p>
+<section class="site-box">
+  <p id="site" class="site">—</p>
+  <div class="segment" id="scope" role="radiogroup" aria-label="Apply to"><button type="button" role="radio" data-value="domain" aria-checked="true">Whole domain</button><button type="button" role="radio" data-value="url" aria-checked="false">This exact page</button></div>
+  <p id="scope-note" class="note">Also covers subdomains.</p>
+  <button id="current" type="button" class="link" hidden>Back to the current website</button>
+</section>
+<form id="form">
+  <div class="row"><label id="gray-label">Grayscale</label><div class="segment small" id="gray" role="radiogroup" aria-labelledby="gray-label"><button type="button" role="radio" data-value="0" aria-checked="true" id="gray-default">Default</button><button type="button" role="radio" data-value="1" aria-checked="false">On</button><button type="button" role="radio" data-value="2" aria-checked="false">Off</button></div></div>
+  <div class="row"><label id="night-label">Night Shift</label><div class="segment small" id="night" role="radiogroup" aria-labelledby="night-label"><button type="button" role="radio" data-value="0" aria-checked="true" id="night-default">Default</button><button type="button" role="radio" data-value="1" aria-checked="false">On</button><button type="button" role="radio" data-value="2" aria-checked="false">Off</button></div></div>
+  <p class="note">Default keeps what the site inherits; the words in brackets say what that is right now.</p>
+  <label class="check"><input type="checkbox" id="inherit" checked><span id="inherit-label">Use default warmth</span></label>
+  <div class="warm"><span>Extra Warmth</span><button id="reset" type="button" class="link" disabled>Reset</button><output id="percent">0%</output></div>
+  <input id="warmth" type="range" min="0" max="100" value="0" disabled aria-label="Extra Warmth, percent">
+  <div class="ends"><span>Off</span><span>25</span><span>50</span><span>75</span><span>Red</span></div>
+  <div class="buttons"><button id="remove" type="button" class="secondary">Remove</button><button id="save" type="submit" class="primary">Save exception</button></div>
+</form>
+<section id="saved-section" hidden><h2>Saved exceptions</h2><ul id="saved" class="saved"></ul></section>
+<details><summary>How these rules work</summary><p class="note">An exact page uses its domain’s settings unless you change them here; a domain covers its subdomains and uses the browser’s app exception. Settings apply on all your displays while this tab is in front, in whichever browser has the extension. Private tabs are left alone. You can also remove rules in Less Pull under Settings → Websites.</p></details>
+<footer>© 2026 Jiri Arion Rose</footer>
+<script src="popup.js" type="module"></script></body></html>
