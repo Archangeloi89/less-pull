@@ -22,4 +22,6 @@ Build 25 (same day): the menu-bar icon is placed at the left end of the menu-bar
 
 Build 26 (same day): "Peek on every display" per app exception, separate from "On every display": while that app is in front, Peek covers all displays instead of the one under the pointer.
 
+Build 27 (same day): "Peek toggles" per app exception replaces "Peek on every display": the display under the pointer, all displays, or any set of connected displays (stored by display UUID). A double press keeps that whole set; the next press lets it go.
+
 Verified: the ten automated suites pass, including new per-display engine tests (apply, cache, independent fades, invalidate). Per-display color was confirmed live on the author's Mac with a second display. Browser support and everything else is as in build 17.
