@@ -1,18 +1,20 @@
-<p align="center"><img src="docs/assets/hero.svg" alt="Less Pull. Less colour. Less pull. A quieter screen, on your terms." width="100%"></p>
+<p align="center"><img src="docs/assets/hero.svg" alt="Less Pull. Less colour. Less pull. Individual app and website settings and exceptions." width="100%"></p>
 
-<p align="center"><strong>A calm macOS menu-bar app by Jiri Arion Rose.</strong><br>Grayscale to reduce the pull of colour. Optional extra warmth, from neutral to red.</p>
+<p align="center"><strong>A calm macOS menu-bar app by Jiri Arion Rose.</strong><br>Grayscale and optional warmth up to red—with individual settings and exceptions for each app and website.</p>
 
 <p align="center"><a href="https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4">Download 1.4.4</a> · <a href="docs/INSTALL.md">Install</a> · <a href="docs/LICENSING.md">Licensing</a> · <a href="https://jiriarion.com">About the author</a></p>
 
 ## A little less invitation to keep looking
 
-Colour makes a screen lively. Less Pull lets you remove it when you want a quieter place to read, write, or work. Keep grayscale on throughout the day and night, then bring colour back for the apps and websites where you need it.
+Colour makes a screen lively. Less Pull lets you remove it when you want a quieter place to read, write, or work. Choose global settings, then customize individual apps and websites independently: grayscale on or off, your preferred Extra Warmth, and Night Shift on or off. Each effect can inherit the global setting or use its own exception. Website settings support whole domains or exact URLs through the optional Chrome/Brave extension.
+
+For example, keep writing apps in grayscale, allow colour in a photo editor, and give a particular website its own warmth setting. Rules take effect when their app or tab is in the foreground; they change the appearance across your displays.
 
 Extra Warmth is optional. Use it during the day, in the evening, or let it follow macOS Night Shift. It extends the available warmth through amber all the way to red, progressively reducing the blue channel. The percentage is a relative control, not a Kelvin value or a measured blue-light reduction. Less Pull is designed around personal preference; it makes no medical or sleep-outcome promises.
 
 <img src="docs/assets/comparison.svg" alt="Illustrative comparison of original colour, grayscale, warm grayscale at 50%, and red at 100%." width="100%">
 
-## Small controls. Room for exceptions.
+## Global defaults. Individual app and website settings.
 
 <table><tr><td width="48%"><img src="docs/assets/settings.png" alt="Actual Less Pull 1.4.4 settings window showing grayscale and independent warmth following." width="440"></td><td valign="top">
 
