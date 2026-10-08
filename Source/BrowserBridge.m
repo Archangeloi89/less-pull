@@ -8,7 +8,9 @@ static NSString *siteName(id value){if(![value isKindOfClass:NSString.class]||[v
 static NSString *pageURL(id value){if(![value isKindOfClass:NSString.class]||[value length]>8192)return nil;NSURLComponents *c=[NSURLComponents componentsWithString:value];if(![@[@"http",@"https"] containsObject:c.scheme.lowercaseString]||!siteName(c.host)||c.user||c.password)return nil;c.scheme=c.scheme.lowercaseString;c.host=c.host.lowercaseString;c.fragment=nil;if(!c.path.length)c.path=@"/";return c.string;}
 @implementation BrowserBridge
 + (NSString *)socketPath {return [NSHomeDirectory() stringByAppendingPathComponent:@"Library/Application Support/Less Pull/browser.sock"];}
-+ (NSString *)portName {return @"com.jiriarion.lesspull.bridge";}
+// The shipped app answers com.jiriarion.lesspull.bridge (what the Safari extension looks
+// up); test binaries and test copies with other identifiers use their own name.
++ (NSString *)portName {NSString *identifier=NSBundle.mainBundle.bundleIdentifier;return [identifier isEqual:@"com.jiriarion.lesspull"]?@"com.jiriarion.lesspull.bridge":[NSString stringWithFormat:@"%@.bridge",identifier?:@"com.jiriarion.lesspull.cli"];}
 // Second doorway, for the sandboxed Safari extension: a Mach message port with the same
 // JSON requests and replies. Only this app's bundle can answer the name while it runs.
 static CFDataRef BridgePortCallback(CFMessagePortRef port,SInt32 msgid,CFDataRef data,void *info) {
