@@ -14,5 +14,7 @@
 - (NSDictionary *)ruleForBrowser:(NSString *)browser base:(NSDictionary *)base site:(NSString **)site;
 // The public tab in front of a browser right now (site and url), or nil.
 - (NSDictionary *)activeContextForBrowser:(NSString *)browser;
+// Drops tab addresses no browser has refreshed for a minute. Addresses live only here, in memory.
+- (void)expireContexts;
 + (NSString *)socketPath;
 @end

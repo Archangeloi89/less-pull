@@ -523,7 +523,7 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
 }
 // Once a minute the matrix is sent again even if nothing changed: the system can replace
 // it without telling us, and the display then shows color while Grayscale is ticked.
-- (void)periodicSync {if(!self.warmth.transitioning)[self.warmth invalidate];[self sync];}
+- (void)periodicSync {if(!self.warmth.transitioning)[self.warmth invalidate];[self.browserBridge expireContexts];[self sync];}
 - (void)pipelineChanged:(id)sender {
  if(self.quitting)return;
  self.pipelineEvents++;
@@ -1112,7 +1112,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
 // Before anything is installed: what the extension can see, in plain words.
 - (BOOL)confirmExtensionData {
  NSAlert *a=[NSAlert new];a.messageText=@"What the browser extension can see";
- a.informativeText=@"The extension reads the address and title of your tabs, so Less Pull knows which website is in front. Your browser will call this “browsing history”.\n\nIt cannot read or change what is on a page, see what you type, or reach your passwords, cookies or forms. It has no buttons and no network connection of its own; it talks only to the Less Pull app on this Mac. Private tabs are never reported.\n\nWhat is kept: the website exceptions you save, on this Mac. The address of the site in front stays in memory and is dropped when the browser disconnects.";
+ a.informativeText=@"The extension reads the address and title of your tabs, so Less Pull knows which website is in front. Your browser will call this “browsing history”.\n\nIt cannot read or change what is on a page, see what you type, or reach your passwords, cookies or forms. It has no buttons and no network connection of its own; it talks only to the Less Pull app on this Mac. Private tabs are never reported.\n\nWhat is kept: only the website exceptions you save, on this Mac. The address of the site in front is held in memory, never written to disk, overwritten by the next one, and dropped when the browser disconnects or stops reporting.";
  [a addButtonWithTitle:@"Continue"];[a addButtonWithTitle:@"Cancel"];[a addButtonWithTitle:@"Read the Privacy Page"];[NSApp activateIgnoringOtherApps:YES];NSModalResponse r=[a runModal];
  if(r==NSAlertThirdButtonReturn){[NSWorkspace.sharedWorkspace openURL:[NSURL URLWithString:@"https://github.com/Archangeloi89/less-pull/blob/main/docs/PRIVACY.md"]];return NO;}
  return r==NSAlertFirstButtonReturn;
