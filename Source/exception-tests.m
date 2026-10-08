@@ -72,6 +72,24 @@ int main(){@autoreleasepool{
   [t resume:nil];check(fw.value==0&&fw.gray==(base!=100),"resume follows warmth only");
   [d setDouble:1.5 forKey:@"warmth"];
  }
+
+ // Pause Less Pull: the plain display with the normal fade, rules ignored, saved
+ // settings kept, persisted for relaunch, expiry clears it.
+ {
+  TestApp *t=[TestApp new];FakeFilter *fe=[FakeFilter new];fe.on=YES;fe.state=(NSBlueStatus){.mode=0,.available=YES};FakeWarmth *fw=[FakeWarmth new];t.engine=fe;t.warmth=fw;t.exclusion=[ExclusionPolicy new];t.policy=[SwitchingPolicy new];t.policy.known=YES;t.policy.nightShiftOn=YES;t.policy.automatic=YES;t.automatic=YES;t.selectedMode=100;[d setInteger:100 forKey:@"nightMode"];[d setDouble:1.5 forKey:@"warmth"];[d removeObjectForKey:@"lessPullPause"];
+  t.grayOverride=1;t.customWarmth=YES;t.appWarmth=80;t.animateAppearance=YES;[t sync];check(fw.gray&&fabs(fw.value-2.4)<1e-9,"exception active before pause");
+  NSInteger nightWrites=fe.nightWrites;[t pauseLessPullForMinutes:15];check(!fw.gray&&fw.value==0&&fw.lastDuration==0.5&&!fw.lastReduced,"pause shows the plain display with the normal fade");
+  check([d doubleForKey:@"warmth"]==1.5&&[d integerForKey:@"nightMode"]==100,"pause keeps saved settings");check(fe.nightWrites==nightWrites&&fe.on,"pause leaves Night Shift alone");
+  t.grayOverride=1;t.customWarmth=YES;t.appWarmth=80;t.animateAppearance=YES;[t sync];check(!fw.gray&&fw.value==0&&t.grayOverride==0&&!t.customWarmth,"rules are ignored while paused");
+  double until=[[d dictionaryForKey:@"lessPullPause"][@"until"] doubleValue];check(until>NSDate.date.timeIntervalSince1970+14*60&&until<NSDate.date.timeIntervalSince1970+16*60,"timed pause persisted with its expiry");
+  TestApp *again=[TestApp new];again.engine=fe;again.warmth=fw;again.exclusion=[ExclusionPolicy new];again.policy=t.policy;again.automatic=YES;again.selectedMode=100;[again restoreLessPullPause];check(again.pausedUntil!=nil&&fabs(again.pausedUntil.timeIntervalSince1970-until)<1,"pause survives relaunch");
+  [t resumeLessPull:nil];check(fw.gray&&fw.value==1.5&&fw.lastDuration==0.5,"resume restores the saved appearance with the normal fade");check([d dictionaryForKey:@"lessPullPause"]==nil,"resume clears the saved pause");
+  [t pauseLessPullForMinutes:0];check([t.pausedUntil isEqualToDate:NSDate.distantFuture]&&[[d dictionaryForKey:@"lessPullPause"][@"until"] doubleValue]==0,"until-I-resume pause persisted as open-ended");
+  [again restoreLessPullPause];check([again.pausedUntil isEqualToDate:NSDate.distantFuture],"open-ended pause survives relaunch");
+  [d setObject:@{@"until":@(NSDate.date.timeIntervalSince1970-5)} forKey:@"lessPullPause"];[again restoreLessPullPause];check(again.pausedUntil==nil&&[d dictionaryForKey:@"lessPullPause"]==nil,"an expired pause is cleared at launch");
+  t.pausedUntil=[NSDate dateWithTimeIntervalSinceNow:-1];[t sync];check(t.pausedUntil==nil&&fw.gray&&fw.value==1.5,"expiry resumes on the next sync");
+  [d removeObjectForKey:@"lessPullPause"];
+ }
  NSUInteger combinations=0;
  for(int follow=0;follow<2;follow++)for(int globalNight=0;globalNight<2;globalNight++)for(int base=100;base<=101;base++)for(int grayRule=0;grayRule<3;grayRule++)for(int nightRule=0;nightRule<3;nightRule++)for(int custom=0;custom<2;custom++)for(NSNumber *percent in @[@0,@25,@77,@100]){
   TestApp *t=[TestApp new];FakeFilter *fe=[FakeFilter new];fe.on=globalNight;fe.state=(NSBlueStatus){.mode=0,.available=YES};FakeWarmth *fw=[FakeWarmth new];t.engine=fe;t.warmth=fw;t.exclusion=[ExclusionPolicy new];t.policy=[SwitchingPolicy new];t.policy.known=YES;t.policy.nightShiftOn=globalNight;t.policy.automatic=follow;t.automatic=follow;t.policy.overrideMode=-1;t.selectedMode=base;[d setInteger:base forKey:@"nightMode"];t.grayOverride=grayRule;t.nightOverride=nightRule;t.excludeNight=nightRule!=0;t.customWarmth=custom;t.appWarmth=percent.doubleValue;t.animateAppearance=YES;
@@ -81,5 +99,5 @@ int main(){@autoreleasepool{
  }
  printf("PASS: %lu combined following/global-state/base/grayscale/Night-Shift/warmth cases and restoration.\n",(unsigned long)combinations);
  check(e.nativeWrites==0,"no native filter toggles / HUD requests");
- puts("PASS: inheritance, independent gray/warmth, Night Shift on/off, own versus genuine transitions, manual off, timed-off precedence/expiry, schedule cutoff, recovery, rapid rule switches.");
+ puts("PASS: Pause Less Pull (plain display, rules ignored, settings kept, relaunch, expiry); inheritance, independent gray/warmth, Night Shift on/off, own versus genuine transitions, manual off, timed-off precedence/expiry, schedule cutoff, recovery, rapid rule switches.");
 }}

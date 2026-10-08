@@ -73,6 +73,8 @@
 @property NSWindow *helpWindow;
 @property NSString *statusImageName;
 @property NSView *welcomeCard;
+@property NSDate *pausedUntil; // nil: not paused; distantFuture: until resumed
+@property NSTimer *pauseAllTimer;
 @property NSMenu *addAppMenu;
 @property NSStackView *websiteRulesList;
 @property BOOL welcomeWanted;
@@ -233,7 +235,7 @@
  [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(displaysChanged:) name:NSApplicationDidChangeScreenParametersNotification object:nil];
  [NSWorkspace.sharedWorkspace.notificationCenter addObserver:self selector:@selector(frontmostChanged:) name:NSWorkspaceDidActivateApplicationNotification object:nil];
  [NSWorkspace.sharedWorkspace.notificationCenter addObserver:self selector:@selector(frontmostChanged:) name:NSWorkspaceDidTerminateApplicationNotification object:nil];
- [self updateForeground];[self restartTimer];[self schedulePauseTimer];[self sync];
+ [self restoreLessPullPause];[self scheduleLessPullPauseTimer];[self updateForeground];[self restartTimer];[self schedulePauseTimer];[self sync];
  if([NSProcessInfo.processInfo.arguments containsObject:@"--settings"])[self showSettings:nil];
  // First launch: Settings opens with a one-time welcome card above the real controls.
  self.welcomeWanted=firstLaunch||[NSProcessInfo.processInfo.arguments containsObject:@"--welcome"];if(self.welcomeWanted)[self showSettings:nil];
@@ -251,9 +253,9 @@
 // pause mark while Night Shift is timed off.
 - (void)updateStatusIcon {
  BOOL gray=self.effectiveMode==100||self.effectiveMode==1;double strength=round(self.targetStrength*20)/20;
- NSString *name=self.pause?@"paused":[NSString stringWithFormat:@"gray=%d warmth=%.2f",gray,strength];
+ BOOL paused=self.pause!=nil||self.pausedUntil!=nil;NSString *name=paused?@"paused":[NSString stringWithFormat:@"gray=%d warmth=%.2f",gray,strength];
  if([name isEqual:self.statusImageName])return;self.statusImageName=name;
- self.item.button.image=self.pause?[self menuBarImage:@"menubar-paused" symbol:@"pause.circle"]:[self statusImageGray:gray warmth:strength];
+ self.item.button.image=paused?[self menuBarImage:@"menubar-paused" symbol:@"pause.circle"]:[self statusImageGray:gray warmth:strength];
 }
 // Drawn rather than a template image so the right half can carry the warmth
 // color: the left half fills while grayscale shows, the right half takes the
@@ -297,7 +299,7 @@
 }
 - (void)sync {
  [self checkPause];
- [self updateForeground];[self reconcileExclusion];
+ [self updateForeground];[self checkLessPullPause];if(self.pausedUntil){if(self.grayOverride||self.nightOverride||self.customWarmth)self.animateAppearance=YES;self.grayOverride=0;self.nightOverride=0;self.customWarmth=NO;self.appWarmth=0;self.excludeGray=NO;self.excludeNight=NO;self.excludeWarmth=NO;}[self reconcileExclusion];
  BOOL on=NO;BOOL known=[self logicalNightShift:&on];
  self.policy.automatic=self.automatic;[self.policy observeKnown:known on:on];[self savePolicy];
  NSInteger target=self.automatic?[NSUserDefaults.standardUserDefaults integerForKey:@"nightMode"]:self.selectedMode;
@@ -328,6 +330,7 @@
  return [NSString stringWithFormat:@"%@ · Warmth %@",name,percent>0?[NSString stringWithFormat:@"%.0f%%",percent]:@"Off"];
 }
 - (NSString *)automationSummaryKnown:(BOOL)known nightOn:(BOOL)on {
+ if(self.pausedUntil)return [[self lessPullPauseLabel] stringByAppendingString:@" · the plain display, settings kept"];
  if(self.pause)return [NSString stringWithFormat:@"Night Shift off until %@",[self timeLabel:self.pause.expiry]];
  if(self.exclusion.active){BOOL actual=NO;[self.engine nightShift:&actual];return [NSString stringWithFormat:@"Night Shift %@ for %@ · usually %@",actual?@"on":@"off",self.foregroundName,self.exclusion.desiredOn?@"on":@"off"];}
  if(self.automatic&&self.policy.overrideMode>=0)return @"Warmth set by hand until Night Shift next changes";
@@ -403,6 +406,8 @@
   [night.submenu addItem:NSMenuItem.separatorItem];
   NSMenuItem *automatic=[self add:@"Extra Warmth follows Night Shift" action:@selector(toggleAuto:) to:night.submenu];automatic.state=self.automatic;automatic.enabled=actualKnown;automatic.toolTip=[self followHelpKnown:actualKnown nightOn:actualOn];
   if(self.automatic&&self.policy.overrideMode>=0)[self add:@"Resume Following" action:@selector(resume:) to:night.submenu];}
+ if(self.pausedUntil){NSMenuItem *resume=[self add:@"Resume Less Pull" action:@selector(resumeLessPull:) to:menu];resume.toolTip=@"Bring Grayscale and Extra Warmth back now, with the normal fade.";}
+ else {NSMenuItem *pauseAll=[self add:@"Pause Less Pull" action:nil to:menu];pauseAll.toolTip=[self pauseLessPullHelp];pauseAll.submenu=[NSMenu new];for(NSArray *pair in @[@[@"For 15 minutes",@15],@[@"For 1 hour",@60],@[@"Until I resume",@0]]){NSMenuItem *i=[self add:pair[0] action:@selector(pauseLessPull:) to:pauseAll.submenu];i.tag=[pair[1] integerValue];i.toolTip=[self pauseLessPullHelp];}}
  [menu addItem:NSMenuItem.separatorItem];
  if(self.lastExternalApp.bundleIdentifier){NSMenuItem *current=[self add:[NSString stringWithFormat:@"Exception for %@…",self.lastExternalApp.localizedName?:@"current app"] action:@selector(excludeCurrent:) to:menu];current.toolTip=[self exclusionSummary];}
  [self add:@"Settings…" action:@selector(showSettings:) to:menu];
@@ -412,11 +417,31 @@
 // One line for the menu: what the display shows now, plus a timed off or an active exception.
 - (NSString *)menuStatusLine {
  NSString *line=[self appearanceSummary];
+ if(self.pausedUntil)return [self lessPullPauseLabel];
  if(self.pause)return [line stringByAppendingFormat:@" · Night Shift off until %@",[self timeLabel:self.pause.expiry]];
  if(self.grayOverride||self.nightOverride||self.customWarmth)return [line stringByAppendingFormat:@" · %@ exception",self.foregroundName];
  if(self.automatic&&self.policy.overrideMode>=0)return [line stringByAppendingString:@" · set by hand"];
  return line;
 }
+// Pause Less Pull: the plain display for a while. Saved settings and rules stay
+// untouched; Night Shift is left alone; it resumes with the normal fade and
+// survives a relaunch.
+- (NSString *)pauseLessPullHelp {return @"Shows the plain display for a while: color and no added warmth. Night Shift is left alone. Your settings and exceptions are kept.";}
+- (void)persistLessPullPause {NSUserDefaults *d=NSUserDefaults.standardUserDefaults;if(self.pausedUntil)[d setObject:@{@"until":@([self.pausedUntil isEqualToDate:NSDate.distantFuture]?0:self.pausedUntil.timeIntervalSince1970)} forKey:@"lessPullPause"];else [d removeObjectForKey:@"lessPullPause"];}
+- (void)restoreLessPullPause {
+ NSDictionary *saved=[NSUserDefaults.standardUserDefaults dictionaryForKey:@"lessPullPause"];if(!saved){self.pausedUntil=nil;return;}
+ double until=[saved[@"until"] doubleValue];self.pausedUntil=until==0?NSDate.distantFuture:[NSDate dateWithTimeIntervalSince1970:until];
+ if([self.pausedUntil timeIntervalSinceNow]<=0){self.pausedUntil=nil;[self persistLessPullPause];}
+}
+- (void)scheduleLessPullPauseTimer {
+ [self.pauseAllTimer invalidate];self.pauseAllTimer=nil;if(!self.pausedUntil||[self.pausedUntil isEqualToDate:NSDate.distantFuture])return;
+ self.pauseAllTimer=[NSTimer timerWithTimeInterval:fmax(.1,[self.pausedUntil timeIntervalSinceNow]) target:self selector:@selector(sync) userInfo:nil repeats:NO];[NSRunLoop.mainRunLoop addTimer:self.pauseAllTimer forMode:NSRunLoopCommonModes];
+}
+- (void)checkLessPullPause {if(self.pausedUntil&&[self.pausedUntil timeIntervalSinceNow]<=0){self.pausedUntil=nil;[self persistLessPullPause];self.animateAppearance=YES;}}
+- (void)pauseLessPullForMinutes:(NSInteger)minutes {self.pausedUntil=minutes>0?[NSDate dateWithTimeIntervalSinceNow:minutes*60]:NSDate.distantFuture;[self persistLessPullPause];[self scheduleLessPullPauseTimer];self.animateAppearance=YES;[self sync];}
+- (void)pauseLessPull:(NSMenuItem *)sender {[self pauseLessPullForMinutes:sender.tag];}
+- (void)resumeLessPull:(id)sender {self.pausedUntil=nil;[self persistLessPullPause];[self scheduleLessPullPauseTimer];self.animateAppearance=YES;[self sync];}
+- (NSString *)lessPullPauseLabel {return !self.pausedUntil?@"":[self.pausedUntil isEqualToDate:NSDate.distantFuture]?@"Paused until you resume":[NSString stringWithFormat:@"Paused until %@",[self timeLabel:self.pausedUntil]];}
 - (void)toggleNightShift:(id)sender {
  self.pause=nil;[self.pauseTimer invalidate];self.pauseTimer=nil;[NSUserDefaults.standardUserDefaults removeObjectForKey:@"nightShiftPause"];
  BOOL before=NO;BOOL known=[self logicalNightShift:&before];
@@ -626,6 +651,7 @@
   @[@"Night Shift",@"Less Pull can turn Night Shift on or off now, or off for a while; your schedule in System Settings stays as it is. With “Extra Warmth follows Night Shift” on, the warmth you set is added only while Night Shift is on, and there is none in the daytime. With it off, Extra Warmth stays on all day. If you move the slider by hand while following, that warmth stays until Night Shift next changes, or until you choose Resume Following."],
   @[@"Exceptions for apps",@"Give an app its own settings in Settings → App Exceptions, or choose “Exception for …” in the menu. They apply while that app is in front with a window open. Each setting can keep the default or get its own value."],
   @[@"Exceptions for websites",@"Install the browser extension from Settings, for Brave or Chrome. Click its icon on a website to give that site, or one exact page, its own settings. Pages inherit from their domain, and domains from the browser’s app exception. Private tabs are left alone."],
+  @[@"Pausing",@"Pause Less Pull shows the plain display for 15 minutes, an hour, or until you resume: color and no added warmth, with Night Shift left alone. Your settings and exceptions are kept, and the menu-bar icon shows a pause mark."],
   @[@"Quitting",@"Quitting returns the display to normal and lets Night Shift follow its schedule again. Your settings and exceptions are kept."],
   @[@"Something not working?",@"Diagnostics shows technical details you can include when asking for help. Nothing is sent anywhere."]];
 }
@@ -657,6 +683,7 @@
  BOOL nightOn=NO;BOOL known=[self logicalNightShift:&nightOn];
  BOOL warmthOff=self.automatic&&self.policy.overrideMode<0&&known&&!nightOn;
  double strength=self.customWarmth?self.appWarmth/100*3:((mode==100||mode==101)&&!warmthOff?[self currentWarmth]:0);
+ if(self.pausedUntil){effective=101;strength=0;}
  if(mode!=self.selectedMode||effective!=self.effectiveMode||strength!=self.targetStrength)self.animateAppearance=YES;
  self.targetStrength=strength;
  BOOL gray=effective==100||effective==1;
@@ -676,7 +703,7 @@
  NSMenuItem *item=[NSMenuItem new];item.tag=(self.selectedMode==1||self.selectedMode==100)?100:101;[self manual:item];
 }
 - (void)displaysChanged:(id)sender {[self pipelineChanged:sender];}
-- (void)applicationWillTerminate:(NSNotification *)note {self.quitting=YES;[self.eventTimer invalidate];[self.pipelineRecoveryTimer invalidate];[self.menuDismissal end];[self.browserBridge stop];[self.warmth cancelTransition];[self endPauseNow:nil];self.excludeNight=NO;[self reconcileExclusion];if(self.grayOverride||self.customWarmth){self.grayOverride=0;self.customWarmth=NO;self.excludeGray=NO;self.excludeWarmth=NO;self.animateAppearance=NO;[self.warmth cancelTransition];[self applyMode:self.selectedMode];}[self.warmth restore];}
+- (void)applicationWillTerminate:(NSNotification *)note {self.quitting=YES;[self.pauseAllTimer invalidate];[self.eventTimer invalidate];[self.pipelineRecoveryTimer invalidate];[self.menuDismissal end];[self.browserBridge stop];[self.warmth cancelTransition];[self endPauseNow:nil];self.excludeNight=NO;[self reconcileExclusion];if(self.grayOverride||self.customWarmth){self.grayOverride=0;self.customWarmth=NO;self.excludeGray=NO;self.excludeWarmth=NO;self.animateAppearance=NO;[self.warmth cancelTransition];[self applyMode:self.selectedMode];}[self.warmth restore];}
 - (void)quit:(id)sender {[NSApp terminate:nil];}
 @end
 int main(int argc,const char *argv[]){@autoreleasepool{
