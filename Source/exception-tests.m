@@ -106,6 +106,16 @@ int main(){@autoreleasepool{
   check([PeekShortcut carbonModifiers:NSEventModifierFlagCommand|NSEventModifierFlagControl|NSEventModifierFlagOption|NSEventModifierFlagShift]==(cmdKey|controlKey|optionKey|shiftKey),"carbon modifier mapping");
   check([[PeekShortcut labelForKeyCode:49 modifiers:NSEventModifierFlagControl|NSEventModifierFlagOption] isEqual:@"⌃⌥Space"],"shortcut label order and key name");
  }
+
+ // Update check: version comparison and release parsing only; no network in tests.
+ check([UpdateCheck compareVersion:@"1.5.0" to:@"1.4.4"]==NSOrderedDescending&&[UpdateCheck compareVersion:@"1.4.4" to:@"1.4.4"]==NSOrderedSame&&[UpdateCheck compareVersion:@"1.4.10" to:@"1.4.9"]==NSOrderedDescending&&[UpdateCheck compareVersion:@"1.5" to:@"1.5.0"]==NSOrderedSame&&[UpdateCheck compareVersion:@"2" to:@"1.9.9"]==NSOrderedDescending,"numeric version comparison");
+ check([[UpdateCheck versionFromTag:@"v1.5.0"] isEqual:@"1.5.0"]&&[[UpdateCheck versionFromTag:@" 1.5.1 "] isEqual:@"1.5.1"]&&[UpdateCheck versionFromTag:@""]==nil&&[UpdateCheck versionFromTag:(id)@[]]==nil,"tag to version");
+ NSDictionary *release=@{@"tag_name":@"v1.5.0",@"html_url":@"https://github.com/Archangeloi89/less-pull/releases/tag/v1.5.0",@"body":@"Notes",@"draft":@NO,@"prerelease":@NO};
+ NSDictionary *update=[UpdateCheck updateFromRelease:release currentVersion:@"1.4.4"];check([update[@"version"] isEqual:@"1.5.0"]&&[update[@"url"] isEqual:release[@"html_url"]]&&[update[@"notes"] isEqual:@"Notes"],"newer release is offered");
+ check([UpdateCheck updateFromRelease:release currentVersion:@"1.5.0"]==nil&&[UpdateCheck updateFromRelease:release currentVersion:@"1.6.0"]==nil,"same or newer app gets no update");
+ NSMutableDictionary *pre=[release mutableCopy];pre[@"prerelease"]=@YES;check([UpdateCheck updateFromRelease:pre currentVersion:@"1.4.4"]==nil,"prereleases are ignored");
+ NSMutableDictionary *odd=[release mutableCopy];odd[@"html_url"]=@"http://evil.example/";odd[@"body"]=NSNull.null;update=[UpdateCheck updateFromRelease:odd currentVersion:@"1.4.4"];check([update[@"url"] isEqual:@"https://github.com/Archangeloi89/less-pull/releases"]&&[update[@"notes"] isEqual:@""],"non-GitHub link and missing notes fall back safely");
+ check([UpdateCheck updateFromRelease:@"garbage" currentVersion:@"1.4.4"]==nil&&[UpdateCheck updateFromRelease:@{} currentVersion:@"1.4.4"]==nil,"malformed release rejected");
  NSUInteger combinations=0;
  for(int follow=0;follow<2;follow++)for(int globalNight=0;globalNight<2;globalNight++)for(int base=100;base<=101;base++)for(int grayRule=0;grayRule<3;grayRule++)for(int nightRule=0;nightRule<3;nightRule++)for(int custom=0;custom<2;custom++)for(NSNumber *percent in @[@0,@25,@77,@100]){
   TestApp *t=[TestApp new];FakeFilter *fe=[FakeFilter new];fe.on=globalNight;fe.state=(NSBlueStatus){.mode=0,.available=YES};FakeWarmth *fw=[FakeWarmth new];t.engine=fe;t.warmth=fw;t.exclusion=[ExclusionPolicy new];t.policy=[SwitchingPolicy new];t.policy.known=YES;t.policy.nightShiftOn=globalNight;t.policy.automatic=follow;t.automatic=follow;t.policy.overrideMode=-1;t.selectedMode=base;[d setInteger:base forKey:@"nightMode"];t.grayOverride=grayRule;t.nightOverride=nightRule;t.excludeNight=nightRule!=0;t.customWarmth=custom;t.appWarmth=percent.doubleValue;t.animateAppearance=YES;
@@ -115,5 +125,5 @@ int main(){@autoreleasepool{
  }
  printf("PASS: %lu combined following/global-state/base/grayscale/Night-Shift/warmth cases and restoration.\n",(unsigned long)combinations);
  check(e.nativeWrites==0,"no native filter toggles / HUD requests");
- puts("PASS: Peek in color (plain display while held, release restores, nothing saved, shortcut rules); Pause Less Pull (plain display, rules ignored, settings kept, relaunch, expiry); inheritance, independent gray/warmth, Night Shift on/off, own versus genuine transitions, manual off, timed-off precedence/expiry, schedule cutoff, recovery, rapid rule switches.");
+ puts("PASS: update check version/release parsing; Peek in color (plain display while held, release restores, nothing saved, shortcut rules); Pause Less Pull (plain display, rules ignored, settings kept, relaunch, expiry); inheritance, independent gray/warmth, Night Shift on/off, own versus genuine transitions, manual off, timed-off precedence/expiry, schedule cutoff, recovery, rapid rule switches.");
 }}

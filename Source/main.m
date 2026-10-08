@@ -57,6 +57,31 @@
 }
 - (void)flagsChanged:(NSEvent *)event {if(!self.recording)[super flagsChanged:event];}
 @end
+// Update check, phase 1: one HTTPS request to GitHub's releases API, at most once
+// a week or on demand. Nothing about the user is sent. Installing stays manual
+// until the app is Developer ID signed and notarized.
+static NSString *const LessPullReleasesAPI=@"https://api.github.com/repos/Archangeloi89/less-pull/releases/latest";
+static NSString *const LessPullReleasesPage=@"https://github.com/Archangeloi89/less-pull/releases";
+@interface UpdateCheck : NSObject
++ (NSString *)versionFromTag:(NSString *)tag;
++ (NSComparisonResult)compareVersion:(NSString *)a to:(NSString *)b;
++ (NSDictionary *)updateFromRelease:(id)release currentVersion:(NSString *)current;
+@end
+@implementation UpdateCheck
++ (NSString *)versionFromTag:(NSString *)tag {if(![tag isKindOfClass:NSString.class])return nil;NSString *t=[tag stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceCharacterSet];if([t.lowercaseString hasPrefix:@"v"])t=[t substringFromIndex:1];return t.length?t:nil;}
++ (NSComparisonResult)compareVersion:(NSString *)a to:(NSString *)b {
+ NSArray *pa=[a componentsSeparatedByString:@"."],*pb=[b componentsSeparatedByString:@"."];NSUInteger n=MAX(pa.count,pb.count);
+ for(NSUInteger i=0;i<n;i++){NSInteger x=i<pa.count?[pa[i] integerValue]:0,y=i<pb.count?[pb[i] integerValue]:0;if(x!=y)return x<y?NSOrderedAscending:NSOrderedDescending;}
+ return NSOrderedSame;
+}
++ (NSDictionary *)updateFromRelease:(id)release currentVersion:(NSString *)current {
+ if(![release isKindOfClass:NSDictionary.class]||[release[@"draft"] boolValue]||[release[@"prerelease"] boolValue])return nil;
+ NSString *version=[self versionFromTag:release[@"tag_name"]];if(!version||!current||[self compareVersion:version to:current]!=NSOrderedDescending)return nil;
+ NSString *url=[release[@"html_url"] isKindOfClass:NSString.class]&&[release[@"html_url"] hasPrefix:@"https://github.com/"]?release[@"html_url"]:LessPullReleasesPage;
+ NSString *notes=[release[@"body"] isKindOfClass:NSString.class]?release[@"body"]:@"";if(notes.length>2000)notes=[[notes substringToIndex:2000] stringByAppendingString:@"…"];
+ return @{@"version":version,@"url":url,@"notes":notes};
+}
+@end
 @interface ExceptionStack : NSStackView
 @end
 @implementation ExceptionStack
@@ -123,6 +148,12 @@
 @property NSView *welcomeCard;
 @property NSDate *pausedUntil; // nil: not paused; distantFuture: until resumed
 @property (nonatomic) BOOL peeking;
+@property NSDictionary *availableUpdate;
+@property NSString *updateStatus;
+@property BOOL checkingUpdates;
+@property NSTimer *updateTimer;
+@property NSButton *updateCheckbox,*updateButton;
+@property NSTextField *updateStatusLabel;
 @property EventHotKeyRef peekHotKey;
 @property ShortcutRecorder *peekRecorder;
 @property NSTextField *peekNote;
@@ -261,7 +292,8 @@
  // earlier version gets the marker silently; it is not a user setting.
  BOOL firstLaunch=![d objectForKey:@"welcomeShown"]&&![d objectForKey:@"nightMode"]&&![d objectForKey:@"unifiedWarmth"]&&![d objectForKey:@"warmth"];
  [d setBool:YES forKey:@"welcomeShown"];
- [d registerDefaults:@{@"automatic":@YES,@"overrideMode":@(-1),@"warmth":@0,@"nightMode":@101,@"manualMode":@1}];
+ [d registerDefaults:@{@"automatic":@YES,@"overrideMode":@(-1),@"warmth":@0,@"nightMode":@101,@"manualMode":@1,@"checkForUpdates":@YES}];
+ self.availableUpdate=[d dictionaryForKey:@"availableUpdate"];
  if([d integerForKey:@"nightMode"]==16)[d setInteger:100 forKey:@"nightMode"];
  if([d integerForKey:@"manualMode"]==16)[d setInteger:100 forKey:@"manualMode"];
  if([d integerForKey:@"overrideMode"]==16)[d setInteger:100 forKey:@"overrideMode"];
@@ -287,7 +319,7 @@
  [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(displaysChanged:) name:NSApplicationDidChangeScreenParametersNotification object:nil];
  [NSWorkspace.sharedWorkspace.notificationCenter addObserver:self selector:@selector(frontmostChanged:) name:NSWorkspaceDidActivateApplicationNotification object:nil];
  [NSWorkspace.sharedWorkspace.notificationCenter addObserver:self selector:@selector(frontmostChanged:) name:NSWorkspaceDidTerminateApplicationNotification object:nil];
- [self restoreLessPullPause];[self scheduleLessPullPauseTimer];[self registerPeekShortcut];[self updateForeground];[self restartTimer];[self schedulePauseTimer];[self sync];
+ [self restoreLessPullPause];[self scheduleLessPullPauseTimer];[self registerPeekShortcut];[self scheduleUpdateChecks];[self updateForeground];[self restartTimer];[self schedulePauseTimer];[self sync];
  if([NSProcessInfo.processInfo.arguments containsObject:@"--settings"])[self showSettings:nil];
  // First launch: Settings opens with a one-time welcome card above the real controls.
  self.welcomeWanted=firstLaunch||[NSProcessInfo.processInfo.arguments containsObject:@"--welcome"];if(self.welcomeWanted)[self showSettings:nil];
@@ -305,14 +337,20 @@
 // pause mark while Night Shift is timed off.
 - (void)updateStatusIcon {
  BOOL gray=self.effectiveMode==100||self.effectiveMode==1;double strength=round(self.targetStrength*20)/20;
- BOOL paused=self.pause!=nil||self.pausedUntil!=nil;NSString *name=paused?@"paused":[NSString stringWithFormat:@"gray=%d warmth=%.2f",gray,strength];
+ BOOL paused=self.pause!=nil||self.pausedUntil!=nil;NSString *name=[NSString stringWithFormat:@"%@ update=%d",paused?@"paused":[NSString stringWithFormat:@"gray=%d warmth=%.2f",gray,strength],self.availableUpdate!=nil];
  if([name isEqual:self.statusImageName])return;self.statusImageName=name;
- self.item.button.image=paused?[self menuBarImage:@"menubar-paused" symbol:@"pause.circle"]:[self statusImageGray:gray warmth:strength];
+ self.item.button.image=[self withUpdateDot:paused?[self menuBarImage:@"menubar-paused" symbol:@"pause.circle"]:[self statusImageGray:gray warmth:strength]];
 }
 // Drawn rather than a template image so the right half can carry the warmth
 // color: the left half fills while grayscale shows, the right half takes the
 // ramp color (light orange to red) for the warmth in effect. Under the full red
 // filter the warm half is much darker than the white half, so both stay visible.
+// A small dot at the top right of the icon while a newer version is known.
+- (NSImage *)withUpdateDot:(NSImage *)base {
+ if(!self.availableUpdate)return base;BOOL template=base.template;
+ NSImage *image=[NSImage imageWithSize:base.size flipped:NO drawingHandler:^BOOL(NSRect rect){[base drawInRect:rect];NSRect dot=NSMakeRect(rect.size.width-6,rect.size.height-6,5,5);[NSColor.labelColor setFill];[[NSBezierPath bezierPathWithOvalInRect:dot] fill];return YES;}];
+ image.template=template;image.accessibilityDescription=[base.accessibilityDescription stringByAppendingString:@", update available"];return image;
+}
 - (NSImage *)statusImageGray:(BOOL)gray warmth:(double)strength {
  NSImage *image=[NSImage imageWithSize:NSMakeSize(18,18) flipped:NO drawingHandler:^BOOL(NSRect rect){
   NSRect circle=NSInsetRect(rect,2,2);NSColor *ink=NSColor.labelColor;NSBezierPath *outline=[NSBezierPath bezierPathWithOvalInRect:circle];
@@ -462,6 +500,7 @@
  else {NSMenuItem *pauseAll=[self add:@"Pause Less Pull" action:nil to:menu];pauseAll.toolTip=[self pauseLessPullHelp];pauseAll.submenu=[NSMenu new];for(NSArray *pair in @[@[@"For 15 minutes",@15],@[@"For 1 hour",@60],@[@"Until I resume",@0]]){NSMenuItem *i=[self add:pair[0] action:@selector(pauseLessPull:) to:pauseAll.submenu];i.tag=[pair[1] integerValue];i.toolTip=[self pauseLessPullHelp];}}
  [menu addItem:NSMenuItem.separatorItem];
  if(self.lastExternalApp.bundleIdentifier){NSMenuItem *current=[self add:[NSString stringWithFormat:@"Exception for %@…",self.lastExternalApp.localizedName?:@"current app"] action:@selector(excludeCurrent:) to:menu];current.toolTip=[self exclusionSummary];}
+ if(self.availableUpdate){NSMenuItem *update=[self add:[NSString stringWithFormat:@"Update available: %@…",self.availableUpdate[@"version"]] action:@selector(showUpdate:) to:menu];update.toolTip=@"See what is new and open the download page.";}
  [self add:@"Settings…" action:@selector(showSettings:) to:menu];
  [menu addItem:NSMenuItem.separatorItem];
  [self add:@"Quit" action:@selector(quit:) to:menu];
@@ -502,6 +541,43 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  self.peekRecorder.accessibilityLabel=[NSString stringWithFormat:@"Peek in color shortcut: %@",s?self.peekRecorder.title:@"none"];
 }
 - (void)startRecording:(ShortcutRecorder *)sender {if(sender.recording){sender.recording=NO;[self refreshPeekRecorder:nil];return;}sender.recording=YES;[sender.window makeFirstResponder:sender];[self refreshPeekRecorder:nil];}
+- (void)scheduleUpdateChecks {
+ [self.updateTimer invalidate];self.updateTimer=[NSTimer timerWithTimeInterval:3600 target:self selector:@selector(maybeCheckForUpdates) userInfo:nil repeats:YES];[NSRunLoop.mainRunLoop addTimer:self.updateTimer forMode:NSRunLoopCommonModes];
+ [self performSelector:@selector(maybeCheckForUpdates) withObject:nil afterDelay:30];
+}
+- (void)maybeCheckForUpdates {
+ NSUserDefaults *d=NSUserDefaults.standardUserDefaults;if(![d boolForKey:@"checkForUpdates"])return;NSDate *last=[d objectForKey:@"lastUpdateCheck"];
+ if(![last isKindOfClass:NSDate.class]||[NSDate.date timeIntervalSinceDate:last]>=7*86400)[self runUpdateCheckManual:NO];
+}
+- (void)checkForUpdatesNow:(id)sender {[self runUpdateCheckManual:YES];}
+- (void)runUpdateCheckManual:(BOOL)manual {
+ if(self.checkingUpdates)return;self.checkingUpdates=YES;self.updateStatus=@"Checking…";[self refreshUpdateControls];
+ NSURLSessionConfiguration *configuration=NSURLSessionConfiguration.ephemeralSessionConfiguration;configuration.timeoutIntervalForRequest=15;configuration.HTTPAdditionalHeaders=@{@"Accept":@"application/vnd.github+json"};
+ NSURLSession *session=[NSURLSession sessionWithConfiguration:configuration];__weak AppDelegate *weak=self;
+ [[session dataTaskWithURL:[NSURL URLWithString:LessPullReleasesAPI] completionHandler:^(NSData *data,NSURLResponse *response,NSError *error){dispatch_async(dispatch_get_main_queue(),^{[weak finishUpdateCheckData:data response:response error:error manual:manual];});[session finishTasksAndInvalidate];}] resume];
+}
+- (void)finishUpdateCheckData:(NSData *)data response:(NSURLResponse *)response error:(NSError *)error manual:(BOOL)manual {
+ self.checkingUpdates=NO;NSUserDefaults *d=NSUserDefaults.standardUserDefaults;NSInteger status=[response isKindOfClass:NSHTTPURLResponse.class]?[(NSHTTPURLResponse *)response statusCode]:0;
+ if(error||status!=200){self.updateStatus=status==404?@"Could not find the release list; it is not public yet.":@"Could not reach GitHub. Try again later.";[self refreshUpdateControls];if(manual)[self showUpdateStatusAlert];return;}
+ [d setObject:NSDate.date forKey:@"lastUpdateCheck"];id release=[NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
+ NSDictionary *update=[UpdateCheck updateFromRelease:release currentVersion:[NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"]];
+ self.availableUpdate=update;if(update)[d setObject:update forKey:@"availableUpdate"];else [d removeObjectForKey:@"availableUpdate"];
+ self.updateStatus=update?[NSString stringWithFormat:@"Version %@ is available.",update[@"version"]]:@"Less Pull is up to date.";[self refreshUpdateControls];[self refreshControlsKnown:NO nightOn:NO];[self sync];
+ if(manual){if(update)[self showUpdate:nil];else [self showUpdateStatusAlert];}
+}
+- (void)showUpdateStatusAlert {NSAlert *a=[NSAlert new];a.messageText=self.updateStatus?:@"";a.informativeText=[NSString stringWithFormat:@"This is Less Pull %@.",[NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"]];[NSApp activateIgnoringOtherApps:YES];[a runModal];}
+- (void)showUpdate:(id)sender {
+ NSDictionary *update=self.availableUpdate;if(!update)return;NSAlert *a=[NSAlert new];a.messageText=[NSString stringWithFormat:@"Less Pull %@ is available",update[@"version"]];
+ a.informativeText=[NSString stringWithFormat:@"You have %@.\n\n%@\n\nInstalling is still by hand: download the new version, quit Less Pull, and replace it in Applications. Your settings and exceptions are kept.",[NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"],[update[@"notes"] length]?update[@"notes"]:@"No release notes were provided."];
+ [a addButtonWithTitle:@"Open Download Page"];[a addButtonWithTitle:@"Later"];[NSApp activateIgnoringOtherApps:YES];if([a runModal]==NSAlertFirstButtonReturn)[NSWorkspace.sharedWorkspace openURL:[NSURL URLWithString:update[@"url"]]];
+}
+- (void)toggleUpdateChecks:(NSButton *)sender {[NSUserDefaults.standardUserDefaults setBool:sender.state==NSControlStateValueOn forKey:@"checkForUpdates"];[self refreshUpdateControls];}
+- (void)refreshUpdateControls {
+ NSUserDefaults *d=NSUserDefaults.standardUserDefaults;self.updateCheckbox.state=[d boolForKey:@"checkForUpdates"];self.updateButton.enabled=!self.checkingUpdates;
+ NSDate *last=[d objectForKey:@"lastUpdateCheck"];NSString *when=[last isKindOfClass:NSDate.class]?[NSDateFormatter localizedStringFromDate:last dateStyle:NSDateFormatterMediumStyle timeStyle:NSDateFormatterShortStyle]:nil;
+ NSString *status=self.updateStatus?:(self.availableUpdate?[NSString stringWithFormat:@"Version %@ is available.",self.availableUpdate[@"version"]]:(when?@"Less Pull was up to date at the last check.":@"Not checked yet."));
+ self.updateStatusLabel.stringValue=when?[NSString stringWithFormat:@"%@ Last checked %@.",status,when]:status;
+}
 - (NSString *)pauseLessPullHelp {return @"Shows the plain display for a while: color and no added warmth. Night Shift is left alone. Your settings and exceptions are kept.";}
 - (void)persistLessPullPause {NSUserDefaults *d=NSUserDefaults.standardUserDefaults;if(self.pausedUntil)[d setObject:@{@"until":@([self.pausedUntil isEqualToDate:NSDate.distantFuture]?0:self.pausedUntil.timeIntervalSince1970)} forKey:@"lessPullPause"];else [d removeObjectForKey:@"lessPullPause"];}
 - (void)restoreLessPullPause {
@@ -686,8 +762,11 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  NSButton *help=[NSButton buttonWithTitle:@"Help" target:self action:@selector(showHelp:)];[self helpView:help text:@"A short guide to Less Pull." label:@"Help"];
  NSButton *diagnostics=[NSButton buttonWithTitle:@"Diagnostics…" target:self action:@selector(diagnostics:)];[self helpView:diagnostics text:@"Technical details for troubleshooting." label:@"Diagnostics"];
  NSButton *licenses=[NSButton buttonWithTitle:@"Licenses" target:self action:@selector(showLicenses:)];[self helpView:licenses text:@"Show the app and source license files included with Less Pull." label:@"Show licenses"];
- NSStackView *column=[self column:@[[self row:@[icon,identity]],[self row:@[website,support]],[self separator],[self row:@[help,diagnostics,licenses]],[self note:@"Less Pull keeps everything on this Mac: no account, no analytics, no network service. The browser extension talks only to the app."]]];
- [(NSStackView *)column.arrangedSubviews[0] setSpacing:16];
+ self.updateCheckbox=[NSButton checkboxWithTitle:@"Check for updates automatically" target:self action:@selector(toggleUpdateChecks:)];[self helpView:self.updateCheckbox text:@"About once a week, Less Pull asks GitHub whether a newer version exists. Nothing about you is sent." label:@"Check for updates automatically"];
+ self.updateButton=[NSButton buttonWithTitle:@"Check for Updates…" target:self action:@selector(checkForUpdatesNow:)];[self helpView:self.updateButton text:@"Ask GitHub now whether a newer version exists." label:@"Check for Updates"];
+ self.updateStatusLabel=[self note:@""];
+ NSStackView *column=[self column:@[[self row:@[icon,identity]],[self row:@[website,support]],[self separator],[self row:@[help,diagnostics,licenses]],[self separator],self.updateCheckbox,[self note:@"About once a week, one request to GitHub asks whether a newer version exists. Nothing about you is sent, and you can turn this off."],[self row:@[self.updateButton,[self spacer]]],self.updateStatusLabel,[self note:@"Everything else stays on this Mac: no account, no analytics, no network service. The browser extension talks only to the app."]]];
+ [(NSStackView *)column.arrangedSubviews[0] setSpacing:16];[column setCustomSpacing:4 afterView:self.updateCheckbox];[column setCustomSpacing:4 afterView:column.arrangedSubviews[7]];[self refreshUpdateControls];
  return column;
 }
 - (NSString *)websiteStatusLine {
@@ -736,6 +815,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
   @[@"Peek in color",@"Record a shortcut in Settings → General. Hold it to see the plain display; let go and Less Pull fades back. Nothing is saved and no exception is made."],
   @[@"Pausing",@"Pause Less Pull shows the plain display for 15 minutes, an hour, or until you resume: color and no added warmth, with Night Shift left alone. Your settings and exceptions are kept, and the menu-bar icon shows a pause mark."],
   @[@"Quitting",@"Quitting returns the display to normal and lets Night Shift follow its schedule again. Your settings and exceptions are kept."],
+  @[@"Updates",@"About once a week Less Pull asks GitHub whether a newer version exists; the menu-bar icon then shows a small dot and the menu offers “Update available”. Nothing about you is sent. Turn it off in Settings → About."],
   @[@"Something not working?",@"Diagnostics shows technical details you can include when asking for help. Nothing is sent anywhere."]];
 }
 - (void)showHelp:(id)sender {
