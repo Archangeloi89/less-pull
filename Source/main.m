@@ -185,6 +185,10 @@ static NSString *const LessPullOldBundleIdentifier=@"local.nightshiftfilters.app
 @property ExclusionPolicy *exclusion;
 @property BOOL excludeGray,excludeNight,excludeWarmth,quitting,animateAppearance;
 @property NSTimer *visibilityTimer;
+// Per display: where the frontmost app's windows are, and for the other displays the exception of the app on top there (or the defaults).
+@property NSSet<NSNumber *> *frontDisplays;
+@property NSDictionary<NSNumber *,NSDictionary *> *displayOverrides;
+@property NSPopUpButton *peekScopePopup;
 @property NSUInteger appearanceGeneration;
 @property NSInteger grayOverride,nightOverride;
 @property BOOL customWarmth,forcedNightOn;
@@ -238,6 +242,9 @@ static NSString *const LessPullOldBundleIdentifier=@"local.nightshiftfilters.app
 @property NSMenu *addAppMenu;
 @property NSStackView *websiteRulesList;
 @property BOOL welcomeWanted;
+@property NSStackView *tourCard;
+@property NSInteger tourPage;
+@property CGFloat tourHeight;
 @end
 @implementation AppDelegate
 - (PausePolicy *)nightGuard {
@@ -286,10 +293,27 @@ static NSString *const LessPullOldBundleIdentifier=@"local.nightshiftfilters.app
  NSInteger gray=visible?[rule[@"grayMode"] integerValue]:0,night=visible?[rule[@"nightMode"] integerValue]:0;BOOL custom=visible&&[rule[@"customWarmth"] boolValue];double warmth=custom?[rule[@"warmth"] doubleValue]:0;
  if(gray!=self.grayOverride||custom!=self.customWarmth||warmth!=self.appWarmth)self.animateAppearance=YES;
  self.grayOverride=gray;self.nightOverride=night;self.customWarmth=custom;self.appWarmth=warmth;self.excludeGray=gray==2;self.excludeNight=night!=0;self.excludeWarmth=custom&&warmth==0;
+ [self updateDisplayMap:app.processIdentifier];BOOL anyRule=self.exclusionRules.count||self.browserBridge.rules.count;hasRule=hasRule||(anyRule&&[self.warmth displays].count>1);
  if(hasRule&&!self.visibilityTimer){self.visibilityTimer=[NSTimer timerWithTimeInterval:.5 target:self selector:@selector(visibilityCheck:) userInfo:nil repeats:YES];[NSRunLoop.mainRunLoop addTimer:self.visibilityTimer forMode:NSRunLoopCommonModes];}
  if(!hasRule){[self.visibilityTimer invalidate];self.visibilityTimer=nil;}
 }
-- (void)visibilityCheck:(id)sender {NSInteger gray=self.grayOverride,night=self.nightOverride;BOOL custom=self.customWarmth;double warmth=self.appWarmth;[self updateForeground];if(gray!=self.grayOverride||night!=self.nightOverride||custom!=self.customWarmth||warmth!=self.appWarmth)[self sync];}
+- (void)visibilityCheck:(id)sender {NSInteger gray=self.grayOverride,night=self.nightOverride;BOOL custom=self.customWarmth;double warmth=self.appWarmth;NSDictionary *overrides=self.displayOverrides;[self updateForeground];if(gray!=self.grayOverride||night!=self.nightOverride||custom!=self.customWarmth||warmth!=self.appWarmth||!(overrides==self.displayOverrides||[overrides isEqual:self.displayOverrides]))[self sync];}
+// Which display shows what: the frontmost app's windows mark its displays. On every other display the
+// app whose window is on top decides (its exception, if it has one, or the defaults); an empty display
+// shows the defaults. Only the frontmost app's own display carries a website rule.
+- (void)updateDisplayMap:(pid_t)frontPid {
+ NSArray *displays=[self.warmth displays];if(displays.count<2||![displays.firstObject unsignedIntValue]){self.frontDisplays=nil;self.displayOverrides=@{};return;}
+ CFArrayRef array=CGWindowListCopyWindowInfo(kCGWindowListOptionOnScreenOnly|kCGWindowListExcludeDesktopElements,kCGNullWindowID);NSArray *windows=array?CFBridgingRelease(array):@[];
+ NSMutableDictionary *top=[NSMutableDictionary new];
+ for(NSDictionary *w in windows){if([w[(id)kCGWindowLayer] intValue]!=0||[w[(id)kCGWindowAlpha] doubleValue]<=0)continue;CGRect rect=CGRectZero;if(!CGRectMakeWithDictionaryRepresentation((__bridge CFDictionaryRef)w[(id)kCGWindowBounds],&rect)||rect.size.width<160||rect.size.height<100)continue;
+  for(NSNumber *d in displays){if(top[d])continue;CGRect overlap=CGRectIntersection(CGDisplayBounds(d.unsignedIntValue),rect);if(!CGRectIsNull(overlap)&&overlap.size.width>=80&&overlap.size.height>=50)top[d]=w[(id)kCGWindowOwnerPID];}
+  if(top.count==displays.count)break;}
+ NSMutableSet *front=[NSMutableSet new];NSMutableDictionary *overrides=[NSMutableDictionary new];
+ for(NSNumber *d in displays){NSNumber *pid=top[d];if(pid&&pid.intValue==frontPid){[front addObject:d];continue;}
+  NSString *bundle=pid?[NSRunningApplication runningApplicationWithProcessIdentifier:pid.intValue].bundleIdentifier:nil;NSDictionary *rule=bundle&&RuleEnabled(self.exclusionRules[bundle])?self.exclusionRules[bundle]:nil;
+  overrides[d]=@{@"grayMode":@([rule[@"grayMode"] integerValue]),@"customWarmth":@([rule[@"customWarmth"] boolValue]),@"warmth":rule[@"warmth"]?:@0};}
+ self.frontDisplays=front;self.displayOverrides=overrides;
+}
 - (void)frontmostChanged:(id)sender {[self sync];}
 // The base a website inherits: the global settings as they stand, then the browser's own app exception.
 - (NSDictionary *)browserBaseForBundle:(NSString *)browser {
@@ -441,12 +465,15 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  BOOL migrated=[PreferenceMigration migrateFromDomain:LessPullOldBundleIdentifier into:NSUserDefaults.standardUserDefaults];
  NSMenu *main=[NSMenu new],*application=[NSMenu new];NSMenuItem *root=[NSMenuItem new];root.submenu=application;[main addItem:root];NSMenuItem *quit=[[NSMenuItem alloc]initWithTitle:@"Quit Less Pull" action:@selector(terminate:) keyEquivalent:@"q"];quit.target=NSApp;[application addItem:quit];NSMenuItem *settingsShortcut=[[NSMenuItem alloc]initWithTitle:@"Settings…" action:@selector(showSettings:) keyEquivalent:@","];settingsShortcut.target=self;[application insertItem:settingsShortcut atIndex:0];NSApp.mainMenu=main;
  self.exclusionRules=[[NSUserDefaults.standardUserDefaults dictionaryForKey:@"appExclusions"] mutableCopy]?:[NSMutableDictionary new];self.exclusion=[ExclusionPolicy fromDictionary:[NSUserDefaults.standardUserDefaults dictionaryForKey:@"exclusionRecovery"]]?:[ExclusionPolicy new];
- self.forcedNightOn=[[[NSUserDefaults.standardUserDefaults dictionaryForKey:@"exclusionRecovery"] objectForKey:@"forcedNightOn"] boolValue];self.engine=[FilterEngine new];self.warmth=[WarmthEngine new];[self.warmth restore];self.selectedMode=self.engine.currentMode;
+ self.forcedNightOn=[[[NSUserDefaults.standardUserDefaults dictionaryForKey:@"exclusionRecovery"] objectForKey:@"forcedNightOn"] boolValue];self.engine=[FilterEngine new];self.warmth=[WarmthEngine new];self.warmth.perDisplay=YES;[self.warmth restore];self.selectedMode=self.engine.currentMode;
  NSUserDefaults *d=NSUserDefaults.standardUserDefaults;
  // The welcome window is for brand-new users only. Anyone with saved settings from an
  // earlier version gets the marker silently; it is not a user setting.
  BOOL firstLaunch=!migrated&&![d objectForKey:@"welcomeShown"]&&![d objectForKey:@"nightMode"]&&![d objectForKey:@"unifiedWarmth"]&&![d objectForKey:@"warmth"];
  [d setBool:YES forKey:@"welcomeShown"];
+ // New users get the two shortcuts set for them (Option-A to peek, Option-Command-G to toggle),
+ // each only if it is free on this Mac and keyboard; the tour shows which ones. Changeable under Shortcuts.
+ if(firstLaunch)for(NSString *key in @[@"peekShortcut",@"grayscaleShortcut"]){if(![d objectForKey:key]){NSDictionary *pick=[self suggestedShortcutFor:key];if(pick)[d setObject:pick forKey:key];}}
  [d registerDefaults:@{@"automatic":@YES,@"overrideMode":@(-1),@"warmth":@0,@"nightMode":@101,@"manualMode":@1,@"checkForUpdates":@YES}];
  self.availableUpdate=[d dictionaryForKey:@"availableUpdate"];
  if([d integerForKey:@"nightMode"]==16)[d setInteger:100 forKey:@"nightMode"];
@@ -622,6 +649,8 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  else if(action==@selector(showSettings:)){help=@"Open all Less Pull settings, exceptions and help.";i.keyEquivalent=@",";}
  else if(action==@selector(showHelp:))help=@"A short guide to Less Pull.";
  else if(action==@selector(diagnostics:))help=@"Technical details for troubleshooting.";
+ else if(action==@selector(reportProblem:))help=@"Open a new GitHub issue with the technical details filled in.";
+ else if(action==@selector(showTour:))help=@"The short tour from the first launch, again.";
  else if(action==@selector(quit:)){help=@"Quit Less Pull. The display returns to normal and Night Shift follows its schedule again.";i.keyEquivalent=@"q";}
  // Menu items carry no tooltips: on macOS a tooltip competes with the submenu. Settings and Help explain.
  (void)help;[menu addItem:i];return i;
@@ -743,6 +772,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
 - (void)startRecording:(ShortcutRecorder *)sender {if(sender.recording){sender.recording=NO;[self refreshPeekRecorder:nil];return;}sender.recording=YES;[sender.window makeFirstResponder:sender];[self refreshPeekRecorder:nil];}
 // What Peek turns off while held: Grayscale and Extra Warmth by default; Night Shift if wanted.
 - (NSDictionary *)peekEffects {NSDictionary *e=[NSUserDefaults.standardUserDefaults dictionaryForKey:@"peekEffects"];return e?:@{@"grayscale":@YES,@"warmth":@YES,@"nightShift":@NO};}
+- (void)peekScopeChanged:(NSPopUpButton *)sender {[NSUserDefaults.standardUserDefaults setBool:sender.indexOfSelectedItem==1 forKey:@"peekActiveDisplayOnly"];if(self.peeking)[self sync];}
 - (void)peekEffectChanged:(NSButton *)sender {NSMutableDictionary *e=[[self peekEffects] mutableCopy];e[sender.identifier]=@(sender.state==NSControlStateValueOn);[NSUserDefaults.standardUserDefaults setObject:e forKey:@"peekEffects"];if(self.peeking){self.animateAppearance=YES;[self sync];}}
 - (void)scheduleUpdateChecks {
  [self.updateTimer invalidate];self.updateTimer=[NSTimer timerWithTimeInterval:3600 target:self selector:@selector(maybeCheckForUpdates) userInfo:nil repeats:YES];[NSRunLoop.mainRunLoop addTimer:self.updateTimer forMode:NSRunLoopCommonModes];
@@ -928,17 +958,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  self.loginNote=[self note:@"Less Pull moved its settings to a new home with this update. If you had Launch at login on, check it again here; an older entry may remain in System Settings → Login Items and can be removed there."];self.loginNote.hidden=!([NSUserDefaults.standardUserDefaults boolForKey:@"migratedPreferences"]&&SMAppService.mainAppService.status!=SMAppServiceStatusEnabled);
 // Shortcuts tab: Peek in color, Toggle Grayscale, and what clicking the icon does.
  NSMutableArray *views=[NSMutableArray new];
- if(self.welcomeWanted){
-  NSTextField *title=[NSTextField labelWithString:@"Welcome to Less Pull"];title.font=[NSFont systemFontOfSize:15 weight:NSFontWeightSemibold];
-  NSTextField *intro=[NSTextField wrappingLabelWithString:@"You have arrived somewhere quieter.\n\nLess Pull takes the color out of your screen, so it pulls at you less — a little like stepping out of a loud room into a still one, or leaving the devices behind for a day outside. What matters is still here. It just stops shouting.\n\nWarmth is the second step, and not decoration: from amber to red it takes the blue out of the light, makes the screen quieter still, and puts you back in charge of how your screen speaks to you: how loudly tools and content may push, and what light reaches your eyes — and through them, your mind. Keep color only for the few apps and websites that truly need it."];intro.preferredMaxLayoutWidth=404;
-  NSImageView *icon=[NSImageView imageViewWithImage:[self statusImageGray:YES warmth:0]];[icon.widthAnchor constraintEqualToConstant:18].active=YES;[icon.heightAnchor constraintEqualToConstant:18].active=YES;icon.accessibilityLabel=@"The Less Pull menu-bar icon";
-  NSTextField *where=[NSTextField wrappingLabelWithString:@"Less Pull lives in your menu bar, at the top right of the screen, and stays out of the way. Click this icon when you want to change something. Start with the two choices below; everything can be changed later."];where.preferredMaxLayoutWidth=376;
-  NSStackView *iconRow=[self row:@[icon,where]];iconRow.alignment=NSLayoutAttributeTop;
-  NSButton *done=[NSButton buttonWithTitle:@"Got it" target:self action:@selector(dismissWelcome:)];done.keyEquivalent=@"\r";[self helpView:done text:@"Hide this welcome message." label:@"Got it"];
-  NSStackView *card=[self column:@[title,intro,iconRow,[self row:@[[self spacer],done]]]];card.spacing=8;card.edgeInsets=NSEdgeInsetsMake(14,14,12,14);card.wantsLayer=YES;card.layer.cornerRadius=8;card.layer.backgroundColor=[NSColor.labelColor colorWithAlphaComponent:.06].CGColor;
-  for(NSView *v in card.arrangedSubviews)if([v isKindOfClass:NSStackView.class])[v.widthAnchor constraintEqualToAnchor:card.widthAnchor constant:-28].active=YES;
-  self.welcomeCard=card;[views addObject:card];
- }
+ if(self.welcomeWanted){self.welcomeCard=[self welcomeCardView];[views addObject:self.welcomeCard];}
  if(self.thanksWanted){self.thanksCard=[self thanksCardView];[views addObject:self.thanksCard];}
  [views addObjectsFromArray:@[self.statusText,self.statusDetail,[self separator],
   [self row:@[self.grayscaleButton,[self spacer],self.grayOffPopup,self.grayOnButton]],[self note:@"Shades of gray, day and night. Exceptions for apps and websites can show color. Off for a while brings it back by itself."],
@@ -964,12 +984,14 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  self.peekGrayButton=[NSButton checkboxWithTitle:@"Grayscale" target:self action:@selector(peekEffectChanged:)];self.peekGrayButton.identifier=@"grayscale";self.peekWarmthButton=[NSButton checkboxWithTitle:@"Extra Warmth" target:self action:@selector(peekEffectChanged:)];self.peekWarmthButton.identifier=@"warmth";self.peekNightButton=[NSButton checkboxWithTitle:@"Night Shift" target:self action:@selector(peekEffectChanged:)];self.peekNightButton.identifier=@"nightShift";
  for(NSButton *b in @[self.peekGrayButton,self.peekWarmthButton,self.peekNightButton])[self helpView:b text:@"Turned off while you hold the Peek shortcut." label:[NSString stringWithFormat:@"While peeking, turn off %@",b.title]];
  NSTextField *peekEffectsLabel=[NSTextField labelWithString:@"While peeking, turn off:"];peekEffectsLabel.font=[NSFont systemFontOfSize:12];
+ NSTextField *peekScopeLabel=[NSTextField labelWithString:@"Peek on:"];peekScopeLabel.font=[NSFont systemFontOfSize:12];
+ self.peekScopePopup=[[NSPopUpButton alloc]initWithFrame:NSZeroRect pullsDown:NO];[self.peekScopePopup addItemsWithTitles:@[@"All displays",@"Only the display with the active window"]];self.peekScopePopup.target=self;self.peekScopePopup.action=@selector(peekScopeChanged:);[self.peekScopePopup selectItemAtIndex:[NSUserDefaults.standardUserDefaults boolForKey:@"peekActiveDisplayOnly"]?1:0];[self helpView:self.peekScopePopup text:@"With more than one display, peek everywhere or only where the window you are using is." label:@"Peek on"];
  NSTextField *peekTitle=[NSTextField labelWithString:@"Peek in color"];peekTitle.font=[NSFont systemFontOfSize:13 weight:NSFontWeightMedium];
  self.peekRecorder=[ShortcutRecorder new];self.peekRecorder.bezelStyle=NSBezelStyleRounded;self.peekRecorder.title=@"Record Shortcut";self.peekRecorder.target=self;self.peekRecorder.action=@selector(startRecording:);[self.peekRecorder.widthAnchor constraintGreaterThanOrEqualToConstant:150].active=YES;
  __weak AppDelegate *weakSelf=self;self.peekRecorder.recorded=^(NSInteger keyCode,NSEventModifierFlags modifiers){[weakSelf savePeekShortcutKeyCode:keyCode modifiers:modifiers];};self.peekRecorder.cleared=^{[weakSelf savePeekShortcutKeyCode:-1 modifiers:0];};
  [self helpView:self.peekRecorder text:@"Click, then press the keys to use. Hold them to see the plain display; let go to return." label:@"Peek in color shortcut"];
  self.peekNote=[self note:@""];
- NSStackView *column=[self column:@[[self row:@[peekTitle,[self spacer],suggestPeek,self.peekRecorder]],self.peekNote,[self row:@[peekEffectsLabel,self.peekGrayButton,self.peekWarmthButton,self.peekNightButton]],[self separator],
+ NSStackView *column=[self column:@[[self row:@[peekTitle,[self spacer],suggestPeek,self.peekRecorder]],self.peekNote,[self row:@[peekEffectsLabel,self.peekGrayButton,self.peekWarmthButton,self.peekNightButton]],[self row:@[peekScopeLabel,self.peekScopePopup]],[self separator],
   [self row:@[grayShortcutTitle,[self spacer],suggestGray,self.grayscaleRecorder]],self.grayscaleShortcutNote,[self separator],
   [self row:@[clickTitle,[self spacer],self.clickPopup]],[self note:@"With Opens the menu, a right-click (or Control-click) toggles Grayscale. With Toggles Grayscale, a right-click opens the menu."]]];
  [column setCustomSpacing:4 afterView:column.arrangedSubviews[0]];[column setCustomSpacing:6 afterView:column.arrangedSubviews[1]];[column setCustomSpacing:4 afterView:column.arrangedSubviews[4]];[column setCustomSpacing:4 afterView:column.arrangedSubviews[7]];[self refreshPeekRecorder:nil];
@@ -1074,11 +1096,13 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  NSStackView *identity=[self column:@[name,version,forever,credit]];identity.spacing=2;
  NSButton *help=[NSButton buttonWithTitle:@"Help" target:self action:@selector(showHelp:)];[self helpView:help text:@"A short guide to Less Pull." label:@"Help"];
  NSButton *diagnostics=[NSButton buttonWithTitle:@"Diagnostics…" target:self action:@selector(diagnostics:)];[self helpView:diagnostics text:@"Technical details for troubleshooting." label:@"Diagnostics"];
+ NSButton *tour=[NSButton buttonWithTitle:@"Tour" target:self action:@selector(showTour:)];[self helpView:tour text:@"The short tour from the first launch, again." label:@"Show the tour"];
+ NSButton *report=[NSButton buttonWithTitle:@"Report a Problem…" target:self action:@selector(reportProblem:)];[self helpView:report text:@"Opens a new issue on GitHub with the build number, your macOS version and the diagnostics filled in. Nothing is sent until you submit it there." label:@"Report a problem"];
  NSButton *licenses=[NSButton buttonWithTitle:@"Licenses" target:self action:@selector(showLicenses:)];[self helpView:licenses text:@"Show the app and source license files included with Less Pull." label:@"Show licenses"];
  self.updateCheckbox=[NSButton checkboxWithTitle:@"Check for updates automatically" target:self action:@selector(toggleUpdateChecks:)];[self helpView:self.updateCheckbox text:@"Once a day, Less Pull asks GitHub whether a newer build exists. Nothing about you is sent." label:@"Check for updates automatically"];
  self.updateButton=[NSButton buttonWithTitle:@"Check for Updates…" target:self action:@selector(checkForUpdatesNow:)];[self helpView:self.updateButton text:@"Ask GitHub now whether a newer version exists." label:@"Check for Updates"];
  self.updateStatusLabel=[self note:@""];
- NSStackView *column=[self column:@[[self row:@[icon,identity]],[self row:[self authorLinkButtons]],[self separator],[self row:@[help,diagnostics,licenses]],[self separator],self.updateCheckbox,[self note:@"Once a day, one request to GitHub asks whether a newer build exists; a second one reads which macOS versions it is made for, so only builds for your macOS are offered. Nothing about you is sent, and you can turn this off."],[self row:@[self.updateButton,[self spacer]]],self.updateStatusLabel,[self note:@"Everything else stays on this Mac: no account, no analytics, no network service. The browser extension talks only to the app."]]];
+ NSStackView *column=[self column:@[[self row:@[icon,identity]],[self row:[self authorLinkButtons]],[self separator],[self row:@[help,tour,diagnostics,report,licenses]],[self separator],self.updateCheckbox,[self note:@"Once a day, one request to GitHub asks whether a newer build exists; a second one reads which macOS versions it is made for, so only builds for your macOS are offered. Nothing about you is sent, and you can turn this off."],[self row:@[self.updateButton,[self spacer]]],self.updateStatusLabel,[self note:@"Everything else stays on this Mac: no account, no analytics, no network service. The browser extension talks only to the app."]]];
  [(NSStackView *)column.arrangedSubviews[0] setSpacing:16];[column setCustomSpacing:4 afterView:self.updateCheckbox];[column setCustomSpacing:4 afterView:column.arrangedSubviews[7]];[self refreshUpdateControls];
  return column;
 }
@@ -1086,13 +1110,70 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  NSMutableArray *browsers=[NSMutableArray new];for(NSString *browser in self.browserBridge.contexts){NSDictionary *c=self.browserBridge.contexts[browser];if([NSDate.date timeIntervalSinceDate:c[@"time"]?:NSDate.distantPast]<=65)[browsers addObject:@{@"com.brave.Browser":@"Brave",@"org.mozilla.firefox":@"Firefox",@"com.operasoftware.Opera":@"Opera",@"com.microsoft.edgemac":@"Edge",@"com.apple.Safari":@"Safari"}[browser]?:@"Chrome"];}
  return browsers.count?[NSString stringWithFormat:@"Extension connected in %@.",[browsers componentsJoinedByString:@" and "]]:@"The extension is not connected right now. Open a browser with the extension installed.";
 }
+// The welcome card: a short welcome, then a tour of the few things that matter most, page by
+// page in the same card at the same size, so nothing jumps. Skip tour is always at hand.
+- (NSView *)welcomeCardView {
+ NSStackView *card=[self column:@[]];card.edgeInsets=NSEdgeInsetsMake(14,14,12,14);card.wantsLayer=YES;card.layer.cornerRadius=8;card.layer.backgroundColor=[NSColor.labelColor colorWithAlphaComponent:.06].CGColor;
+ self.tourCard=card;self.tourPage=0;self.tourHeight=0;[self showTourPage:0 animated:NO];return card;
+}
+- (NSView *)tourSymbol:(NSString *)name label:(NSString *)label {
+ NSImage *image=[NSImage imageWithSystemSymbolName:name accessibilityDescription:label];image=[image imageWithSymbolConfiguration:[NSImageSymbolConfiguration configurationWithPointSize:30 weight:NSFontWeightLight]];
+ NSImageView *v=[NSImageView imageViewWithImage:image];v.contentTintColor=[NSColor colorWithSRGBRed:.93 green:.55 blue:.28 alpha:1];[v.widthAnchor constraintEqualToConstant:44].active=YES;[v.heightAnchor constraintEqualToConstant:44].active=YES;v.accessibilityLabel=label;return v;
+}
+- (NSView *)tourPageView:(NSInteger)page {
+ NSArray *titles=@[@"Welcome to Less Pull",@"The screen, quieter",@"Color where it matters",@"A peek, when you need it",@"Yours, and nobody else’s"];
+ NSDictionary *peek=[self shortcutForKey:@"peekShortcut"],*toggle=[self shortcutForKey:@"grayscaleShortcut"];
+ NSString *peekLabel=peek?[PeekShortcut labelForKeyCode:[peek[@"keyCode"] integerValue] modifiers:[peek[@"modifiers"] integerValue]]:@"the Peek shortcut",*toggleLabel=toggle?[PeekShortcut labelForKeyCode:[toggle[@"keyCode"] integerValue] modifiers:[toggle[@"modifiers"] integerValue]]:@"The Toggle Grayscale shortcut";
+ NSArray *texts=@[@"You have arrived somewhere quieter.\n\nLess Pull takes the color out of your screen, so it pulls at you less — a little like stepping out of a loud room into a still one, or leaving the devices behind for a day outside. What matters is still here. It just stops shouting.\n\nWarmth is the second step, and not decoration: from amber to red it takes the blue out of the light, makes the screen quieter still, and puts you back in charge of how your screen speaks to you: how loudly tools and content may push, and what light reaches your eyes — and through them, your mind. Keep color only for the few apps and websites that truly need it.",
+  @"Click the circle in the menu bar, at the top right of your screen. Grayscale takes the color out of everything. Extra Warmth takes the blue out of the light, from a touch of amber all the way to red.\n\nEvery change fades in over half a second, on every display you have.",
+  @"A photo app, a video site, a chart: some things need color. Choose Exception for the app you are in, right in the menu, and set only what should differ. Everything else stays quiet.\n\nWebsites work the same way once the small browser extension connects. It lives under Websites.",
+  [NSString stringWithFormat:@"Hold %@ and the screen is in color for exactly as long as you hold it. Press it twice quickly to keep it; one more press returns.\n\n%@ turns Grayscale on or off.\n\nBoth are set for you now. Change them under Shortcuts whenever you like.",peekLabel,toggleLabel],
+  @"No account, no analytics, nothing leaves your Mac. The addresses of websites you visit pass through memory and are never stored.\n\nAnd because Less Pull changes the display itself, not the picture, screenshots, recordings and screen sharing keep their normal colors."];
+ NSArray *symbols=@[@"",@"circle.lefthalf.filled",@"globe",@"eye",@"lock.shield"];
+ NSTextField *title=[NSTextField labelWithString:titles[page]];title.font=[NSFont systemFontOfSize:15 weight:NSFontWeightSemibold];
+ NSTextField *text=[NSTextField wrappingLabelWithString:texts[page]];text.preferredMaxLayoutWidth=page==0?404:346;  // next to the symbol on the tour pages
+ NSMutableArray *parts=[NSMutableArray arrayWithObject:title];
+ if(page==0){NSImageView *icon=[NSImageView imageViewWithImage:[self statusImageGray:YES warmth:0]];[icon.widthAnchor constraintEqualToConstant:18].active=YES;[icon.heightAnchor constraintEqualToConstant:18].active=YES;icon.accessibilityLabel=@"The Less Pull menu-bar icon";
+  NSTextField *where=[NSTextField wrappingLabelWithString:@"Less Pull lives in your menu bar and stays out of the way. A short tour shows the four things worth knowing; everything can be changed later."];where.preferredMaxLayoutWidth=376;NSStackView *iconRow=[self row:@[icon,where]];iconRow.alignment=NSLayoutAttributeTop;[parts addObjectsFromArray:@[text,iconRow]];}
+ else {NSStackView *body=[self row:@[[self tourSymbol:symbols[page] label:titles[page]],text]];body.alignment=NSLayoutAttributeTop;body.spacing=14;[parts addObject:body];}
+ NSView *fill=[NSView new];[fill setContentHuggingPriority:1 forOrientation:NSLayoutConstraintOrientationVertical];[parts addObject:fill];
+ NSButton *skip=[NSButton buttonWithTitle:@"Skip tour" target:self action:@selector(dismissWelcome:)];skip.bezelStyle=NSBezelStyleInline;skip.font=[NSFont systemFontOfSize:11];[self helpView:skip text:@"Close the welcome and the tour. You can open the tour again from the About tab." label:@"Skip tour"];
+ NSMutableArray *nav=[NSMutableArray new];
+ if(page==0){NSButton *start=[NSButton buttonWithTitle:@"Start tour" target:self action:@selector(tourNext:)];start.keyEquivalent=@"\r";[self helpView:start text:@"A tour of four pages, right here." label:@"Start tour"];[nav addObjectsFromArray:@[[self spacer],skip,start]];}
+ else {NSButton *back=[NSButton buttonWithTitle:@"Back" target:self action:@selector(tourBack:)];[self helpView:back text:@"The previous page." label:@"Back"];
+  NSTextField *step=[NSTextField labelWithString:[NSString stringWithFormat:@"%ld of 4",(long)page]];step.font=[NSFont systemFontOfSize:11];step.textColor=NSColor.secondaryLabelColor;
+  BOOL last=page==4;NSButton *next=[NSButton buttonWithTitle:last?@"Done":@"Next" target:self action:last?@selector(dismissWelcome:):@selector(tourNext:)];next.keyEquivalent=@"\r";[self helpView:next text:last?@"Close the tour.":@"The next page." label:next.title];
+  [nav addObjectsFromArray:@[back,[self spacer],step,[self spacer]]];if(!last)[nav addObject:skip];[nav addObject:next];}
+ [parts addObject:[self row:nav]];
+ NSStackView *column=[self column:parts];column.spacing=8;return column;
+}
+- (void)showTourPage:(NSInteger)page animated:(BOOL)animated {
+ NSStackView *card=self.tourCard;if(!card)return;NSView *old=card.arrangedSubviews.firstObject;NSStackView *next=(NSStackView *)[self tourPageView:page];self.tourPage=page;
+ [card addArrangedSubview:next];[next.widthAnchor constraintEqualToAnchor:card.widthAnchor constant:-28].active=YES;for(NSView *v in next.arrangedSubviews)if([v isKindOfClass:NSStackView.class])[v.widthAnchor constraintEqualToAnchor:next.widthAnchor].active=YES;
+ if(old){[card removeArrangedSubview:old];[old removeFromSuperview];}
+ if(!self.tourHeight){[card layoutSubtreeIfNeeded];self.tourHeight=card.fittingSize.height;[card.heightAnchor constraintEqualToConstant:self.tourHeight].active=YES;}  // the welcome page sets the size; every page keeps it
+ else [next.heightAnchor constraintEqualToConstant:self.tourHeight-26].active=YES;
+ if(animated&&!NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceMotion){next.alphaValue=0;[NSAnimationContext runAnimationGroup:^(NSAnimationContext *ctx){ctx.duration=.5;next.animator.alphaValue=1;} completionHandler:nil];}
+ if(self.settings)[self.settings makeFirstResponder:nil];
+}
+- (void)tourNext:(id)sender {if(self.tourPage<4)[self showTourPage:self.tourPage+1 animated:YES];}
+- (void)tourBack:(id)sender {if(self.tourPage>0)[self showTourPage:self.tourPage-1 animated:YES];}
+// Reopens the welcome and tour from the About tab: the window is rebuilt with the card in place.
+- (void)showTour:(id)sender {[self.settings close];self.settings=nil;self.welcomeWanted=YES;[self showSettings:nil];}
 - (void)dismissWelcome:(id)sender {
- NSView *card=self.welcomeCard;if(!card)return;NSStackView *column=(NSStackView *)card.superview;
+ NSView *card=self.welcomeCard;if(!card)return;self.tourCard=nil;NSStackView *column=(NSStackView *)card.superview;
  [column removeArrangedSubview:card];[card removeFromSuperview];self.welcomeCard=nil;self.welcomeWanted=NO;
  // The tab's root view echoes its frame as fitting size; measure the column, then
  // reselect the tab so the tab controller applies the smaller size to the window.
  [column layoutSubtreeIfNeeded];self.settingsTabs.tabViewItems.firstObject.viewController.preferredContentSize=NSMakeSize(500,column.fittingSize.height);
  self.settingsTabs.selectedTabViewItemIndex=1;self.settingsTabs.selectedTabViewItemIndex=0;
+}
+// A prefilled GitHub issue: build, macOS and the diagnostics text, which names no apps or websites.
+- (void)reportProblem:(id)sender {
+ NSOperatingSystemVersion v=NSProcessInfo.processInfo.operatingSystemVersion;NSString *build=[NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleVersion"]?:@"?";
+ NSString *body=[NSString stringWithFormat:@"**What happened**\n\n(what you saw, and what you expected)\n\n**Steps**\n\n1. \n\n**Setup**\n\nLess Pull 1.4.4 build %@, macOS %ld.%ld.%ld, %lu display(s)\n\n<details><summary>Diagnostics</summary>\n\n```\n%@\n%@\n```\n</details>\n",build,(long)v.majorVersion,(long)v.minorVersion,(long)v.patchVersion,(unsigned long)[self.warmth displays].count,self.engine.diagnostics?:@"",self.warmth.diagnostics?:@""];
+ NSCharacterSet *allowed=NSCharacterSet.URLQueryAllowedCharacterSet;NSString *title=[[NSString stringWithFormat:@"Build %@: ",build] stringByAddingPercentEncodingWithAllowedCharacters:allowed];NSString *encoded=[[body stringByAddingPercentEncodingWithAllowedCharacters:allowed] stringByReplacingOccurrencesOfString:@"&" withString:@"%%26"];
+ NSURL *url=[NSURL URLWithString:[NSString stringWithFormat:@"https://github.com/Archangeloi89/less-pull/issues/new?title=%@&body=%@",title,encoded]];if(url)[NSWorkspace.sharedWorkspace openURL:url];
 }
 - (void)showLicenses:(id)sender {NSURL *folder=NSBundle.mainBundle.resourceURL;[NSWorkspace.sharedWorkspace activateFileViewerSelectingURLs:@[[folder URLByAppendingPathComponent:@"LICENSE-APP.txt"],[folder URLByAppendingPathComponent:@"LICENSE-SOURCE.txt"]]];}
 - (void)showSettings:(id)sender {
@@ -1184,7 +1265,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  sender.state=SMAppService.mainAppService.status==SMAppServiceStatusEnabled;if(sender.state==NSControlStateValueOn)self.loginNote.hidden=YES;
 }
 - (void)resetWarmth:(id)sender {NSSlider *slider=[NSSlider new];slider.doubleValue=0;[self warmthChanged:slider];}
-- (void)diagnostics:(id)sender {NSAlert *a=[NSAlert new];a.messageText=@"Diagnostics";NSString *betterDisplay=[NSRunningApplication runningApplicationsWithBundleIdentifier:@"pro.betterdisplay.BetterDisplay"].count?@"\nBetterDisplay is running; it can change how displays look. HDR state is not read.":@"";a.informativeText=[NSString stringWithFormat:@"Less Pull %@ (%@)\n\n%@\n%@\nDisplay events: %lu; recoveries: %lu\nGrayscale setting: %@; grayscale showing now: %@; exception active: %@%@\n\nNight Shift drives “Extra Warmth follows Night Shift”; it does not prove the display looks warmer.",[NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"],[NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleVersion"],self.engine.diagnostics,self.warmth.diagnostics,(unsigned long)self.pipelineEvents,(unsigned long)self.pipelineRestorations,(self.selectedMode==100||self.selectedMode==1)?@"On":@"Off",(self.effectiveMode==100||self.effectiveMode==1)?@"On":@"Off",(self.grayOverride||self.customWarmth)?@"yes":@"no",betterDisplay];[NSApp activateIgnoringOtherApps:YES];[a runModal];}
+- (void)diagnostics:(id)sender {NSAlert *a=[NSAlert new];a.messageText=@"Diagnostics";NSString *betterDisplay=[NSRunningApplication runningApplicationsWithBundleIdentifier:@"pro.betterdisplay.BetterDisplay"].count?@"\nBetterDisplay is running; it can change how displays look. HDR state is not read.":@"";a.informativeText=[NSString stringWithFormat:@"Less Pull %@ (%@)\n\n%@\n%@\nDisplays: %lu, each with its own matrix\nDisplay events: %lu; recoveries: %lu\nGrayscale setting: %@; grayscale showing now: %@; exception active: %@%@\n\nNight Shift drives “Extra Warmth follows Night Shift”; it does not prove the display looks warmer.",[NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"],[NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleVersion"],self.engine.diagnostics,self.warmth.diagnostics,(unsigned long)[self.warmth displays].count,(unsigned long)self.pipelineEvents,(unsigned long)self.pipelineRestorations,(self.selectedMode==100||self.selectedMode==1)?@"On":@"Off",(self.effectiveMode==100||self.effectiveMode==1)?@"On":@"Off",(self.grayOverride||self.customWarmth)?@"yes":@"no",betterDisplay];[NSApp activateIgnoringOtherApps:YES];[a runModal];}
 - (NSString *)warmthKey {return @"warmth";}
 - (double)currentWarmth {return [NSUserDefaults.standardUserDefaults doubleForKey:[self warmthKey]];}
 - (BOOL)applyMode:(NSInteger)mode {
@@ -1198,6 +1279,21 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  if(mode!=self.selectedMode||effective!=self.effectiveMode||strength!=self.targetStrength)self.animateAppearance=YES;
  self.targetStrength=strength;
  BOOL gray=effective==100||effective==1;
+ NSArray *displays=[self.warmth displays];
+ if(displays.count>1||[displays.firstObject unsignedIntValue]){ // one matrix per display, each fading on its own clock
+  BOOL peekActiveOnly=[NSUserDefaults.standardUserDefaults boolForKey:@"peekActiveDisplayOnly"],reduce=NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceMotion,ok=YES;
+  if(self.animateAppearance&&!self.quitting&&self.engine.class==FilterEngine.class)NSLog(@"Less Pull appearance: global=%ld effective=%ld warmth=%.3f exception=%d following=%d displays=%lu",(long)mode,(long)effective,strength,(self.grayOverride||self.customWarmth),self.automatic,(unsigned long)displays.count);
+  self.animateAppearance=NO;self.selectedMode=mode;self.effectiveMode=effective;
+  for(NSNumber *dn in displays){uint32_t d=dn.unsignedIntValue;NSDictionary *o=self.displayOverrides[dn];
+   NSInteger g=o?[o[@"grayMode"] integerValue]:self.grayOverride;BOOL custom=o?[o[@"customWarmth"] boolValue]:self.customWarmth;double w=o?[o[@"warmth"] doubleValue]:self.appWarmth;
+   NSInteger eff=g==1?100:g==2?101:(self.grayOffUntil?101:mode);double str=custom?w/100*3:((mode==100||mode==101)&&!warmthOff?[self currentWarmth]:0);
+   if(self.pausedUntil){eff=101;str=0;}else if(self.peeking&&(!peekActiveOnly||!o)){NSDictionary *e=[self peekEffects];if([e[@"grayscale"] boolValue])eff=101;if([e[@"warmth"] boolValue])str=0;}
+   BOOL grayHere=eff==100||eff==1;NSArray *last=[self.warmth stateForDisplay:d];
+   if(last&&([last[0] doubleValue]!=str||[last[1] boolValue]!=grayHere)&&!self.quitting){__weak AppDelegate *weak=self;[self.warmth transitionStrength:str grayscale:grayHere display:d reduceMotion:reduce duration:0.5 completion:^{[weak.warmth applyStrength:str grayscale:grayHere display:d];}];}
+   else if(!last||![self.warmth transitioning]){if(![self.warmth applyStrength:str grayscale:grayHere display:d])ok=NO;}
+  }
+  return ok;
+ }
  if(self.animateAppearance&&!self.quitting){if(self.engine.class==FilterEngine.class)NSLog(@"Less Pull appearance: global=%ld effective=%ld warmth=%.3f exception=%d following=%d",(long)mode,(long)effective,strength,(self.grayOverride||self.customWarmth),self.automatic);self.animateAppearance=NO;NSUInteger generation=++self.appearanceGeneration;self.selectedMode=mode;self.effectiveMode=effective;
   [self.warmth transitionStrength:strength grayscale:gray reduceMotion:NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceMotion duration:0.5 completion:^{if(generation!=self.appearanceGeneration)return;[self.warmth applyStrength:strength grayscale:gray];}];return YES;
  }

@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-17"><b>Download build 17</b></a>
+  <a href="https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-19"><b>Download build 19</b></a>
   &nbsp;·&nbsp; <a href="#install">Install</a>
   &nbsp;·&nbsp; <a href="docs/EXCEPTIONS.md">App and website exceptions</a>
   &nbsp;·&nbsp; <a href="docs/README.md">All docs</a>
@@ -27,6 +27,8 @@ Warmth is the second step: from a touch of amber all the way to red, it takes th
 - **Time off**: Grayscale off for an hour, four hours, or until Night Shift changes; Pause Less Pull for a while.
 - **[Night Shift](#night-shift-can-set-the-rhythm)** can set the rhythm, so warmth comes only at night.
 - **A menu-bar icon that shows the state**: its left half fills while grayscale is on, its right half warms with the warmth.
+- **[Every display on its own](#every-display-on-its-own)**: an exception applies on the display where its window is; the others keep your defaults. Any number of displays.
+- **[Screenshots keep their colors](#screenshots-keep-their-colors)**: the display changes, the picture does not.
 - **[Private by design](#private-by-design)**: no account, no analytics, nothing leaves your Mac except an optional daily update check.
 
 ## Every app and website can have its own settings
@@ -71,7 +73,7 @@ An exception does not have to replace everything. Grayscale, Extra Warmth and Ni
 
 A few things to know before you rely on it:
 
-- A rule changes **all your displays** while its app or tab is in front. It does not tint a single window, and it never touches the web page itself.
+- A rule changes the **display its window is on** while its app or tab is in front. It does not tint a single window, and it never touches the web page itself. See [every display on its own](#every-display-on-its-own).
 - An app rule applies while that app is frontmost with a visible window that is not minimized.
 - Private browser tabs are never read, so website rules do not apply there.
 
@@ -106,6 +108,20 @@ Sometimes you need color for a moment: to tell two lines in a chart apart, to ch
 - **Choose what peeking turns off.** Grayscale and Extra Warmth by default; Night Shift too, if you like.
 - **Toggle Grayscale** is the second shortcut, for switching your default on and off without opening the menu. A right-click on the menu-bar icon does the same.
 - **For longer than a moment**, there is **Grayscale off for** an hour, four hours, or until Night Shift next changes, and **Pause Less Pull** for 15 minutes, an hour, or until you resume. Both are in the menu.
+
+## Every display on its own
+
+With more than one display, each one gets its own matrix and its own fade, on its own refresh clock. The app you are working in decides how its display looks, website rule included. Every other display follows the app whose window is on top there: its exception, if it has one, or your defaults. An empty display shows your defaults. Any number of displays works the same way.
+
+Night Shift, Pause, Grayscale off for a while and the Toggle shortcut stay global, since Night Shift is system wide anyway. Peek has a choice under **Settings… → Shortcuts**: all displays, or only the display with the active window.
+
+## Screenshots keep their colors
+
+<p align="center">
+  <img src="docs/assets/screenshots.png" width="100%" alt="Two drawings side by side. Left, What you see: a monitor showing a busy web page in grayscale with a little warmth. Right, What you share: the screenshot of that same screen, in full color, with a camera mark. Caption: Less Pull changes the display itself, after the picture is made. Screenshots, recordings and screen sharing keep their normal colors.">
+</p>
+
+Less Pull changes the display at the very end of the pipeline, after the picture is made. Screenshots, screen recordings and screen sharing read the picture before that step, so they show the normal colors. What is quiet for you is unchanged for everyone else.
 
 ## Night Shift can set the rhythm
 
@@ -164,7 +180,7 @@ Choose **Settings…** in the menu. This is the window on the right, with five t
 - **Websites**: the browser extension and the saved website exceptions.
 - **About**: version, links, Help, Diagnostics, licenses, and the update check.
 
-On the very first launch this window opens by itself with a short welcome. After two weeks of use, the next time you open Settings, a small card asks whether you enjoy Less Pull and how to support the author; it never pops up on its own.
+On the very first launch this window opens by itself with a short welcome and a four-page tour: the screen, exceptions, Peek and privacy, in the same card at the same size, with Skip tour always at hand. The two shortcuts are set for new users, ⌥A to peek and ⌥⌘G to toggle, each only if it is free on that Mac and keyboard; the tour shows which ones, and Shortcuts lets you change them. The tour can be opened again from About. After two weeks of use, the next time you open Settings, a small card asks whether you enjoy Less Pull and how to support the author; it never pops up on its own.
 
 <p align="center">
   <img src="docs/assets/settings-tabs.png" width="100%" alt="Four screenshots of the Settings window on a plain backdrop. Shortcuts: Peek in color with the shortcut Option-A, what peeking turns off, a Toggle Grayscale shortcut Option-Command-G, and what clicking the menu-bar icon does. Apps: three app exceptions, Music, Photos and TextEdit, each with its icon, a Use this exception checkbox, Default, On and Off segments for Grayscale and Night Shift, and a warmth slider on the ramp. Websites: the Install Browser Extension button, the extension connected in Firefox, Brave and Opera, and two saved exceptions for example.com and one exact page with the same controls. About: the app icon, version 1.4.4 build 16, the author's links, Help, Diagnostics and Licenses, and the automatic update check.">
@@ -180,7 +196,7 @@ The app changes the display; nothing is injected into pages, and the Mac app has
 
 ## Install
 
-1. Download **Less-Pull-1.4.4-17.zip** from the [build 17 release](https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-17), unzip it, and move **Less Pull.app** to **Applications**.
+1. Download **Less-Pull-1.4.4-19.zip** from the [build 19 release](https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-19), unzip it, and move **Less Pull.app** to **Applications**.
 2. Open it. The Settings window greets you once; the circle in the menu bar is where you choose Grayscale and Extra Warmth from then on.
 3. For website rules, open **Settings… → Websites**, choose **Install Browser Extension…**, and follow the steps for [your browser](docs/INSTALL.md#safari-brave-chrome-firefox-opera-or-edge).
 
@@ -188,7 +204,7 @@ The app changes the display; nothing is injected into pages, and the Mac app has
 > Setting up with an AI agent? The release includes an **agent pack** (`Less-Pull-Agent-Pack.zip`): a script that installs the app and the bridge, and scripts that connect Brave, Chrome, Opera, Edge and Firefox, with the instructions an agent needs. See [tools/agent-pack](tools/agent-pack/README.md).
 
 > [!NOTE]
-> Version 1.4.4 (build 17) is a test build for Apple silicon Macs. The version number stays 1.4.4 on purpose; the build number is what changes. It is ad-hoc signed and not notarized by Apple, so Gatekeeper may block a downloaded copy. It is built for macOS 13 and later and has been tested on macOS 27 only. The browser extension is loaded locally and is not in the Chrome Web Store, on addons.mozilla.org or in the App Store. See [install help](docs/INSTALL.md) and [what is still open](docs/RELEASE-PLAN.md).
+> Version 1.4.4 (build 19) is a test build for Apple silicon Macs. The version number stays 1.4.4 on purpose; the build number is what changes. It is ad-hoc signed and not notarized by Apple, so Gatekeeper may block a downloaded copy. It is built for macOS 13 and later and has been tested on macOS 27 only. The browser extension is loaded locally and is not in the Chrome Web Store, on addons.mozilla.org or in the App Store. See [install help](docs/INSTALL.md) and [what is still open](docs/RELEASE-PLAN.md).
 
 ## Private by design
 
@@ -212,7 +228,7 @@ The app is Objective-C on Apple frameworks. The extension is plain JavaScript on
 zsh Source/build.sh
 ```
 
-See [testing](Source/TESTING.txt), the [build 17 notes](docs/1.4.4-17-release.txt), the [build 16 notes](docs/1.4.4-16-release.txt) and the [release plan](docs/RELEASE-PLAN.md). Less Pull relies on private macOS display interfaces, so each macOS version needs its own check.
+See [testing](Source/TESTING.txt), the [build 19 notes](docs/1.4.4-19-release.txt), the [build 17 notes](docs/1.4.4-17-release.txt), the [build 16 notes](docs/1.4.4-16-release.txt) and the [release plan](docs/RELEASE-PLAN.md). Less Pull relies on private macOS display interfaces, so each macOS version needs its own check.
 
 ## Documentation
 

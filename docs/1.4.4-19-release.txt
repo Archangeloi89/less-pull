@@ -1,0 +1,11 @@
+Less Pull 1.4.4 — build 19
+
+The version number stays 1.4.4 for good; the build number is what changes. Build 18 (never released) and build 19 add:
+
+- Every display on its own. Each connected display gets its own color matrix and its own fade, driven by that display's refresh clock (a display link; 60 or 120 steps per second as the panel allows). The app in front decides its own display, website rule included; every other display follows the app whose window is on top there, with its exception or the defaults; an empty display shows the defaults. Any number of displays. Night Shift, Pause, Grayscale off for a while and the Toggle shortcut stay global. Peek on: all displays, or only the display with the active window (Settings → Shortcuts).
+- A welcome tour on the first launch: four pages (the screen, exceptions, Peek, privacy) in the same card at the same size, Skip tour always visible, reopenable from About → Tour.
+- Default shortcuts for new users: Option-A to peek and Option-Command-G to toggle Grayscale, each only if free on that Mac and keyboard; changeable under Shortcuts. Existing users keep what they have.
+- About → Report a Problem… opens a new GitHub issue with build, macOS version, display count and the diagnostics text filled in. Nothing is sent until you submit it there.
+- Documentation: screenshots, recordings and screen sharing keep their normal colors (the matrix is applied after the picture is made); a figure shows it.
+
+Verified: the ten automated suites pass, including new per-display engine tests (apply, cache, independent fades, invalidate). Per-display color was confirmed live on the author's Mac with a second display. Browser support and everything else is as in build 17.
