@@ -12,4 +12,6 @@ Build 20 (same day) adds Settings → General → Displays: every connected disp
 
 Build 21 (same day): Peek works per display by default, on the display with the window you are using; a double press keeps that display plain, another display can be kept the same way later, and a press on a kept display lets only that one go. "All displays" remains a choice under Shortcuts. A two-display test covers it.
 
+Build 22 (same day): the per-display Peek acts on the display under the mouse pointer, so no window has to be chosen first.
+
 Verified: the ten automated suites pass, including new per-display engine tests (apply, cache, independent fades, invalidate). Per-display color was confirmed live on the author's Mac with a second display. Browser support and everything else is as in build 17.

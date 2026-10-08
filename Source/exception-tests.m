@@ -37,6 +37,7 @@
 @end
 @implementation TestApp
 - (void)updateForeground {}
+- (uint32_t)displayUnderMouse {return self.activeDisplay;}
 - (void)refreshControlsKnown:(BOOL)known nightOn:(BOOL)on {}
 - (void)nightShiftFailure {abort();}
 - (PausePolicy *)nightGuard {PausePolicy *p=[super nightGuard];p.nightEnd=[NSDate.date dateByAddingTimeInterval:3600];p.scheduleMode=0;return p;}
