@@ -132,7 +132,7 @@ Less Pull changes the display at the very end of the pipeline, after the picture
 
 ## Sessions
 
-A session is a stretch of focused work with a gentle end. Choose **Start a session…** in the menu: a small panel grows out of the icon with your lengths (25, 45, 60 and 90 minutes to begin with; change them under **Settings… → Sessions**), and folds back into the icon once you choose. The icon gains a thin ring that fills as the session runs, with the minutes left next to it.
+A session is a stretch of focused work with a gentle end. Choose **Start a session…**, the first item in the menu: a small panel grows out of the icon with your lengths (25, 45, 60 and 90 minutes to begin with; change them under **Settings… → Sessions**), and folds back into the icon once you choose. The icon gains a thin ring that fills as the session runs, with the minutes left next to it.
 
 At the end, a warm glow blooms across every display for three seconds with one line of text, and a soft gong sounds, built from pure tones on the 432 Hz reference and the solfeggio pitches, low and short. Nothing to dismiss: the count simply goes on past the end, −0, −1, −2 in the warm color, breathing gently to say it can be clicked, so you can see how far you have stretched. A quieter reminder can come every few minutes if you ask for one; by default it never does.
 
