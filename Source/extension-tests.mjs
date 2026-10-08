@@ -14,4 +14,7 @@ focused=true;tab={...tab,url:'https://other.example/p',incognito:true};await hea
 for(const url of ['chrome://settings','file:///tmp/x','https://user:pass@example.com/'])assert.equal(module.identity(url),null);
 chrome.tabs.query=async()=>{throw new Error('Window unavailable')};await heartbeat();await settle();assert.equal(messages.at(-1).focused,false);assert.equal(messages.at(-1).url,'');
 const before=messages.length;assert.equal(chrome.runtime.onMessage.listeners[0]({type:'set'},{id:'different'},()=>{}),false);assert.equal(messages.length,before);
-console.log('PASS: active tab identity, exact URL/fragment handling, popup-safe active context, private-tab exclusion, unsupported pages, heartbeat, and sender validation.');
+const labels=await import('./Browser Extension/labels.js');
+assert.equal(labels.defaultLabel({grayMode:1,nightMode:2},'grayMode'),'Use default (On)');assert.equal(labels.defaultLabel({grayMode:1,nightMode:2},'nightMode'),'Use default (Off)');assert.equal(labels.defaultLabel(undefined,'grayMode'),'Use default');assert.equal(labels.defaultLabel({grayMode:0},'grayMode'),'Use default');
+assert.equal(labels.warmthLabel({warmth:35}),'Use default warmth (35%)');assert.equal(labels.warmthLabel({warmth:0}),'Use default warmth (Off)');assert.equal(labels.warmthLabel({}),'Use default warmth');assert.equal(labels.warmthLabel(undefined),'Use default warmth');
+console.log('PASS: active tab identity, exact URL/fragment handling, popup-safe active context, private-tab exclusion, unsupported pages, heartbeat, sender validation, and resolved default labels (older app replies without them).');

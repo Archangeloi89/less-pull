@@ -129,6 +129,12 @@
 }
 - (void)visibilityCheck:(id)sender {NSInteger gray=self.grayOverride,night=self.nightOverride;BOOL custom=self.customWarmth;double warmth=self.appWarmth;[self updateForeground];if(gray!=self.grayOverride||night!=self.nightOverride||custom!=self.customWarmth||warmth!=self.appWarmth)[self sync];}
 - (void)frontmostChanged:(id)sender {[self sync];}
+// The base a website inherits: the global settings as they stand, then the browser's own app exception.
+- (NSDictionary *)browserBaseForBundle:(NSString *)browser {
+ BOOL night=NO;[self logicalNightShift:&night];NSInteger gray=(self.selectedMode==1||self.selectedMode==100)?1:2,nightMode=night?1:2;double warmth=[self currentWarmth]/3*100;
+ NSDictionary *app=self.exclusionRules[browser];if([app[@"grayMode"] integerValue])gray=[app[@"grayMode"] integerValue];if([app[@"nightMode"] integerValue])nightMode=[app[@"nightMode"] integerValue];if([app[@"customWarmth"] boolValue])warmth=[app[@"warmth"] doubleValue];
+ return @{@"grayMode":@(gray),@"nightMode":@(nightMode),@"warmth":@(warmth)};
+}
 - (NSString *)exclusionSummary {
  NSMutableArray *effects=[NSMutableArray new];if(self.grayOverride)[effects addObject:self.grayOverride==1?@"Grayscale on":@"Grayscale off"];if(self.nightOverride)[effects addObject:self.pause?@"Night Shift off for now":self.nightOverride==1?@"Night Shift on":@"Night Shift off"];if(self.customWarmth)[effects addObject:[NSString stringWithFormat:@"Warmth %.0f%%",self.appWarmth]];
  return effects.count?[NSString stringWithFormat:@"%@: %@",self.foregroundName,[effects componentsJoinedByString:@", "]]:@"Using your default settings";
@@ -216,7 +222,7 @@
  self.policy=[SwitchingPolicy new];self.policy.automatic=self.automatic;
  self.policy.overrideMode=[d integerForKey:@"overrideMode"];
  self.policy.known=[d boolForKey:@"lastNightShiftKnown"];self.policy.nightShiftOn=[d boolForKey:@"lastNightShiftOn"];
- self.browserBridge=[BrowserBridge new];__weak AppDelegate *browserOwner=self;self.browserBridge.changed=^{[browserOwner sync];[browserOwner rebuildWebsiteRulesList];};[self.browserBridge start];
+ self.browserBridge=[BrowserBridge new];__weak AppDelegate *browserOwner=self;self.browserBridge.changed=^{[browserOwner sync];[browserOwner rebuildWebsiteRulesList];};self.browserBridge.defaults=^NSDictionary *(NSString *browser){return [browserOwner browserBaseForBundle:browser];};[self.browserBridge start];
  self.item=[NSStatusBar.systemStatusBar statusItemWithLength:NSSquareStatusItemLength];
  self.item.button.image=[self menuBarImage:@"menubar-grayscale" symbol:@"circle.lefthalf.filled"];
  self.item.button.toolTip=@"Less Pull";

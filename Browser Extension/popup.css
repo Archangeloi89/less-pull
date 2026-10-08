@@ -2,6 +2,6 @@
 
 body{padding:16px;max-height:560px;overflow-y:auto}.modes{display:grid;grid-template-columns:1fr 1fr;gap:10px}.modes select{font-size:12px}details{margin-top:14px;font-size:11px}summary{cursor:pointer;opacity:.7}footer{margin-top:12px}label{margin-top:9px}
 
-h1{display:flex;align-items:center;gap:8px;font-weight:650}#save{background:color-mix(in srgb,CanvasText 14%,Canvas);color:CanvasText;border-color:color-mix(in srgb,CanvasText 25%,Canvas)}input{accent-color:light-dark(#555,#bbb)}.site{background:transparent;padding:0;border-radius:0}header{border-bottom:1px solid color-mix(in srgb,CanvasText 15%,Canvas);padding-bottom:4px}.modes label{font-weight:500}
+h1{display:flex;align-items:center;gap:8px;font-weight:650}#save{background:light-dark(#2f2f33,#e9e9ec);color:light-dark(#fff,#1b1b1e);border-color:transparent;font-weight:600}#save:hover:not(:disabled){background:light-dark(#1f1f22,#fff)}#current{width:100%;margin-top:8px}[hidden]{display:none !important}input{accent-color:light-dark(#555,#bbb)}.site{background:transparent;padding:0;border-radius:0}header{border-bottom:1px solid color-mix(in srgb,CanvasText 15%,Canvas);padding-bottom:4px}.modes label{font-weight:500}
 
 #reset{font-size:11px;padding:3px 7px;margin-left:auto;margin-right:12px;border:none;background:transparent;color:inherit}

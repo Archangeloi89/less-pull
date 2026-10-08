@@ -1,5 +1,9 @@
+import { defaultLabel, warmthLabel } from './labels.js';
 const $ = id => document.getElementById(id);
 let current, target, scope = 'domain', rules = {}, loading = 0;
+function showInherited(inherited) { $('gray-default').textContent = defaultLabel(inherited, 'grayMode'); $('night-default').textContent = defaultLabel(inherited, 'nightMode'); $('inherit-label').textContent = warmthLabel(inherited); }
+function onCurrent() { return !!current && !current.private && !!target && target.url === current.url && target.domain === current.domain; }
+function backButton() { $('current').hidden = !current || current.private || onCurrent(); }
 async function ask(message) {
  const r = await chrome.runtime.sendMessage(message);
  if (!r?.ok) throw new Error(r?.error || 'The extension could not connect.');
@@ -10,12 +14,13 @@ function warmth() { $('warmth').disabled = $('inherit').checked; $('percent').te
 function ruleKey() { return scope === 'domain' ? target?.domain : target?.url; }
 async function load() {
  const ticket = ++loading; scope = $('scope').value;
- const key = ruleKey(); $('site').textContent = key || 'Open a normal website to add an exception.';
+ const key = ruleKey(); $('site').textContent = key || 'Open a normal website to add an exception.'; backButton();
  $('save').disabled = !key; $('remove').disabled = !key;
  if (!key) { status(current?.private ? 'Website exceptions are excluded in private tabs.' : 'Open a normal website to add an exception.'); return; }
  try {
-  const { rule } = await ask({ type: 'get', scope, site: key });
+  const { rule, inherited } = await ask({ type: 'get', scope, site: key });
   if (ticket !== loading) return;
+  showInherited(inherited);
   $('gray').value = rule?.grayMode || 0; $('night').value = rule?.nightMode || 0;
   $('inherit').checked = !rule?.customWarmth; $('warmth').value = rule?.warmth || 0; warmth();
   $('remove').disabled = !rule; status(rule ? 'Saved exception ready to edit.' : 'Choose settings, then save this exception.');
@@ -27,7 +32,7 @@ async function list() {
  for (const key of Object.keys(rules).sort()) $('saved').add(new Option(key, key));
 }
 $('current').addEventListener('click', async () => {
- try { current = (await ask({ type: 'active' })).tab; target = current.private ? null : current; $('saved').value = ''; await load(); }
+ try { target = current && !current.private ? current : null; $('saved').value = ''; $('scope').value = 'domain'; await load(); }
  catch (e) { status(e.message, true); }
 });
 $('saved').addEventListener('change', async () => {

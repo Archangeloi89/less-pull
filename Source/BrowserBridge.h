@@ -2,6 +2,9 @@
 @interface BrowserBridge : NSObject
 @property NSMutableDictionary *rules,*contexts;
 @property (copy) void (^changed)(void);
+// What a site inherits before its own rule: the app supplies the browser-level base.
+@property (copy) NSDictionary *(^defaults)(NSString *browser);
+- (NSDictionary *)inheritedForSite:(NSString *)site browser:(NSString *)browser;
 @property int listener;
 - (void)start;
 - (void)stop;
