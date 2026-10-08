@@ -42,5 +42,6 @@ def write(name, sig, gain=0.2):
 write('session-end.wav', mix(tone(132.0, 6.5, attack=0.16, decay=3.8), tone(198.0, 6.0, attack=0.16, decay=3.4, gain=0.7, start=0.06), tone(264.0, 5.6, attack=0.2, decay=3.0, gain=0.5, start=0.55), tone(396.0, 4.5, attack=0.3, decay=2.2, gain=0.16, start=0.9)), gain=0.24)
 # A reminder: the same gong, quieter and shorter, from the next room.
 write('session-remind.wav', mix(tone(132.0, 4.2, attack=0.16, decay=2.4), tone(198.0, 3.8, attack=0.16, decay=2.2, gain=0.7, start=0.06), tone(264.0, 3.4, attack=0.2, decay=2.0, gain=0.5, start=0.5)), gain=0.13)
-# The call back: the same gong as the end. One sound to know.
-write('session-back.wav', mix(tone(132.0, 6.5, attack=0.16, decay=3.8), tone(198.0, 6.0, attack=0.16, decay=3.4, gain=0.7, start=0.06), tone(264.0, 5.6, attack=0.2, decay=3.0, gain=0.5, start=0.55), tone(396.0, 4.5, attack=0.3, decay=2.2, gain=0.16, start=0.9)), gain=0.24)
+# The call back: no strike at all. A warm chord that breathes in over a second (264 and 396 Hz, a fifth),
+# the 528 joining a moment later like a small lift, then a long easy release. An invitation, not a call.
+write('session-back.wav', mix(tone(264.0, 5.6, attack=0.9, decay=2.6), tone(396.0, 5.4, attack=1.0, decay=2.4, gain=0.6, start=0.1), tone(528.0, 4.6, attack=0.8, decay=2.2, gain=0.35, start=0.9)), gain=0.19)
