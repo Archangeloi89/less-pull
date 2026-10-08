@@ -126,6 +126,12 @@ Choose **Settings…** in the menu. This is the window on the right, with five t
 
 On the very first launch this window opens by itself with a short welcome.
 
+<p align="center">
+  <img src="docs/assets/settings-tabs.png" width="100%" alt="Four screenshots of the Settings window on a plain backdrop. Shortcuts: Peek in color with the shortcut Option-A, what peeking turns off, a Toggle Grayscale shortcut Option-Command-G, and what clicking the menu-bar icon does. Apps: three app exceptions, Music, Photos and TextEdit, each with its icon, a Use this exception checkbox, Default, On and Off segments for Grayscale and Night Shift, and a warmth slider on the ramp. Websites: the Install Browser Extension button, the extension connected in Firefox, Brave and Opera, and two saved exceptions for example.com and one exact page with the same controls. About: the app icon, version 1.4.4 build 16, the author's links, Help, Diagnostics and Licenses, and the automatic update check.">
+</p>
+
+<sub>Real screenshots of build 16 with example rules, placed on a plain backdrop.</sub>
+
 ### Website exceptions, in your browser
 
 The browser extension has no buttons and no settings of its own. It only tells the Mac app which website is in front. With a website open, the Less Pull menu offers **Exception for [that site]**, just like it does for apps: choose **Whole domain** or **This exact page**, set only what you want to change, and it is saved. Saved website rules are listed under **Settings… → Websites**.
