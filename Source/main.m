@@ -62,10 +62,20 @@
 // until the app is Developer ID signed and notarized.
 static NSString *const LessPullReleasesAPI=@"https://api.github.com/repos/Archangeloi89/less-pull/releases/latest";
 static NSString *const LessPullReleasesPage=@"https://github.com/Archangeloi89/less-pull/releases";
+// The author's links. Empty entries are not shown; fill in Substack, YouTube and X when known.
+static NSString *const LessPullWebsite=@"https://jiriarion.com";
+static NSString *const LessPullCoffee=@"https://buymeacoffee.com/HsERf62fiZ";
+static NSString *const LessPullSubstack=@"";
+static NSString *const LessPullYouTube=@"";
+static NSString *const LessPullX=@"";
 @interface UpdateCheck : NSObject
 + (NSString *)versionFromTag:(NSString *)tag;
 + (NSComparisonResult)compareVersion:(NSString *)a to:(NSString *)b;
 + (NSDictionary *)updateFromRelease:(id)release currentVersion:(NSString *)current;
++ (NSInteger)buildFromTag:(NSString *)tag;
++ (NSDictionary *)updateFromRelease:(id)release currentVersion:(NSString *)current currentBuild:(NSInteger)build;
++ (BOOL)metadata:(id)metadata allowsSystem:(NSOperatingSystemVersion)system;
++ (NSString *)metadataURLInRelease:(id)release;
 @end
 @implementation UpdateCheck
 + (NSString *)versionFromTag:(NSString *)tag {if(![tag isKindOfClass:NSString.class])return nil;NSString *t=[tag stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceCharacterSet];if([t.lowercaseString hasPrefix:@"v"])t=[t substringFromIndex:1];return t.length?t:nil;}
@@ -74,12 +84,34 @@ static NSString *const LessPullReleasesPage=@"https://github.com/Archangeloi89/l
  for(NSUInteger i=0;i<n;i++){NSInteger x=i<pa.count?[pa[i] integerValue]:0,y=i<pb.count?[pb[i] integerValue]:0;if(x!=y)return x<y?NSOrderedAscending:NSOrderedDescending;}
  return NSOrderedSame;
 }
-+ (NSDictionary *)updateFromRelease:(id)release currentVersion:(NSString *)current {
+// Releases are tagged v<version>-<build>, e.g. v1.4.4-17. The version stays 1.4.4
+// for good (the author's joke); the build number is what moves.
++ (NSInteger)buildFromTag:(NSString *)tag {
+ if(![tag isKindOfClass:NSString.class])return 0;NSRange dash=[tag rangeOfString:@"-" options:NSBackwardsSearch];if(dash.location==NSNotFound)return 0;
+ NSString *digits=[tag substringFromIndex:dash.location+1];if(!digits.length||[digits rangeOfCharacterFromSet:NSCharacterSet.decimalDigitCharacterSet.invertedSet].location!=NSNotFound)return 0;return digits.integerValue;
+}
++ (NSString *)metadataURLInRelease:(id)release {
+ for(id asset in [release[@"assets"] isKindOfClass:NSArray.class]?release[@"assets"]:@[]){if([asset isKindOfClass:NSDictionary.class]&&[asset[@"name"] isEqual:@"lesspull-update.json"]&&[asset[@"browser_download_url"] isKindOfClass:NSString.class]&&[asset[@"browser_download_url"] hasPrefix:@"https://github.com/"])return asset[@"browser_download_url"];}
+ return nil;
+}
+// Only a build made for this macOS is offered: minimumSystemVersion and
+// maximumSystemVersion (either optional) bound the running system, major.minor.
++ (BOOL)metadata:(id)metadata allowsSystem:(NSOperatingSystemVersion)system {
+ if(![metadata isKindOfClass:NSDictionary.class])return YES;NSString *running=[NSString stringWithFormat:@"%ld.%ld.%ld",(long)system.majorVersion,(long)system.minorVersion,(long)system.patchVersion];
+ NSString *minimum=metadata[@"minimumSystemVersion"],*maximum=metadata[@"maximumSystemVersion"];
+ if([minimum isKindOfClass:NSString.class]&&minimum.length&&[self compareVersion:running to:minimum]==NSOrderedAscending)return NO;
+ if([maximum isKindOfClass:NSString.class]&&maximum.length){NSArray *parts=[maximum componentsSeparatedByString:@"."];NSString *clipped=[[[running componentsSeparatedByString:@"."] subarrayWithRange:NSMakeRange(0,MIN(parts.count,3))] componentsJoinedByString:@"."];if([self compareVersion:clipped to:maximum]==NSOrderedDescending)return NO;}
+ return YES;
+}
++ (NSDictionary *)updateFromRelease:(id)release currentVersion:(NSString *)current {return [self updateFromRelease:release currentVersion:current currentBuild:0];}
++ (NSDictionary *)updateFromRelease:(id)release currentVersion:(NSString *)current currentBuild:(NSInteger)currentBuild {
  if(![release isKindOfClass:NSDictionary.class]||[release[@"draft"] boolValue]||[release[@"prerelease"] boolValue])return nil;
- NSString *version=[self versionFromTag:release[@"tag_name"]];if(!version||!current||[self compareVersion:version to:current]!=NSOrderedDescending)return nil;
+ NSString *version=[self versionFromTag:release[@"tag_name"]];NSInteger build=[self buildFromTag:release[@"tag_name"]];
+ if(build){if(build<=currentBuild)return nil;version=[version substringToIndex:[version rangeOfString:@"-" options:NSBackwardsSearch].location];}
+ else if(!version||!current||[self compareVersion:version to:current]!=NSOrderedDescending)return nil;
  NSString *url=[release[@"html_url"] isKindOfClass:NSString.class]&&[release[@"html_url"] hasPrefix:@"https://github.com/"]?release[@"html_url"]:LessPullReleasesPage;
  NSString *notes=[release[@"body"] isKindOfClass:NSString.class]?release[@"body"]:@"";if(notes.length>2000)notes=[[notes substringToIndex:2000] stringByAppendingString:@"…"];
- return @{@"version":version,@"url":url,@"notes":notes};
+ NSMutableDictionary *update=[@{@"version":version,@"url":url,@"notes":notes,@"build":@(build)} mutableCopy];NSString *metadata=[self metadataURLInRelease:release];if(metadata)update[@"metadata"]=metadata;return update;
 }
 @end
 @interface ExceptionStack : NSStackView
@@ -154,6 +186,8 @@ static NSString *const LessPullReleasesPage=@"https://github.com/Archangeloi89/l
 @property NSTimer *updateTimer;
 @property NSButton *updateCheckbox,*updateButton;
 @property NSTextField *updateStatusLabel;
+@property NSWindow *thanksWindow;
+@property NSTimer *thanksTimer;
 @property EventHotKeyRef peekHotKey;
 @property ShortcutRecorder *peekRecorder;
 @property NSTextField *peekNote;
@@ -346,7 +380,7 @@ static NSString *const LessPullReleasesPage=@"https://github.com/Archangeloi89/l
  [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(displaysChanged:) name:NSApplicationDidChangeScreenParametersNotification object:nil];
  [NSWorkspace.sharedWorkspace.notificationCenter addObserver:self selector:@selector(frontmostChanged:) name:NSWorkspaceDidActivateApplicationNotification object:nil];
  [NSWorkspace.sharedWorkspace.notificationCenter addObserver:self selector:@selector(frontmostChanged:) name:NSWorkspaceDidTerminateApplicationNotification object:nil];
- [self restoreLessPullPause];[self scheduleLessPullPauseTimer];[self registerPeekShortcut];[self scheduleUpdateChecks];[self updateForeground];[self restartTimer];[self schedulePauseTimer];[self sync];
+ [self restoreLessPullPause];[self scheduleLessPullPauseTimer];[self registerPeekShortcut];[self scheduleUpdateChecks];[self scheduleThanks];[self updateForeground];[self restartTimer];[self schedulePauseTimer];[self sync];
  if([NSProcessInfo.processInfo.arguments containsObject:@"--settings"])[self showSettings:nil];
  // First launch: Settings opens with a one-time welcome card above the real controls.
  self.welcomeWanted=firstLaunch||[NSProcessInfo.processInfo.arguments containsObject:@"--welcome"];if(self.welcomeWanted)[self showSettings:nil];
@@ -527,7 +561,7 @@ static NSString *const LessPullReleasesPage=@"https://github.com/Archangeloi89/l
  else {NSMenuItem *pauseAll=[self add:@"Pause Less Pull" action:nil to:menu];pauseAll.toolTip=[self pauseLessPullHelp];pauseAll.submenu=[NSMenu new];for(NSArray *pair in @[@[@"For 15 minutes",@15],@[@"For 1 hour",@60],@[@"Until I resume",@0]]){NSMenuItem *i=[self add:pair[0] action:@selector(pauseLessPull:) to:pauseAll.submenu];i.tag=[pair[1] integerValue];i.toolTip=[self pauseLessPullHelp];}}
  [menu addItem:NSMenuItem.separatorItem];
  if(self.lastExternalApp.bundleIdentifier){NSMenuItem *current=[self add:[NSString stringWithFormat:@"Exception for %@",self.lastExternalApp.localizedName?:@"current app"] action:nil to:menu];current.toolTip=[self exclusionSummary];current.submenu=[self currentAppMenu];current.image=[self menuIconForBundle:self.lastExternalApp.bundleIdentifier];}
- if(self.availableUpdate){NSMenuItem *update=[self add:[NSString stringWithFormat:@"Update available: %@…",self.availableUpdate[@"version"]] action:@selector(showUpdate:) to:menu];update.toolTip=@"See what is new and open the download page.";}
+ if(self.availableUpdate){NSMenuItem *update=[self add:[NSString stringWithFormat:@"Update available: %@…",[[self updateLabel:self.availableUpdate] stringByReplacingOccurrencesOfString:@"Version " withString:@""]] action:@selector(showUpdate:) to:menu];update.toolTip=@"See what is new and open the download page.";}
  [self add:@"Settings…" action:@selector(showSettings:) to:menu];
  [menu addItem:NSMenuItem.separatorItem];
  [self add:@"Quit" action:@selector(quit:) to:menu];
@@ -574,7 +608,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
 }
 - (void)maybeCheckForUpdates {
  NSUserDefaults *d=NSUserDefaults.standardUserDefaults;if(![d boolForKey:@"checkForUpdates"])return;NSDate *last=[d objectForKey:@"lastUpdateCheck"];
- if(![last isKindOfClass:NSDate.class]||[NSDate.date timeIntervalSinceDate:last]>=7*86400)[self runUpdateCheckManual:NO];
+ if(![last isKindOfClass:NSDate.class]||[NSDate.date timeIntervalSinceDate:last]>=86400)[self runUpdateCheckManual:NO];
 }
 - (void)checkForUpdatesNow:(id)sender {[self runUpdateCheckManual:YES];}
 - (void)runUpdateCheckManual:(BOOL)manual {
@@ -586,23 +620,33 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
 - (void)finishUpdateCheckData:(NSData *)data response:(NSURLResponse *)response error:(NSError *)error manual:(BOOL)manual {
  self.checkingUpdates=NO;NSUserDefaults *d=NSUserDefaults.standardUserDefaults;NSInteger status=[response isKindOfClass:NSHTTPURLResponse.class]?[(NSHTTPURLResponse *)response statusCode]:0;
  if(error||status!=200){self.updateStatus=status==404?@"Could not find the release list; it is not public yet.":@"Could not reach GitHub. Try again later.";[self refreshUpdateControls];if(manual)[self showUpdateStatusAlert];return;}
- [d setObject:NSDate.date forKey:@"lastUpdateCheck"];id release=[NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
- NSDictionary *update=[UpdateCheck updateFromRelease:release currentVersion:[NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"]];
+[d setObject:NSDate.date forKey:@"lastUpdateCheck"];id release=[NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
+ NSDictionary *update=[UpdateCheck updateFromRelease:release currentVersion:[NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"] currentBuild:[[NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleVersion"] integerValue]];
+ if(update[@"metadata"]){ // a newer build: one more request tells whether it is made for this macOS
+  self.checkingUpdates=YES;NSURLSessionConfiguration *configuration=NSURLSessionConfiguration.ephemeralSessionConfiguration;configuration.timeoutIntervalForRequest=15;NSURLSession *session=[NSURLSession sessionWithConfiguration:configuration];__weak AppDelegate *weak=self;
+  [[session dataTaskWithURL:[NSURL URLWithString:update[@"metadata"]] completionHandler:^(NSData *meta,NSURLResponse *metaResponse,NSError *metaError){id parsed=meta?[NSJSONSerialization JSONObjectWithData:meta options:0 error:nil]:nil;dispatch_async(dispatch_get_main_queue(),^{[weak finishUpdate:update metadata:parsed manual:manual];});[session finishTasksAndInvalidate];}] resume];return;}
+ [self finishUpdate:update metadata:nil manual:manual];
+}
+- (void)finishUpdate:(NSDictionary *)candidate metadata:(id)metadata manual:(BOOL)manual {
+ self.checkingUpdates=NO;NSUserDefaults *d=NSUserDefaults.standardUserDefaults;BOOL compatible=[UpdateCheck metadata:metadata allowsSystem:NSProcessInfo.processInfo.operatingSystemVersion];NSDictionary *update=compatible?candidate:nil;
  self.availableUpdate=update;if(update)[d setObject:update forKey:@"availableUpdate"];else [d removeObjectForKey:@"availableUpdate"];
- self.updateStatus=update?[NSString stringWithFormat:@"Version %@ is available.",update[@"version"]]:@"Less Pull is up to date.";[self refreshUpdateControls];[self refreshControlsKnown:NO nightOn:NO];[self sync];
+ NSString *label=[self updateLabel:candidate];
+ self.updateStatus=update?[NSString stringWithFormat:@"%@ is available.",label]:candidate?[NSString stringWithFormat:@"%@ exists but is made for another macOS version, so it is not offered.",label]:@"Less Pull is up to date.";[self refreshUpdateControls];[self refreshControlsKnown:NO nightOn:NO];[self sync];
  if(manual){if(update)[self showUpdate:nil];else [self showUpdateStatusAlert];}
 }
-- (void)showUpdateStatusAlert {NSAlert *a=[NSAlert new];a.messageText=self.updateStatus?:@"";a.informativeText=[NSString stringWithFormat:@"This is Less Pull %@.",[NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"]];[NSApp activateIgnoringOtherApps:YES];[a runModal];}
+- (NSString *)updateLabel:(NSDictionary *)update {return [update[@"build"] integerValue]?[NSString stringWithFormat:@"Version %@ (build %ld)",update[@"version"],(long)[update[@"build"] integerValue]]:[NSString stringWithFormat:@"Version %@",update[@"version"]];}
+- (NSString *)runningVersionLabel {return [NSString stringWithFormat:@"%@ (build %@)",[NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"],[NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleVersion"]];}
+- (void)showUpdateStatusAlert {NSAlert *a=[NSAlert new];a.messageText=self.updateStatus?:@"";a.informativeText=[NSString stringWithFormat:@"This is Less Pull %@.",[self runningVersionLabel]];[NSApp activateIgnoringOtherApps:YES];[a runModal];}
 - (void)showUpdate:(id)sender {
- NSDictionary *update=self.availableUpdate;if(!update)return;NSAlert *a=[NSAlert new];a.messageText=[NSString stringWithFormat:@"Less Pull %@ is available",update[@"version"]];
- a.informativeText=[NSString stringWithFormat:@"You have %@.\n\n%@\n\nInstalling is still by hand: download the new version, quit Less Pull, and replace it in Applications. Your settings and exceptions are kept.",[NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"],[update[@"notes"] length]?update[@"notes"]:@"No release notes were provided."];
+ NSDictionary *update=self.availableUpdate;if(!update)return;NSAlert *a=[NSAlert new];a.messageText=[NSString stringWithFormat:@"Less Pull %@ is available",[[self updateLabel:update] stringByReplacingOccurrencesOfString:@"Version " withString:@""]];
+ a.informativeText=[NSString stringWithFormat:@"You have %@.\n\n%@\n\nInstalling is still by hand: download the new version, quit Less Pull, and replace it in Applications. Your settings and exceptions are kept.",[self runningVersionLabel],[update[@"notes"] length]?update[@"notes"]:@"No release notes were provided."];
  [a addButtonWithTitle:@"Open Download Page"];[a addButtonWithTitle:@"Later"];[NSApp activateIgnoringOtherApps:YES];if([a runModal]==NSAlertFirstButtonReturn)[NSWorkspace.sharedWorkspace openURL:[NSURL URLWithString:update[@"url"]]];
 }
 - (void)toggleUpdateChecks:(NSButton *)sender {[NSUserDefaults.standardUserDefaults setBool:sender.state==NSControlStateValueOn forKey:@"checkForUpdates"];[self refreshUpdateControls];}
 - (void)refreshUpdateControls {
  NSUserDefaults *d=NSUserDefaults.standardUserDefaults;self.updateCheckbox.state=[d boolForKey:@"checkForUpdates"];self.updateButton.enabled=!self.checkingUpdates;
  NSDate *last=[d objectForKey:@"lastUpdateCheck"];NSString *when=[last isKindOfClass:NSDate.class]?[NSDateFormatter localizedStringFromDate:last dateStyle:NSDateFormatterMediumStyle timeStyle:NSDateFormatterShortStyle]:nil;
- NSString *status=self.updateStatus?:(self.availableUpdate?[NSString stringWithFormat:@"Version %@ is available.",self.availableUpdate[@"version"]]:(when?@"Less Pull was up to date at the last check.":@"Not checked yet."));
+ NSString *status=self.updateStatus?:(self.availableUpdate?[NSString stringWithFormat:@"%@ is available.",[self updateLabel:self.availableUpdate]]:(when?@"Less Pull was up to date at the last check.":@"Not checked yet."));
  self.updateStatusLabel.stringValue=when?[NSString stringWithFormat:@"%@ Last checked %@.",status,when]:status;
 }
 - (NSString *)pauseLessPullHelp {return @"Shows the plain display for a while: color and no added warmth. Night Shift is left alone. Your settings and exceptions are kept.";}
@@ -782,18 +826,17 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
 - (NSStackView *)aboutTab {
  NSImageView *icon=[NSImageView imageViewWithImage:NSApp.applicationIconImage];[icon.widthAnchor constraintEqualToConstant:64].active=YES;[icon.heightAnchor constraintEqualToConstant:64].active=YES;icon.accessibilityLabel=@"Less Pull app icon";
  NSTextField *name=[NSTextField labelWithString:@"Less Pull"];name.font=[NSFont systemFontOfSize:20 weight:NSFontWeightSemibold];
- NSTextField *version=[NSTextField labelWithString:[NSString stringWithFormat:@"Version %@ (%@)",[NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"],[NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleVersion"]]];version.textColor=NSColor.secondaryLabelColor;
+ NSTextField *version=[NSTextField labelWithString:[NSString stringWithFormat:@"Version %@",[self runningVersionLabel]]];version.textColor=NSColor.secondaryLabelColor;version.toolTip=@"It will always be 1.4.4. The build number is what changes.";version.accessibilityHelp=version.toolTip;
  NSTextField *credit=[NSTextField labelWithString:@"© 2026 Jiri Arion Rose"];credit.font=[NSFont systemFontOfSize:11];credit.textColor=NSColor.secondaryLabelColor;
- NSStackView *identity=[self column:@[name,version,credit]];identity.spacing=2;
- NSButton *website=[NSButton buttonWithTitle:@"jiriarion.com" target:self action:@selector(openWebsite:)];website.bezelStyle=NSBezelStyleInline;website.contentTintColor=NSColor.linkColor;[self helpView:website text:@"Open jiriarion.com in your default browser." label:@"Visit Jiri Arion Rose’s website"];
- NSButton *support=[NSButton buttonWithTitle:@"Buy me a coffee" target:self action:@selector(openSupport:)];support.bezelStyle=NSBezelStyleInline;support.contentTintColor=NSColor.linkColor;[self helpView:support text:@"Open buymeacoffee.com/HsERf62fiZ in your default browser." label:@"Support Jiri Arion Rose — Buy me a coffee"];
+ NSTextField *forever=[NSTextField labelWithString:@"It will always be 1.4.4. The build number is what changes."];forever.font=[NSFont systemFontOfSize:10];forever.textColor=NSColor.tertiaryLabelColor;
+ NSStackView *identity=[self column:@[name,version,forever,credit]];identity.spacing=2;
  NSButton *help=[NSButton buttonWithTitle:@"Help" target:self action:@selector(showHelp:)];[self helpView:help text:@"A short guide to Less Pull." label:@"Help"];
  NSButton *diagnostics=[NSButton buttonWithTitle:@"Diagnostics…" target:self action:@selector(diagnostics:)];[self helpView:diagnostics text:@"Technical details for troubleshooting." label:@"Diagnostics"];
  NSButton *licenses=[NSButton buttonWithTitle:@"Licenses" target:self action:@selector(showLicenses:)];[self helpView:licenses text:@"Show the app and source license files included with Less Pull." label:@"Show licenses"];
- self.updateCheckbox=[NSButton checkboxWithTitle:@"Check for updates automatically" target:self action:@selector(toggleUpdateChecks:)];[self helpView:self.updateCheckbox text:@"About once a week, Less Pull asks GitHub whether a newer version exists. Nothing about you is sent." label:@"Check for updates automatically"];
+ self.updateCheckbox=[NSButton checkboxWithTitle:@"Check for updates automatically" target:self action:@selector(toggleUpdateChecks:)];[self helpView:self.updateCheckbox text:@"Once a day, Less Pull asks GitHub whether a newer build exists. Nothing about you is sent." label:@"Check for updates automatically"];
  self.updateButton=[NSButton buttonWithTitle:@"Check for Updates…" target:self action:@selector(checkForUpdatesNow:)];[self helpView:self.updateButton text:@"Ask GitHub now whether a newer version exists." label:@"Check for Updates"];
  self.updateStatusLabel=[self note:@""];
- NSStackView *column=[self column:@[[self row:@[icon,identity]],[self row:@[website,support]],[self separator],[self row:@[help,diagnostics,licenses]],[self separator],self.updateCheckbox,[self note:@"About once a week, one request to GitHub asks whether a newer version exists. Nothing about you is sent, and you can turn this off."],[self row:@[self.updateButton,[self spacer]]],self.updateStatusLabel,[self note:@"Everything else stays on this Mac: no account, no analytics, no network service. The browser extension talks only to the app."]]];
+ NSStackView *column=[self column:@[[self row:@[icon,identity]],[self row:[self authorLinkButtons]],[self separator],[self row:@[help,diagnostics,licenses]],[self separator],self.updateCheckbox,[self note:@"Once a day, one request to GitHub asks whether a newer build exists; a second one reads which macOS versions it is made for, so only builds for your macOS are offered. Nothing about you is sent, and you can turn this off."],[self row:@[self.updateButton,[self spacer]]],self.updateStatusLabel,[self note:@"Everything else stays on this Mac: no account, no analytics, no network service. The browser extension talks only to the app."]]];
  [(NSStackView *)column.arrangedSubviews[0] setSpacing:16];[column setCustomSpacing:4 afterView:self.updateCheckbox];[column setCustomSpacing:4 afterView:column.arrangedSubviews[7]];[self refreshUpdateControls];
  return column;
 }
@@ -833,8 +876,49 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  guide.informativeText=firefox?@"1. On the page that opened, click Load Temporary Add-on….\n2. Select manifest.json in the Browser Extension (Firefox) folder shown in Finder.\n3. Pin Less Pull in the toolbar.\n\nFirefox removes temporary add-ons when it quits; load it again next time, or use Firefox Developer Edition with signing turned off. Click its icon on a website to give that site its own settings. Keep Less Pull where it is installed; run this setup again if you move it.":@"1. Turn on Developer mode on the Extensions page.\n2. Click Load unpacked.\n3. Select the Browser Extension folder shown in Finder.\n4. Pin Less Pull in the browser toolbar.\n\nClick its icon on a website to give that site its own settings. Keep Less Pull where it is installed; run this setup again if you move it.";
  [guide addButtonWithTitle:@"Done"];[guide addButtonWithTitle:@"Copy extension folder path"];[NSApp activateIgnoringOtherApps:YES];if([guide runModal]==NSAlertSecondButtonReturn){[NSPasteboard.generalPasteboard clearContents];[NSPasteboard.generalPasteboard setString:folder.path forType:NSPasteboardTypeString];}
 }
-- (void)openWebsite:(id)sender {[NSWorkspace.sharedWorkspace openURL:[NSURL URLWithString:@"https://jiriarion.com"]];}
-- (void)openSupport:(id)sender {[NSWorkspace.sharedWorkspace openURL:[NSURL URLWithString:@"https://buymeacoffee.com/HsERf62fiZ"]];}
+- (void)openWebsite:(id)sender {[NSWorkspace.sharedWorkspace openURL:[NSURL URLWithString:LessPullWebsite]];}
+- (void)openSupport:(id)sender {[NSWorkspace.sharedWorkspace openURL:[NSURL URLWithString:LessPullCoffee]];}
+- (void)openLink:(NSButton *)sender {if(sender.identifier.length)[NSWorkspace.sharedWorkspace openURL:[NSURL URLWithString:sender.identifier]];}
+// Link buttons for the About tab and the thanks window; empty addresses are skipped.
+- (NSArray<NSButton *> *)authorLinkButtons {
+ NSMutableArray *buttons=[NSMutableArray new];
+ for(NSArray *link in @[@[@"jiriarion.com",LessPullWebsite,@"Open jiriarion.com in your default browser.",@"Visit Jiri Arion Rose’s website"],@[@"Buy me a coffee",LessPullCoffee,@"Open buymeacoffee.com/HsERf62fiZ in your default browser.",@"Support Jiri Arion Rose — Buy me a coffee"],@[@"Substack",LessPullSubstack,@"Open Jiri Arion Rose’s Substack in your default browser.",@"Jiri Arion Rose on Substack"],@[@"YouTube",LessPullYouTube,@"Open Jiri Arion Rose’s YouTube channel in your default browser.",@"Jiri Arion Rose on YouTube"],@[@"X",LessPullX,@"Open Jiri Arion Rose on X in your default browser.",@"Jiri Arion Rose on X"]]){
+  if(![link[1] length])continue;NSButton *b=[NSButton buttonWithTitle:link[0] target:self action:@selector(openLink:)];b.identifier=link[1];b.bezelStyle=NSBezelStyleInline;b.contentTintColor=NSColor.linkColor;[self helpView:b text:link[2] label:link[3]];[buttons addObject:b];}
+ return buttons;
+}
+// A thank-you after 30 days of use: shown once, Later asks again in 90 days,
+// Don't show again never does. Nothing is sent anywhere.
+- (void)scheduleThanks {
+ NSUserDefaults *d=NSUserDefaults.standardUserDefaults;if(![d objectForKey:@"firstLaunchDate"])[d setObject:NSDate.date forKey:@"firstLaunchDate"];
+ [self.thanksTimer invalidate];self.thanksTimer=[NSTimer timerWithTimeInterval:3600 target:self selector:@selector(maybeShowThanks) userInfo:nil repeats:YES];[NSRunLoop.mainRunLoop addTimer:self.thanksTimer forMode:NSRunLoopCommonModes];
+ if([NSProcessInfo.processInfo.arguments containsObject:@"--thanks"])[self showThanks:nil];else [self performSelector:@selector(maybeShowThanks) withObject:nil afterDelay:120];
+}
+- (void)maybeShowThanks {
+ NSUserDefaults *d=NSUserDefaults.standardUserDefaults;if([d boolForKey:@"thanksDismissed"]||self.thanksWindow.visible)return;
+ NSDate *first=[d objectForKey:@"firstLaunchDate"],*next=[d objectForKey:@"thanksNextDate"];NSDate *due=[next isKindOfClass:NSDate.class]?next:[[first isKindOfClass:NSDate.class]?first:NSDate.date dateByAddingTimeInterval:30*86400];
+ if([NSDate.date compare:due]==NSOrderedAscending)return;[self showThanks:nil];
+}
+- (void)showThanks:(id)sender {
+ if(!self.thanksWindow){
+  self.thanksWindow=[[NSWindow alloc]initWithContentRect:NSMakeRect(0,0,460,380) styleMask:NSWindowStyleMaskTitled|NSWindowStyleMaskClosable backing:NSBackingStoreBuffered defer:NO];self.thanksWindow.title=@"Thank you";self.thanksWindow.releasedWhenClosed=NO;
+  NSImageView *icon=[NSImageView imageViewWithImage:NSApp.applicationIconImage];[icon.widthAnchor constraintEqualToConstant:56].active=YES;[icon.heightAnchor constraintEqualToConstant:56].active=YES;icon.accessibilityLabel=@"Less Pull app icon";
+  NSTextField *title=[NSTextField labelWithString:@"Are you enjoying Less Pull?"];title.font=[NSFont systemFontOfSize:18 weight:NSFontWeightSemibold];
+  NSTextField *body=[NSTextField wrappingLabelWithString:@"This app is a gift from the universe to you. It has been fully funded by life.\n\nMy future projects and my work are still being developed, and they benefit from any kind of support: a contribution, telling a friend, or whatever you choose.\n\nThanks for being part of life and making it more beautiful for everyone.\n\n— Jiri Arion Rose"];body.preferredMaxLayoutWidth=412;
+  NSStackView *links=[self row:[self authorLinkButtons]];links.spacing=6;
+  NSButton *later=[NSButton buttonWithTitle:@"Later" target:self action:@selector(thanksLater:)];[self helpView:later text:@"Close this and show it again in about three months." label:@"Later"];
+  NSButton *never=[NSButton buttonWithTitle:@"Don’t Show Again" target:self action:@selector(thanksNever:)];[self helpView:never text:@"Close this and never show it again." label:@"Don’t show again"];
+  NSButton *done=[NSButton buttonWithTitle:@"Thanks" target:self action:@selector(thanksNever:)];done.keyEquivalent=@"\r";[self helpView:done text:@"Close this window; it will not come back." label:@"Thanks"];
+  NSStackView *buttons=[self row:@[never,[self spacer],later,done]];
+  NSStackView *header=[self row:@[icon,title]];header.spacing=14;
+  NSStackView *stack=[self column:@[header,body,links,buttons]];stack.spacing=16;stack.edgeInsets=NSEdgeInsetsMake(22,24,20,24);stack.translatesAutoresizingMaskIntoConstraints=NO;[stack setCustomSpacing:10 afterView:body];
+  NSView *content=self.thanksWindow.contentView;[content addSubview:stack];
+  [NSLayoutConstraint activateConstraints:@[[stack.topAnchor constraintEqualToAnchor:content.topAnchor],[stack.leadingAnchor constraintEqualToAnchor:content.leadingAnchor],[stack.trailingAnchor constraintEqualToAnchor:content.trailingAnchor],[stack.bottomAnchor constraintEqualToAnchor:content.bottomAnchor],[content.widthAnchor constraintEqualToConstant:460],[buttons.widthAnchor constraintEqualToAnchor:stack.widthAnchor constant:-48]]];
+  [content layoutSubtreeIfNeeded];[self.thanksWindow setContentSize:content.fittingSize];[self.thanksWindow center];
+ }
+ [NSApp activateIgnoringOtherApps:YES];[self.thanksWindow makeKeyAndOrderFront:nil];
+}
+- (void)thanksLater:(id)sender {[NSUserDefaults.standardUserDefaults setObject:[NSDate.date dateByAddingTimeInterval:90*86400] forKey:@"thanksNextDate"];[self.thanksWindow close];}
+- (void)thanksNever:(id)sender {[NSUserDefaults.standardUserDefaults setBool:YES forKey:@"thanksDismissed"];[NSUserDefaults.standardUserDefaults removeObjectForKey:@"thanksNextDate"];[self.thanksWindow close];}
 - (NSArray<NSArray<NSString *> *> *)helpSections {
  return @[
   @[@"What Less Pull does",@"Less Pull takes the color out of your screen so it pulls at your attention less. You can add warmth, from amber to red, and keep color where you need it."],
@@ -846,7 +930,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
   @[@"Peek in color",@"Record a shortcut in Settings → General. Hold it to see the plain display; let go and Less Pull fades back. Nothing is saved and no exception is made."],
   @[@"Pausing",@"Pause Less Pull shows the plain display for 15 minutes, an hour, or until you resume: color and no added warmth, with Night Shift left alone. Your settings and exceptions are kept, and the menu-bar icon shows a pause mark."],
   @[@"Quitting",@"Quitting returns the display to normal and lets Night Shift follow its schedule again. Your settings and exceptions are kept."],
-  @[@"Updates",@"About once a week Less Pull asks GitHub whether a newer version exists; the menu-bar icon then shows a small dot and the menu offers “Update available”. Nothing about you is sent. Turn it off in Settings → About."],
+  @[@"Updates",@"Once a day Less Pull asks GitHub whether a newer build exists, and only offers builds made for your macOS version; the menu-bar icon then shows a small dot and the menu offers “Update available”. Nothing about you is sent. Turn it off in Settings → About."],
   @[@"Something not working?",@"Diagnostics shows technical details you can include when asking for help. Nothing is sent anywhere."]];
 }
 - (void)showHelp:(id)sender {

@@ -6,7 +6,7 @@ This describes Less Pull 1.5.0.
 
 - No account, analytics, telemetry or cloud sync.
 - The app and the extension run no network service of their own.
-- About once a week the app asks GitHub whether a newer version exists. That is one HTTPS request to GitHub's releases API with no identifiers; it can be turned off in Settings → About.
+- Once a day the app asks GitHub whether a newer build exists. That is one HTTPS request to GitHub's releases API with no identifiers (a second one reads which macOS versions a newer build is made for); it can be turned off in Settings → About.
 - The extension never reads or changes the content of web pages.
 - Your rules are stored on your Mac.
 
@@ -25,7 +25,7 @@ The domain and URL of the active public tab are sent through a small helper and 
 
 ## The update check
 
-Once a week at most, and when you choose **Check for Updates…**, the app requests `https://api.github.com/repos/Archangeloi89/less-pull/releases/latest` over HTTPS. The request carries no account, identifier or settings; GitHub sees the same thing any browser visiting that address would send, including your IP address, under [GitHub's privacy statement](https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement). The reply (version, release notes, download page) is stored on your Mac so the menu can show it. Nothing is downloaded or installed by itself; installing a new version is done by you. Untick **Check for updates automatically** in Settings → About to stop the weekly check; the manual button still works.
+Once a day at most, and when you choose **Check for Updates…**, the app requests `https://api.github.com/repos/Archangeloi89/less-pull/releases/latest` over HTTPS. If that names a newer build, it also fetches the small `lesspull-update.json` file attached to that release, which says which macOS versions the build is made for; builds made for another macOS version are not offered. The request carries no account, identifier or settings; GitHub sees the same thing any browser visiting that address would send, including your IP address, under [GitHub's privacy statement](https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement). The reply (version, release notes, download page) is stored on your Mac so the menu can show it. Nothing is downloaded or installed by itself; installing a new version is done by you. Untick **Check for updates automatically** in Settings → About to stop the daily check; the manual button still works.
 
 ## What is stored
 

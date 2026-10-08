@@ -149,7 +149,7 @@ The extension tells the Mac app which site is in front, and the app changes the 
 
 ## Private by design
 
-No account, no analytics, no cloud sync. The extension reads the address of the active tab, passes it to the app on your Mac, and never reads or changes page content. Private tabs are excluded. Your rules stay on your Mac. The only thing the app sends anywhere is one request to GitHub about once a week to ask whether a newer version exists; it carries nothing about you and can be turned off in Settings → About. [Privacy details](docs/PRIVACY.md).
+No account, no analytics, no cloud sync. The extension reads the address of the active tab, passes it to the app on your Mac, and never reads or changes page content. Private tabs are excluded. Your rules stay on your Mac. The only thing the app sends anywhere is one request to GitHub once a day to ask whether a newer build exists; it carries nothing about you and can be turned off in Settings → About. [Privacy details](docs/PRIVACY.md).
 
 ## Free to use, including at work
 
