@@ -38,7 +38,7 @@ Keep the Mac app running, and keep it in the place it was installed. If you move
 - **macOS 13 or later** is the build target. Only macOS 27 has been tested.
 - **Ad-hoc signed, not notarized.** Developer ID signing and notarization are planned.
 - **The extension is loaded by hand.** It is not in the Chrome Web Store yet. It asks for access to tab addresses and for a connection to the local app.
-- **Brave, Firefox and Safari are confirmed working** on the author's Mac. Chrome, Opera and Edge are implemented but have not been through a clean install test; the Safari companion app is included only in builds made with Xcode.
+- **Brave, Firefox, Safari and Opera are confirmed working** on the author's Mac. Chrome and Edge are implemented but have not been through a clean install test; the Safari companion app is included only in builds made with Xcode.
 - **Updates are checked, not installed.** Once a day the app asks GitHub whether a newer build exists and shows a dot on its icon if one is made for your macOS. Installing is still by hand, until the app is signed and notarized.
 - Less Pull uses private macOS display interfaces. A macOS update can change how they behave.
 
