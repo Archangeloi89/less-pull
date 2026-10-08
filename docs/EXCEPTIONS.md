@@ -51,34 +51,26 @@ Things to know:
 
 ## Website exceptions
 
-Website rules need the browser extension, for Safari, Brave, Chrome, Firefox, Opera or Edge. See [Install](INSTALL.md#safari-brave-chrome-firefox-opera-or-edge). The Mac app has to be running.
+Website rules need the browser extension, for Safari, Brave, Chrome, Firefox, Opera or Edge. See [Install](INSTALL.md#safari-brave-chrome-firefox-opera-or-edge). The extension has no buttons and no settings of its own; it only tells the Mac app which website is in front. The Mac app has to be running.
 
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="assets/website-popup-dark.png">
-    <img src="assets/website-popup-light.png" width="620" alt="The Less Pull Website Exceptions popup open from a browser toolbar on example.com/reading. Apply to is set to This exact URL. Grayscale and Night Shift are set to Use default, each showing what the default resolves to. Extra Warmth is 70 percent. Buttons read Save exception and Remove.">
-  </picture>
-</p>
+1. Open the website in your browser.
+2. Click the Less Pull icon in the menu bar and open **Exception for [that site]**.
+3. Under **Apply to**, choose **Whole domain** or **This exact page**.
+4. Set Grayscale and Night Shift to **On**, **Off** or **Use default**; the default entries show what they resolve to, for example **Use default (On)**. Untick **Use default warmth** to give the site its own Extra Warmth with the slider.
 
-<sub>The popup is the shipped extension code, rendered with example data. The browser window around it is a drawing, and menus and sliders look a little different in Brave and Chrome on a Mac.</sub>
-
-1. Open the website and click the Less Pull icon in the browser toolbar. The popup shows the site you are on.
-2. Under **Apply to**, choose **Whole domain** or **This exact URL**.
-3. Set Grayscale and Night Shift to **On**, **Off** or **Use default**. The default entries show what they resolve to, for example **Use default (On)**. Uncheck **Use default warmth** to give the site its own Extra Warmth.
-4. Click **Save exception**.
-
-To change or delete a rule later, pick it from the **Website Exceptions** list in the popup. **Remove** deletes it. Saved website rules are also listed under **Settings… → Websites** in the Mac app, with a **Remove** button, so they can be managed even without the extension.
+The first change saves the rule. **Remove this exception** deletes it. All saved website rules are listed under **Settings… → Websites**, with a **Remove** button, so they can be managed even without the extension.
 
 Things to know:
 
 - The rule applies while that tab is the active tab of the browser window in front. It changes all your displays. Nothing is added to the web page.
 - A domain rule covers subdomains. `example.com` also covers `www.example.com`.
-- An exact URL rule matches the whole address, including its path and query string. The part after `#` is ignored.
-- An exact URL inherits from its domain, a domain inherits from the browser's app rule, and that inherits from your global settings.
-- Private tabs are excluded. The extension does not report them, so they use the browser's app rule or your global settings.
-- Avoid saving exact URLs that contain tokens or other secrets. Saved rules are stored on your Mac. See [Privacy](PRIVACY.md).
+- An exact page rule matches the whole address, including its path and query string. The part after `#` is ignored.
+- An exact page inherits from its domain, a domain inherits from the browser's app rule, and that inherits from your default settings.
+- Private tabs are excluded. The extension does not report them, so they use the browser's app rule or your default settings.
+- Avoid saving exact pages whose address contains tokens or other secrets. Saved rules are stored on your Mac. See [Privacy](PRIVACY.md).
+- Several browsers can use the extension at once; whichever window is in front decides.
 
-Browser support in build 16: Brave is confirmed working. Chrome, Firefox, Safari, Opera and Edge are implemented, but none has been through a clean installation test on a fresh machine. Firefox keeps a temporary add-on only until it quits unless the extension is signed; Safari needs Allow Unsigned Extensions until the companion app is signed by Apple. Several browsers can use the extension at once.
+Browser support in build 16: Brave and Firefox are confirmed working on the author's Mac. Safari, Chrome, Opera and Edge are implemented, but none has been through a clean installation test on a fresh machine. Firefox keeps a temporary add-on only until it quits unless the extension is signed; Safari needs Allow Unsigned Extensions until the companion app is signed by Apple.
 
 ## Examples
 
@@ -87,8 +79,8 @@ These are ideas, not built-in presets.
 | You want | Rule |
 | :-- | :-- |
 | A photo editor in color while everything else is gray | App rule: Grayscale Off |
-| A video site in color, only when its tab is in front | Domain rule: Grayscale Off |
-| A long-read page warmer than the rest of the site | Exact URL rule: uncheck Use default warmth, set Extra Warmth |
+| A video site in color, only when its tab is in front | Whole domain: Grayscale Off |
+| A long-read page warmer than the rest of the site | This exact page: untick Use default warmth, set Extra Warmth |
 | A design tool that should never get Night Shift | App rule: Night Shift Off |
 
 ## Switching

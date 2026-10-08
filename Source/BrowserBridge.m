@@ -43,6 +43,7 @@ static CFDataRef BridgePortCallback(CFMessagePortRef port,SInt32 msgid,CFDataRef
  for(NSString *key in keys){NSDictionary *r=self.rules[key];if([r[@"grayMode"] integerValue])gray=[r[@"grayMode"] integerValue];if([r[@"nightMode"] integerValue])night=[r[@"nightMode"] integerValue];if([r[@"customWarmth"] boolValue])warmth=[r[@"warmth"] doubleValue];}
  return @{@"grayMode":@(gray),@"nightMode":@(night),@"warmth":@(warmth)};
 }
+- (NSDictionary *)activeContextForBrowser:(NSString *)browser {NSDictionary *c=self.contexts[browser];if(![c[@"focused"] boolValue]||[NSDate.date timeIntervalSinceDate:c[@"time"]?:NSDate.distantPast]>65||![c[@"site"] length])return nil;return c;}
 - (void)startPort {
  if(self.port)return;CFMessagePortContext context={0,(__bridge void *)self,NULL,NULL,NULL};CFMessagePortRef port=CFMessagePortCreateLocal(NULL,(__bridge CFStringRef)BrowserBridge.portName,BridgePortCallback,&context,NULL);if(!port)return;
  CFRunLoopSourceRef source=CFMessagePortCreateRunLoopSource(NULL,port,0);CFRunLoopAddSource(CFRunLoopGetMain(),source,kCFRunLoopCommonModes);CFRelease(source);self.port=port;

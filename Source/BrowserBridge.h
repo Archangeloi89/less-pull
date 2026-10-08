@@ -12,5 +12,7 @@
 - (void)stop;
 - (NSDictionary *)handle:(NSDictionary *)message;
 - (NSDictionary *)ruleForBrowser:(NSString *)browser base:(NSDictionary *)base site:(NSString **)site;
+// The public tab in front of a browser right now (site and url), or nil.
+- (NSDictionary *)activeContextForBrowser:(NSString *)browser;
 + (NSString *)socketPath;
 @end

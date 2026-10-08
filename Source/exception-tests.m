@@ -160,6 +160,20 @@ int main(){@autoreleasepool{
   check([PeekShortcut suggestionAvoiding:[NSSet set] preferring:@[@{@"keyCode":@8,@"modifiers":@0}]]==nil,"candidates without a real modifier are never suggested");
   check([[PeekShortcut systemShortcutKeys] isKindOfClass:NSSet.class],"system shortcut list reads without error");
  }
+
+ // Website exception from the menu: the bridge's active tab, whole domain or exact page.
+ {
+  TestApp *t=[TestApp new];FakeFilter *fe=[FakeFilter new];fe.on=YES;fe.state=(NSBlueStatus){.mode=0,.available=YES};FakeWarmth *fw=[FakeWarmth new];t.engine=fe;t.warmth=fw;t.exclusion=[ExclusionPolicy new];t.policy=[SwitchingPolicy new];t.policy.known=YES;t.policy.nightShiftOn=YES;t.automatic=YES;t.selectedMode=100;t.exclusionRules=[NSMutableDictionary new];
+  BrowserBridge *bridge=[BrowserBridge new];bridge.rules=[NSMutableDictionary new];t.browserBridge=bridge;[bridge handle:@{@"type":@"context",@"browser":@"com.brave.Browser",@"session":@"m",@"site":@"example.com",@"url":@"https://example.com/reading?x=1",@"focused":@YES}];
+  NSDictionary *tab=[bridge activeContextForBrowser:@"com.brave.Browser"];check([tab[@"site"] isEqual:@"example.com"]&&[bridge activeContextForBrowser:@"com.google.Chrome"]==nil,"active tab known per browser");
+  check([[t websiteKeyForTab:tab] isEqual:@"example.com"],"whole domain by default");
+  NSMenuItem *off=[NSMenuItem new];off.tag=2;t.lastExternalApp=nil;
+  [t storeWebsiteRule:@{@"grayMode":@2} forTab:tab];check([bridge.rules[@"example.com"][@"grayMode"] integerValue]==2&&![bridge.rules[@"example.com"][@"customWarmth"] boolValue],"domain rule saved through the bridge");
+  t.websiteScopeExact=YES;check([[t websiteKeyForTab:tab] isEqual:@"https://example.com/reading?x=1"],"exact page key");
+  [t storeWebsiteRule:@{@"customWarmth":@YES,@"warmth":@40} forTab:tab];check([bridge.rules[@"https://example.com/reading?x=1"][@"warmth"] doubleValue]==40&&[bridge.rules[@"https://example.com/reading?x=1"][@"grayMode"] integerValue]==0,"page rule saved with its own warmth only");
+  NSDictionary *inherited=[bridge inheritedForSite:@"https://example.com/reading?x=1" browser:@"com.brave.Browser"];check([inherited[@"grayMode"] integerValue]==2,"page inherits the domain's grayscale for the menu labels");
+  t.websiteScopeExact=NO;bridge.rules=[NSMutableDictionary new];[bridge handle:@{@"type":@"clear",@"browser":@"com.brave.Browser",@"session":@"m"}];(void)off;
+ }
  NSUInteger combinations=0;
  for(int follow=0;follow<2;follow++)for(int globalNight=0;globalNight<2;globalNight++)for(int base=100;base<=101;base++)for(int grayRule=0;grayRule<3;grayRule++)for(int nightRule=0;nightRule<3;nightRule++)for(int custom=0;custom<2;custom++)for(NSNumber *percent in @[@0,@25,@77,@100]){
   TestApp *t=[TestApp new];FakeFilter *fe=[FakeFilter new];fe.on=globalNight;fe.state=(NSBlueStatus){.mode=0,.available=YES};FakeWarmth *fw=[FakeWarmth new];t.engine=fe;t.warmth=fw;t.exclusion=[ExclusionPolicy new];t.policy=[SwitchingPolicy new];t.policy.known=YES;t.policy.nightShiftOn=globalNight;t.policy.automatic=follow;t.automatic=follow;t.policy.overrideMode=-1;t.selectedMode=base;[d setInteger:base forKey:@"nightMode"];t.grayOverride=grayRule;t.nightOverride=nightRule;t.excludeNight=nightRule!=0;t.customWarmth=custom;t.appWarmth=percent.doubleValue;t.animateAppearance=YES;
@@ -169,5 +183,5 @@ int main(){@autoreleasepool{
  }
  printf("PASS: %lu combined following/global-state/base/grayscale/Night-Shift/warmth cases and restoration.\n",(unsigned long)combinations);
  check(e.nativeWrites==0,"no native filter toggles / HUD requests");
- puts("PASS: Grayscale off for a while, Peek effects, shortcut suggestions; preference migration; update check version/build/compatibility parsing; Peek in color (plain display while held, release restores, nothing saved, shortcut rules); Pause Less Pull (plain display, rules ignored, settings kept, relaunch, expiry); inheritance, independent gray/warmth, Night Shift on/off, own versus genuine transitions, manual off, timed-off precedence/expiry, schedule cutoff, recovery, rapid rule switches.");
+ puts("PASS: website exception from the menu; Grayscale off for a while, Peek effects, shortcut suggestions; preference migration; update check version/build/compatibility parsing; Peek in color (plain display while held, release restores, nothing saved, shortcut rules); Pause Less Pull (plain display, rules ignored, settings kept, relaunch, expiry); inheritance, independent gray/warmth, Night Shift on/off, own versus genuine transitions, manual off, timed-off precedence/expiry, schedule cutoff, recovery, rapid rule switches.");
 }}

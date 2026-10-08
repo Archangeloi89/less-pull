@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Less Pull — Website Exceptions",
-  "version": "0.3.0",
-  "description": "Set website display exceptions for the Less Pull Mac app.",
+  "version": "0.4.0",
+  "description": "Connects your browser to the Less Pull Mac app, so websites can have their own display settings. Set them from the Less Pull menu.",
   "permissions": [
     "tabs",
     "nativeMessaging"
@@ -11,16 +11,6 @@
     "scripts": [
       "background.js"
     ]
-  },
-  "action": {
-    "default_popup": "popup.html",
-    "default_title": "Less Pull website settings",
-    "default_icon": {
-      "16": "icon16.png",
-      "32": "icon32.png",
-      "48": "icon48.png",
-      "128": "icon128.png"
-    }
   },
   "icons": {
     "16": "icon16.png",

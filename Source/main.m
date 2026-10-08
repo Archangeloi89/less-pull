@@ -212,6 +212,7 @@ static NSString *const LessPullOldBundleIdentifier=@"local.nightshiftfilters.app
 @property NSString *statusImageName;
 @property NSView *welcomeCard;
 @property NSDate *pausedUntil; // nil: not paused; distantFuture: until resumed
+@property BOOL websiteScopeExact; // menu: whole domain (NO) or this exact page (YES)
 @property (nonatomic) BOOL peeking;
 @property NSDictionary *availableUpdate;
 @property NSString *updateStatus;
@@ -329,6 +330,43 @@ static NSString *const LessPullOldBundleIdentifier=@"local.nightshiftfilters.app
 - (void)currentAppChoice:(NSMenuItem *)sender {NSMutableDictionary *rule=[self currentAppRuleCreating:YES];if(!rule)return;rule[sender.tag/10==0?@"grayMode":@"nightMode"]=@(sender.tag%10);[self storeCurrentAppRule:rule];}
 - (void)currentAppWarmthDefault:(NSMenuItem *)sender {NSMutableDictionary *rule=[self currentAppRuleCreating:YES];if(!rule)return;rule[@"customWarmth"]=@(![rule[@"customWarmth"] boolValue]);[self storeCurrentAppRule:rule];}
 - (void)currentAppWarmthChanged:(NSSlider *)sender {NSMutableDictionary *rule=[self currentAppRuleCreating:YES];if(!rule)return;rule[@"customWarmth"]=@YES;rule[@"warmth"]=@(sender.doubleValue);[self storeCurrentAppRule:rule];NSTextField *readout=[sender.superview viewWithTag:98];readout.stringValue=[NSString stringWithFormat:@"%.0f%%",sender.doubleValue];}
+// "Exception for <website>": the same choices as for an app, for the public tab in
+// front. Whole domain (also subdomains) or this exact page; saved through the bridge.
+- (NSString *)websiteKeyForTab:(NSDictionary *)tab {return self.websiteScopeExact&&[tab[@"url"] length]?tab[@"url"]:tab[@"site"];}
+- (NSDictionary *)websiteRuleForTab:(NSDictionary *)tab {return self.browserBridge.rules[[self websiteKeyForTab:tab]];}
+- (void)storeWebsiteRule:(NSDictionary *)rule forTab:(NSDictionary *)tab {
+ NSString *key=[self websiteKeyForTab:tab];BOOL exact=[key containsString:@"://"];
+ [self.browserBridge handle:@{@"type":@"set",@"scope":exact?@"url":@"domain",@"site":key,@"rule":@{@"grayMode":rule[@"grayMode"]?:@0,@"nightMode":rule[@"nightMode"]?:@0,@"customWarmth":rule[@"customWarmth"]?:@NO,@"warmth":rule[@"warmth"]?:@0}}];
+}
+- (NSDictionary *)menuTab {return [self.browserBridge activeContextForBrowser:self.lastExternalApp.bundleIdentifier];}
+- (void)websiteScope:(NSMenuItem *)sender {self.websiteScopeExact=sender.tag==1;}
+- (void)websiteChoice:(NSMenuItem *)sender {NSDictionary *tab=[self menuTab];if(!tab)return;NSMutableDictionary *rule=[[self websiteRuleForTab:tab] mutableCopy]?:[NSMutableDictionary new];rule[sender.tag/10==0?@"grayMode":@"nightMode"]=@(sender.tag%10);[self storeWebsiteRule:rule forTab:tab];}
+- (void)websiteWarmthDefault:(NSMenuItem *)sender {NSDictionary *tab=[self menuTab];if(!tab)return;NSMutableDictionary *rule=[[self websiteRuleForTab:tab] mutableCopy]?:[NSMutableDictionary new];rule[@"customWarmth"]=@(![rule[@"customWarmth"] boolValue]);[self storeWebsiteRule:rule forTab:tab];}
+- (void)websiteWarmthChanged:(NSSlider *)sender {NSDictionary *tab=[self menuTab];if(!tab)return;NSMutableDictionary *rule=[[self websiteRuleForTab:tab] mutableCopy]?:[NSMutableDictionary new];rule[@"customWarmth"]=@YES;rule[@"warmth"]=@(sender.doubleValue);[self storeWebsiteRule:rule forTab:tab];NSTextField *readout=[sender.superview viewWithTag:98];readout.stringValue=[NSString stringWithFormat:@"%.0f%%",sender.doubleValue];}
+- (void)websiteRemove:(NSMenuItem *)sender {NSDictionary *tab=[self menuTab];if(!tab)return;NSString *key=[self websiteKeyForTab:tab];[self.browserBridge handle:@{@"type":@"remove",@"scope":[key containsString:@"://"]?@"url":@"domain",@"site":key}];}
+- (NSMenu *)websiteMenuForTab:(NSDictionary *)tab {
+ NSMenu *sub=[NSMenu new];if(!self.websiteScopeExact&&!self.browserBridge.rules[tab[@"site"]]&&self.browserBridge.rules[tab[@"url"]?:@""])self.websiteScopeExact=YES;
+ NSMenuItem *scopeHead=[[NSMenuItem alloc]initWithTitle:@"Apply to" action:nil keyEquivalent:@""];scopeHead.enabled=NO;[sub addItem:scopeHead];
+ NSMenuItem *domain=[self add:[NSString stringWithFormat:@"Whole domain · %@",tab[@"site"]] action:@selector(websiteScope:) to:sub];domain.tag=0;domain.indentationLevel=1;domain.state=!self.websiteScopeExact;domain.toolTip=@"Also covers subdomains.";
+ NSMenuItem *page=[self add:@"This exact page" action:[tab[@"url"] length]?@selector(websiteScope:):nil to:sub];page.tag=1;page.indentationLevel=1;page.state=self.websiteScopeExact;page.enabled=[tab[@"url"] length]>0;page.toolTip=[NSString stringWithFormat:@"Only this address, with its path and query; the part after # is ignored.\n%@",tab[@"url"]?:@""];
+ [sub addItem:NSMenuItem.separatorItem];
+ NSDictionary *rule=[self websiteRuleForTab:tab];NSString *key=[self websiteKeyForTab:tab];NSDictionary *inherited=[self.browserBridge inheritedForSite:key browser:self.lastExternalApp.bundleIdentifier];NSArray *words=@[@"",@"On",@"Off"];
+ NSArray *titles=@[@"Grayscale",@"Night Shift"],*keys=@[@"grayMode",@"nightMode"];
+ for(int i=0;i<2;i++){NSMenuItem *head=[[NSMenuItem alloc]initWithTitle:titles[i] action:nil keyEquivalent:@""];head.enabled=NO;[sub addItem:head];
+  NSInteger resolved=[inherited[keys[i]] integerValue];NSArray *choices=@[[NSString stringWithFormat:@"Use default%@",resolved?[NSString stringWithFormat:@" (%@)",words[resolved]]:@""],@"On",@"Off"];
+  for(int j=0;j<3;j++){NSMenuItem *item=[self add:choices[j] action:@selector(websiteChoice:) to:sub];item.tag=i*10+j;item.indentationLevel=1;item.state=[rule[keys[i]] integerValue]==j;}
+  [sub addItem:NSMenuItem.separatorItem];}
+ BOOL custom=[rule[@"customWarmth"] boolValue];double inheritedWarmth=[inherited[@"warmth"] doubleValue];
+ NSMenuItem *inherit=[self add:[NSString stringWithFormat:@"Use default warmth (%@)",inheritedWarmth>0?[NSString stringWithFormat:@"%.0f%%",inheritedWarmth]:@"Off"] action:@selector(websiteWarmthDefault:) to:sub];inherit.state=!custom;
+ NSMenuItem *sliderItem=[NSMenuItem new];NSView *view=[[NSView alloc]initWithFrame:NSMakeRect(0,0,260,54)];
+ NSTextField *label=[NSTextField labelWithString:[NSString stringWithFormat:@"Extra Warmth for %@",self.websiteScopeExact?@"this page":tab[@"site"]]];label.font=[NSFont systemFontOfSize:12];label.frame=NSMakeRect(18,34,190,16);label.lineBreakMode=NSLineBreakByTruncatingTail;[view addSubview:label];
+ NSTextField *readout=[NSTextField labelWithString:[NSString stringWithFormat:@"%.0f%%",[rule[@"warmth"] doubleValue]]];readout.tag=98;readout.font=[NSFont monospacedDigitSystemFontOfSize:12 weight:NSFontWeightRegular];readout.alignment=NSTextAlignmentRight;readout.frame=NSMakeRect(204,34,40,16);[view addSubview:readout];
+ NSSlider *slider=[self warmthSliderWithValue:[rule[@"warmth"] doubleValue] action:@selector(websiteWarmthChanged:)];slider.frame=NSMakeRect(18,6,226,26);slider.enabled=custom;[self helpView:slider text:@"Extra Warmth for this website, from Off to Red." label:[NSString stringWithFormat:@"Extra Warmth for %@, percent",key]];[view addSubview:slider];
+ sliderItem.view=view;[sub addItem:sliderItem];[sub addItem:NSMenuItem.separatorItem];
+ if(rule){NSMenuItem *remove=[self add:@"Remove this exception" action:@selector(websiteRemove:) to:sub];remove.toolTip=@"The site then uses the inherited settings again.";}
+ NSMenuItem *more=[self add:@"All website exceptions…" action:@selector(showWebsites:) to:sub];more.toolTip=@"Open Settings → Websites.";
+ return sub;
+}
 - (NSMenu *)currentAppMenu {
  NSMenu *sub=[NSMenu new];NSDictionary *rule=[self currentAppRuleCreating:NO];NSString *name=self.lastExternalApp.localizedName?:@"this app";
  NSArray *titles=@[@"Grayscale",@"Night Shift"],*keys=@[@"grayMode",@"nightMode"],*choices=@[@"Use default",@"On",@"Off"];
@@ -609,6 +647,8 @@ static NSString *const LessPullOldBundleIdentifier=@"local.nightshiftfilters.app
  [menu addItem:NSMenuItem.separatorItem];
  if(self.lastExternalApp.bundleIdentifier){NSMenuItem *current=[self add:[NSString stringWithFormat:@"Exception for %@",self.lastExternalApp.localizedName?:@"current app"] action:nil to:menu];current.toolTip=[self exclusionSummary];current.submenu=[self currentAppMenu];current.image=[self menuIconForBundle:self.lastExternalApp.bundleIdentifier];}
  if(self.availableUpdate){NSMenuItem *update=[self add:[NSString stringWithFormat:@"Update available: %@…",[[self updateLabel:self.availableUpdate] stringByReplacingOccurrencesOfString:@"Version " withString:@""]] action:@selector(showUpdate:) to:menu];update.toolTip=@"See what is new and open the download page.";}
+ NSDictionary *tab=[self.browserBridge activeContextForBrowser:self.lastExternalApp.bundleIdentifier];
+ if(tab){NSMenuItem *site=[self add:[NSString stringWithFormat:@"Exception for %@",tab[@"site"]] action:nil to:menu];site.toolTip=@"Display settings for the website in front. The browser extension only connects the browser; the settings live here.";site.submenu=[self websiteMenuForTab:tab];site.image=[NSImage imageWithSystemSymbolName:@"globe" accessibilityDescription:nil];}
  [self add:@"Settings…" action:@selector(showSettings:) to:menu];
  [menu addItem:NSMenuItem.separatorItem];
  [self add:@"Quit" action:@selector(quit:) to:menu];
@@ -911,13 +951,13 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  return column;
 }
 - (NSStackView *)websitesTab {
- NSTextField *intro=[NSTextField wrappingLabelWithString:@"Websites can have their own settings through the Less Pull browser extension, for Safari, Brave, Chrome, Firefox, Opera and Edge. Click its icon on a website to set up that site or one exact page."];intro.preferredMaxLayoutWidth=452;
+ NSTextField *intro=[NSTextField wrappingLabelWithString:@"Websites can have their own settings through the Less Pull browser extension, for Safari, Brave, Chrome, Firefox, Opera and Edge. With a website in front, the menu-bar menu offers “Exception for that site”, like it does for apps; the extension itself has no buttons."];intro.preferredMaxLayoutWidth=452;
  self.websiteStatus=[self note:@""];
  NSButton *install=[NSButton buttonWithTitle:@"Install Browser Extension…" target:self action:@selector(installBrowserExtension:)];[self helpView:install text:@"Add the Less Pull extension to your browser so websites can have their own settings. Less Pull must stay open." label:@"Install Browser Extension"];
  NSTextField *savedTitle=[NSTextField labelWithString:@"Saved website exceptions"];savedTitle.font=[NSFont systemFontOfSize:13 weight:NSFontWeightMedium];
  NSScrollView *scroll=[NSScrollView new];scroll.hasVerticalScroller=YES;scroll.borderType=NSBezelBorder;[scroll.heightAnchor constraintEqualToConstant:220].active=YES;
  self.websiteRulesList=[ExceptionStack new];self.websiteRulesList.orientation=NSUserInterfaceLayoutOrientationVertical;self.websiteRulesList.alignment=NSLayoutAttributeLeading;self.websiteRulesList.spacing=0;self.websiteRulesList.translatesAutoresizingMaskIntoConstraints=NO;scroll.documentView=self.websiteRulesList;[self.websiteRulesList.widthAnchor constraintEqualToAnchor:scroll.contentView.widthAnchor].active=YES;
- NSStackView *column=[self column:@[intro,[self row:@[install,[self spacer]]],self.websiteStatus,[self separator],savedTitle,scroll,[self note:@"Edit a website’s settings from the extension’s icon in the browser. Remove works here even without the extension. Less Pull must stay open for website exceptions to work; private tabs are left alone."]]];
+ NSStackView *column=[self column:@[intro,[self row:@[install,[self spacer]]],self.websiteStatus,[self separator],savedTitle,scroll,[self note:@"Set a website’s settings from the menu-bar menu while the site is in front. Remove works here even without the extension. Less Pull must stay open for website exceptions to work; private tabs are left alone."]]];
  [column setCustomSpacing:4 afterView:column.arrangedSubviews[1]];[column setCustomSpacing:6 afterView:savedTitle];[self rebuildWebsiteRulesList];
  return column;
 }
@@ -931,7 +971,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
 - (void)rebuildWebsiteRulesList {
  if(!self.websiteRulesList)return;for(NSView *v in self.websiteRulesList.arrangedSubviews.copy){[self.websiteRulesList removeArrangedSubview:v];[v removeFromSuperview];}
  NSArray *keys=[self.browserBridge.rules.allKeys sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
- if(!keys.count){NSTextField *empty=[NSTextField labelWithString:@"No website exceptions yet. Add one from the extension’s icon in the browser."];empty.textColor=NSColor.secondaryLabelColor;NSStackView *pad=[self column:@[empty]];pad.edgeInsets=NSEdgeInsetsMake(10,10,10,10);[self.websiteRulesList addArrangedSubview:pad];}
+ if(!keys.count){NSTextField *empty=[NSTextField labelWithString:@"No website exceptions yet. With a website in front, use “Exception for …” in the menu."];empty.textColor=NSColor.secondaryLabelColor;NSStackView *pad=[self column:@[empty]];pad.edgeInsets=NSEdgeInsetsMake(10,10,10,10);[self.websiteRulesList addArrangedSubview:pad];}
  BOOL first=YES;for(NSString *key in keys){if(!first){NSBox *line=[self separator];[self.websiteRulesList addArrangedSubview:line];[line.widthAnchor constraintEqualToAnchor:self.websiteRulesList.widthAnchor].active=YES;}first=NO;
   BOOL exact=[key containsString:@"://"];NSTextField *name=[NSTextField labelWithString:key];name.font=[NSFont systemFontOfSize:13 weight:NSFontWeightSemibold];name.lineBreakMode=NSLineBreakByTruncatingMiddle;name.toolTip=key;[name setContentCompressionResistancePriority:1 forOrientation:NSLayoutConstraintOrientationHorizontal];
   NSTextField *kind=[self note:exact?@"Exact page":@"Whole domain, including subdomains"];NSTextField *summary=[self note:[self websiteRuleSummary:self.browserBridge.rules[key]]];
@@ -992,7 +1032,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  NSURL *folder=[NSBundle.mainBundle.resourceURL URLByAppendingPathComponent:firefox?@"Browser Extension (Firefox)":@"Browser Extension"];[NSWorkspace.sharedWorkspace activateFileViewerSelectingURLs:@[folder]];
  [NSWorkspace.sharedWorkspace openURLs:@[[NSURL URLWithString:browsers[index][2]]] withApplicationAtURL:browserURL configuration:NSWorkspaceOpenConfiguration.configuration completionHandler:nil];
  NSAlert *guide=[NSAlert new];guide.messageText=[NSString stringWithFormat:@"Finish installation in %@",browser];
- guide.informativeText=firefox?@"1. On the page that opened, click Load Temporary Add-on….\n2. Select manifest.json in the Browser Extension (Firefox) folder shown in Finder.\n3. Pin Less Pull in the toolbar.\n\nFirefox removes temporary add-ons when it quits; load it again next time, or use Firefox Developer Edition with signing turned off. Click its icon on a website to give that site its own settings. Keep Less Pull where it is installed; run this setup again if you move it.":@"1. Turn on Developer mode on the Extensions page.\n2. Click Load unpacked.\n3. Select the Browser Extension folder shown in Finder.\n4. Pin Less Pull in the browser toolbar.\n\nClick its icon on a website to give that site its own settings. Keep Less Pull where it is installed; run this setup again if you move it.";
+ guide.informativeText=firefox?@"1. On the page that opened, click Load Temporary Add-on….\n2. Select manifest.json in the Browser Extension (Firefox) folder shown in Finder.\n\nFirefox removes temporary add-ons when it quits; load it again next time, or use Firefox Developer Edition with signing turned off. The extension has no buttons: with a website in front, use “Exception for …” in the Less Pull menu. Keep Less Pull where it is installed; run this setup again if you move it.":@"1. Turn on Developer mode on the Extensions page.\n2. Click Load unpacked.\n3. Select the Browser Extension folder shown in Finder.\n\nThe extension has no buttons: with a website in front, use “Exception for …” in the Less Pull menu. Keep Less Pull where it is installed; run this setup again if you move it.";
  [guide addButtonWithTitle:@"Done"];[guide addButtonWithTitle:@"Copy extension folder path"];[NSApp activateIgnoringOtherApps:YES];if([guide runModal]==NSAlertSecondButtonReturn){[NSPasteboard.generalPasteboard clearContents];[NSPasteboard.generalPasteboard setString:folder.path forType:NSPasteboardTypeString];}
 }
 // Safari: the extension lives in a small companion app inside Less Pull. Opening it
@@ -1001,7 +1041,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  NSURL *companion=[NSBundle.mainBundle.resourceURL URLByAppendingPathComponent:@"Less Pull for Safari.app"];
  if(![NSFileManager.defaultManager fileExistsAtPath:companion.path]){NSAlert *missing=[NSAlert new];missing.messageText=@"The Safari extension is not in this build";missing.informativeText=@"This copy of Less Pull was built without Xcode, so the Safari companion app is missing. A build with Xcode includes it.";[missing runModal];return;}
  [NSWorkspace.sharedWorkspace openURL:companion];
- NSAlert *guide=[NSAlert new];guide.messageText=@"Finish installation in Safari";guide.informativeText=@"1. The Less Pull for Safari app opens; click its Open Safari Settings button.\n2. Until this build is signed by Apple, Safari needs Allow Unsigned Extensions from the Develop menu (turn on the Develop menu under Settings → Advanced). That choice lasts until Safari quits.\n3. Turn on Less Pull in Settings → Extensions and allow it on all websites.\n\nClick its icon on a website to give that site its own settings. Keep Less Pull where it is installed.";[guide addButtonWithTitle:@"Done"];[NSApp activateIgnoringOtherApps:YES];[guide runModal];
+ NSAlert *guide=[NSAlert new];guide.messageText=@"Finish installation in Safari";guide.informativeText=@"1. The Less Pull for Safari app opens; click its Open Safari Settings button.\n2. Until this build is signed by Apple, Safari needs Allow Unsigned Extensions from the Develop menu (turn on the Develop menu under Settings → Advanced). That choice lasts until Safari quits.\n3. Turn on Less Pull in Settings → Extensions and allow it on all websites.\n\nThe extension has no buttons: with a website in front, use “Exception for …” in the Less Pull menu. Keep Less Pull where it is installed.";[guide addButtonWithTitle:@"Done"];[NSApp activateIgnoringOtherApps:YES];[guide runModal];
 }
 - (void)openWebsite:(id)sender {[NSWorkspace.sharedWorkspace openURL:[NSURL URLWithString:LessPullWebsite]];}
 - (void)openSupport:(id)sender {[NSWorkspace.sharedWorkspace openURL:[NSURL URLWithString:LessPullCoffee]];}
@@ -1053,7 +1093,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
   @[@"Extra Warmth",@"Adds warmth on top of Night Shift. Off adds none; 100% is red. The slider is in the menu and in Settings."],
   @[@"Night Shift",@"Less Pull can turn Night Shift on or off now, or off for a while; your schedule in System Settings stays as it is. With “Extra Warmth follows Night Shift” on, the warmth you set is added only while Night Shift is on, and there is none in the daytime. With it off, Extra Warmth stays on all day. If you move the slider by hand while following, that warmth stays until Night Shift next changes, or until you choose Resume Following."],
   @[@"Exceptions for apps",@"Give an app its own settings in Settings → App Exceptions, or choose “Exception for …” in the menu. They apply while that app is in front with a window open. Each setting can keep the default or get its own value."],
-  @[@"Exceptions for websites",@"Install the browser extension from Settings, for Safari, Brave, Chrome, Firefox, Opera or Edge. Several browsers can use it at the same time; whichever is in front decides. Click its icon on a website to give that site, or one exact page, its own settings. Pages inherit from their domain, and domains from the browser’s app exception. Private tabs are left alone."],
+  @[@"Exceptions for websites",@"Install the browser extension from Settings, for Safari, Brave, Chrome, Firefox, Opera or Edge. It only connects the browser; it has no buttons. With a website in front, the menu offers “Exception for that site”, for the whole domain or one exact page. Pages inherit from their domain, and domains from the browser’s app exception. Several browsers can use it at the same time; private tabs are left alone."],
   @[@"Peek in color",@"Record a shortcut in Settings → Shortcuts, or let Suggest pick one that is free. Hold it to see the plain display; let go and Less Pull fades back. Choose there what peeking turns off: Grayscale, Extra Warmth, and Night Shift if you like. Nothing is saved and no exception is made."],
   @[@"Grayscale off for a while",@"In the menu or in Settings, turn Grayscale off for 1 hour, 4 hours, or until Night Shift next changes. It comes back by itself; your setting stays saved."],
   @[@"The menu-bar icon and shortcuts",@"By default a click opens the menu and a right-click (or Control-click) toggles Grayscale; Settings → Shortcuts can swap the two. A Toggle Grayscale shortcut can be recorded there as well."],

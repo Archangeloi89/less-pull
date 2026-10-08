@@ -22,12 +22,11 @@ The extension is optional. It adds [website exceptions](EXCEPTIONS.md#website-ex
 1. In Less Pull, open **Settings… → Websites**, choose **Install Browser Extension…**, and pick your browser. Less Pull sets up its local connection, opens the browser's extensions page, and shows the extension folder in Finder.
 2. On the Extensions page, turn on **Developer mode**.
 3. Click **Load unpacked** and select the **Browser Extension** folder shown in Finder. You can also press <kbd>⌘</kbd><kbd>⇧</kbd><kbd>G</kbd> in the file picker and enter `/Applications/Less Pull.app/Contents/Resources/Browser Extension`.
-4. Pin Less Pull to the browser toolbar.
-5. Open a website and click the Less Pull icon. The popup already shows the site you are on.
+4. Open a website, then click the Less Pull icon in the **menu bar**: the menu now offers **Exception for [that site]**. The extension itself shows nothing in the browser.
 
 In Firefox the steps differ: on the **about:debugging** page that opens, click **Load Temporary Add-on…** and select `manifest.json` in the **Browser Extension (Firefox)** folder. Firefox removes temporary add-ons when it quits, so load it again next time, or use Firefox Developer Edition with signing turned off.
 
-In Safari the extension comes as a small companion app inside Less Pull. Choosing **Safari** opens it; click **Open Safari Settings** there. Until this build is signed by Apple, Safari needs **Allow Unsigned Extensions** from the **Develop** menu (turn the Develop menu on under Settings → Advanced); that choice lasts until Safari quits. Then turn on **Less Pull** under Settings → Extensions and allow it on all websites.
+In Safari the extension comes as a small companion app inside Less Pull. Choosing **Safari** opens it; click **Open Safari Settings** there. Until this build is signed by Apple, Safari needs **Allow Unsigned Extensions** from the **Develop** menu (turn the Develop menu on under Settings → Advanced); that choice lasts until Safari quits. Then turn on **Less Pull** under Settings → Extensions and allow it on all websites. The extension shows nothing in Safari itself; website exceptions are set from the Less Pull menu.
 
 Opera and Edge take the same steps as Chrome on their own extensions pages. Several browsers can use the extension at the same time; whichever browser window is in front decides.
 

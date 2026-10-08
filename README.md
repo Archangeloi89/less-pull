@@ -35,7 +35,7 @@ An exception can be as broad or as narrow as you like:
 - **A whole website.** A domain rule also covers its subdomains.
 - **One exact URL.** For a single page, with its path and query string.
 
-Website rules are set from the browser toolbar with the [optional extension](#website-exceptions-in-your-browser), and listed under **Settings… → Websites**.
+Website rules are set from the same menu once the [optional extension](#website-exceptions-in-your-browser) connects your browser, and listed under **Settings… → Websites**.
 
 ### Change one thing, keep the rest
 
@@ -96,7 +96,7 @@ More in [Night Shift and warmth](docs/NIGHT-SHIFT.md).
 
 ## Where the controls are
 
-Less Pull has two interfaces on the Mac and a third in the browser.
+Less Pull has two interfaces, both on the Mac: the menu and the Settings window. The browser extension only connects the browser.
 
 <p align="center">
   <img src="docs/assets/interfaces.png" width="100%" alt="Two screenshots of Less Pull side by side. On the left, the menu-bar dropdown under its half-filled circle icon: one status line, Grayscale, the Extra Warmth slider drawn as a ramp from neutral through amber to red with stops labeled Off, 25, 50, 75 and Red, Night Shift with a submenu, Pause Less Pull, Exception for the current app with its icon, Settings and Quit. On the right, the Settings window on its General tab, with the toolbar tabs General, Shortcuts, Apps, Websites and About: the heading Grayscale, Warmth 40 percent, a Grayscale checkbox, the Extra Warmth ramp slider with a Reset button, Night Shift with a Turn Night Shift off for menu, Extra Warmth follows Night Shift, Peek in color with a Record Shortcut button, and Launch at login, each with a short explanation underneath.">
@@ -112,7 +112,7 @@ Click the circle in the menu bar (a right-click toggles Grayscale straight away)
 - **Grayscale** and the **Extra Warmth** slider change your defaults. The slider's track shows the real ramp from neutral through amber to red. **Grayscale off for** gives you color for an hour, four hours, or until Night Shift next changes.
 - **Night Shift** holds everything about Night Shift: on or off now, off for a while, and whether Extra Warmth follows it.
 - **Pause Less Pull** shows the plain display for 15 minutes, an hour, or until you resume.
-- **Exception for [current app]** sets the rule for the app you were just using, right in the menu.
+- **Exception for [current app]** sets the rule for the app you were just using, right in the menu. With a website in front, **Exception for [that site]** does the same for the domain or the exact page.
 
 ### The settings window, for everything in one place
 
@@ -128,18 +128,9 @@ On the very first launch this window opens by itself with a short welcome.
 
 ### Website exceptions, in your browser
 
-Website rules live where you browse. Click the Less Pull icon in the browser toolbar and the popup already knows which site you are on. Choose **Whole domain** or **This exact URL**, set only what you want to change, and save.
+The browser extension has no buttons and no settings of its own. It only tells the Mac app which website is in front. With a website open, the Less Pull menu offers **Exception for [that site]**, just like it does for apps: choose **Whole domain** or **This exact page**, set only what you want to change, and it is saved. Saved website rules are listed under **Settings… → Websites**.
 
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/website-popup-dark.png">
-    <img src="docs/assets/website-popup-light.png" width="620" alt="The Less Pull Website Exceptions popup open from a browser toolbar on example.com/reading. Apply to is set to This exact URL. Grayscale and Night Shift are set to Use default, each showing what the default resolves to. Extra Warmth is 70 percent. Buttons read Save exception and Remove.">
-  </picture>
-</p>
-
-<sub>The popup is the shipped extension code, rendered with example data. The browser window around it is a drawing.</sub>
-
-The extension tells the Mac app which site is in front, and the app changes the display. It does not inject anything into pages, and the Mac app has to be running. Brave is confirmed working. Safari, Chrome, Firefox, Opera and Edge are implemented but have not yet been through a clean install test. Several browsers can use it at the same time.
+The app changes the display; nothing is injected into pages, and the Mac app has to be running. Brave and Firefox are confirmed working on the author's Mac. Safari, Chrome, Opera and Edge are implemented but have not yet been through a clean install test. Several browsers can use the extension at the same time; whichever browser window is in front decides.
 
 ## Install
 
