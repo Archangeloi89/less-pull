@@ -8,4 +8,6 @@ The version number stays 1.4.4 for good; the build number is what changes. Build
 - About → Report a Problem… opens a new GitHub issue with build, macOS version, display count and the diagnostics text filled in. Nothing is sent until you submit it there.
 - Documentation: screenshots, recordings and screen sharing keep their normal colors (the matrix is applied after the picture is made); a figure shows it.
 
+Build 20 (same day) adds Settings → General → Displays: every connected display, by name, with Follows what is on it / Always your defaults / Always plain, in color, stored by display UUID; and the Shortcuts wording "Left-clicking the menu-bar icon".
+
 Verified: the ten automated suites pass, including new per-display engine tests (apply, cache, independent fades, invalidate). Per-display color was confirmed live on the author's Mac with a second display. Browser support and everything else is as in build 17.

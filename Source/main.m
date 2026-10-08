@@ -197,7 +197,7 @@ static NSString *const LessPullOldBundleIdentifier=@"local.nightshiftfilters.app
 @property NSString *foregroundID,*foregroundName,*exclusionError;
 @property NSTabViewController *settingsTabs;
 @property NSTextField *websiteStatus;
-@property NSStackView *exclusionsList;
+@property NSStackView *exclusionsList,*displaysList;
 @property NSTextField *exclusionText;
 @property NSRunningApplication *lastExternalApp;
 @property SwitchingPolicy *policy;
@@ -298,6 +298,29 @@ static NSString *const LessPullOldBundleIdentifier=@"local.nightshiftfilters.app
  if(!hasRule){[self.visibilityTimer invalidate];self.visibilityTimer=nil;}
 }
 - (void)visibilityCheck:(id)sender {NSInteger gray=self.grayOverride,night=self.nightOverride;BOOL custom=self.customWarmth;double warmth=self.appWarmth;NSDictionary *overrides=self.displayOverrides;[self updateForeground];if(gray!=self.grayOverride||night!=self.nightOverride||custom!=self.customWarmth||warmth!=self.appWarmth||!(overrides==self.displayOverrides||[overrides isEqual:self.displayOverrides]))[self sync];}
+// Settings → General → Displays: one choice per connected display. Follows what is on it (the
+// default): the app in front, or the app on top there, or your defaults. Always your defaults:
+// exceptions never apply there. Always plain: no grayscale and no warmth there, ever.
+// Stored by display UUID, so a display keeps its choice when it is plugged in again.
+- (NSString *)displayUUID:(uint32_t)display {CFUUIDRef u=CGDisplayCreateUUIDFromDisplayID(display);if(!u)return [NSString stringWithFormat:@"%u",display];NSString *s=CFBridgingRelease(CFUUIDCreateString(NULL,u));CFRelease(u);return s;}
+- (NSInteger)displayMode:(uint32_t)display {return [[NSUserDefaults.standardUserDefaults dictionaryForKey:@"displayModes"][[self displayUUID:display]] integerValue];}
+- (NSString *)displayName:(uint32_t)display {for(NSScreen *s in NSScreen.screens)if([s.deviceDescription[@"NSScreenNumber"] unsignedIntValue]==display)return s.localizedName;return [NSString stringWithFormat:@"Display %u",display];}
+- (NSView *)displaysSection {
+ NSTextField *title=[NSTextField labelWithString:@"Displays"];title.font=[NSFont systemFontOfSize:13 weight:NSFontWeightMedium];
+ self.displaysList=[self column:@[]];self.displaysList.spacing=6;[self refreshDisplayRows];
+ NSStackView *section=[self column:@[title,self.displaysList,[self note:@"Each display has its own matrix and its own fade. Follows what is on it: the app in front decides its display; every other display follows the app whose window is on top there, with its exception or your defaults. Peek has its own choice under Shortcuts."]]];section.spacing=6;return section;
+}
+- (void)refreshDisplayRows {
+ NSStackView *list=self.displaysList;if(!list)return;for(NSView *v in list.arrangedSubviews.copy){[list removeArrangedSubview:v];[v removeFromSuperview];}
+ NSArray *displays=[self.warmth displays];
+ for(NSNumber *dn in displays){uint32_t d=dn.unsignedIntValue;if(!d)continue;
+  NSTextField *name=[NSTextField labelWithString:[NSString stringWithFormat:@"%@%@",[self displayName:d],CGDisplayIsMain(d)?@" (main)":@""]];name.lineBreakMode=NSLineBreakByTruncatingTail;[name setContentCompressionResistancePriority:200 forOrientation:NSLayoutConstraintOrientationHorizontal];
+  NSPopUpButton *choice=[[NSPopUpButton alloc]initWithFrame:NSZeroRect pullsDown:NO];[choice addItemsWithTitles:@[@"Follows what is on it",@"Always your defaults",@"Always plain, in color"]];[choice selectItemAtIndex:[self displayMode:d]];choice.tag=d;choice.target=self;choice.action=@selector(displayModeChanged:);[choice.widthAnchor constraintEqualToConstant:220].active=YES;
+  [self helpView:choice text:@"What this display shows. Follows what is on it: the app in front, or the app on top here, or your defaults. Always your defaults: exceptions never apply here. Always plain: never grayscale or warmth here." label:[NSString stringWithFormat:@"%@: what it shows",[self displayName:d]]];
+  NSStackView *row=[self row:@[name,[self spacer],choice]];[list addArrangedSubview:row];[row.widthAnchor constraintEqualToAnchor:list.widthAnchor].active=YES;}
+ if(displays.count<2){NSTextField *one=[self note:@"One display is connected. Choices for each display appear here when more are connected."];[list addArrangedSubview:one];}
+}
+- (void)displayModeChanged:(NSPopUpButton *)sender {NSMutableDictionary *m=[[NSUserDefaults.standardUserDefaults dictionaryForKey:@"displayModes"] mutableCopy]?:[NSMutableDictionary new];NSString *key=[self displayUUID:(uint32_t)sender.tag];if(sender.indexOfSelectedItem)m[key]=@(sender.indexOfSelectedItem);else [m removeObjectForKey:key];[NSUserDefaults.standardUserDefaults setObject:m forKey:@"displayModes"];[self updateForeground];[self sync];}
 // Which display shows what: the frontmost app's windows mark its displays. On every other display the
 // app whose window is on top decides (its exception, if it has one, or the defaults); an empty display
 // shows the defaults. Only the frontmost app's own display carries a website rule.
@@ -309,7 +332,9 @@ static NSString *const LessPullOldBundleIdentifier=@"local.nightshiftfilters.app
   for(NSNumber *d in displays){if(top[d])continue;CGRect overlap=CGRectIntersection(CGDisplayBounds(d.unsignedIntValue),rect);if(!CGRectIsNull(overlap)&&overlap.size.width>=80&&overlap.size.height>=50)top[d]=w[(id)kCGWindowOwnerPID];}
   if(top.count==displays.count)break;}
  NSMutableSet *front=[NSMutableSet new];NSMutableDictionary *overrides=[NSMutableDictionary new];
- for(NSNumber *d in displays){NSNumber *pid=top[d];if(pid&&pid.intValue==frontPid){[front addObject:d];continue;}
+ for(NSNumber *d in displays){NSInteger mode=[self displayMode:d.unsignedIntValue];
+  if(mode){overrides[d]=@{@"grayMode":@0,@"customWarmth":@NO,@"warmth":@0,@"plain":@(mode==2)};continue;}
+  NSNumber *pid=top[d];if(pid&&pid.intValue==frontPid){[front addObject:d];continue;}
   NSString *bundle=pid?[NSRunningApplication runningApplicationWithProcessIdentifier:pid.intValue].bundleIdentifier:nil;NSDictionary *rule=bundle&&RuleEnabled(self.exclusionRules[bundle])?self.exclusionRules[bundle]:nil;
   overrides[d]=@{@"grayMode":@([rule[@"grayMode"] integerValue]),@"customWarmth":@([rule[@"customWarmth"] boolValue]),@"warmth":rule[@"warmth"]?:@0};}
  self.frontDisplays=front;self.displayOverrides=overrides;
@@ -965,14 +990,14 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
   [self row:@[self.warmthTitle,[self spacer],self.resetButton]],[self row:@[self.warmthSlider,self.warmthLabel]],tickRow,[self note:@"Adds warmth on top of Night Shift, from Off to Red."],[self separator],
   [self row:@[self.nightButton,[self spacer],self.pausePopup,self.endPauseButton]],[self note:@"Turns Night Shift on or off now; your schedule in System Settings stays as it is."],
   [self row:@[self.autoButton,[self spacer],self.resumeButton]],[self note:@"On: Extra Warmth only while Night Shift is on, none in the daytime. Off: Extra Warmth stays on all day."],[self separator],
-  self.loginButton,self.loginNote]];
+  self.loginButton,self.loginNote,[self separator],[self displaysSection]]];
  NSStackView *column=[self column:views];
  tickRow.identifier=@"fixed";[tickRow.widthAnchor constraintEqualToAnchor:self.warmthSlider.widthAnchor].active=YES;
  NSUInteger base=(self.welcomeCard?1:0)+(self.thanksCard?1:0);[column setCustomSpacing:4 afterView:self.statusText];[column setCustomSpacing:4 afterView:column.arrangedSubviews[base+3]];[column setCustomSpacing:6 afterView:column.arrangedSubviews[base+5]];[column setCustomSpacing:2 afterView:column.arrangedSubviews[base+6]];[column setCustomSpacing:6 afterView:tickRow];[column setCustomSpacing:4 afterView:column.arrangedSubviews[base+10]];[column setCustomSpacing:4 afterView:column.arrangedSubviews[base+12]];
  return column;
 }
 - (NSStackView *)shortcutsTab {
- NSTextField *clickTitle=[NSTextField labelWithString:@"Clicking the menu-bar icon"];clickTitle.font=[NSFont systemFontOfSize:13 weight:NSFontWeightMedium];
+ NSTextField *clickTitle=[NSTextField labelWithString:@"Left-clicking the menu-bar icon"];clickTitle.font=[NSFont systemFontOfSize:13 weight:NSFontWeightMedium];
  self.clickPopup=[[NSPopUpButton alloc]initWithFrame:NSZeroRect pullsDown:NO];[self.clickPopup addItemsWithTitles:@[@"Opens the menu",@"Toggles Grayscale"]];self.clickPopup.target=self;self.clickPopup.action=@selector(clickBehaviorChanged:);[self.clickPopup.widthAnchor constraintEqualToConstant:200].active=YES;[self helpView:self.clickPopup text:@"What the left and right mouse buttons do on the menu-bar icon. Control-click counts as a right-click." label:@"Clicking the menu-bar icon"];
  NSTextField *grayShortcutTitle=[NSTextField labelWithString:@"Toggle Grayscale shortcut"];grayShortcutTitle.font=[NSFont systemFontOfSize:13 weight:NSFontWeightMedium];
  self.grayscaleRecorder=[ShortcutRecorder new];self.grayscaleRecorder.bezelStyle=NSBezelStyleRounded;self.grayscaleRecorder.title=@"Record Shortcut";self.grayscaleRecorder.target=self;self.grayscaleRecorder.action=@selector(startRecording:);[self.grayscaleRecorder.widthAnchor constraintGreaterThanOrEqualToConstant:150].active=YES;
@@ -1287,6 +1312,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
   for(NSNumber *dn in displays){uint32_t d=dn.unsignedIntValue;NSDictionary *o=self.displayOverrides[dn];
    NSInteger g=o?[o[@"grayMode"] integerValue]:self.grayOverride;BOOL custom=o?[o[@"customWarmth"] boolValue]:self.customWarmth;double w=o?[o[@"warmth"] doubleValue]:self.appWarmth;
    NSInteger eff=g==1?100:g==2?101:(self.grayOffUntil?101:mode);double str=custom?w/100*3:((mode==100||mode==101)&&!warmthOff?[self currentWarmth]:0);
+   if([o[@"plain"] boolValue]){eff=101;str=0;}
    if(self.pausedUntil){eff=101;str=0;}else if(self.peeking&&(!peekActiveOnly||!o)){NSDictionary *e=[self peekEffects];if([e[@"grayscale"] boolValue])eff=101;if([e[@"warmth"] boolValue])str=0;}
    BOOL grayHere=eff==100||eff==1;NSArray *last=[self.warmth stateForDisplay:d];
    if(last&&([last[0] doubleValue]!=str||[last[1] boolValue]!=grayHere)&&!self.quitting){__weak AppDelegate *weak=self;[self.warmth transitionStrength:str grayscale:grayHere display:d reduceMotion:reduce duration:0.5 completion:^{[weak.warmth applyStrength:str grayscale:grayHere display:d];}];}
@@ -1309,7 +1335,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  [self.policy selectManual:self.selectedMode];[self savePolicy];
  NSMenuItem *item=[NSMenuItem new];item.tag=(self.selectedMode==1||self.selectedMode==100)?100:101;[self manual:item];
 }
-- (void)displaysChanged:(id)sender {[self pipelineChanged:sender];}
+- (void)displaysChanged:(id)sender {[self pipelineChanged:sender];[self refreshDisplayRows];}
 - (void)applicationWillTerminate:(NSNotification *)note {self.quitting=YES;if(self.peekHotKey)UnregisterEventHotKey(self.peekHotKey);if(self.grayscaleHotKey)UnregisterEventHotKey(self.grayscaleHotKey);[self.grayOffTimer invalidate];[self.pauseAllTimer invalidate];[self.eventTimer invalidate];[self.pipelineRecoveryTimer invalidate];[self.menuDismissal end];[self.browserBridge stop];[self.warmth cancelTransition];[self endPauseNow:nil];self.excludeNight=NO;[self reconcileExclusion];if(self.grayOverride||self.customWarmth){self.grayOverride=0;self.customWarmth=NO;self.excludeGray=NO;self.excludeWarmth=NO;self.animateAppearance=NO;[self.warmth cancelTransition];[self applyMode:self.selectedMode];}[self.warmth restore];}
 - (void)quit:(id)sender {[NSApp terminate:nil];}
 @end
