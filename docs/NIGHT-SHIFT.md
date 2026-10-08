@@ -20,7 +20,7 @@ With this option on:
 - Grayscale is not affected. It stays the way you set it, day and night.
 - Apps and websites with their own warmth keep it.
 
-With the option off, Extra Warmth stays wherever you put the slider, at any time of day.
+With the option off, Extra Warmth stays wherever you put the slider, at any time of day. In short: on means Extra Warmth only while Night Shift is on and none in the daytime; off means Extra Warmth stays on all day.
 
 ## Changing warmth while following
 
@@ -30,13 +30,14 @@ Turning Grayscale on or off does not start an override.
 
 ## Controlling Night Shift from Less Pull
 
-- **Night Shift: On / Off** switches Night Shift now. Your macOS schedule is kept and may change the state later.
-- **Turn Night Shift off for…** pauses it for 1 hour, 4 hours, or until morning. When the pause ends, Night Shift resumes only if your schedule says it should be on. It is never forced on in the daytime.
+- The **Night Shift** entry in the menu holds everything: **Turn On / Turn Off** switches Night Shift now, and your macOS schedule is kept and may change the state later.
+- **Off for 1 hour**, **Off for 4 hours** and **Off until morning** pause it. When the pause ends, Night Shift resumes only if your schedule says it should be on. It is never forced on in the daytime.
 - A timed pause wins over an app rule that says Night Shift: On.
 - Quitting Less Pull removes the warmth it added and ends a timed pause safely.
+- **Pause Less Pull** is different: it shows the plain display for a while and leaves Night Shift alone.
 
 ## Limits
 
 - The Extra Warmth percentage is a relative control. It is not a Kelvin value and not a measured reduction in blue light.
-- Some displays, HDR modes and other display tools can stop Night Shift from taking effect. **Help → Diagnostics** shows what Less Pull requested and what macOS reported.
+- Some displays, HDR modes and other display tools can stop Night Shift from taking effect. **Settings… → About → Diagnostics…** shows what Less Pull requested and what macOS reported.
 - Less Pull is not a medical device and makes no promises about sleep or eye health.

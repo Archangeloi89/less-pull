@@ -2,9 +2,8 @@
 
 | File | What it is |
 | :-- | :-- |
-| `interfaces.png` | Two real screenshots of Less Pull 1.4.4, the menu-bar dropdown with its icon and the settings window, cropped and placed side by side on a drawn backdrop |
+| `interfaces.png` | Two real screenshots of Less Pull 1.4.4 build 16, the menu-bar dropdown with its icon and the Settings window, cropped and placed side by side on a drawn backdrop |
 | `src/raw/*.png` | The two original captures, untouched |
-| `website-popup-light.png`, `website-popup-dark.png` | The shipped extension popup (`Browser Extension/popup.html`) rendered in Chromium with example data. The browser window around it is drawn. It is not a screenshot taken inside Brave or Chrome |
 | `hero-*.svg` | Animated illustration of one display changing with the app in front. It respects Reduce Motion |
 | `warmth-*.svg` | Illustration of Extra Warmth from Off to Red, in color and grayscale |
 | `examples-*.svg` | Three example rules: what is in front, what you set, and what the screen shows |
@@ -27,7 +26,6 @@ The sources are in [`src`](src). They need Node.js, and Playwright with Chromium
 cd docs/assets/src
 npm install
 node build.mjs        # writes the SVG files
-node popshot.mjs      # renders the popup images
 python3 stage.py raw ..   # places the two screenshots on one backdrop (needs Pillow and NumPy)
 ```
 

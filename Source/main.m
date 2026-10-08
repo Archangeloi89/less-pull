@@ -8,13 +8,166 @@
 #import "ExclusionPolicy.h"
 #import "BrowserBridge.h"
 #import "MenuDismissal.h"
+#import <Carbon/Carbon.h>
+#import "WarmthCurve.h"
+// Peek in color: a global shortcut held down shows the plain display. The shortcut
+// is stored as a key code plus Carbon modifiers; there is no default binding.
+@interface PeekShortcut : NSObject
++ (BOOL)isValidKeyCode:(NSInteger)keyCode modifiers:(NSEventModifierFlags)modifiers;
++ (UInt32)carbonModifiers:(NSEventModifierFlags)modifiers;
++ (NSString *)labelForKeyCode:(NSInteger)keyCode modifiers:(NSEventModifierFlags)modifiers;
++ (NSSet<NSString *> *)systemShortcutKeys;
++ (NSDictionary *)suggestionAvoiding:(NSSet<NSString *> *)taken preferring:(NSArray<NSDictionary *> *)candidates;
++ (NSString *)keyForKeyCode:(NSInteger)keyCode modifiers:(NSEventModifierFlags)modifiers;
+@end
+@implementation PeekShortcut
++ (BOOL)isValidKeyCode:(NSInteger)keyCode modifiers:(NSEventModifierFlags)modifiers {
+ NSEventModifierFlags m=modifiers&(NSEventModifierFlagCommand|NSEventModifierFlagControl|NSEventModifierFlagOption|NSEventModifierFlagShift);
+ if(keyCode<0||keyCode>127||keyCode==kVK_Escape)return NO;
+ return (m&(NSEventModifierFlagCommand|NSEventModifierFlagControl|NSEventModifierFlagOption))!=0; // Shift alone would clash with typing
+}
++ (UInt32)carbonModifiers:(NSEventModifierFlags)modifiers {UInt32 c=0;if(modifiers&NSEventModifierFlagCommand)c|=cmdKey;if(modifiers&NSEventModifierFlagControl)c|=controlKey;if(modifiers&NSEventModifierFlagOption)c|=optionKey;if(modifiers&NSEventModifierFlagShift)c|=shiftKey;return c;}
++ (NSString *)keyName:(NSInteger)keyCode {
+ NSDictionary *special=@{@(kVK_Space):@"Space",@(kVK_Return):@"↩",@(kVK_Tab):@"⇥",@(kVK_Delete):@"⌫",@(kVK_ForwardDelete):@"⌦",@(kVK_LeftArrow):@"←",@(kVK_RightArrow):@"→",@(kVK_UpArrow):@"↑",@(kVK_DownArrow):@"↓",@(kVK_Home):@"↖",@(kVK_End):@"↘",@(kVK_PageUp):@"⇞",@(kVK_PageDown):@"⇟",@(kVK_F1):@"F1",@(kVK_F2):@"F2",@(kVK_F3):@"F3",@(kVK_F4):@"F4",@(kVK_F5):@"F5",@(kVK_F6):@"F6",@(kVK_F7):@"F7",@(kVK_F8):@"F8",@(kVK_F9):@"F9",@(kVK_F10):@"F10",@(kVK_F11):@"F11",@(kVK_F12):@"F12"};
+ if(special[@(keyCode)])return special[@(keyCode)];
+ TISInputSourceRef source=TISCopyCurrentKeyboardLayoutInputSource();CFDataRef layout=source?TISGetInputSourceProperty(source,kTISPropertyUnicodeKeyLayoutData):NULL;NSString *name=nil;
+ if(layout){UInt32 dead=0;UniChar chars[4];UniCharCount length=0;if(UCKeyTranslate((const UCKeyboardLayout *)CFDataGetBytePtr(layout),(UInt16)keyCode,kUCKeyActionDisplay,0,LMGetKbdType(),kUCKeyTranslateNoDeadKeysBit,&dead,4,&length,chars)==noErr&&length)name=[[NSString stringWithCharacters:chars length:length] uppercaseString];}
+ if(source)CFRelease(source);return name.length?name:[NSString stringWithFormat:@"Key %ld",(long)keyCode];
+}
++ (NSString *)keyForKeyCode:(NSInteger)keyCode modifiers:(NSEventModifierFlags)modifiers {return [NSString stringWithFormat:@"%ld/%lu",(long)keyCode,(unsigned long)(modifiers&(NSEventModifierFlagCommand|NSEventModifierFlagControl|NSEventModifierFlagOption|NSEventModifierFlagShift))];}
+// The shortcuts macOS itself has enabled (Spotlight, screenshots, input sources…),
+// read from the symbolic hot keys preference so a suggestion never collides with them.
++ (NSSet<NSString *> *)systemShortcutKeys {
+ NSMutableSet *keys=[NSMutableSet new];NSDictionary *all=[[NSUserDefaults.standardUserDefaults persistentDomainForName:@"com.apple.symbolichotkeys"][@"AppleSymbolicHotKeys"] isKindOfClass:NSDictionary.class]?[NSUserDefaults.standardUserDefaults persistentDomainForName:@"com.apple.symbolichotkeys"][@"AppleSymbolicHotKeys"]:@{};
+ for(id entry in all.allValues){if(![entry isKindOfClass:NSDictionary.class]||![entry[@"enabled"] boolValue])continue;NSArray *p=entry[@"value"][@"parameters"];if(![p isKindOfClass:NSArray.class]||p.count<3)continue;NSInteger code=[p[1] integerValue];if(code<0||code>127)continue;[keys addObject:[self keyForKeyCode:code modifiers:[p[2] unsignedIntegerValue]]];}
+ return keys;
+}
+// First candidate that is neither a macOS shortcut nor already taken in Less Pull.
++ (NSDictionary *)suggestionAvoiding:(NSSet<NSString *> *)taken preferring:(NSArray<NSDictionary *> *)candidates {
+ NSSet *system=[self systemShortcutKeys];
+ for(NSDictionary *c in candidates){NSString *key=[self keyForKeyCode:[c[@"keyCode"] integerValue] modifiers:[c[@"modifiers"] unsignedIntegerValue]];if(![system containsObject:key]&&![taken containsObject:key]&&[self isValidKeyCode:[c[@"keyCode"] integerValue] modifiers:[c[@"modifiers"] unsignedIntegerValue]])return c;}
+ return nil;
+}
++ (NSString *)labelForKeyCode:(NSInteger)keyCode modifiers:(NSEventModifierFlags)modifiers {
+ NSMutableString *label=[NSMutableString new];if(modifiers&NSEventModifierFlagControl)[label appendString:@"⌃"];if(modifiers&NSEventModifierFlagOption)[label appendString:@"⌥"];if(modifiers&NSEventModifierFlagShift)[label appendString:@"⇧"];if(modifiers&NSEventModifierFlagCommand)[label appendString:@"⌘"];
+ [label appendString:[self keyName:keyCode]];return label;
+}
+@end
+// A button that records the next key combination while it has focus.
+@interface ShortcutRecorder : NSButton
+@property BOOL recording;
+@property (copy) void (^recorded)(NSInteger keyCode,NSEventModifierFlags modifiers);
+@property (copy) void (^cleared)(void);
+@end
+@implementation ShortcutRecorder
+- (BOOL)acceptsFirstResponder {return YES;}
+- (BOOL)becomeFirstResponder {return YES;}
+- (BOOL)resignFirstResponder {if(self.recording){self.recording=NO;[self sendAction:self.action to:self.target];}return [super resignFirstResponder];}
+- (BOOL)performKeyEquivalent:(NSEvent *)event {if(self.recording){[self keyDown:event];return YES;}return [super performKeyEquivalent:event];}
+- (void)keyDown:(NSEvent *)event {
+ if(!self.recording){[super keyDown:event];return;}
+ NSEventModifierFlags m=event.modifierFlags&NSEventModifierFlagDeviceIndependentFlagsMask;
+ if(event.keyCode==kVK_Escape){self.recording=NO;[self sendAction:self.action to:self.target];return;}
+ if((event.keyCode==kVK_Delete||event.keyCode==kVK_ForwardDelete)&&!(m&(NSEventModifierFlagCommand|NSEventModifierFlagControl|NSEventModifierFlagOption))){self.recording=NO;if(self.cleared)self.cleared();return;}
+ if(![PeekShortcut isValidKeyCode:event.keyCode modifiers:m]){NSBeep();return;}
+ self.recording=NO;if(self.recorded)self.recorded(event.keyCode,m);
+}
+- (void)flagsChanged:(NSEvent *)event {if(!self.recording)[super flagsChanged:event];}
+@end
+// Update check, phase 1: one HTTPS request to GitHub's releases API, at most once
+// a week or on demand. Nothing about the user is sent. Installing stays manual
+// until the app is Developer ID signed and notarized.
+static NSString *const LessPullReleasesAPI=@"https://api.github.com/repos/Archangeloi89/less-pull/releases/latest";
+static NSString *const LessPullReleasesPage=@"https://github.com/Archangeloi89/less-pull/releases";
+// The author's links. Empty entries are not shown; fill in Substack, YouTube and X when known.
+static NSString *const LessPullWebsite=@"https://jiriarion.com";
+static NSString *const LessPullCoffee=@"https://buymeacoffee.com/HsERf62fiZ";
+static NSString *const LessPullSubstack=@"https://substack.com/@jiriarion";
+static NSString *const LessPullYouTube=@"https://www.youtube.com/@JiriArion";
+static NSString *const LessPullX=@"https://x.com/JiriArion";
+@interface UpdateCheck : NSObject
++ (NSString *)versionFromTag:(NSString *)tag;
++ (NSComparisonResult)compareVersion:(NSString *)a to:(NSString *)b;
++ (NSDictionary *)updateFromRelease:(id)release currentVersion:(NSString *)current;
++ (NSInteger)buildFromTag:(NSString *)tag;
++ (NSDictionary *)updateFromRelease:(id)release currentVersion:(NSString *)current currentBuild:(NSInteger)build;
++ (BOOL)metadata:(id)metadata allowsSystem:(NSOperatingSystemVersion)system;
++ (NSString *)metadataURLInRelease:(id)release;
+@end
+@implementation UpdateCheck
++ (NSString *)versionFromTag:(NSString *)tag {if(![tag isKindOfClass:NSString.class])return nil;NSString *t=[tag stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceCharacterSet];if([t.lowercaseString hasPrefix:@"v"])t=[t substringFromIndex:1];return t.length?t:nil;}
++ (NSComparisonResult)compareVersion:(NSString *)a to:(NSString *)b {
+ NSArray *pa=[a componentsSeparatedByString:@"."],*pb=[b componentsSeparatedByString:@"."];NSUInteger n=MAX(pa.count,pb.count);
+ for(NSUInteger i=0;i<n;i++){NSInteger x=i<pa.count?[pa[i] integerValue]:0,y=i<pb.count?[pb[i] integerValue]:0;if(x!=y)return x<y?NSOrderedAscending:NSOrderedDescending;}
+ return NSOrderedSame;
+}
+// Releases are tagged v<version>-<build>, e.g. v1.4.4-17. The version stays 1.4.4
+// for good (the author's joke); the build number is what moves.
++ (NSInteger)buildFromTag:(NSString *)tag {
+ if(![tag isKindOfClass:NSString.class])return 0;NSRange dash=[tag rangeOfString:@"-" options:NSBackwardsSearch];if(dash.location==NSNotFound)return 0;
+ NSString *digits=[tag substringFromIndex:dash.location+1];if(!digits.length||[digits rangeOfCharacterFromSet:NSCharacterSet.decimalDigitCharacterSet.invertedSet].location!=NSNotFound)return 0;return digits.integerValue;
+}
++ (NSString *)metadataURLInRelease:(id)release {
+ for(id asset in [release[@"assets"] isKindOfClass:NSArray.class]?release[@"assets"]:@[]){if([asset isKindOfClass:NSDictionary.class]&&[asset[@"name"] isEqual:@"lesspull-update.json"]&&[asset[@"browser_download_url"] isKindOfClass:NSString.class]&&[asset[@"browser_download_url"] hasPrefix:@"https://github.com/"])return asset[@"browser_download_url"];}
+ return nil;
+}
+// Only a build made for this macOS is offered: minimumSystemVersion and
+// maximumSystemVersion (either optional) bound the running system, major.minor.
++ (BOOL)metadata:(id)metadata allowsSystem:(NSOperatingSystemVersion)system {
+ if(![metadata isKindOfClass:NSDictionary.class])return YES;NSString *running=[NSString stringWithFormat:@"%ld.%ld.%ld",(long)system.majorVersion,(long)system.minorVersion,(long)system.patchVersion];
+ NSString *minimum=metadata[@"minimumSystemVersion"],*maximum=metadata[@"maximumSystemVersion"];
+ if([minimum isKindOfClass:NSString.class]&&minimum.length&&[self compareVersion:running to:minimum]==NSOrderedAscending)return NO;
+ if([maximum isKindOfClass:NSString.class]&&maximum.length){NSArray *parts=[maximum componentsSeparatedByString:@"."];NSString *clipped=[[[running componentsSeparatedByString:@"."] subarrayWithRange:NSMakeRange(0,MIN(parts.count,3))] componentsJoinedByString:@"."];if([self compareVersion:clipped to:maximum]==NSOrderedDescending)return NO;}
+ return YES;
+}
++ (NSDictionary *)updateFromRelease:(id)release currentVersion:(NSString *)current {return [self updateFromRelease:release currentVersion:current currentBuild:0];}
++ (NSDictionary *)updateFromRelease:(id)release currentVersion:(NSString *)current currentBuild:(NSInteger)currentBuild {
+ if(![release isKindOfClass:NSDictionary.class]||[release[@"draft"] boolValue]||[release[@"prerelease"] boolValue])return nil;
+ NSString *version=[self versionFromTag:release[@"tag_name"]];NSInteger build=[self buildFromTag:release[@"tag_name"]];
+ if(build){if(build<=currentBuild)return nil;version=[version substringToIndex:[version rangeOfString:@"-" options:NSBackwardsSearch].location];}
+ else if(!version||!current||[self compareVersion:version to:current]!=NSOrderedDescending)return nil;
+ NSString *url=[release[@"html_url"] isKindOfClass:NSString.class]&&[release[@"html_url"] hasPrefix:@"https://github.com/"]?release[@"html_url"]:LessPullReleasesPage;
+ NSString *notes=[release[@"body"] isKindOfClass:NSString.class]?release[@"body"]:@"";if(notes.length>2000)notes=[[notes substringToIndex:2000] stringByAppendingString:@"…"];
+ NSMutableDictionary *update=[@{@"version":version,@"url":url,@"notes":notes,@"build":@(build)} mutableCopy];NSString *metadata=[self metadataURLInRelease:release];if(metadata)update[@"metadata"]=metadata;return update;
+}
+@end
+// The bundle identifier moved from local.nightshiftfilters.app to
+// com.jiriarion.lesspull in build 16. Settings are copied once from the old
+// preferences domain; the old domain is left in place.
+static NSString *const LessPullOldBundleIdentifier=@"local.nightshiftfilters.app";
+@interface PreferenceMigration : NSObject
++ (BOOL)migrateFromDomain:(NSString *)oldDomain into:(NSUserDefaults *)defaults;
+@end
+@implementation PreferenceMigration
++ (BOOL)migrateFromDomain:(NSString *)oldDomain into:(NSUserDefaults *)defaults {
+ if([defaults objectForKey:@"unifiedWarmth"]||[defaults objectForKey:@"nightMode"]||[defaults boolForKey:@"migratedPreferences"])return NO;
+ NSDictionary *old=[defaults persistentDomainForName:oldDomain];if(!old.count)return NO;
+ for(NSString *key in old)if(![defaults objectForKey:key])[defaults setObject:old[key] forKey:key];
+ [defaults setBool:YES forKey:@"migratedPreferences"];return YES;
+}
+@end
 @interface ExceptionStack : NSStackView
 @end
 @implementation ExceptionStack
 - (BOOL)isFlipped {return YES;}
 @end
+// The slider track shows what the slider does: the real neutral -> amber -> red
+// ramp of WarmthCurve.h, i.e. what white becomes at each strength.
+@interface WarmthSliderCell : NSSliderCell
+@end
+@implementation WarmthSliderCell
+- (void)drawBarInside:(NSRect)rect flipped:(BOOL)flipped {
+ NSMutableArray *colors=[NSMutableArray new];NSMutableArray *locations=[NSMutableArray new];int steps=24;
+ for(int i=0;i<=steps;i++){double gains[3];WarmthGains(3.0*i/steps,gains);[colors addObject:[NSColor colorWithSRGBRed:gains[0] green:gains[1] blue:gains[2] alpha:1]];[locations addObject:@((double)i/steps)];}
+ CGFloat stops[steps+1];for(int i=0;i<=steps;i++)stops[i]=[locations[i] doubleValue];
+ NSGradient *ramp=[[NSGradient alloc]initWithColors:colors atLocations:stops colorSpace:NSColorSpace.sRGBColorSpace];
+ NSRect bar=NSInsetRect(rect,0,(rect.size.height-5)/2);NSBezierPath *path=[NSBezierPath bezierPathWithRoundedRect:bar xRadius:2.5 yRadius:2.5];
+ [ramp drawInBezierPath:path angle:0];[[NSColor.labelColor colorWithAlphaComponent:.2] setStroke];path.lineWidth=.5;[path stroke];
+}
+@end
 @interface AppDelegate : NSObject <NSApplicationDelegate,NSMenuDelegate>
 @property NSStatusItem *item;
+@property NSMenu *statusMenu;
 @property BrowserBridge *browserBridge;
 @property MenuDismissal *menuDismissal;
 @property NSString *website;
@@ -38,7 +191,8 @@
 @property double appWarmth,targetStrength;
 @property NSInteger effectiveMode;
 @property NSString *foregroundID,*foregroundName,*exclusionError;
-@property NSWindow *exclusionsWindow;
+@property NSTabViewController *settingsTabs;
+@property NSTextField *websiteStatus;
 @property NSStackView *exclusionsList;
 @property NSTextField *exclusionText;
 @property NSRunningApplication *lastExternalApp;
@@ -54,6 +208,34 @@
 @property BOOL suppressPauseCancellation;
 @property NSTimer *pauseTimer,*eventTimer,*pipelineRecoveryTimer;
 @property NSUInteger pipelineEvents,pipelineRestorations;
+@property NSWindow *helpWindow;
+@property NSString *statusImageName;
+@property NSView *welcomeCard;
+@property NSDate *pausedUntil; // nil: not paused; distantFuture: until resumed
+@property BOOL websiteScopeExact; // menu: whole domain (NO) or this exact page (YES)
+@property (nonatomic) BOOL peeking;
+@property NSDictionary *availableUpdate;
+@property NSString *updateStatus;
+@property BOOL checkingUpdates;
+@property NSTimer *updateTimer;
+@property NSButton *updateCheckbox,*updateButton;
+@property NSTextField *updateStatusLabel;
+@property NSWindow *thanksWindow;
+@property NSTimer *thanksTimer;
+@property EventHotKeyRef peekHotKey;
+@property EventHotKeyRef grayscaleHotKey;
+@property ShortcutRecorder *peekRecorder,*grayscaleRecorder;
+@property NSTextField *peekNote,*loginNote,*grayscaleShortcutNote;
+@property NSButton *peekGrayButton,*peekWarmthButton,*peekNightButton;
+@property NSPopUpButton *clickPopup,*grayOffPopup;
+@property NSButton *grayOnButton;
+@property NSDate *grayOffUntil; // nil: not timed off; distantFuture: until Night Shift next changes
+@property NSTimer *grayOffTimer;
+@property BOOL lastNightForGrayOff;
+@property NSTimer *pauseAllTimer;
+@property NSMenu *addAppMenu;
+@property NSStackView *websiteRulesList;
+@property BOOL welcomeWanted;
 @end
 @implementation AppDelegate
 - (PausePolicy *)nightGuard {
@@ -79,11 +261,11 @@
  if(self.excludeNight&&!self.exclusion.active){[self.exclusion beginKnown:known on:actual guard:[self nightGuard]];self.forcedNightOn=actual;}
  if(self.exclusion.active){NSBlueStatus schedule={0};if([self.engine readNightShiftStatus:&schedule]&&schedule.mode==2){NSInteger minute=[NSCalendar.currentCalendar component:NSCalendarUnitHour fromDate:NSDate.date]*60+[NSCalendar.currentCalendar component:NSCalendarUnitMinute fromDate:NSDate.date];NSInteger start=schedule.schedule.from.hour*60+schedule.schedule.from.minute,end=schedule.schedule.to.hour*60+schedule.schedule.to.minute;BOOL window=start<end?(minute>=start&&minute<end):(start!=end&&(minute>=start||minute<end));BOOL previous=self.exclusion.desiredOn;[self.exclusion observeScheduleWindow:window];if(!previous&&self.exclusion.desiredOn)self.exclusion.guard=[self nightGuard];}}
  if(self.pause&&self.exclusion.active)[self.exclusion requestOn:NO guard:nil];
- if(self.excludeNight){BOOL target=self.nightOverride==1&&!self.pause;self.forcedNightOn=target;if(known&&actual!=target&&![self.engine setNightShiftEnabled:target])self.exclusionError=@"Could not apply the foreground Night Shift exception.";}
+ if(self.excludeNight){BOOL target=self.nightOverride==1&&!self.pause;self.forcedNightOn=target;if(known&&actual!=target&&![self.engine setNightShiftEnabled:target])self.exclusionError=@"Could not change Night Shift for this app.";}
  else if(self.exclusion.active){
-  if(!known){self.exclusionError=@"Night Shift unavailable; exclusion restoration pending.";return;}
+  if(!known){self.exclusionError=@"Night Shift is unavailable right now; Less Pull will restore it when it can.";return;}
   BOOL restore=!self.pause&&[self.exclusion mayRestoreAt:NSDate.date unchanged:[self guardUnchanged:self.exclusion.guard] calendar:NSCalendar.currentCalendar];
-  if(actual!=restore&&![self.engine setNightShiftEnabled:restore]){self.exclusionError=@"Could not restore Night Shift after exclusion.";return;}
+  if(actual!=restore&&![self.engine setNightShiftEnabled:restore]){self.exclusionError=@"Could not restore Night Shift after leaving this app.";return;}
   self.exclusion.active=NO;self.exclusion.guard=nil;
  }
  [self persistExclusion];
@@ -98,7 +280,7 @@
  if(self.quitting)return;NSRunningApplication *app=NSWorkspace.sharedWorkspace.frontmostApplication;
  if(![app.bundleIdentifier isEqual:NSBundle.mainBundle.bundleIdentifier])self.lastExternalApp=app;
  self.foregroundID=app.bundleIdentifier?:@"";self.foregroundName=app.localizedName?:@"Current app";
- self.website=nil;NSString *site=nil;NSDictionary *rule=[self.browserBridge ruleForBrowser:self.foregroundID base:self.exclusionRules[self.foregroundID] site:&site]?:self.exclusionRules[self.foregroundID];self.website=site;if(site)self.foregroundName=site;BOOL hasRule=[rule[@"grayMode"] integerValue]!=0||[rule[@"nightMode"] integerValue]!=0||[rule[@"customWarmth"] boolValue];BOOL visible=hasRule&&[self hasVisibleWindow:app.processIdentifier];
+ self.website=nil;NSString *site=nil;NSDictionary *appRule=RuleEnabled(self.exclusionRules[self.foregroundID])?self.exclusionRules[self.foregroundID]:nil;NSDictionary *rule=[self.browserBridge ruleForBrowser:self.foregroundID base:appRule site:&site]?:appRule;self.website=site;if(site)self.foregroundName=site;BOOL hasRule=[rule[@"grayMode"] integerValue]!=0||[rule[@"nightMode"] integerValue]!=0||[rule[@"customWarmth"] boolValue];BOOL visible=hasRule&&[self hasVisibleWindow:app.processIdentifier];
  NSInteger gray=visible?[rule[@"grayMode"] integerValue]:0,night=visible?[rule[@"nightMode"] integerValue]:0;BOOL custom=visible&&[rule[@"customWarmth"] boolValue];double warmth=custom?[rule[@"warmth"] doubleValue]:0;
  if(gray!=self.grayOverride||custom!=self.customWarmth||warmth!=self.appWarmth)self.animateAppearance=YES;
  self.grayOverride=gray;self.nightOverride=night;self.customWarmth=custom;self.appWarmth=warmth;self.excludeGray=gray==2;self.excludeNight=night!=0;self.excludeWarmth=custom&&warmth==0;
@@ -107,59 +289,164 @@
 }
 - (void)visibilityCheck:(id)sender {NSInteger gray=self.grayOverride,night=self.nightOverride;BOOL custom=self.customWarmth;double warmth=self.appWarmth;[self updateForeground];if(gray!=self.grayOverride||night!=self.nightOverride||custom!=self.customWarmth||warmth!=self.appWarmth)[self sync];}
 - (void)frontmostChanged:(id)sender {[self sync];}
-- (NSString *)exclusionSummary {
- NSMutableArray *effects=[NSMutableArray new];if(self.grayOverride)[effects addObject:self.grayOverride==1?@"Gray on":@"Gray off"];if(self.nightOverride)[effects addObject:self.pause?@"Night Shift paused":self.nightOverride==1?@"Night Shift on":@"Night Shift off"];if(self.customWarmth)[effects addObject:[NSString stringWithFormat:@"Warmth %.0f%%",self.appWarmth]];
- return effects.count?[NSString stringWithFormat:@"%@: %@",self.foregroundName,[effects componentsJoinedByString:@", "]]:@"Using global display settings";
+// The base a website inherits: the global settings as they stand, then the browser's own app exception.
+- (NSDictionary *)browserBaseForBundle:(NSString *)browser {
+ BOOL night=NO;[self logicalNightShift:&night];NSInteger gray=(self.selectedMode==1||self.selectedMode==100)?1:2,nightMode=night?1:2;double warmth=[self currentWarmth]/3*100;
+ NSDictionary *app=self.exclusionRules[browser];if([app[@"grayMode"] integerValue])gray=[app[@"grayMode"] integerValue];if([app[@"nightMode"] integerValue])nightMode=[app[@"nightMode"] integerValue];if([app[@"customWarmth"] boolValue])warmth=[app[@"warmth"] doubleValue];
+ return @{@"grayMode":@(gray),@"nightMode":@(nightMode),@"warmth":@(warmth)};
 }
-- (NSString *)exclusionHelp {return @"App Exceptions apply only to the frontmost app with a visible, nonminimized regular window, across all displays. Use global setting inherits each effect independently. Global preferences and appearance overrides stay saved. Changes use the display matrix to avoid native Color Filter toggle indicators. Timed Night Shift off takes precedence over app Night Shift On. Restoration respects schedule eligibility. App warmth can still desaturate colors even with Grayscale Off; full color is not calibrated accuracy.";}
+- (NSString *)exclusionSummary {
+ NSMutableArray *effects=[NSMutableArray new];if(self.grayOverride)[effects addObject:self.grayOverride==1?@"Grayscale on":@"Grayscale off"];if(self.nightOverride)[effects addObject:self.pause?@"Night Shift off for now":self.nightOverride==1?@"Night Shift on":@"Night Shift off"];if(self.customWarmth)[effects addObject:[NSString stringWithFormat:@"Warmth %.0f%%",self.appWarmth]];
+ return effects.count?[NSString stringWithFormat:@"%@: %@",self.foregroundName,[effects componentsJoinedByString:@", "]]:@"Using your default settings";
+}
+- (NSString *)exclusionHelp {return @"An exception applies while that app is in front with a window open, on all your displays. Each setting can keep the default or get its own value. Your defaults stay saved. If Night Shift is turned off for a while, that wins over an app’s Night Shift On.";}
+// An exception can be switched off and keep its settings; a rule without the flag is on.
+static BOOL RuleEnabled(NSDictionary *rule) {return rule&&(rule[@"enabled"]==nil||[rule[@"enabled"] boolValue]);}
+static BOOL RuleDiffers(NSDictionary *rule) {return [rule[@"grayMode"] integerValue]||[rule[@"nightMode"] integerValue]||[rule[@"customWarmth"] boolValue];}
+// Any change away from default switches the exception on; the user can switch it off again.
+static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictionary *after) {if(RuleDiffers(after)&&!(RuleDiffers(before)&&!RuleEnabled(before)))after[@"enabled"]=@YES;if(after[@"enabled"]==nil)after[@"enabled"]=@(RuleDiffers(after));return after;}
 - (void)saveExclusionRules {[NSUserDefaults.standardUserDefaults setObject:self.exclusionRules forKey:@"appExclusions"];[self sync];}
 - (void)ruleChanged:(NSControl *)sender {
  NSString *bundle=sender.identifier;NSMutableDictionary *rule=[self.exclusionRules[bundle] mutableCopy];
- if([sender isKindOfClass:NSPopUpButton.class])rule[sender.tag==0?@"grayMode":@"nightMode"]=@([(NSPopUpButton *)sender indexOfSelectedItem]);
+ NSDictionary *before=[rule copy];
+ if([sender isKindOfClass:NSSegmentedControl.class])rule[sender.tag==0?@"grayMode":@"nightMode"]=@([(NSSegmentedControl *)sender selectedSegment]);
  else if(sender.tag==2)rule[@"customWarmth"]=@([(NSButton *)sender state]==NSControlStateValueOff);
+ else if(sender.tag==4)rule[@"enabled"]=@([(NSButton *)sender state]==NSControlStateValueOn);
  else rule[@"warmth"]=@([(NSSlider *)sender doubleValue]);
- self.exclusionRules[bundle]=rule;[self saveExclusionRules];if(sender.tag!=3)[self rebuildExclusionsList];else {NSTextField *readout=[sender.superview viewWithTag:99];readout.stringValue=[NSString stringWithFormat:@"%.0f%%",[rule[@"warmth"] doubleValue]];}
+ if(sender.tag!=4)RuleAfterChange(before,rule);
+ self.exclusionRules[bundle]=rule;[self saveExclusionRules];if(sender.tag!=3)[self rebuildExclusionsList];else {NSTextField *readout=[sender.superview viewWithTag:99];readout.stringValue=[NSString stringWithFormat:@"%.0f%%",[rule[@"warmth"] doubleValue]];for(NSView *v in sender.superview.superview.subviews)for(NSView *w in v.subviews)if([w isKindOfClass:NSButton.class]&&[(NSButton *)w tag]==4)[(NSButton *)w setState:RuleEnabled(rule)];}
 }
 - (void)removeRule:(NSButton *)sender {[self.exclusionRules removeObjectForKey:sender.identifier];[self saveExclusionRules];[self rebuildExclusionsList];}
 - (void)addAppURL:(NSURL *)url {
  NSBundle *bundle=[NSBundle bundleWithURL:url];NSString *identifier=bundle.bundleIdentifier;if(!identifier||[identifier isEqual:NSBundle.mainBundle.bundleIdentifier])return;
  NSString *name=[NSFileManager.defaultManager displayNameAtPath:url.path];if([name hasSuffix:@".app"])name=[name substringToIndex:name.length-4];
- if(!self.exclusionRules[identifier])self.exclusionRules[identifier]=@{@"name":name,@"grayMode":@0,@"nightMode":@0,@"customWarmth":@NO,@"warmth":@0};[self saveExclusionRules];[self rebuildExclusionsList];
+ if(!self.exclusionRules[identifier])self.exclusionRules[identifier]=@{@"name":name,@"grayMode":@0,@"nightMode":@0,@"customWarmth":@NO,@"warmth":@0,@"enabled":@NO};[self saveExclusionRules];[self rebuildExclusionsList];
 }
 - (void)addExclusionApp:(id)sender {
  NSOpenPanel *panel=[NSOpenPanel openPanel];panel.title=@"Add an app exception";panel.directoryURL=[NSURL fileURLWithPath:@"/Applications"];panel.canChooseDirectories=NO;panel.canChooseFiles=YES;panel.allowedContentTypes=@[UTTypeApplicationBundle];panel.treatsFilePackagesAsDirectories=NO;
- [panel beginSheetModalForWindow:self.exclusionsWindow completionHandler:^(NSModalResponse result){if(result==NSModalResponseOK)[self addAppURL:panel.URL];}];
+ [panel beginSheetModalForWindow:self.settings completionHandler:^(NSModalResponse result){if(result==NSModalResponseOK)[self addAppURL:panel.URL];}];
 }
-- (void)excludeCurrent:(id)sender {NSURL *url=self.lastExternalApp.bundleURL;[self showExclusions:nil];if(url)[self addAppURL:url];}
+- (void)excludeCurrent:(id)sender {NSURL *url=self.lastExternalApp.bundleURL;NSString *bundle=self.lastExternalApp.bundleIdentifier;[self showExclusions:nil];if(url)[self addAppURL:url];
+ for(NSView *row in self.exclusionsList.arrangedSubviews)if([row.identifier isEqual:bundle]){[self.exclusionsList layoutSubtreeIfNeeded];[row scrollRectToVisible:row.bounds];break;}}
+// "Exception for <App>" in the menu: change the rule for the app in front without
+// opening Settings. The first change creates the rule.
+- (NSMutableDictionary *)currentAppRuleCreating:(BOOL)create {
+ NSString *bundle=self.lastExternalApp.bundleIdentifier;if(!bundle)return nil;if(!self.exclusionRules[bundle]){if(!create)return nil;NSURL *url=self.lastExternalApp.bundleURL;if(url)[self addAppURL:url];}
+ return [self.exclusionRules[bundle] mutableCopy];
+}
+- (void)storeCurrentAppRule:(NSDictionary *)rule {self.exclusionRules[self.lastExternalApp.bundleIdentifier]=rule;[self saveExclusionRules];[self rebuildExclusionsList];}
+- (void)currentAppChoice:(NSMenuItem *)sender {NSMutableDictionary *rule=[self currentAppRuleCreating:YES];if(!rule)return;NSDictionary *before=[rule copy];rule[sender.tag/10==0?@"grayMode":@"nightMode"]=@(sender.tag%10);[self storeCurrentAppRule:RuleAfterChange(before,rule)];}
+- (void)currentAppWarmthDefault:(NSMenuItem *)sender {NSMutableDictionary *rule=[self currentAppRuleCreating:YES];if(!rule)return;NSDictionary *before=[rule copy];rule[@"customWarmth"]=@(![rule[@"customWarmth"] boolValue]);[self storeCurrentAppRule:RuleAfterChange(before,rule)];}
+- (void)currentAppEnabled:(NSMenuItem *)sender {NSMutableDictionary *rule=[self currentAppRuleCreating:YES];if(!rule)return;rule[@"enabled"]=@(!RuleEnabled(rule));[self storeCurrentAppRule:rule];}
+- (void)currentAppWarmthChanged:(NSSlider *)sender {NSMutableDictionary *rule=[self currentAppRuleCreating:YES];if(!rule)return;NSDictionary *before=[rule copy];rule[@"customWarmth"]=@YES;rule[@"warmth"]=@(sender.doubleValue);RuleAfterChange(before,rule);[self storeCurrentAppRule:rule];NSTextField *readout=[sender.superview viewWithTag:98];readout.stringValue=[NSString stringWithFormat:@"%.0f%%",sender.doubleValue];}
+// "Exception for <website>": the same choices as for an app, for the public tab in
+// front. Whole domain (also subdomains) or this exact page; saved through the bridge.
+- (NSString *)websiteKeyForTab:(NSDictionary *)tab {return self.websiteScopeExact&&[tab[@"url"] length]?tab[@"url"]:tab[@"site"];}
+- (NSDictionary *)websiteRuleForTab:(NSDictionary *)tab {return self.browserBridge.rules[[self websiteKeyForTab:tab]];}
+- (void)storeWebsiteRule:(NSDictionary *)rule forTab:(NSDictionary *)tab {
+ NSString *key=[self websiteKeyForTab:tab];BOOL exact=[key containsString:@"://"];
+ [self.browserBridge handle:@{@"type":@"set",@"scope":exact?@"url":@"domain",@"site":key,@"rule":@{@"grayMode":rule[@"grayMode"]?:@0,@"nightMode":rule[@"nightMode"]?:@0,@"customWarmth":rule[@"customWarmth"]?:@NO,@"warmth":rule[@"warmth"]?:@0,@"enabled":@(RuleEnabled(rule))}}];
+}
+- (NSDictionary *)menuTab {return [self.browserBridge activeContextForBrowser:self.lastExternalApp.bundleIdentifier];}
+- (void)websiteScope:(NSMenuItem *)sender {self.websiteScopeExact=sender.tag==1;}
+- (void)websiteChoice:(NSMenuItem *)sender {NSDictionary *tab=[self menuTab];if(!tab)return;NSMutableDictionary *rule=[[self websiteRuleForTab:tab] mutableCopy]?:[NSMutableDictionary new];NSDictionary *before=[rule copy];rule[sender.tag/10==0?@"grayMode":@"nightMode"]=@(sender.tag%10);[self storeWebsiteRule:RuleAfterChange(before,rule) forTab:tab];}
+- (void)websiteWarmthDefault:(NSMenuItem *)sender {NSDictionary *tab=[self menuTab];if(!tab)return;NSMutableDictionary *rule=[[self websiteRuleForTab:tab] mutableCopy]?:[NSMutableDictionary new];NSDictionary *before=[rule copy];rule[@"customWarmth"]=@(![rule[@"customWarmth"] boolValue]);[self storeWebsiteRule:RuleAfterChange(before,rule) forTab:tab];}
+- (void)websiteEnabled:(NSMenuItem *)sender {NSDictionary *tab=[self menuTab];if(!tab)return;NSMutableDictionary *rule=[[self websiteRuleForTab:tab] mutableCopy]?:[NSMutableDictionary new];rule[@"enabled"]=@(!RuleEnabled(rule));[self storeWebsiteRule:rule forTab:tab];}
+- (void)websiteWarmthChanged:(NSSlider *)sender {NSDictionary *tab=[self menuTab];if(!tab)return;NSMutableDictionary *rule=[[self websiteRuleForTab:tab] mutableCopy]?:[NSMutableDictionary new];NSDictionary *before=[rule copy];rule[@"customWarmth"]=@YES;rule[@"warmth"]=@(sender.doubleValue);RuleAfterChange(before,rule);[self storeWebsiteRule:rule forTab:tab];NSTextField *readout=[sender.superview viewWithTag:98];readout.stringValue=[NSString stringWithFormat:@"%.0f%%",sender.doubleValue];}
+- (void)websiteRemove:(NSMenuItem *)sender {NSDictionary *tab=[self menuTab];if(!tab)return;NSString *key=[self websiteKeyForTab:tab];[self.browserBridge handle:@{@"type":@"remove",@"scope":[key containsString:@"://"]?@"url":@"domain",@"site":key}];}
+- (NSMenu *)websiteMenuForTab:(NSDictionary *)tab {
+ NSMenu *sub=[NSMenu new];if(!self.websiteScopeExact&&!self.browserBridge.rules[tab[@"site"]]&&self.browserBridge.rules[tab[@"url"]?:@""])self.websiteScopeExact=YES;
+ NSMenuItem *scopeHead=[[NSMenuItem alloc]initWithTitle:@"Apply to" action:nil keyEquivalent:@""];scopeHead.enabled=NO;[sub addItem:scopeHead];
+ NSMenuItem *domain=[self add:[NSString stringWithFormat:@"Whole domain · %@",tab[@"site"]] action:@selector(websiteScope:) to:sub];domain.tag=0;domain.indentationLevel=1;domain.state=!self.websiteScopeExact;domain.toolTip=@"Also covers subdomains.";
+ NSMenuItem *page=[self add:@"This exact page" action:[tab[@"url"] length]?@selector(websiteScope:):nil to:sub];page.tag=1;page.indentationLevel=1;page.state=self.websiteScopeExact;page.enabled=[tab[@"url"] length]>0;page.toolTip=[NSString stringWithFormat:@"Only this address, with its path and query; the part after # is ignored.\n%@",tab[@"url"]?:@""];
+ [sub addItem:NSMenuItem.separatorItem];
+ NSDictionary *rule=[self websiteRuleForTab:tab];NSString *key=[self websiteKeyForTab:tab];
+ NSMenuItem *enabled=[self add:@"Use this exception" action:@selector(websiteEnabled:) to:sub];enabled.state=RuleEnabled(rule);enabled.toolTip=@"Off keeps the settings below but does not apply them. Changing a setting away from default switches it on again.";[sub addItem:NSMenuItem.separatorItem];NSDictionary *inherited=[self.browserBridge inheritedForSite:key browser:self.lastExternalApp.bundleIdentifier];NSArray *words=@[@"",@"On",@"Off"];
+ NSArray *titles=@[@"Grayscale",@"Night Shift"],*keys=@[@"grayMode",@"nightMode"];
+ for(int i=0;i<2;i++){NSMenuItem *head=[[NSMenuItem alloc]initWithTitle:titles[i] action:nil keyEquivalent:@""];head.enabled=NO;[sub addItem:head];
+  NSInteger resolved=[inherited[keys[i]] integerValue];NSArray *choices=@[[NSString stringWithFormat:@"Use default%@",resolved?[NSString stringWithFormat:@" (%@)",words[resolved]]:@""],@"On",@"Off"];
+  for(int j=0;j<3;j++){NSMenuItem *item=[self add:choices[j] action:@selector(websiteChoice:) to:sub];item.tag=i*10+j;item.indentationLevel=1;item.state=[rule[keys[i]] integerValue]==j;}
+  [sub addItem:NSMenuItem.separatorItem];}
+ BOOL custom=[rule[@"customWarmth"] boolValue];double inheritedWarmth=[inherited[@"warmth"] doubleValue];
+ NSMenuItem *inherit=[self add:[NSString stringWithFormat:@"Use default warmth (%@)",inheritedWarmth>0?[NSString stringWithFormat:@"%.0f%%",inheritedWarmth]:@"Off"] action:@selector(websiteWarmthDefault:) to:sub];inherit.state=!custom;
+ NSMenuItem *sliderItem=[NSMenuItem new];NSView *view=[[NSView alloc]initWithFrame:NSMakeRect(0,0,260,54)];
+ NSTextField *label=[NSTextField labelWithString:[NSString stringWithFormat:@"Extra Warmth for %@",self.websiteScopeExact?@"this page":tab[@"site"]]];label.font=[NSFont systemFontOfSize:12];label.frame=NSMakeRect(18,34,190,16);label.lineBreakMode=NSLineBreakByTruncatingTail;[view addSubview:label];
+ NSTextField *readout=[NSTextField labelWithString:[NSString stringWithFormat:@"%.0f%%",[rule[@"warmth"] doubleValue]]];readout.tag=98;readout.font=[NSFont monospacedDigitSystemFontOfSize:12 weight:NSFontWeightRegular];readout.alignment=NSTextAlignmentRight;readout.frame=NSMakeRect(204,34,40,16);[view addSubview:readout];
+ NSSlider *slider=[self warmthSliderWithValue:[rule[@"warmth"] doubleValue] action:@selector(websiteWarmthChanged:)];slider.frame=NSMakeRect(18,6,226,26);slider.enabled=custom;[self helpView:slider text:@"Extra Warmth for this website, from Off to Red." label:[NSString stringWithFormat:@"Extra Warmth for %@, percent",key]];[view addSubview:slider];
+ sliderItem.view=view;[sub addItem:sliderItem];[sub addItem:NSMenuItem.separatorItem];
+ if(rule){NSMenuItem *remove=[self add:@"Remove this exception" action:@selector(websiteRemove:) to:sub];remove.toolTip=@"The site then uses the inherited settings again.";}
+ NSMenuItem *more=[self add:@"All website exceptions…" action:@selector(showWebsites:) to:sub];more.toolTip=@"Open Settings → Websites.";
+ return sub;
+}
+- (NSMenu *)currentAppMenu {
+ NSMenu *sub=[NSMenu new];NSDictionary *rule=[self currentAppRuleCreating:NO];NSString *name=self.lastExternalApp.localizedName?:@"this app";
+ NSMenuItem *enabled=[self add:@"Use this exception" action:@selector(currentAppEnabled:) to:sub];enabled.state=RuleEnabled(rule);enabled.toolTip=@"Off keeps the settings below but does not apply them. Changing a setting away from default switches it on again.";[sub addItem:NSMenuItem.separatorItem];
+ NSArray *titles=@[@"Grayscale",@"Night Shift"],*keys=@[@"grayMode",@"nightMode"],*choices=@[@"Use default",@"On",@"Off"];
+ for(int i=0;i<2;i++){NSMenuItem *head=[[NSMenuItem alloc]initWithTitle:titles[i] action:nil keyEquivalent:@""];head.enabled=NO;[sub addItem:head];
+  for(int j=0;j<3;j++){NSMenuItem *item=[self add:choices[j] action:@selector(currentAppChoice:) to:sub];item.tag=i*10+j;item.indentationLevel=1;item.state=[rule[keys[i]] integerValue]==j;item.toolTip=[NSString stringWithFormat:@"%@ for %@ while it is in front.",titles[i],name];}
+  [sub addItem:NSMenuItem.separatorItem];}
+ BOOL custom=[rule[@"customWarmth"] boolValue];NSMenuItem *inherit=[self add:@"Use default warmth" action:@selector(currentAppWarmthDefault:) to:sub];inherit.state=!custom;inherit.toolTip=[NSString stringWithFormat:@"Uncheck to give %@ its own Extra Warmth.",name];
+ NSMenuItem *sliderItem=[NSMenuItem new];NSView *view=[[NSView alloc]initWithFrame:NSMakeRect(0,0,260,54)];
+ NSTextField *label=[NSTextField labelWithString:[NSString stringWithFormat:@"Extra Warmth for %@",name]];label.font=[NSFont systemFontOfSize:12];label.frame=NSMakeRect(18,34,190,16);label.lineBreakMode=NSLineBreakByTruncatingTail;[view addSubview:label];
+ NSTextField *readout=[NSTextField labelWithString:[NSString stringWithFormat:@"%.0f%%",[rule[@"warmth"] doubleValue]]];readout.tag=98;readout.font=[NSFont monospacedDigitSystemFontOfSize:12 weight:NSFontWeightRegular];readout.alignment=NSTextAlignmentRight;readout.frame=NSMakeRect(204,34,40,16);[view addSubview:readout];
+ NSSlider *slider=[self warmthSliderWithValue:[rule[@"warmth"] doubleValue] action:@selector(currentAppWarmthChanged:)];slider.frame=NSMakeRect(18,6,226,26);slider.enabled=custom;[self helpView:slider text:[NSString stringWithFormat:@"Extra Warmth for %@, from Off to Red.",name] label:[NSString stringWithFormat:@"Extra Warmth for %@, percent",name]];[view addSubview:slider];
+ sliderItem.view=view;[sub addItem:sliderItem];[sub addItem:NSMenuItem.separatorItem];
+ NSMenuItem *more=[self add:@"More in Settings…" action:@selector(excludeCurrent:) to:sub];more.toolTip=[NSString stringWithFormat:@"Open the exception for %@ in Settings → Apps.",name];
+ return sub;
+}
+// One App Exceptions row: name and Remove, the two choices, and the app's own warmth.
+- (NSView *)exceptionRowForBundle:(NSString *)bundle rule:(NSDictionary *)rule {
+ NSTextField *name=[NSTextField labelWithString:rule[@"name"]?:bundle];name.font=[NSFont systemFontOfSize:13 weight:NSFontWeightSemibold];name.toolTip=bundle;
+ NSImageView *icon=[NSImageView imageViewWithImage:[self iconForBundle:bundle]];[icon.widthAnchor constraintEqualToConstant:28].active=YES;[icon.heightAnchor constraintEqualToConstant:28].active=YES;icon.accessibilityLabel=[NSString stringWithFormat:@"%@ icon",rule[@"name"]];
+ NSButton *remove=[NSButton buttonWithTitle:@"Remove" target:self action:@selector(removeRule:)];remove.identifier=bundle;remove.bezelStyle=NSBezelStyleInline;[self helpView:remove text:@"Remove this exception. The app then uses your default settings." label:[NSString stringWithFormat:@"Remove %@ exception",rule[@"name"]]];
+ NSButton *enable=[NSButton checkboxWithTitle:@"Use this exception" target:self action:@selector(ruleChanged:)];enable.identifier=bundle;enable.tag=4;enable.state=RuleEnabled(rule);enable.font=[NSFont systemFontOfSize:12];[self helpView:enable text:@"Off keeps the settings below but does not apply them. Changing a setting away from default switches it on again." label:[NSString stringWithFormat:@"Use the exception for %@",rule[@"name"]]];enable.tag=4;
+ NSStackView *header=[self row:@[icon,name,[self spacer],enable,remove]];
+ NSMutableArray *choices=[NSMutableArray new];NSArray *titles=@[@"Grayscale",@"Night Shift"];
+ for(int i=0;i<2;i++){NSTextField *label=[NSTextField labelWithString:titles[i]];NSSegmentedControl *choice=[NSSegmentedControl segmentedControlWithLabels:@[@"Default",@"On",@"Off"] trackingMode:NSSegmentSwitchTrackingSelectOne target:self action:@selector(ruleChanged:)];choice.selectedSegment=[rule[i==0?@"grayMode":@"nightMode"] integerValue];choice.identifier=bundle;choice.tag=i;for(int k=0;k<3;k++)[choice setWidth:44 forSegment:k];[self helpView:choice text:[self exclusionHelp] label:[NSString stringWithFormat:@"%@ — %@",rule[@"name"],titles[i]]];[choices addObject:label];[choices addObject:choice];}
+ NSStackView *modes=[self row:choices];modes.spacing=6;[modes setCustomSpacing:14 afterView:choices[1]];
+ NSButton *inherit=[NSButton checkboxWithTitle:@"Use default warmth" target:self action:@selector(ruleChanged:)];inherit.identifier=bundle;inherit.tag=2;inherit.state=![rule[@"customWarmth"] boolValue];[self helpView:inherit text:@"Uncheck to give this app its own Extra Warmth. Off adds no warmth; 100% is red. Your default warmth stays saved." label:[NSString stringWithFormat:@"%@ — Use default warmth",rule[@"name"]]];
+ NSSlider *slider=[self warmthSliderWithValue:[rule[@"warmth"] doubleValue] action:@selector(ruleChanged:)];slider.identifier=bundle;slider.tag=3;slider.enabled=[rule[@"customWarmth"] boolValue];[slider.widthAnchor constraintGreaterThanOrEqualToConstant:180].active=YES;[slider setContentHuggingPriority:1 forOrientation:NSLayoutConstraintOrientationHorizontal];[self helpView:slider text:@"Extra Warmth for this app, from Off to Red." label:[NSString stringWithFormat:@"%@ — Extra Warmth percent",rule[@"name"]]];
+ NSTextField *percent=[NSTextField labelWithString:[NSString stringWithFormat:@"%.0f%%",[rule[@"warmth"] doubleValue]]];percent.tag=99;percent.alignment=NSTextAlignmentRight;percent.font=[NSFont monospacedDigitSystemFontOfSize:13 weight:NSFontWeightRegular];[percent.widthAnchor constraintEqualToConstant:44].active=YES;
+ NSStackView *warmth=[self row:@[inherit,slider,percent]];
+ NSStackView *row=[self column:@[header,modes,warmth]];row.spacing=8;row.edgeInsets=NSEdgeInsetsMake(10,10,10,10);row.identifier=bundle;
+ return row;
+}
+- (NSImage *)menuIconForBundle:(NSString *)bundle {NSImage *icon=[[self iconForBundle:bundle] copy];icon.size=NSMakeSize(16,16);return icon;}
+- (NSImage *)iconForBundle:(NSString *)bundle {
+ NSURL *url=[NSWorkspace.sharedWorkspace URLForApplicationWithBundleIdentifier:bundle];NSImage *icon=url?[NSWorkspace.sharedWorkspace iconForFile:url.path]:[NSWorkspace.sharedWorkspace iconForContentType:UTTypeApplicationBundle];return icon;
+}
+// "Add app…" lists the apps running now, with icons, then the file picker.
+- (void)menuNeedsUpdate:(NSMenu *)menu {
+ if(menu!=self.addAppMenu)return;[menu removeAllItems];[menu addItemWithTitle:@"Add app…" action:nil keyEquivalent:@""];
+ NSArray *running=[NSWorkspace.sharedWorkspace.runningApplications sortedArrayUsingComparator:^NSComparisonResult(NSRunningApplication *a,NSRunningApplication *b){return [a.localizedName?:@"" localizedCaseInsensitiveCompare:b.localizedName?:@""];}];
+ for(NSRunningApplication *app in running){if(app.activationPolicy!=NSApplicationActivationPolicyRegular||!app.bundleIdentifier||!app.bundleURL||[app.bundleIdentifier isEqual:NSBundle.mainBundle.bundleIdentifier]||self.exclusionRules[app.bundleIdentifier])continue;
+  NSMenuItem *item=[[NSMenuItem alloc]initWithTitle:app.localizedName?:app.bundleIdentifier action:@selector(addRunningApp:) keyEquivalent:@""];item.target=self;item.representedObject=app.bundleURL;NSImage *icon=[app.icon copy];icon.size=NSMakeSize(16,16);item.image=icon;[menu addItem:item];}
+ if(menu.numberOfItems>1)[menu addItem:NSMenuItem.separatorItem];
+ NSMenuItem *other=[[NSMenuItem alloc]initWithTitle:@"Choose another app…" action:@selector(addExclusionApp:) keyEquivalent:@""];other.target=self;[menu addItem:other];
+}
+- (void)addRunningApp:(NSMenuItem *)sender {if(sender.representedObject)[self addAppURL:sender.representedObject];}
 - (void)rebuildExclusionsList {
  if(!self.exclusionsList)return;for(NSView *v in self.exclusionsList.arrangedSubviews.copy){[self.exclusionsList removeArrangedSubview:v];[v removeFromSuperview];}
  NSArray *keys=[self.exclusionRules.allKeys sortedArrayUsingComparator:^NSComparisonResult(NSString *a,NSString *b){return [self.exclusionRules[a][@"name"] localizedCaseInsensitiveCompare:self.exclusionRules[b][@"name"]];}];
- if(!keys.count){NSTextField *empty=[NSTextField labelWithString:@"Add an app, then choose its display settings."];[self.exclusionsList addArrangedSubview:empty];}
- for(NSString *bundle in keys){NSDictionary *rule=self.exclusionRules[bundle];NSView *row=[[NSView alloc]initWithFrame:NSMakeRect(0,0,620,142)];[row.heightAnchor constraintEqualToConstant:142].active=YES;[row.widthAnchor constraintEqualToConstant:620].active=YES;
- NSTextField *name=[NSTextField labelWithString:rule[@"name"]?:bundle];name.font=[NSFont systemFontOfSize:13 weight:NSFontWeightSemibold];name.frame=NSMakeRect(8,112,480,20);name.toolTip=bundle;[row addSubview:name];
- NSArray *titles=@[@"Grayscale",@"Night Shift"];
- for(int i=0;i<2;i++){NSTextField *label=[NSTextField labelWithString:titles[i]];label.frame=NSMakeRect(8+i*300,77,80,20);[row addSubview:label];NSPopUpButton *choice=[[NSPopUpButton alloc]initWithFrame:NSMakeRect(90+i*300,72,210,28) pullsDown:NO];[choice addItemsWithTitles:@[@"Use global setting",@"On",@"Off"]];[choice selectItemAtIndex:[rule[i==0?@"grayMode":@"nightMode"] integerValue]];choice.target=self;choice.action=@selector(ruleChanged:);choice.identifier=bundle;choice.tag=i;[self helpView:choice text:[self exclusionHelp] label:[NSString stringWithFormat:@"%@ — %@",rule[@"name"],titles[i]]];[row addSubview:choice];}
- NSButton *inherit=[NSButton checkboxWithTitle:@"Use global warmth" target:self action:@selector(ruleChanged:)];inherit.frame=NSMakeRect(8,35,160,26);inherit.identifier=bundle;inherit.tag=2;inherit.state=![rule[@"customWarmth"] boolValue];[self helpView:inherit text:@"Uncheck to set this app’s own warmth percentage. 0% adds no warmth; 100% reaches red. The global slider remains saved." label:[NSString stringWithFormat:@"%@ — Use global warmth",rule[@"name"]]];[row addSubview:inherit];
- NSSlider *slider=[NSSlider sliderWithValue:[rule[@"warmth"] doubleValue] minValue:0 maxValue:100 target:self action:@selector(ruleChanged:)];slider.frame=NSMakeRect(185,34,325,28);slider.identifier=bundle;slider.tag=3;slider.continuous=YES;slider.enabled=[rule[@"customWarmth"] boolValue];slider.numberOfTickMarks=5;[self helpView:slider text:@"App-specific Extra Warmth, Off 0% to Red 100%." label:[NSString stringWithFormat:@"%@ — Extra Warmth percent",rule[@"name"]]];[row addSubview:slider];
- NSTextField *percent=[NSTextField labelWithString:[NSString stringWithFormat:@"%.0f%%",[rule[@"warmth"] doubleValue]]];percent.tag=99;percent.frame=NSMakeRect(536,37,76,24);[row addSubview:percent];NSTextField *off=[NSTextField labelWithString:@"Off"];off.font=[NSFont systemFontOfSize:10];off.frame=NSMakeRect(185,15,40,16);[row addSubview:off];NSTextField *red=[NSTextField labelWithString:@"Red"];red.font=[NSFont systemFontOfSize:10];red.alignment=NSTextAlignmentRight;red.frame=NSMakeRect(470,15,40,16);[row addSubview:red];
- NSButton *remove=[NSButton buttonWithTitle:@"Remove" target:self action:@selector(removeRule:)];remove.identifier=bundle;remove.frame=NSMakeRect(536,109,76,26);[self helpView:remove text:@"Remove this app’s rule and restore any currently suspended effects safely." label:[NSString stringWithFormat:@"Remove %@ exception",rule[@"name"]]];[row addSubview:remove];[self.exclusionsList addArrangedSubview:row];}
+ if(!keys.count){NSTextField *empty=[NSTextField labelWithString:@"No exceptions yet. Add an app, then choose its display settings."];empty.textColor=NSColor.secondaryLabelColor;NSStackView *pad=[self column:@[empty]];pad.edgeInsets=NSEdgeInsetsMake(10,10,10,10);[self.exclusionsList addArrangedSubview:pad];}
+ BOOL first=YES;for(NSString *bundle in keys){if(!first){NSBox *line=[self separator];[self.exclusionsList addArrangedSubview:line];[line.widthAnchor constraintEqualToAnchor:self.exclusionsList.widthAnchor].active=YES;}first=NO;NSView *row=[self exceptionRowForBundle:bundle rule:self.exclusionRules[bundle]];[self.exclusionsList addArrangedSubview:row];[row.widthAnchor constraintEqualToAnchor:self.exclusionsList.widthAnchor].active=YES;}
 }
-- (void)showExclusions:(id)sender {
- if(!self.exclusionsWindow){self.exclusionsWindow=[[NSWindow alloc]initWithContentRect:NSMakeRect(0,0,680,510) styleMask:NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskResizable backing:NSBackingStoreBuffered defer:NO];self.exclusionsWindow.title=@"App Exceptions";self.exclusionsWindow.releasedWhenClosed=NO;self.exclusionsWindow.minSize=NSMakeSize(680,480);
- NSTextField *intro=[NSTextField wrappingLabelWithString:@"Choose app-specific display settings. They apply only while the app is frontmost with a visible, nonminimized regular window; global settings stay saved."];intro.frame=NSMakeRect(24,446,632,44);intro.autoresizingMask=NSViewMinYMargin|NSViewWidthSizable;[self.exclusionsWindow.contentView addSubview:intro];
- NSScrollView *scroll=[[NSScrollView alloc]initWithFrame:NSMakeRect(24,142,632,294)];scroll.hasVerticalScroller=YES;scroll.autoresizingMask=NSViewWidthSizable|NSViewHeightSizable;self.exclusionsList=[ExceptionStack new];self.exclusionsList.orientation=NSUserInterfaceLayoutOrientationVertical;self.exclusionsList.alignment=NSLayoutAttributeLeading;self.exclusionsList.spacing=8;self.exclusionsList.edgeInsets=NSEdgeInsetsMake(8,0,8,0);scroll.documentView=self.exclusionsList;self.exclusionsList.translatesAutoresizingMaskIntoConstraints=NO;[self.exclusionsList.widthAnchor constraintEqualToAnchor:scroll.contentView.widthAnchor].active=YES;[self.exclusionsWindow.contentView addSubview:scroll];
- NSButton *add=[NSButton buttonWithTitle:@"Add app…" target:self action:@selector(addExclusionApp:)];add.frame=NSMakeRect(24,36,110,28);[self.exclusionsWindow.contentView addSubview:add];
- NSTextField *note=[NSTextField wrappingLabelWithString:@"Timed Night Shift off overrides app Night Shift On. Grayscale Off with warmth 0% and Night Shift Off removes these three effects; True Tone and other tools remain separate."];note.font=[NSFont systemFontOfSize:10];note.textColor=NSColor.secondaryLabelColor;note.frame=NSMakeRect(150,22,506,48);note.autoresizingMask=NSViewWidthSizable;[self.exclusionsWindow.contentView addSubview:note];[self.exclusionsWindow center];}
- [self rebuildExclusionsList];[NSApp activateIgnoringOtherApps:YES];[self.exclusionsWindow makeKeyAndOrderFront:nil];
-}
+- (void)showExclusions:(id)sender {[self showSettings:nil];self.settingsTabs.selectedTabViewItemIndex=2;}
+- (void)showWebsites:(id)sender {[self showSettings:nil];self.settingsTabs.selectedTabViewItemIndex=3;}
 
 - (void)applicationDidFinishLaunching:(NSNotification *)n {
- if([NSRunningApplication runningApplicationsWithBundleIdentifier:NSBundle.mainBundle.bundleIdentifier].count>1){[NSApp terminate:nil];return;}
+ if([NSRunningApplication runningApplicationsWithBundleIdentifier:NSBundle.mainBundle.bundleIdentifier].count>1||[NSRunningApplication runningApplicationsWithBundleIdentifier:LessPullOldBundleIdentifier].count>0){[NSApp terminate:nil];return;}
+ BOOL migrated=[PreferenceMigration migrateFromDomain:LessPullOldBundleIdentifier into:NSUserDefaults.standardUserDefaults];
  NSMenu *main=[NSMenu new],*application=[NSMenu new];NSMenuItem *root=[NSMenuItem new];root.submenu=application;[main addItem:root];NSMenuItem *quit=[[NSMenuItem alloc]initWithTitle:@"Quit Less Pull" action:@selector(terminate:) keyEquivalent:@"q"];quit.target=NSApp;[application addItem:quit];NSMenuItem *settingsShortcut=[[NSMenuItem alloc]initWithTitle:@"Settings…" action:@selector(showSettings:) keyEquivalent:@","];settingsShortcut.target=self;[application insertItem:settingsShortcut atIndex:0];NSApp.mainMenu=main;
  self.exclusionRules=[[NSUserDefaults.standardUserDefaults dictionaryForKey:@"appExclusions"] mutableCopy]?:[NSMutableDictionary new];self.exclusion=[ExclusionPolicy fromDictionary:[NSUserDefaults.standardUserDefaults dictionaryForKey:@"exclusionRecovery"]]?:[ExclusionPolicy new];
  self.forcedNightOn=[[[NSUserDefaults.standardUserDefaults dictionaryForKey:@"exclusionRecovery"] objectForKey:@"forcedNightOn"] boolValue];self.engine=[FilterEngine new];self.warmth=[WarmthEngine new];[self.warmth restore];self.selectedMode=self.engine.currentMode;
  NSUserDefaults *d=NSUserDefaults.standardUserDefaults;
- [d registerDefaults:@{@"automatic":@YES,@"overrideMode":@(-1),@"warmth":@0,@"nightMode":@101,@"manualMode":@1}];
+ // The welcome window is for brand-new users only. Anyone with saved settings from an
+ // earlier version gets the marker silently; it is not a user setting.
+ BOOL firstLaunch=!migrated&&![d objectForKey:@"welcomeShown"]&&![d objectForKey:@"nightMode"]&&![d objectForKey:@"unifiedWarmth"]&&![d objectForKey:@"warmth"];
+ [d setBool:YES forKey:@"welcomeShown"];
+ [d registerDefaults:@{@"automatic":@YES,@"overrideMode":@(-1),@"warmth":@0,@"nightMode":@101,@"manualMode":@1,@"checkForUpdates":@YES}];
+ self.availableUpdate=[d dictionaryForKey:@"availableUpdate"];
  if([d integerForKey:@"nightMode"]==16)[d setInteger:100 forKey:@"nightMode"];
  if([d integerForKey:@"manualMode"]==16)[d setInteger:100 forKey:@"manualMode"];
  if([d integerForKey:@"overrideMode"]==16)[d setInteger:100 forKey:@"overrideMode"];
@@ -174,23 +461,58 @@
  self.policy=[SwitchingPolicy new];self.policy.automatic=self.automatic;
  self.policy.overrideMode=[d integerForKey:@"overrideMode"];
  self.policy.known=[d boolForKey:@"lastNightShiftKnown"];self.policy.nightShiftOn=[d boolForKey:@"lastNightShiftOn"];
- self.browserBridge=[BrowserBridge new];__weak AppDelegate *browserOwner=self;self.browserBridge.changed=^{[browserOwner sync];};[self.browserBridge start];
+ self.browserBridge=[BrowserBridge new];__weak AppDelegate *browserOwner=self;self.browserBridge.changed=^{[browserOwner sync];[browserOwner rebuildWebsiteRulesList];};self.browserBridge.defaults=^NSDictionary *(NSString *browser){return [browserOwner browserBaseForBundle:browser];};[self.browserBridge start];
  self.item=[NSStatusBar.systemStatusBar statusItemWithLength:NSSquareStatusItemLength];
- self.item.button.image=[NSImage imageWithSystemSymbolName:@"circle.lefthalf.filled" accessibilityDescription:@"Less Pull"];
+ self.item.button.image=[self menuBarImage:@"menubar-grayscale" symbol:@"circle.lefthalf.filled"];
  self.item.button.toolTip=@"Less Pull";
- NSMenu *menu=[NSMenu new];menu.delegate=self;self.item.menu=menu;
+ NSMenu *menu=[NSMenu new];menu.delegate=self;self.statusMenu=menu;self.item.button.target=self;self.item.button.action=@selector(statusItemClicked:);[self.item.button sendActionOn:NSEventMaskLeftMouseUp|NSEventMaskRightMouseUp];
  __weak AppDelegate *weak=self;self.engine.changed=^{[weak pipelineChanged:nil];};
  [NSWorkspace.sharedWorkspace.notificationCenter addObserver:self selector:@selector(pipelineChanged:) name:NSWorkspaceDidWakeNotification object:nil];
  [NSWorkspace.sharedWorkspace.notificationCenter addObserver:self selector:@selector(pipelineChanged:) name:NSWorkspaceSessionDidBecomeActiveNotification object:nil];
  [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(displaysChanged:) name:NSApplicationDidChangeScreenParametersNotification object:nil];
  [NSWorkspace.sharedWorkspace.notificationCenter addObserver:self selector:@selector(frontmostChanged:) name:NSWorkspaceDidActivateApplicationNotification object:nil];
  [NSWorkspace.sharedWorkspace.notificationCenter addObserver:self selector:@selector(frontmostChanged:) name:NSWorkspaceDidTerminateApplicationNotification object:nil];
- [self updateForeground];[self restartTimer];[self schedulePauseTimer];[self sync];
+ [self restoreLessPullPause];[self scheduleLessPullPauseTimer];[self restoreGrayscaleOff];[self scheduleGrayscaleOffTimer];[self registerPeekShortcut];[self scheduleUpdateChecks];[self scheduleThanks];[self updateForeground];[self restartTimer];[self schedulePauseTimer];[self sync];
  if([NSProcessInfo.processInfo.arguments containsObject:@"--settings"])[self showSettings:nil];
- if([NSProcessInfo.processInfo.arguments containsObject:@"--menu-test"]){[self showSettings:nil];main.itemArray.firstObject.submenu=self.item.menu;}
+ // First launch: Settings opens with a one-time welcome card above the real controls.
+ self.welcomeWanted=firstLaunch||[NSProcessInfo.processInfo.arguments containsObject:@"--welcome"];if(self.welcomeWanted)[self showSettings:nil];
+ if([NSProcessInfo.processInfo.arguments containsObject:@"--menu-test"]){[self showSettings:nil];main.itemArray.firstObject.submenu=self.statusMenu;}
 
 }
 - (BOOL)applicationShouldHandleReopen:(NSApplication *)application hasVisibleWindows:(BOOL)visible {[self showSettings:nil];return YES;}
+// The supplied menu-bar images are black on transparent; as template images they
+// follow the menu-bar appearance. The SF Symbol remains the fallback.
+- (NSImage *)menuBarImage:(NSString *)name symbol:(NSString *)symbol {
+ NSImage *image=[NSBundle.mainBundle imageForResource:name];if(image){image.template=YES;image.accessibilityDescription=@"Less Pull";return image;}
+ return [NSImage imageWithSystemSymbolName:symbol accessibilityDescription:@"Less Pull"];
+}
+// Half-filled circle while grayscale is showing, outline while color is showing,
+// pause mark while Night Shift is timed off.
+- (void)updateStatusIcon {
+ BOOL gray=self.effectiveMode==100||self.effectiveMode==1;double strength=round(self.targetStrength*20)/20;
+ BOOL paused=self.pause!=nil||self.pausedUntil!=nil;NSString *name=[NSString stringWithFormat:@"%@ update=%d",paused?@"paused":[NSString stringWithFormat:@"gray=%d warmth=%.2f",gray,strength],self.availableUpdate!=nil];
+ if([name isEqual:self.statusImageName])return;self.statusImageName=name;
+ self.item.button.image=[self withUpdateDot:paused?[self menuBarImage:@"menubar-paused" symbol:@"pause.circle"]:[self statusImageGray:gray warmth:strength]];
+}
+// Drawn rather than a template image so the right half can carry the warmth
+// color: the left half fills while grayscale shows, the right half takes the
+// ramp color (light orange to red) for the warmth in effect. Under the full red
+// filter the warm half is much darker than the white half, so both stay visible.
+// A small dot at the top right of the icon while a newer version is known.
+- (NSImage *)withUpdateDot:(NSImage *)base {
+ if(!self.availableUpdate)return base;BOOL template=base.template;
+ NSImage *image=[NSImage imageWithSize:base.size flipped:NO drawingHandler:^BOOL(NSRect rect){[base drawInRect:rect];NSRect dot=NSMakeRect(rect.size.width-6,rect.size.height-6,5,5);[NSColor.labelColor setFill];[[NSBezierPath bezierPathWithOvalInRect:dot] fill];return YES;}];
+ image.template=template;image.accessibilityDescription=[base.accessibilityDescription stringByAppendingString:@", update available"];return image;
+}
+- (NSImage *)statusImageGray:(BOOL)gray warmth:(double)strength {
+ NSImage *image=[NSImage imageWithSize:NSMakeSize(18,18) flipped:NO drawingHandler:^BOOL(NSRect rect){
+  NSRect circle=NSInsetRect(rect,2,2);NSColor *ink=NSColor.labelColor;NSBezierPath *outline=[NSBezierPath bezierPathWithOvalInRect:circle];
+  NSRect left=circle,right=circle;left.size.width/=2;right.size.width/=2;right.origin.x+=right.size.width;
+  if(gray){[NSGraphicsContext saveGraphicsState];[[NSBezierPath bezierPathWithRect:left] addClip];[ink setFill];[outline fill];[NSGraphicsContext restoreGraphicsState];}
+  if(strength>0){double gains[3];WarmthGains(strength,gains);[NSGraphicsContext saveGraphicsState];[[NSBezierPath bezierPathWithRect:right] addClip];[[NSColor colorWithSRGBRed:gains[0] green:gains[1] blue:gains[2] alpha:1] setFill];[outline fill];[NSGraphicsContext restoreGraphicsState];}
+  [ink setStroke];outline.lineWidth=1.5;[outline stroke];return YES;}];
+ image.template=NO;image.accessibilityDescription=[NSString stringWithFormat:@"Less Pull: %@%@",gray?@"grayscale":@"color",strength>0?[NSString stringWithFormat:@", warmth %.0f%%",strength/3*100]:@""];return image;
+}
 - (void)restartTimer {
  [self.timer invalidate];double t=60;self.timer=[NSTimer timerWithTimeInterval:t target:self selector:@selector(sync) userInfo:nil repeats:YES];
  [NSRunLoop.mainRunLoop addTimer:self.timer forMode:NSRunLoopCommonModes];
@@ -220,56 +542,63 @@
 }
 - (void)sync {
  [self checkPause];
- [self updateForeground];[self reconcileExclusion];
+ [self updateForeground];[self checkLessPullPause];[self checkGrayscaleOff];
+ if(self.peeking&&[[self peekEffects][@"nightShift"] boolValue]){self.nightOverride=2;self.excludeNight=YES;}
+ if(self.pausedUntil){if(self.grayOverride||self.nightOverride||self.customWarmth)self.animateAppearance=YES;self.grayOverride=0;self.nightOverride=0;self.customWarmth=NO;self.appWarmth=0;self.excludeGray=NO;self.excludeNight=NO;self.excludeWarmth=NO;}[self reconcileExclusion];
  BOOL on=NO;BOOL known=[self logicalNightShift:&on];
  self.policy.automatic=self.automatic;[self.policy observeKnown:known on:on];[self savePolicy];
  NSInteger target=self.automatic?[NSUserDefaults.standardUserDefaults integerForKey:@"nightMode"]:self.selectedMode;
- if(![self applyMode:target])self.status=self.warmth.error?:@"Could not verify appearance change; retrying.";
- else self.status=[NSString stringWithFormat:@"%@ · Extra Warmth following %@ · Night Shift %@",[self modeName:target],self.automatic?@"on":@"off",known?(on?@"on":@"off"):@"unavailable"];
+ if(![self applyMode:target])self.status=self.warmth.error?:@"Could not confirm the display change. Trying again.";
+ else self.status=[NSString stringWithFormat:@"%@ · Extra Warmth %@ · Night Shift %@",[self modeName:target],self.automatic?@"follows Night Shift":@"set by hand",known?(on?@"on":@"off"):@"unavailable"];
  if(self.pause)self.status=[self.status stringByAppendingFormat:@" · Night Shift off until %@",[self timeLabel:self.pause.expiry]];
  if(self.exclusionError)self.status=self.exclusionError;
  [self refreshControlsKnown:known nightOn:on];
  NSArray *arguments=NSProcessInfo.processInfo.arguments;NSUInteger testIndex=[arguments indexOfObject:@"--test-state-path"];if(testIndex!=NSNotFound&&testIndex+1<arguments.count){BOOL actual=NO;[self.engine nightShift:&actual];NSDictionary *state=@{@"front":self.foregroundID?:@"",@"grayOverride":@(self.grayOverride),@"nightOverride":@(self.nightOverride),@"customWarmth":@(self.customWarmth),@"effectiveMode":@(self.effectiveMode),@"strength":@(self.targetStrength),@"logicalNight":@(on),@"actualNight":@(actual),@"override":@(self.policy.overrideMode),@"transitioning":@(self.warmth.transitioning),@"pause":@(self.pause!=nil)};[[NSJSONSerialization dataWithJSONObject:state options:NSJSONWritingPrettyPrinted error:nil] writeToFile:arguments[testIndex+1] atomically:YES];}
 
 }
+- (NSSlider *)warmthSliderWithValue:(double)value action:(SEL)action {
+ NSSlider *slider=[NSSlider new];slider.cell=[WarmthSliderCell new];slider.minValue=0;slider.maxValue=100;slider.doubleValue=value;slider.target=self;slider.action=action;slider.continuous=YES;slider.numberOfTickMarks=5;slider.allowsTickMarkValuesOnly=NO;slider.sliderType=NSSliderTypeLinear;return slider;
+}
 - (NSString *)modeName:(NSInteger)mode {return mode==101?@"Color":mode==100?@"Grayscale":mode==0?@"Natural Colors":mode==1?@"Grayscale":mode==16?@"System Color Tint":@"Other filter";}
-- (NSString *)autoHelp {return @"Controls Extra Warmth only; never changes Grayscale or the system schedule. Night Shift off removes inherited Extra Warmth; on restores its saved amount. Manual warmth changes temporarily override following until the next transition or Resume Following. App and website exceptions retain their independent overrides.";}
+- (NSString *)autoHelp {return @"On: Extra Warmth is added only while Night Shift is on, and there is none in the daytime. Off: Extra Warmth stays on all day. Grayscale and your Night Shift schedule are not affected. If you move the slider yourself while following, that warmth stays until Night Shift next changes, or until you choose Resume Following.";}
 - (NSString *)followHelpKnown:(BOOL)known nightOn:(BOOL)on {
- NSString *availability=!known?@"Night Shift status is unavailable; your preference is retained. ":@"";
+ NSString *availability=!known?@"Night Shift cannot be read right now; your choice is kept. ":@"";
  return [availability stringByAppendingString:self.autoHelp];
 }
-- (NSString *)grayHelp {return @"Checked keeps grayscale on day and night; unchecked keeps color. Night Shift and warmth following do not change this choice. App and website exceptions can override it.";}
-- (NSString *)warmthHelp {return @"0% adds no warmth; 100% is red monochrome. Color and grayscale meet at the same red endpoint. The percentage is relative, not Kelvin. With warmth following enabled, changes temporarily override the schedule and are saved for night.";}
-- (NSString *)nightHelp {return @"Manual on/off now; preserves the system schedule, which may change the state later. Off does not permanently disable scheduling. Cancels any timed pause; an actual transition ends a warmth override.";}
-- (NSString *)pauseHelp {return @"Timed off; preserves the system schedule. Following removes inherited warmth and keeps Grayscale unchanged unless manually overridden. Resumes only while eligible; stays off in daytime. Until morning uses the custom end or shown 07:00 fallback. Quit ends the timed pause safely.";}
+- (NSString *)grayHelp {return @"Shows everything in shades of gray, day and night. Night Shift does not change this. Exceptions for apps and websites can.";}
+- (NSString *)warmthHelp {return @"Adds warmth on top of Night Shift: Off adds none, 100% is red. The percentage is Less Pull’s own scale. When warmth follows Night Shift, the amount you set is used at night.";}
+- (NSString *)nightHelp {return @"Turns Night Shift on or off now. Your Night Shift schedule in System Settings stays as it is and may change it again later.";}
+- (NSString *)pauseHelp {return @"Turns Night Shift off for a while and back on afterwards, if your schedule still wants it on. Grayscale stays as it is. Quitting Less Pull ends the timed off.";}
 - (void)helpView:(NSView *)view text:(NSString *)text label:(NSString *)label {view.toolTip=text;view.accessibilityHelp=text;if(label)view.accessibilityLabel=label;}
 - (NSString *)appearanceSummary {
  NSString *name=[self modeName:self.effectiveMode];double percent=self.targetStrength/3*100;
  return [NSString stringWithFormat:@"%@ · Warmth %@",name,percent>0?[NSString stringWithFormat:@"%.0f%%",percent]:@"Off"];
 }
 - (NSString *)automationSummaryKnown:(BOOL)known nightOn:(BOOL)on {
- if(self.pause)return [NSString stringWithFormat:@"Night Shift off until %@ · Following %@",[self timeLabel:self.pause.expiry],self.automatic?@"on":@"off"];
- if(self.exclusion.active){BOOL actual=NO;[self.engine nightShift:&actual];return [NSString stringWithFormat:@"App Night Shift %@ · global %@%@",actual?@"on":@"off",self.exclusion.desiredOn?@"on":@"off",self.policy.overrideMode>=0?@" · override":@""];}
- if(self.automatic&&self.policy.overrideMode>=0)return @"Temporary warmth override · Following stays on";
- return [NSString stringWithFormat:@"%@ · Night Shift %@",self.automatic?@"Warmth follows Night Shift":@"Manual",known?(on?@"on":@"off"):@"unavailable"];
+ if(self.pausedUntil)return [[self lessPullPauseLabel] stringByAppendingString:@" · the plain display, settings kept"];
+ if(self.grayOffUntil)return [self grayOffLabel];
+ if(self.pause)return [NSString stringWithFormat:@"Night Shift off until %@",[self timeLabel:self.pause.expiry]];
+ if(self.exclusion.active){BOOL actual=NO;[self.engine nightShift:&actual];return [NSString stringWithFormat:@"Night Shift %@ for %@ · usually %@",actual?@"on":@"off",self.foregroundName,self.exclusion.desiredOn?@"on":@"off"];}
+ if(self.automatic&&self.policy.overrideMode>=0)return @"Warmth set by hand until Night Shift next changes";
+ return [NSString stringWithFormat:@"%@ · Night Shift %@",self.automatic?@"Warmth follows Night Shift":@"Warmth set by hand",known?(on?@"on":@"off"):@"unavailable"];
 }
 - (void)refreshControlsKnown:(BOOL)known nightOn:(BOOL)on {
  NSString *summary=[self appearanceSummary],*detail=[self automationSummaryKnown:known nightOn:on];
  BOOL failed=[self.status containsString:@"Could not"]||[self.status containsString:@"unavailable"]||[self.status containsString:@"unsupported"];
- self.statusText.stringValue=failed?self.status:summary;self.statusDetail.stringValue=detail;self.exclusionText.stringValue=[self exclusionSummary];self.exclusionText.toolTip=[self exclusionHelp];self.exclusionText.accessibilityHelp=[self exclusionHelp];
+ self.statusText.stringValue=failed?self.status:summary;self.statusDetail.stringValue=detail;self.websiteStatus.stringValue=[self websiteStatusLine];self.exclusionText.stringValue=[self exclusionSummary];self.exclusionText.toolTip=[self exclusionHelp];self.exclusionText.accessibilityHelp=[self exclusionHelp];
  BOOL actualOn=NO;BOOL actualKnown=[self.engine nightShift:&actualOn];
- self.item.button.toolTip=[NSString stringWithFormat:@"%@\n%@\nClick for appearance, Night Shift, and Warmth-following controls.",summary,detail];
+ self.item.button.toolTip=[NSString stringWithFormat:@"%@\n%@\nClick for Grayscale, Extra Warmth and Night Shift.",summary,detail];[self updateStatusIcon];
  self.autoButton.state=self.automatic;self.autoButton.enabled=actualKnown;[self helpView:self.autoButton text:[self followHelpKnown:actualKnown nightOn:actualOn] label:@"Extra Warmth follows Night Shift"];self.nightButton.state=actualKnown&&actualOn;self.nightButton.enabled=known;
  self.nightButton.state=self.exclusion.active?on:(actualKnown&&actualOn);
- self.nightButton.title=known?(self.exclusion.active?(on?@"Global Night Shift: On":@"Global Night Shift: Off"):(on?@"Night Shift: On":@"Night Shift: Off")):@"Night Shift unavailable";[self helpView:self.nightButton text:self.exclusion.active?[[self exclusionHelp] stringByAppendingString:@" The toggle changes the underlying requested state; exception controls the actual Night Shift state."]:self.nightHelp label:nil];
+ self.nightButton.title=known?(self.exclusion.active?(on?@"Default Night Shift: On":@"Default Night Shift: Off"):(on?@"Night Shift: On":@"Night Shift: Off")):@"Night Shift unavailable";[self helpView:self.nightButton text:self.exclusion.active?[[self exclusionHelp] stringByAppendingString:@" This changes your default; the app in front keeps its own Night Shift exception."]:self.nightHelp label:nil];
  self.grayscaleButton.state=self.selectedMode==1||self.selectedMode==100;
- self.grayscaleButton.title=self.grayOverride?@"Global Grayscale":@"Grayscale";
+ self.grayscaleButton.title=self.grayOverride?@"Default Grayscale":@"Grayscale";self.grayOnButton.hidden=self.grayOffUntil==nil;self.grayOffPopup.hidden=self.grayOffUntil!=nil||!self.grayscaleButton.state;self.grayOnButton.toolTip=[self grayOffLabel];if(self.clickPopup)[self.clickPopup selectItemAtIndex:[self leftClickToggles]?1:0];
  self.resumeButton.hidden=!(self.automatic&&self.policy.overrideMode>=0);
- self.endPauseButton.title=[self canResumePause]?@"Resume Night Shift now":@"End timed pause";[self helpView:self.endPauseButton text:[self endPauseHelp] label:self.endPauseButton.title];self.endPauseButton.hidden=self.pause==nil;self.pausePopup.hidden=self.pause!=nil;self.pausePopup.enabled=known&&(on||actualOn);
+ self.endPauseButton.title=[self canResumePause]?@"Turn Night Shift back on":@"End timed off";[self helpView:self.endPauseButton text:[self endPauseHelp] label:self.endPauseButton.title];self.endPauseButton.hidden=self.pause==nil;self.pausePopup.hidden=self.pause!=nil;self.pausePopup.enabled=known&&(on||actualOn);
  self.resetButton.enabled=[self currentWarmth]>0;
  self.warmthSlider.doubleValue=[self currentWarmth]/3*100;NSString *percent=[NSString stringWithFormat:@"%.0f%%",[self currentWarmth]/3*100];self.warmthLabel.stringValue=percent;self.menuWarmthReadout.stringValue=percent;
  self.warmthLabel.accessibilityLabel=[NSString stringWithFormat:@"Extra Warmth %@",percent];
- self.warmthTitle.stringValue=self.customWarmth?@"Global Extra Warmth":(self.automatic&&self.policy.overrideMode<0&&known&&!on)?@"Extra Warmth · saved for night":@"Extra Warmth";
+ self.warmthTitle.stringValue=self.customWarmth?@"Default Extra Warmth":(self.automatic&&self.policy.overrideMode<0&&known&&!on)?@"Extra Warmth · used at night":@"Extra Warmth";
  self.statusText.toolTip=self.status;self.statusDetail.toolTip=self.autoHelp;
  if(self.pausePopup)[self populatePausePopup];
 }
@@ -278,20 +607,20 @@
  NSString *help=nil;
  if(action==@selector(toggleAuto:))help=self.autoHelp;
  else if(action==@selector(toggleGrayscale:))help=self.grayHelp;
+ else if(action==@selector(grayscaleOff:))help=[self grayOffHelp];
  else if(action==@selector(toggleNightShift:))help=self.nightHelp;
  else if(action==@selector(pauseNightShift:))help=self.pauseHelp;
  else if(action==@selector(endPauseNow:))help=[self endPauseHelp];
- else if(action==@selector(resume:))help=@"Apply the warmth for the current Night Shift state now. Warmth following stays enabled.";
- else if(action==@selector(showSettings:)){help=@"Open appearance, Night Shift, Extra Warmth follows Night Shift, and login settings.";i.keyEquivalent=@",";}
- else if(action==@selector(showAbout:))help=@"App version, copyright, and Jiri Arion Rose’s website.";
- else if(action==@selector(showHelp:))help=@"Read a short guide or open troubleshooting diagnostics.";
- else if(action==@selector(diagnostics:))help=@"Inspect system state and display requests for troubleshooting.";
- else if(action==@selector(quit:)){help=@"Quit the app, remove app-added warmth, and end an active Night Shift pause safely. The native system filter is restored.";i.keyEquivalent=@"q";}
+ else if(action==@selector(resume:))help=@"Go back to following Night Shift now.";
+ else if(action==@selector(showSettings:)){help=@"Open all Less Pull settings, exceptions and help.";i.keyEquivalent=@",";}
+ else if(action==@selector(showHelp:))help=@"A short guide to Less Pull.";
+ else if(action==@selector(diagnostics:))help=@"Technical details for troubleshooting.";
+ else if(action==@selector(quit:)){help=@"Quit Less Pull. The display returns to normal and Night Shift follows its schedule again.";i.keyEquivalent=@"q";}
  i.toolTip=help;[menu addItem:i];return i;
 }
 - (NSString *)morningPauseTitle {
  NSBlueStatus s={0};[self.engine readNightShiftStatus:&s];NSDate *morning=[PausePolicy nextMorningForDate:NSDate.date mode:s.mode endMinute:s.schedule.to.hour*60+s.schedule.to.minute calendar:NSCalendar.currentCalendar];
- return [NSString stringWithFormat:@"Off until morning · %@%@",[self timeLabel:morning],s.mode==2?@"":@" local fallback"];
+ return [NSString stringWithFormat:@"Off until morning · %@",[self timeLabel:morning]];
 }
 - (void)populatePauses:(NSMenu *)menu {
  for(NSArray *pair in @[@[@"Off for 1 hour",@1],@[@"Off for 4 hours",@4],@[[self morningPauseTitle],@0]]){NSMenuItem *i=[self add:pair[0] action:@selector(pauseNightShift:) to:menu];i.tag=[pair[1] integerValue];}
@@ -299,31 +628,191 @@
 - (void)populatePausePopup {
  [self.pausePopup removeAllItems];[self.pausePopup addItemWithTitle:@"Turn Night Shift off for…"];[self populatePauses:self.pausePopup.menu];
 }
-- (void)menuDidClose:(NSMenu *)menu {[self.menuDismissal end];}
+- (void)menuDidClose:(NSMenu *)menu {if(menu!=self.statusMenu)return;[self.menuDismissal end];self.item.menu=nil;}
 - (void)menuWillOpen:(NSMenu *)menu {
- if(!self.menuDismissal)self.menuDismissal=[MenuDismissal new];[self.menuDismissal begin:menu];
+ if(menu!=self.statusMenu)return;if(!self.menuDismissal)self.menuDismissal=[MenuDismissal new];[self.menuDismissal begin:menu];
  [self sync];[menu removeAllItems];BOOL on=NO;BOOL known=[self logicalNightShift:&on];BOOL actualOn=NO;BOOL actualKnown=[self.engine nightShift:&actualOn];
- NSMenuItem *summary=[self add:[self appearanceSummary] action:nil to:menu];summary.toolTip=self.status;
- NSMenuItem *state=[self add:[self automationSummaryKnown:known nightOn:on] action:nil to:menu];state.toolTip=self.autoHelp;
+ NSMenuItem *summary=[self add:[self menuStatusLine] action:nil to:menu];summary.toolTip=[NSString stringWithFormat:@"%@\n%@",[self automationSummaryKnown:known nightOn:on],[self exclusionSummary]];
  [menu addItem:NSMenuItem.separatorItem];
- NSMenuItem *gray=[self add:self.grayOverride?@"Global Grayscale":@"Grayscale" action:@selector(toggleGrayscale:) to:menu];gray.state=self.selectedMode==1||self.selectedMode==100;
+ NSMenuItem *gray=[self add:self.grayOverride?@"Default Grayscale":@"Grayscale" action:@selector(toggleGrayscale:) to:menu];gray.state=self.selectedMode==1||self.selectedMode==100;
+ if(self.grayOffUntil){NSMenuItem *backOn=[self add:@"Grayscale back on now" action:@selector(grayscaleBackOn:) to:menu];backOn.toolTip=[self grayOffLabel];}
+ else if(gray.state){NSMenuItem *off=[self add:@"Grayscale off for" action:nil to:menu];off.toolTip=[self grayOffHelp];off.submenu=[NSMenu new];[self populateGrayscaleOff:off.submenu];}
  NSMenuItem *sliderItem=[NSMenuItem new];NSView *view=[[NSView alloc]initWithFrame:NSMakeRect(0,0,300,78)];
- NSTextField *label=[NSTextField labelWithString:self.customWarmth?@"Global Extra Warmth":(self.automatic&&self.policy.overrideMode<0&&known&&!on)?@"Warmth · saved for night":@"Extra Warmth"];label.frame=NSMakeRect(18,54,210,18);[self helpView:label text:self.warmthHelp label:nil];[view addSubview:label];
+ NSTextField *label=[NSTextField labelWithString:self.customWarmth?@"Default Extra Warmth":(self.automatic&&self.policy.overrideMode<0&&known&&!on)?@"Extra Warmth · used at night":@"Extra Warmth"];label.frame=NSMakeRect(18,54,210,18);[self helpView:label text:self.warmthHelp label:nil];[view addSubview:label];
  self.menuWarmthReadout=[NSTextField labelWithString:[NSString stringWithFormat:@"%.0f%%",[self currentWarmth]/3*100]];self.menuWarmthReadout.frame=NSMakeRect(242,54,48,18);self.menuWarmthReadout.alignment=NSTextAlignmentRight;[self helpView:self.menuWarmthReadout text:self.warmthHelp label:@"Extra Warmth percentage"];[view addSubview:self.menuWarmthReadout];
- NSSlider *slider=[NSSlider sliderWithValue:[self currentWarmth]/3*100 minValue:0 maxValue:100 target:self action:@selector(warmthChanged:)];slider.frame=NSMakeRect(18,26,260,26);slider.continuous=YES;slider.numberOfTickMarks=5;slider.allowsTickMarkValuesOnly=NO;[self helpView:slider text:self.warmthHelp label:@"Extra Warmth, percent"];[view addSubview:slider];
+ NSSlider *slider=[self warmthSliderWithValue:[self currentWarmth]/3*100 action:@selector(warmthChanged:)];slider.frame=NSMakeRect(18,26,260,26);[self helpView:slider text:self.warmthHelp label:@"Extra Warmth, percent"];[view addSubview:slider];
  for(int i=0;i<5;i++){NSTextField *r=[NSTextField labelWithString:@[@"Off",@"25",@"50",@"75",@"Red"][i]];r.font=[NSFont systemFontOfSize:10];r.alignment=NSTextAlignmentCenter;r.frame=NSMakeRect(28+60*i-20,4,40,16);[view addSubview:r];}
  [self helpView:view text:self.warmthHelp label:nil];sliderItem.view=view;sliderItem.toolTip=self.warmthHelp;[menu addItem:sliderItem];
  [menu addItem:NSMenuItem.separatorItem];
- NSMenuItem *night=[self add:known?(self.exclusion.active?(on?@"Global Night Shift: On":@"Global Night Shift: Off"):(on?@"Night Shift: On":@"Night Shift: Off")):@"Night Shift unavailable" action:known?@selector(toggleNightShift:):nil to:menu];night.state=known&&on;night.enabled=known;night.toolTip=self.exclusion.active?@"Changes the underlying requested Night Shift state; the foreground exception controls the actual Night Shift state.":self.nightHelp;
- if(self.pause)[self add:[self canResumePause]?@"Resume Night Shift now":@"End timed pause" action:@selector(endPauseNow:) to:menu];
- else if(known&&(on||actualOn)){NSMenuItem *pause=[self add:@"Turn Night Shift off for…" action:nil to:menu];pause.toolTip=self.pauseHelp;pause.submenu=[NSMenu new];[self populatePauses:pause.submenu];}
- NSMenuItem *automatic=[self add:@"Extra Warmth follows Night Shift" action:@selector(toggleAuto:) to:menu];automatic.state=self.automatic;automatic.enabled=actualKnown;automatic.toolTip=[self followHelpKnown:actualKnown nightOn:actualOn];
- if(self.automatic&&self.policy.overrideMode>=0)[self add:@"Resume Following" action:@selector(resume:) to:menu];
- [menu addItem:NSMenuItem.separatorItem];NSMenuItem *ex=[self add:[self exclusionSummary] action:nil to:menu];ex.toolTip=[self exclusionHelp];[self add:@"App Exceptions…" action:@selector(showExclusions:) to:menu];if(self.lastExternalApp.bundleIdentifier)[self add:[NSString stringWithFormat:@"Customize %@…",self.lastExternalApp.localizedName?:@"current app"] action:@selector(excludeCurrent:) to:menu];[self add:@"Install Browser Extension…" action:@selector(installBrowserExtension:) to:menu];[self add:@"Settings…" action:@selector(showSettings:) to:menu];
- NSMenuItem *help=[self add:@"Help" action:nil to:menu];help.toolTip=@"Usage help and troubleshooting.";help.submenu=[NSMenu new];[self add:@"How to Use…" action:@selector(showHelp:) to:help.submenu];[self add:@"Diagnostics…" action:@selector(diagnostics:) to:help.submenu];
- [self add:@"About Less Pull…" action:@selector(showAbout:) to:menu];
+ // Everything about Night Shift lives in one submenu: on/off now, off for a while,
+ // and whether Extra Warmth follows it.
+ NSString *nightTitle=known?(self.exclusion.active?(on?@"Default Night Shift: On":@"Default Night Shift: Off"):(on?@"Night Shift: On":@"Night Shift: Off")):@"Night Shift unavailable";
+ NSMenuItem *night=[self add:nightTitle action:nil to:menu];night.state=known&&on;night.enabled=known;night.toolTip=self.exclusion.active?@"Your default Night Shift setting. The app in front keeps its own Night Shift exception.":self.nightHelp;
+ if(known){night.submenu=[NSMenu new];
+  [self add:on?@"Turn Off":@"Turn On" action:@selector(toggleNightShift:) to:night.submenu];
+  if(self.pause)[self add:[self canResumePause]?@"Turn Night Shift back on":@"End timed off" action:@selector(endPauseNow:) to:night.submenu];
+  else if(on||actualOn){[night.submenu addItem:NSMenuItem.separatorItem];[self populatePauses:night.submenu];}
+  [night.submenu addItem:NSMenuItem.separatorItem];
+  NSMenuItem *automatic=[self add:@"Extra Warmth follows Night Shift" action:@selector(toggleAuto:) to:night.submenu];automatic.state=self.automatic;automatic.enabled=actualKnown;automatic.toolTip=[self followHelpKnown:actualKnown nightOn:actualOn];
+  if(self.automatic&&self.policy.overrideMode>=0)[self add:@"Resume Following" action:@selector(resume:) to:night.submenu];}
+ if(self.pausedUntil){NSMenuItem *resume=[self add:@"Resume Less Pull" action:@selector(resumeLessPull:) to:menu];resume.toolTip=@"Bring Grayscale and Extra Warmth back now, with the normal fade.";}
+ else {NSMenuItem *pauseAll=[self add:@"Pause Less Pull" action:nil to:menu];pauseAll.toolTip=[self pauseLessPullHelp];pauseAll.submenu=[NSMenu new];for(NSArray *pair in @[@[@"For 15 minutes",@15],@[@"For 1 hour",@60],@[@"Until I resume",@0]]){NSMenuItem *i=[self add:pair[0] action:@selector(pauseLessPull:) to:pauseAll.submenu];i.tag=[pair[1] integerValue];i.toolTip=[self pauseLessPullHelp];}}
+ [menu addItem:NSMenuItem.separatorItem];
+ if(self.lastExternalApp.bundleIdentifier){NSDictionary *appRule=self.exclusionRules[self.lastExternalApp.bundleIdentifier];NSMenuItem *current=[self add:[NSString stringWithFormat:@"Exception for %@",self.lastExternalApp.localizedName?:@"current app"] action:nil to:menu];current.toolTip=[self exclusionSummary];current.submenu=[self currentAppMenu];current.image=[self menuIconForBundle:self.lastExternalApp.bundleIdentifier];current.state=RuleEnabled(appRule)&&RuleDiffers(appRule);}
+ if(self.availableUpdate){NSMenuItem *update=[self add:[NSString stringWithFormat:@"Update available: %@…",[[self updateLabel:self.availableUpdate] stringByReplacingOccurrencesOfString:@"Version " withString:@""]] action:@selector(showUpdate:) to:menu];update.toolTip=@"See what is new and open the download page.";}
+ NSDictionary *tab=[self.browserBridge activeContextForBrowser:self.lastExternalApp.bundleIdentifier];
+ if(tab){NSMenuItem *site=[self add:[NSString stringWithFormat:@"Exception for %@",tab[@"site"]] action:nil to:menu];site.toolTip=@"Display settings for the website in front. The browser extension only connects the browser; the settings live here.";site.submenu=[self websiteMenuForTab:tab];site.image=[NSImage imageWithSystemSymbolName:@"globe" accessibilityDescription:nil];NSDictionary *siteRule=[self websiteRuleForTab:tab];site.state=RuleEnabled(siteRule)&&RuleDiffers(siteRule);}
+ [self add:@"Settings…" action:@selector(showSettings:) to:menu];
+ [menu addItem:NSMenuItem.separatorItem];
  [self add:@"Quit" action:@selector(quit:) to:menu];
 }
+// One line for the menu: what the display shows now, plus a timed off or an active exception.
+- (NSString *)menuStatusLine {
+ NSString *line=[self appearanceSummary];
+ if(self.pausedUntil)return [self lessPullPauseLabel];
+ if(self.grayOffUntil)line=[NSString stringWithFormat:@"%@ · %@",line,[self grayOffLabel]];
+ if(self.pause)return [line stringByAppendingFormat:@" · Night Shift off until %@",[self timeLabel:self.pause.expiry]];
+ if(self.grayOverride||self.nightOverride||self.customWarmth)return [line stringByAppendingFormat:@" · %@ exception",self.foregroundName];
+ if(self.automatic&&self.policy.overrideMode>=0)return [line stringByAppendingString:@" · set by hand"];
+ return line;
+}
+// Pause Less Pull: the plain display for a while. Saved settings and rules stay
+// untouched; Night Shift is left alone; it resumes with the normal fade and
+// survives a relaunch.
+// Carbon hot keys deliver pressed and released events without Accessibility permission.
+static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *userData) {
+ AppDelegate *owner=(__bridge AppDelegate *)userData;UInt32 kind=GetEventKind(event);EventHotKeyID hotKeyID={0};GetEventParameter(event,kEventParamDirectObject,typeEventHotKeyID,NULL,sizeof(hotKeyID),NULL,&hotKeyID);
+ dispatch_async(dispatch_get_main_queue(),^{if(hotKeyID.id==2){if(kind==kEventHotKeyPressed)[owner toggleGrayscale:nil];}else [owner setPeeking:kind==kEventHotKeyPressed];});return noErr;
+}
+- (void)setPeeking:(BOOL)peeking {if(_peeking==peeking)return;_peeking=peeking;self.animateAppearance=YES;[self sync];}
+// Two global shortcuts: Peek in color (held) and Toggle Grayscale (pressed). Both
+// are optional and recorded by the user; Suggest picks a free combination.
+- (NSDictionary *)shortcutForKey:(NSString *)key {NSDictionary *s=[NSUserDefaults.standardUserDefaults dictionaryForKey:key];return [PeekShortcut isValidKeyCode:[s[@"keyCode"] integerValue] modifiers:[s[@"modifiers"] unsignedIntegerValue]]?s:nil;}
+- (NSDictionary *)peekShortcut {return [self shortcutForKey:@"peekShortcut"];}
+- (EventHotKeyRef)registerShortcut:(NSDictionary *)s identifier:(UInt32)identifier {if(!s)return NULL;EventHotKeyID hotKeyID={.signature='LsPl',.id=identifier};EventHotKeyRef ref=NULL;return RegisterEventHotKey((UInt32)[s[@"keyCode"] integerValue],[PeekShortcut carbonModifiers:[s[@"modifiers"] unsignedIntegerValue]],hotKeyID,GetApplicationEventTarget(),0,&ref)==noErr?ref:NULL;}
+- (void)registerPeekShortcut {
+ static BOOL installed=NO;if(!installed){installed=YES;EventTypeSpec kinds[2]={{kEventClassKeyboard,kEventHotKeyPressed},{kEventClassKeyboard,kEventHotKeyReleased}};InstallApplicationEventHandler(PeekHotKeyHandler,2,kinds,(__bridge void *)self,NULL);}
+ if(self.peekHotKey){UnregisterEventHotKey(self.peekHotKey);self.peekHotKey=NULL;}if(self.grayscaleHotKey){UnregisterEventHotKey(self.grayscaleHotKey);self.grayscaleHotKey=NULL;}self.peeking=NO;
+ self.peekHotKey=[self registerShortcut:[self peekShortcut] identifier:1];self.grayscaleHotKey=[self registerShortcut:[self shortcutForKey:@"grayscaleShortcut"] identifier:2];
+}
+- (void)saveShortcut:(NSString *)key keyCode:(NSInteger)keyCode modifiers:(NSEventModifierFlags)modifiers {
+ NSUserDefaults *d=NSUserDefaults.standardUserDefaults;if(keyCode<0)[d removeObjectForKey:key];else [d setObject:@{@"keyCode":@(keyCode),@"modifiers":@(modifiers&NSEventModifierFlagDeviceIndependentFlagsMask)} forKey:key];
+ [self registerPeekShortcut];[self refreshPeekRecorder:nil];
+}
+- (void)savePeekShortcutKeyCode:(NSInteger)keyCode modifiers:(NSEventModifierFlags)modifiers {[self saveShortcut:@"peekShortcut" keyCode:keyCode modifiers:modifiers];}
+- (NSSet *)takenShortcutKeysExcept:(NSString *)key {NSMutableSet *taken=[NSMutableSet new];for(NSString *k in @[@"peekShortcut",@"grayscaleShortcut"]){if([k isEqual:key])continue;NSDictionary *s=[self shortcutForKey:k];if(s)[taken addObject:[PeekShortcut keyForKeyCode:[s[@"keyCode"] integerValue] modifiers:[s[@"modifiers"] unsignedIntegerValue]]];}return taken;}
+- (NSDictionary *)suggestedShortcutFor:(NSString *)key {
+ // Left-hand only: Control and Option under the left pinky and ring finger, the key under the index finger.
+ NSEventModifierFlags co=NSEventModifierFlagControl|NSEventModifierFlagOption;NSArray *peek=@[@{@"keyCode":@(kVK_ANSI_C),@"modifiers":@(co)},@{@"keyCode":@(kVK_ANSI_V),@"modifiers":@(co)},@{@"keyCode":@(kVK_ANSI_X),@"modifiers":@(co)},@{@"keyCode":@(kVK_ANSI_C),@"modifiers":@(co|NSEventModifierFlagShift)}];
+ NSArray *gray=@[@{@"keyCode":@(kVK_ANSI_G),@"modifiers":@(co)},@{@"keyCode":@(kVK_ANSI_F),@"modifiers":@(co)},@{@"keyCode":@(kVK_ANSI_D),@"modifiers":@(co)},@{@"keyCode":@(kVK_ANSI_G),@"modifiers":@(co|NSEventModifierFlagShift)}];
+ return [PeekShortcut suggestionAvoiding:[self takenShortcutKeysExcept:key] preferring:[key isEqual:@"peekShortcut"]?peek:gray];
+}
+- (void)suggestShortcut:(NSButton *)sender {NSString *key=sender.identifier;NSDictionary *s=[self suggestedShortcutFor:key];if(!s){NSBeep();return;}[self saveShortcut:key keyCode:[s[@"keyCode"] integerValue] modifiers:[s[@"modifiers"] unsignedIntegerValue]];}
+- (void)refreshRecorder:(ShortcutRecorder *)recorder key:(NSString *)key registered:(BOOL)registered note:(NSTextField *)note idle:(NSString *)idle active:(NSString *)active name:(NSString *)name {
+ NSDictionary *s=[self shortcutForKey:key];NSDictionary *suggested=[self suggestedShortcutFor:key];NSString *hint=suggested?[NSString stringWithFormat:@" Suggest picks %@, which is free of macOS shortcuts.",[PeekShortcut labelForKeyCode:[suggested[@"keyCode"] integerValue] modifiers:[suggested[@"modifiers"] unsignedIntegerValue]]]:@"";
+ if(recorder.recording){recorder.title=@"Press keys…";note.stringValue=@"Press the keys to use, with ⌘, ⌃ or ⌥. Esc cancels; ⌫ removes the shortcut.";}
+ else {recorder.title=s?[PeekShortcut labelForKeyCode:[s[@"keyCode"] integerValue] modifiers:[s[@"modifiers"] unsignedIntegerValue]]:@"Record Shortcut";note.stringValue=s?(registered?active:@"That shortcut could not be registered; it may be taken by another app. Click to choose another."):[idle stringByAppendingString:hint];}
+ recorder.accessibilityLabel=[NSString stringWithFormat:@"%@ shortcut: %@",name,s?recorder.title:@"none"];
+}
+- (void)refreshPeekRecorder:(id)sender {
+ [self refreshRecorder:self.peekRecorder key:@"peekShortcut" registered:self.peekHotKey!=NULL note:self.peekNote idle:@"Hold a shortcut to see the plain display; let go to return. No exception is made and nothing is saved." active:@"Hold the shortcut to see the plain display; let go to return. Click to change it." name:@"Peek in color"];
+ [self refreshRecorder:self.grayscaleRecorder key:@"grayscaleShortcut" registered:self.grayscaleHotKey!=NULL note:self.grayscaleShortcutNote idle:@"Press a shortcut to turn Grayscale on or off from anywhere." active:@"Press the shortcut to turn Grayscale on or off from anywhere. Click to change it." name:@"Toggle Grayscale"];
+ NSDictionary *effects=[self peekEffects];self.peekGrayButton.state=[effects[@"grayscale"] boolValue];self.peekWarmthButton.state=[effects[@"warmth"] boolValue];self.peekNightButton.state=[effects[@"nightShift"] boolValue];
+}
+- (void)startRecording:(ShortcutRecorder *)sender {if(sender.recording){sender.recording=NO;[self refreshPeekRecorder:nil];return;}sender.recording=YES;[sender.window makeFirstResponder:sender];[self refreshPeekRecorder:nil];}
+// What Peek turns off while held: Grayscale and Extra Warmth by default; Night Shift if wanted.
+- (NSDictionary *)peekEffects {NSDictionary *e=[NSUserDefaults.standardUserDefaults dictionaryForKey:@"peekEffects"];return e?:@{@"grayscale":@YES,@"warmth":@YES,@"nightShift":@NO};}
+- (void)peekEffectChanged:(NSButton *)sender {NSMutableDictionary *e=[[self peekEffects] mutableCopy];e[sender.identifier]=@(sender.state==NSControlStateValueOn);[NSUserDefaults.standardUserDefaults setObject:e forKey:@"peekEffects"];if(self.peeking){self.animateAppearance=YES;[self sync];}}
+- (void)scheduleUpdateChecks {
+ [self.updateTimer invalidate];self.updateTimer=[NSTimer timerWithTimeInterval:3600 target:self selector:@selector(maybeCheckForUpdates) userInfo:nil repeats:YES];[NSRunLoop.mainRunLoop addTimer:self.updateTimer forMode:NSRunLoopCommonModes];
+ [self performSelector:@selector(maybeCheckForUpdates) withObject:nil afterDelay:30];
+}
+- (void)maybeCheckForUpdates {
+ NSUserDefaults *d=NSUserDefaults.standardUserDefaults;if(![d boolForKey:@"checkForUpdates"])return;NSDate *last=[d objectForKey:@"lastUpdateCheck"];
+ if(![last isKindOfClass:NSDate.class]||[NSDate.date timeIntervalSinceDate:last]>=86400)[self runUpdateCheckManual:NO];
+}
+- (void)checkForUpdatesNow:(id)sender {[self runUpdateCheckManual:YES];}
+- (void)runUpdateCheckManual:(BOOL)manual {
+ if(self.checkingUpdates)return;self.checkingUpdates=YES;self.updateStatus=@"Checking…";[self refreshUpdateControls];
+ NSURLSessionConfiguration *configuration=NSURLSessionConfiguration.ephemeralSessionConfiguration;configuration.timeoutIntervalForRequest=15;configuration.HTTPAdditionalHeaders=@{@"Accept":@"application/vnd.github+json"};
+ NSURLSession *session=[NSURLSession sessionWithConfiguration:configuration];__weak AppDelegate *weak=self;
+ [[session dataTaskWithURL:[NSURL URLWithString:LessPullReleasesAPI] completionHandler:^(NSData *data,NSURLResponse *response,NSError *error){dispatch_async(dispatch_get_main_queue(),^{[weak finishUpdateCheckData:data response:response error:error manual:manual];});[session finishTasksAndInvalidate];}] resume];
+}
+- (void)finishUpdateCheckData:(NSData *)data response:(NSURLResponse *)response error:(NSError *)error manual:(BOOL)manual {
+ self.checkingUpdates=NO;NSUserDefaults *d=NSUserDefaults.standardUserDefaults;NSInteger status=[response isKindOfClass:NSHTTPURLResponse.class]?[(NSHTTPURLResponse *)response statusCode]:0;
+ if(error||status!=200){self.updateStatus=status==404?@"Could not find the release list; it is not public yet.":@"Could not reach GitHub. Try again later.";[self refreshUpdateControls];if(manual)[self showUpdateStatusAlert];return;}
+[d setObject:NSDate.date forKey:@"lastUpdateCheck"];id release=[NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
+ NSDictionary *update=[UpdateCheck updateFromRelease:release currentVersion:[NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"] currentBuild:[[NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleVersion"] integerValue]];
+ if(update[@"metadata"]){ // a newer build: one more request tells whether it is made for this macOS
+  self.checkingUpdates=YES;NSURLSessionConfiguration *configuration=NSURLSessionConfiguration.ephemeralSessionConfiguration;configuration.timeoutIntervalForRequest=15;NSURLSession *session=[NSURLSession sessionWithConfiguration:configuration];__weak AppDelegate *weak=self;
+  [[session dataTaskWithURL:[NSURL URLWithString:update[@"metadata"]] completionHandler:^(NSData *meta,NSURLResponse *metaResponse,NSError *metaError){id parsed=meta?[NSJSONSerialization JSONObjectWithData:meta options:0 error:nil]:nil;dispatch_async(dispatch_get_main_queue(),^{[weak finishUpdate:update metadata:parsed manual:manual];});[session finishTasksAndInvalidate];}] resume];return;}
+ [self finishUpdate:update metadata:nil manual:manual];
+}
+- (void)finishUpdate:(NSDictionary *)candidate metadata:(id)metadata manual:(BOOL)manual {
+ self.checkingUpdates=NO;NSUserDefaults *d=NSUserDefaults.standardUserDefaults;BOOL compatible=[UpdateCheck metadata:metadata allowsSystem:NSProcessInfo.processInfo.operatingSystemVersion];NSDictionary *update=compatible?candidate:nil;
+ self.availableUpdate=update;if(update)[d setObject:update forKey:@"availableUpdate"];else [d removeObjectForKey:@"availableUpdate"];
+ NSString *label=[self updateLabel:candidate];
+ self.updateStatus=update?[NSString stringWithFormat:@"%@ is available.",label]:candidate?[NSString stringWithFormat:@"%@ exists but is made for another macOS version, so it is not offered.",label]:@"Less Pull is up to date.";[self refreshUpdateControls];[self refreshControlsKnown:NO nightOn:NO];[self sync];
+ if(manual){if(update)[self showUpdate:nil];else [self showUpdateStatusAlert];}
+}
+- (NSString *)updateLabel:(NSDictionary *)update {return [update[@"build"] integerValue]?[NSString stringWithFormat:@"Version %@ (build %ld)",update[@"version"],(long)[update[@"build"] integerValue]]:[NSString stringWithFormat:@"Version %@",update[@"version"]];}
+- (NSString *)runningVersionLabel {return [NSString stringWithFormat:@"%@ (build %@)",[NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"],[NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleVersion"]];}
+- (void)showUpdateStatusAlert {NSAlert *a=[NSAlert new];a.messageText=self.updateStatus?:@"";a.informativeText=[NSString stringWithFormat:@"This is Less Pull %@.",[self runningVersionLabel]];[NSApp activateIgnoringOtherApps:YES];[a runModal];}
+- (void)showUpdate:(id)sender {
+ NSDictionary *update=self.availableUpdate;if(!update)return;NSAlert *a=[NSAlert new];a.messageText=[NSString stringWithFormat:@"Less Pull %@ is available",[[self updateLabel:update] stringByReplacingOccurrencesOfString:@"Version " withString:@""]];
+ a.informativeText=[NSString stringWithFormat:@"You have %@.\n\n%@\n\nInstalling is still by hand: download the new version, quit Less Pull, and replace it in Applications. Your settings and exceptions are kept.",[self runningVersionLabel],[update[@"notes"] length]?update[@"notes"]:@"No release notes were provided."];
+ [a addButtonWithTitle:@"Open Download Page"];[a addButtonWithTitle:@"Later"];[NSApp activateIgnoringOtherApps:YES];if([a runModal]==NSAlertFirstButtonReturn)[NSWorkspace.sharedWorkspace openURL:[NSURL URLWithString:update[@"url"]]];
+}
+- (void)toggleUpdateChecks:(NSButton *)sender {[NSUserDefaults.standardUserDefaults setBool:sender.state==NSControlStateValueOn forKey:@"checkForUpdates"];[self refreshUpdateControls];}
+- (void)refreshUpdateControls {
+ NSUserDefaults *d=NSUserDefaults.standardUserDefaults;self.updateCheckbox.state=[d boolForKey:@"checkForUpdates"];self.updateButton.enabled=!self.checkingUpdates;
+ NSDate *last=[d objectForKey:@"lastUpdateCheck"];NSString *when=[last isKindOfClass:NSDate.class]?[NSDateFormatter localizedStringFromDate:last dateStyle:NSDateFormatterMediumStyle timeStyle:NSDateFormatterShortStyle]:nil;
+ NSString *status=self.updateStatus?:(self.availableUpdate?[NSString stringWithFormat:@"%@ is available.",[self updateLabel:self.availableUpdate]]:(when?@"Less Pull was up to date at the last check.":@"Not checked yet."));
+ self.updateStatusLabel.stringValue=when?[NSString stringWithFormat:@"%@ Last checked %@.",status,when]:status;
+}
+// Grayscale off for a while: 1 hour, 4 hours, or until Night Shift next changes.
+// The saved Grayscale choice is untouched and comes back by itself.
+- (NSString *)grayOffHelp {return @"Shows color for a while, then Grayscale comes back by itself. Your Grayscale setting stays saved; exceptions still apply.";}
+- (void)persistGrayscaleOff {NSUserDefaults *d=NSUserDefaults.standardUserDefaults;if(self.grayOffUntil)[d setObject:@{@"until":@([self.grayOffUntil isEqualToDate:NSDate.distantFuture]?0:self.grayOffUntil.timeIntervalSince1970)} forKey:@"grayscaleOff"];else [d removeObjectForKey:@"grayscaleOff"];}
+- (void)restoreGrayscaleOff {NSDictionary *saved=[NSUserDefaults.standardUserDefaults dictionaryForKey:@"grayscaleOff"];if(!saved){self.grayOffUntil=nil;return;}double until=[saved[@"until"] doubleValue];self.grayOffUntil=until==0?NSDate.distantFuture:[NSDate dateWithTimeIntervalSince1970:until];if([self.grayOffUntil timeIntervalSinceNow]<=0){self.grayOffUntil=nil;[self persistGrayscaleOff];}BOOL on=NO;[self logicalNightShift:&on];self.lastNightForGrayOff=on;}
+- (void)scheduleGrayscaleOffTimer {[self.grayOffTimer invalidate];self.grayOffTimer=nil;if(!self.grayOffUntil||[self.grayOffUntil isEqualToDate:NSDate.distantFuture])return;self.grayOffTimer=[NSTimer timerWithTimeInterval:fmax(.1,[self.grayOffUntil timeIntervalSinceNow]) target:self selector:@selector(sync) userInfo:nil repeats:NO];[NSRunLoop.mainRunLoop addTimer:self.grayOffTimer forMode:NSRunLoopCommonModes];}
+- (void)checkGrayscaleOff {
+ BOOL on=NO;BOOL known=[self logicalNightShift:&on];
+ if(self.grayOffUntil&&([self.grayOffUntil timeIntervalSinceNow]<=0||([self.grayOffUntil isEqualToDate:NSDate.distantFuture]&&known&&on!=self.lastNightForGrayOff))){self.grayOffUntil=nil;[self persistGrayscaleOff];self.animateAppearance=YES;}
+ if(known)self.lastNightForGrayOff=on;
+}
+- (void)grayscaleOffForMinutes:(NSInteger)minutes {BOOL on=NO;[self logicalNightShift:&on];self.lastNightForGrayOff=on;self.grayOffUntil=minutes>0?[NSDate dateWithTimeIntervalSinceNow:minutes*60]:NSDate.distantFuture;[self persistGrayscaleOff];[self scheduleGrayscaleOffTimer];self.animateAppearance=YES;[self sync];}
+- (void)grayscaleOff:(NSMenuItem *)sender {[self grayscaleOffForMinutes:sender.tag];}
+- (void)grayscaleBackOn:(id)sender {self.grayOffUntil=nil;[self persistGrayscaleOff];[self scheduleGrayscaleOffTimer];self.animateAppearance=YES;[self sync];}
+- (NSString *)grayOffLabel {return !self.grayOffUntil?@"":[self.grayOffUntil isEqualToDate:NSDate.distantFuture]?@"Grayscale off until Night Shift changes":[NSString stringWithFormat:@"Grayscale off until %@",[self timeLabel:self.grayOffUntil]];}
+- (void)populateGrayscaleOff:(NSMenu *)menu {for(NSArray *pair in @[@[@"Off for 1 hour",@60],@[@"Off for 4 hours",@240],@[@"Off until Night Shift changes",@0]]){NSMenuItem *i=[self add:pair[0] action:@selector(grayscaleOff:) to:menu];i.tag=[pair[1] integerValue];i.toolTip=[self grayOffHelp];}}
+- (void)populateGrayscaleOffPopup {[self.grayOffPopup removeAllItems];[self.grayOffPopup addItemWithTitle:@"Turn Grayscale off for…"];[self populateGrayscaleOff:self.grayOffPopup.menu];}
+// Clicking the menu-bar icon: the menu on the left button and a Grayscale toggle on the
+// right button by default; the preference swaps them.
+- (BOOL)leftClickToggles {return [NSUserDefaults.standardUserDefaults integerForKey:@"iconClick"]==1;}
+- (void)statusItemClicked:(id)sender {
+ NSEvent *event=NSApp.currentEvent;BOOL secondary=event.type==NSEventTypeRightMouseUp||event.type==NSEventTypeRightMouseDown||(event.modifierFlags&NSEventModifierFlagControl);
+ BOOL toggle=[self leftClickToggles]?!secondary:secondary;
+ if(toggle){[self toggleGrayscale:nil];return;}
+ self.item.menu=self.statusMenu;[self.item.button performClick:nil];
+}
+- (void)clickBehaviorChanged:(NSPopUpButton *)sender {[NSUserDefaults.standardUserDefaults setInteger:sender.indexOfSelectedItem forKey:@"iconClick"];[self refreshControlsKnown:NO nightOn:NO];[self sync];}
+- (NSString *)pauseLessPullHelp {return @"Shows the plain display for a while: color and no added warmth. Night Shift is left alone. Your settings and exceptions are kept.";}
+- (void)persistLessPullPause {NSUserDefaults *d=NSUserDefaults.standardUserDefaults;if(self.pausedUntil)[d setObject:@{@"until":@([self.pausedUntil isEqualToDate:NSDate.distantFuture]?0:self.pausedUntil.timeIntervalSince1970)} forKey:@"lessPullPause"];else [d removeObjectForKey:@"lessPullPause"];}
+- (void)restoreLessPullPause {
+ NSDictionary *saved=[NSUserDefaults.standardUserDefaults dictionaryForKey:@"lessPullPause"];if(!saved){self.pausedUntil=nil;return;}
+ double until=[saved[@"until"] doubleValue];self.pausedUntil=until==0?NSDate.distantFuture:[NSDate dateWithTimeIntervalSince1970:until];
+ if([self.pausedUntil timeIntervalSinceNow]<=0){self.pausedUntil=nil;[self persistLessPullPause];}
+}
+- (void)scheduleLessPullPauseTimer {
+ [self.pauseAllTimer invalidate];self.pauseAllTimer=nil;if(!self.pausedUntil||[self.pausedUntil isEqualToDate:NSDate.distantFuture])return;
+ self.pauseAllTimer=[NSTimer timerWithTimeInterval:fmax(.1,[self.pausedUntil timeIntervalSinceNow]) target:self selector:@selector(sync) userInfo:nil repeats:NO];[NSRunLoop.mainRunLoop addTimer:self.pauseAllTimer forMode:NSRunLoopCommonModes];
+}
+- (void)checkLessPullPause {if(self.pausedUntil&&[self.pausedUntil timeIntervalSinceNow]<=0){self.pausedUntil=nil;[self persistLessPullPause];self.animateAppearance=YES;}}
+- (void)pauseLessPullForMinutes:(NSInteger)minutes {self.pausedUntil=minutes>0?[NSDate dateWithTimeIntervalSinceNow:minutes*60]:NSDate.distantFuture;[self persistLessPullPause];[self scheduleLessPullPauseTimer];self.animateAppearance=YES;[self sync];}
+- (void)pauseLessPull:(NSMenuItem *)sender {[self pauseLessPullForMinutes:sender.tag];}
+- (void)resumeLessPull:(id)sender {self.pausedUntil=nil;[self persistLessPullPause];[self scheduleLessPullPauseTimer];self.animateAppearance=YES;[self sync];}
+- (NSString *)lessPullPauseLabel {return !self.pausedUntil?@"":[self.pausedUntil isEqualToDate:NSDate.distantFuture]?@"Paused until you resume":[NSString stringWithFormat:@"Paused until %@",[self timeLabel:self.pausedUntil]];}
 - (void)toggleNightShift:(id)sender {
  self.pause=nil;[self.pauseTimer invalidate];self.pauseTimer=nil;[NSUserDefaults.standardUserDefaults removeObjectForKey:@"nightShiftPause"];
  BOOL before=NO;BOOL known=[self logicalNightShift:&before];
@@ -354,7 +843,7 @@
  BOOL unchanged=[self.engine readNightShiftStatus:&s]&&s.mode==p.scheduleMode&&(s.mode!=2||(s.schedule.from.hour*60+s.schedule.from.minute==p.startMinute&&s.schedule.to.hour*60+s.schedule.to.minute==p.endMinute));
  return unchanged&&[self logicalNightShift:&on]&&!on&&[p mayResumeAt:NSDate.date calendar:NSCalendar.currentCalendar];
 }
-- (NSString *)endPauseHelp {if(self.nightOverride)return @"Ends timed off. The global Night Shift state resumes only if eligible; the active app’s Night Shift override then applies again. App On can turn Night Shift on even when the global schedule is off; leaving restores the eligible global state.";return [self canResumePause]?@"End the timed pause and resume Night Shift now. The prior state and unchanged schedule are currently eligible. App appearance then follows actual Night Shift when enabled.":@"End the timed pause without turning Night Shift on: the prior state or schedule is not currently eligible, or status is unavailable. Night Shift stays off in daytime; its system schedule remains unchanged.";}
+- (NSString *)endPauseHelp {if(self.nightOverride)return @"Ends the timed off. Night Shift comes back if your schedule wants it on, and the app in front keeps its own Night Shift exception.";return [self canResumePause]?@"Ends the timed off and turns Night Shift back on now.":@"Ends the timed off. Night Shift stays off because your schedule does not want it on right now.";}
 - (void)endPauseNow:(id)sender {
  PausePolicy *p=self.pause;if(!p)return;self.pause=nil;[self.pauseTimer invalidate];self.pauseTimer=nil;[NSUserDefaults.standardUserDefaults removeObjectForKey:@"nightShiftPause"];
  NSBlueStatus s={0};BOOL on=NO;BOOL unchanged=[self.engine readNightShiftStatus:&s]&&s.mode==p.scheduleMode&&(s.mode!=2||(s.schedule.from.hour*60+s.schedule.from.minute==p.startMinute&&s.schedule.to.hour*60+s.schedule.to.minute==p.endMinute));
@@ -365,8 +854,8 @@
  if(sender)[self sync];
 }
 - (void)nightShiftFailure {
- NSAlert *alert=[NSAlert new];alert.messageText=@"Night Shift change could not be confirmed";
- alert.informativeText=@"Check Displays → Night Shift and Diagnostics. This display, HDR mode, or another display app may prevent activation. Your schedule and Extra Warmth follows Night Shift setting were not changed.";[NSApp activateIgnoringOtherApps:YES];[alert runModal];
+ NSAlert *alert=[NSAlert new];alert.messageText=@"Night Shift could not be changed";
+ alert.informativeText=@"Check System Settings → Displays → Night Shift. This display, HDR mode or another display app may be preventing it. Your schedule and settings were not changed.";[NSApp activateIgnoringOtherApps:YES];[alert runModal];
 }
 - (void)enableAutomatic:(BOOL)value {self.automatic=value;self.policy.automatic=value;[self.policy resume];[self savePolicy];[NSUserDefaults.standardUserDefaults setBool:value forKey:@"automatic"];[self sync];}
 - (BOOL)validateMenuItem:(NSMenuItem *)item {if(item.action==@selector(toggleAuto:)){BOOL on=NO;return [self.engine nightShift:&on];}return YES;}
@@ -375,81 +864,299 @@
  if(sender.tag==101||sender.tag==1||sender.tag==100)[NSUserDefaults.standardUserDefaults setInteger:sender.tag forKey:@"nightMode"];
  BOOL on=NO;BOOL known=[self logicalNightShift:&on];[self.policy observeKnown:known on:on];
  [self savePolicy];
- if(![self applyMode:sender.tag]){NSAlert *a=[NSAlert new];a.messageText=@"Filter change could not be verified";a.informativeText=self.warmth.error?:@"Open Accessibility → Display to check Color Filters. Your saved tint was not rewritten.";[a runModal];}
+ if(![self applyMode:sender.tag]){NSAlert *a=[NSAlert new];a.messageText=@"The display change could not be confirmed";a.informativeText=self.warmth.error?:@"Check System Settings → Accessibility → Display → Color Filters. Your settings were not changed.";[a runModal];}
  [NSUserDefaults.standardUserDefaults setInteger:self.selectedMode forKey:@"manualMode"];
  [self sync];
 }
 - (void)resume:(id)sender {[self.policy resume];[self savePolicy];[self sync];}
-- (NSTextField *)label:(NSString *)text y:(CGFloat)y height:(CGFloat)height {
- NSTextField *label=[NSTextField wrappingLabelWithString:text];label.frame=NSMakeRect(24,y,432,height);[self.settings.contentView addSubview:label];return label;
+// Settings window building blocks: Auto Layout stacks, one short note under each
+// control that is not obvious.
+- (NSTextField *)note:(NSString *)text {NSTextField *n=[NSTextField wrappingLabelWithString:text];n.font=[NSFont systemFontOfSize:11];n.textColor=NSColor.secondaryLabelColor;n.preferredMaxLayoutWidth=440;return n;}
+- (NSStackView *)column:(NSArray<NSView *> *)views {NSStackView *s=[NSStackView stackViewWithViews:views];s.orientation=NSUserInterfaceLayoutOrientationVertical;s.alignment=NSLayoutAttributeLeading;s.spacing=12;return s;}
+- (NSStackView *)row:(NSArray<NSView *> *)views {NSStackView *s=[NSStackView stackViewWithViews:views];s.orientation=NSUserInterfaceLayoutOrientationHorizontal;s.alignment=NSLayoutAttributeCenterY;s.spacing=8;return s;}
+- (NSView *)spacer {NSView *v=[NSView new];[v setContentHuggingPriority:1 forOrientation:NSLayoutConstraintOrientationHorizontal];[v setContentCompressionResistancePriority:1 forOrientation:NSLayoutConstraintOrientationHorizontal];return v;}
+- (NSBox *)separator {NSBox *b=[NSBox new];b.boxType=NSBoxSeparator;return b;}
+- (NSTabViewItem *)tab:(NSString *)title symbol:(NSString *)symbol content:(NSStackView *)content {
+ content.edgeInsets=NSEdgeInsetsMake(20,24,20,24);content.translatesAutoresizingMaskIntoConstraints=NO;
+ // The standard window material: translucent like System Settings when transparency is on, solid under Reduce transparency.
+ NSViewController *controller=[NSViewController new];NSVisualEffectView *root=[NSVisualEffectView new];root.material=NSVisualEffectMaterialWindowBackground;root.blendingMode=NSVisualEffectBlendingModeBehindWindow;root.state=NSVisualEffectStateFollowsWindowActiveState;[root addSubview:content];
+ [NSLayoutConstraint activateConstraints:@[[content.topAnchor constraintEqualToAnchor:root.topAnchor],[content.leadingAnchor constraintEqualToAnchor:root.leadingAnchor],[content.trailingAnchor constraintEqualToAnchor:root.trailingAnchor],[content.bottomAnchor constraintEqualToAnchor:root.bottomAnchor],[root.widthAnchor constraintEqualToConstant:500]]];
+ // Rows, separators and lists span the column; a view marked fixed keeps its own width.
+ for(NSView *v in content.arrangedSubviews)if(([v isKindOfClass:NSStackView.class]&&![v.identifier isEqual:@"fixed"])||[v isKindOfClass:NSBox.class]||[v isKindOfClass:NSScrollView.class])[v.widthAnchor constraintEqualToAnchor:content.widthAnchor constant:-48].active=YES;
+ controller.view=root;controller.title=title;[root layoutSubtreeIfNeeded];controller.preferredContentSize=root.fittingSize;
+ NSTabViewItem *item=[NSTabViewItem tabViewItemWithViewController:controller];item.label=title;item.image=[NSImage imageWithSystemSymbolName:symbol accessibilityDescription:title];return item;
 }
-- (void)separatorAt:(CGFloat)y {NSBox *line=[[NSBox alloc]initWithFrame:NSMakeRect(24,y,432,1)];line.boxType=NSBoxSeparator;[self.settings.contentView addSubview:line];}
+- (NSStackView *)generalTab {
+ self.statusText=[NSTextField labelWithString:@""];self.statusText.font=[NSFont systemFontOfSize:18 weight:NSFontWeightSemibold];
+ self.statusDetail=[NSTextField labelWithString:@""];self.statusDetail.font=[NSFont systemFontOfSize:12];self.statusDetail.textColor=NSColor.secondaryLabelColor;
+ self.grayscaleButton=[NSButton checkboxWithTitle:@"Grayscale" target:self action:@selector(toggleGrayscale:)];[self helpView:self.grayscaleButton text:self.grayHelp label:@"Grayscale"];
+ self.grayOffPopup=[[NSPopUpButton alloc]initWithFrame:NSZeroRect pullsDown:YES];[self.grayOffPopup.widthAnchor constraintEqualToConstant:220].active=YES;[self helpView:self.grayOffPopup text:[self grayOffHelp] label:@"Turn Grayscale off for…"];[self populateGrayscaleOffPopup];
+ self.grayOnButton=[NSButton buttonWithTitle:@"Grayscale back on now" target:self action:@selector(grayscaleBackOn:)];[self.grayOnButton.widthAnchor constraintEqualToConstant:220].active=YES;self.grayOnButton.hidden=YES;[self helpView:self.grayOnButton text:@"End the timed off and show Grayscale again now." label:@"Grayscale back on now"];
+ self.warmthTitle=[NSTextField labelWithString:@"Extra Warmth"];self.warmthTitle.font=[NSFont systemFontOfSize:13 weight:NSFontWeightMedium];[self helpView:self.warmthTitle text:self.warmthHelp label:nil];
+ self.resetButton=[NSButton buttonWithTitle:@"Reset" target:self action:@selector(resetWarmth:)];self.resetButton.bezelStyle=NSBezelStyleInline;[self helpView:self.resetButton text:@"Set Extra Warmth to Off. Grayscale and Night Shift stay as they are." label:@"Reset Extra Warmth"];
+ self.warmthSlider=[self warmthSliderWithValue:[self currentWarmth]/3*100 action:@selector(warmthChanged:)];[self.warmthSlider setContentHuggingPriority:1 forOrientation:NSLayoutConstraintOrientationHorizontal];[self helpView:self.warmthSlider text:self.warmthHelp label:@"Extra Warmth, percent"];
+ self.warmthLabel=[NSTextField labelWithString:@""];self.warmthLabel.alignment=NSTextAlignmentRight;self.warmthLabel.font=[NSFont monospacedDigitSystemFontOfSize:14 weight:NSFontWeightMedium];[self.warmthLabel.widthAnchor constraintEqualToConstant:56].active=YES;[self helpView:self.warmthLabel text:self.warmthHelp label:@"Extra Warmth percentage"];
+ NSMutableArray *ticks=[NSMutableArray new];for(NSString *t in @[@"Off",@"25",@"50",@"75",@"Red"]){NSTextField *r=[NSTextField labelWithString:t];r.font=[NSFont systemFontOfSize:10];r.textColor=NSColor.secondaryLabelColor;r.alignment=NSTextAlignmentCenter;[r.widthAnchor constraintEqualToConstant:30].active=YES;[ticks addObject:r];}
+ NSStackView *tickRow=[self row:ticks];tickRow.distribution=NSStackViewDistributionEqualSpacing;
+ self.nightButton=[NSButton checkboxWithTitle:@"Night Shift" target:self action:@selector(toggleNightShift:)];[self helpView:self.nightButton text:self.nightHelp label:@"Night Shift"];
+ self.pausePopup=[[NSPopUpButton alloc]initWithFrame:NSZeroRect pullsDown:YES];[self.pausePopup.widthAnchor constraintEqualToConstant:220].active=YES;[self helpView:self.pausePopup text:self.pauseHelp label:@"Turn Night Shift off for…"];
+ self.endPauseButton=[NSButton buttonWithTitle:@"End timed off" target:self action:@selector(endPauseNow:)];self.endPauseButton.hidden=YES;[self.endPauseButton.widthAnchor constraintEqualToConstant:220].active=YES;[self helpView:self.endPauseButton text:self.pauseHelp label:@"End timed off"];
+ self.autoButton=[NSButton checkboxWithTitle:@"Extra Warmth follows Night Shift" target:self action:@selector(toggleAuto:)];[self helpView:self.autoButton text:self.autoHelp label:@"Extra Warmth follows Night Shift"];
+ self.resumeButton=[NSButton buttonWithTitle:@"Resume Following" target:self action:@selector(resume:)];[self helpView:self.resumeButton text:@"Go back to following Night Shift now." label:@"Resume Following Now"];
+ self.loginButton=[NSButton checkboxWithTitle:@"Launch at login" target:self action:@selector(login:)];[self helpView:self.loginButton text:@"Open Less Pull when you sign in to your Mac. Install it in Applications first." label:@"Launch at login"];
+ self.loginNote=[self note:@"Less Pull moved its settings to a new home with this update. If you had Launch at login on, check it again here; an older entry may remain in System Settings → Login Items and can be removed there."];self.loginNote.hidden=!([NSUserDefaults.standardUserDefaults boolForKey:@"migratedPreferences"]&&SMAppService.mainAppService.status!=SMAppServiceStatusEnabled);
+// Shortcuts tab: Peek in color, Toggle Grayscale, and what clicking the icon does.
+ NSMutableArray *views=[NSMutableArray new];
+ if(self.welcomeWanted){
+  NSTextField *title=[NSTextField labelWithString:@"Welcome to Less Pull"];title.font=[NSFont systemFontOfSize:15 weight:NSFontWeightSemibold];
+  NSTextField *intro=[NSTextField wrappingLabelWithString:@"Less Pull takes the color out of your screen so it pulls at your attention less. You can add warmth from amber to red, and keep color for the apps and websites that need it."];intro.preferredMaxLayoutWidth=404;
+  NSImageView *icon=[NSImageView imageViewWithImage:[self statusImageGray:YES warmth:0]];[icon.widthAnchor constraintEqualToConstant:18].active=YES;[icon.heightAnchor constraintEqualToConstant:18].active=YES;icon.accessibilityLabel=@"The Less Pull menu-bar icon";
+  NSTextField *where=[NSTextField wrappingLabelWithString:@"Less Pull lives in your menu bar, at the top right of the screen. Click this icon for Grayscale, Extra Warmth and Night Shift. Start with the two choices below; everything can be changed later."];where.preferredMaxLayoutWidth=376;
+  NSStackView *iconRow=[self row:@[icon,where]];iconRow.alignment=NSLayoutAttributeTop;
+  NSButton *done=[NSButton buttonWithTitle:@"Got it" target:self action:@selector(dismissWelcome:)];done.keyEquivalent=@"\r";[self helpView:done text:@"Hide this welcome message." label:@"Got it"];
+  NSStackView *card=[self column:@[title,intro,iconRow,[self row:@[[self spacer],done]]]];card.spacing=8;card.edgeInsets=NSEdgeInsetsMake(14,14,12,14);card.wantsLayer=YES;card.layer.cornerRadius=8;card.layer.backgroundColor=[NSColor.labelColor colorWithAlphaComponent:.06].CGColor;
+  for(NSView *v in card.arrangedSubviews)if([v isKindOfClass:NSStackView.class])[v.widthAnchor constraintEqualToAnchor:card.widthAnchor constant:-28].active=YES;
+  self.welcomeCard=card;[views addObject:card];
+ }
+ [views addObjectsFromArray:@[self.statusText,self.statusDetail,[self separator],
+  [self row:@[self.grayscaleButton,[self spacer],self.grayOffPopup,self.grayOnButton]],[self note:@"Shades of gray, day and night. Exceptions for apps and websites can show color. Off for a while brings it back by itself."],
+  [self row:@[self.warmthTitle,[self spacer],self.resetButton]],[self row:@[self.warmthSlider,self.warmthLabel]],tickRow,[self note:@"Adds warmth on top of Night Shift, from Off to Red."],[self separator],
+  [self row:@[self.nightButton,[self spacer],self.pausePopup,self.endPauseButton]],[self note:@"Turns Night Shift on or off now; your schedule in System Settings stays as it is."],
+  [self row:@[self.autoButton,[self spacer],self.resumeButton]],[self note:@"On: Extra Warmth only while Night Shift is on, none in the daytime. Off: Extra Warmth stays on all day."],[self separator],
+  self.loginButton,self.loginNote]];
+ NSStackView *column=[self column:views];
+ tickRow.identifier=@"fixed";[tickRow.widthAnchor constraintEqualToAnchor:self.warmthSlider.widthAnchor].active=YES;
+ NSUInteger base=self.welcomeCard?1:0;[column setCustomSpacing:4 afterView:self.statusText];[column setCustomSpacing:4 afterView:column.arrangedSubviews[base+3]];[column setCustomSpacing:6 afterView:column.arrangedSubviews[base+5]];[column setCustomSpacing:2 afterView:column.arrangedSubviews[base+6]];[column setCustomSpacing:6 afterView:tickRow];[column setCustomSpacing:4 afterView:column.arrangedSubviews[base+10]];[column setCustomSpacing:4 afterView:column.arrangedSubviews[base+12]];
+ return column;
+}
+- (NSStackView *)shortcutsTab {
+ NSTextField *clickTitle=[NSTextField labelWithString:@"Clicking the menu-bar icon"];clickTitle.font=[NSFont systemFontOfSize:13 weight:NSFontWeightMedium];
+ self.clickPopup=[[NSPopUpButton alloc]initWithFrame:NSZeroRect pullsDown:NO];[self.clickPopup addItemsWithTitles:@[@"Opens the menu",@"Toggles Grayscale"]];self.clickPopup.target=self;self.clickPopup.action=@selector(clickBehaviorChanged:);[self.clickPopup.widthAnchor constraintEqualToConstant:200].active=YES;[self helpView:self.clickPopup text:@"What the left and right mouse buttons do on the menu-bar icon. Control-click counts as a right-click." label:@"Clicking the menu-bar icon"];
+ NSTextField *grayShortcutTitle=[NSTextField labelWithString:@"Toggle Grayscale shortcut"];grayShortcutTitle.font=[NSFont systemFontOfSize:13 weight:NSFontWeightMedium];
+ self.grayscaleRecorder=[ShortcutRecorder new];self.grayscaleRecorder.bezelStyle=NSBezelStyleRounded;self.grayscaleRecorder.title=@"Record Shortcut";self.grayscaleRecorder.target=self;self.grayscaleRecorder.action=@selector(startRecording:);[self.grayscaleRecorder.widthAnchor constraintGreaterThanOrEqualToConstant:150].active=YES;
+ __weak AppDelegate *weakGray=self;self.grayscaleRecorder.recorded=^(NSInteger keyCode,NSEventModifierFlags modifiers){[weakGray saveShortcut:@"grayscaleShortcut" keyCode:keyCode modifiers:modifiers];};self.grayscaleRecorder.cleared=^{[weakGray saveShortcut:@"grayscaleShortcut" keyCode:-1 modifiers:0];};
+ [self helpView:self.grayscaleRecorder text:@"Click, then press the keys to use. Press them anywhere to turn Grayscale on or off." label:@"Toggle Grayscale shortcut"];
+ NSButton *suggestGray=[NSButton buttonWithTitle:@"Suggest" target:self action:@selector(suggestShortcut:)];suggestGray.identifier=@"grayscaleShortcut";suggestGray.bezelStyle=NSBezelStyleInline;[self helpView:suggestGray text:@"Pick a shortcut that is free of macOS shortcuts and of Less Pull’s other shortcut." label:@"Suggest a Toggle Grayscale shortcut"];
+ self.grayscaleShortcutNote=[self note:@""];
+ NSButton *suggestPeek=[NSButton buttonWithTitle:@"Suggest" target:self action:@selector(suggestShortcut:)];suggestPeek.identifier=@"peekShortcut";suggestPeek.bezelStyle=NSBezelStyleInline;[self helpView:suggestPeek text:@"Pick a shortcut that is free of macOS shortcuts and of Less Pull’s other shortcut." label:@"Suggest a Peek in color shortcut"];
+ self.peekGrayButton=[NSButton checkboxWithTitle:@"Grayscale" target:self action:@selector(peekEffectChanged:)];self.peekGrayButton.identifier=@"grayscale";self.peekWarmthButton=[NSButton checkboxWithTitle:@"Extra Warmth" target:self action:@selector(peekEffectChanged:)];self.peekWarmthButton.identifier=@"warmth";self.peekNightButton=[NSButton checkboxWithTitle:@"Night Shift" target:self action:@selector(peekEffectChanged:)];self.peekNightButton.identifier=@"nightShift";
+ for(NSButton *b in @[self.peekGrayButton,self.peekWarmthButton,self.peekNightButton])[self helpView:b text:@"Turned off while you hold the Peek shortcut." label:[NSString stringWithFormat:@"While peeking, turn off %@",b.title]];
+ NSTextField *peekEffectsLabel=[NSTextField labelWithString:@"While peeking, turn off:"];peekEffectsLabel.font=[NSFont systemFontOfSize:12];
+ NSTextField *peekTitle=[NSTextField labelWithString:@"Peek in color"];peekTitle.font=[NSFont systemFontOfSize:13 weight:NSFontWeightMedium];
+ self.peekRecorder=[ShortcutRecorder new];self.peekRecorder.bezelStyle=NSBezelStyleRounded;self.peekRecorder.title=@"Record Shortcut";self.peekRecorder.target=self;self.peekRecorder.action=@selector(startRecording:);[self.peekRecorder.widthAnchor constraintGreaterThanOrEqualToConstant:150].active=YES;
+ __weak AppDelegate *weakSelf=self;self.peekRecorder.recorded=^(NSInteger keyCode,NSEventModifierFlags modifiers){[weakSelf savePeekShortcutKeyCode:keyCode modifiers:modifiers];};self.peekRecorder.cleared=^{[weakSelf savePeekShortcutKeyCode:-1 modifiers:0];};
+ [self helpView:self.peekRecorder text:@"Click, then press the keys to use. Hold them to see the plain display; let go to return." label:@"Peek in color shortcut"];
+ self.peekNote=[self note:@""];
+ NSStackView *column=[self column:@[[self row:@[peekTitle,[self spacer],suggestPeek,self.peekRecorder]],self.peekNote,[self row:@[peekEffectsLabel,self.peekGrayButton,self.peekWarmthButton,self.peekNightButton]],[self separator],
+  [self row:@[grayShortcutTitle,[self spacer],suggestGray,self.grayscaleRecorder]],self.grayscaleShortcutNote,[self separator],
+  [self row:@[clickTitle,[self spacer],self.clickPopup]],[self note:@"With Opens the menu, a right-click (or Control-click) toggles Grayscale. With Toggles Grayscale, a right-click opens the menu."]]];
+ [column setCustomSpacing:4 afterView:column.arrangedSubviews[0]];[column setCustomSpacing:6 afterView:column.arrangedSubviews[1]];[column setCustomSpacing:4 afterView:column.arrangedSubviews[4]];[column setCustomSpacing:4 afterView:column.arrangedSubviews[7]];[self refreshPeekRecorder:nil];
+ return column;
+}
+- (NSStackView *)appsTab {
+ NSTextField *intro=[NSTextField wrappingLabelWithString:@"Give an app its own display settings. They apply while that app is in front with a window open; your default settings stay saved."];intro.preferredMaxLayoutWidth=452;
+ self.exclusionText=[self note:@"Using your default settings"];
+ NSScrollView *scroll=[NSScrollView new];scroll.hasVerticalScroller=YES;scroll.borderType=NSBezelBorder;[scroll.heightAnchor constraintEqualToConstant:300].active=YES;
+ self.exclusionsList=[ExceptionStack new];self.exclusionsList.orientation=NSUserInterfaceLayoutOrientationVertical;self.exclusionsList.alignment=NSLayoutAttributeLeading;self.exclusionsList.spacing=0;self.exclusionsList.translatesAutoresizingMaskIntoConstraints=NO;scroll.documentView=self.exclusionsList;[self.exclusionsList.widthAnchor constraintEqualToAnchor:scroll.contentView.widthAnchor].active=YES;
+ NSPopUpButton *add=[[NSPopUpButton alloc]initWithFrame:NSZeroRect pullsDown:YES];self.addAppMenu=add.menu;add.menu.delegate=self;[add.menu addItemWithTitle:@"Add app…" action:nil keyEquivalent:@""];[add.widthAnchor constraintEqualToConstant:150].active=YES;[self helpView:add text:@"Pick one of the apps running now, or choose another app." label:@"Add an app exception"];
+ NSStackView *column=[self column:@[intro,self.exclusionText,scroll,[self row:@[add,[self spacer]]],[self note:@"If Night Shift is turned off for a while, that wins over an app’s Night Shift On. Grayscale Off, warmth Off and Night Shift Off together show the plain display."]]];
+ [column setCustomSpacing:6 afterView:intro];
+ return column;
+}
+- (NSStackView *)websitesTab {
+ NSTextField *intro=[NSTextField wrappingLabelWithString:@"Websites can have their own settings through the Less Pull browser extension, for Safari, Brave, Chrome, Firefox, Opera and Edge. With a website in front, the menu-bar menu offers “Exception for that site”, like it does for apps; the extension itself has no buttons."];intro.preferredMaxLayoutWidth=452;
+ self.websiteStatus=[self note:@""];
+ NSButton *install=[NSButton buttonWithTitle:@"Install Browser Extension…" target:self action:@selector(installBrowserExtension:)];[self helpView:install text:@"Add the Less Pull extension to your browser so websites can have their own settings. Less Pull must stay open." label:@"Install Browser Extension"];
+ NSTextField *savedTitle=[NSTextField labelWithString:@"Saved website exceptions"];savedTitle.font=[NSFont systemFontOfSize:13 weight:NSFontWeightMedium];
+ NSScrollView *scroll=[NSScrollView new];scroll.hasVerticalScroller=YES;scroll.borderType=NSBezelBorder;[scroll.heightAnchor constraintEqualToConstant:220].active=YES;
+ self.websiteRulesList=[ExceptionStack new];self.websiteRulesList.orientation=NSUserInterfaceLayoutOrientationVertical;self.websiteRulesList.alignment=NSLayoutAttributeLeading;self.websiteRulesList.spacing=0;self.websiteRulesList.translatesAutoresizingMaskIntoConstraints=NO;scroll.documentView=self.websiteRulesList;[self.websiteRulesList.widthAnchor constraintEqualToAnchor:scroll.contentView.widthAnchor].active=YES;
+ NSStackView *column=[self column:@[intro,[self row:@[install,[self spacer]]],self.websiteStatus,[self separator],savedTitle,scroll,[self note:@"Set a website’s settings from the menu-bar menu while the site is in front. Remove works here even without the extension. Less Pull must stay open for website exceptions to work; private tabs are left alone."]]];
+ [column setCustomSpacing:4 afterView:column.arrangedSubviews[1]];[column setCustomSpacing:6 afterView:savedTitle];[self rebuildWebsiteRulesList];
+ return column;
+}
+// Saved website rules only (domains and exact pages), never the tab that is open now.
+- (NSString *)websiteRuleSummary:(NSDictionary *)rule {
+ NSMutableArray *parts=[NSMutableArray new];if(!RuleEnabled(rule))[parts addObject:@"Off"];NSArray *words=@[@"default",@"on",@"off"];
+ [parts addObject:[NSString stringWithFormat:@"Grayscale %@",words[MIN(2,MAX(0,[rule[@"grayMode"] integerValue]))]]];[parts addObject:[NSString stringWithFormat:@"Night Shift %@",words[MIN(2,MAX(0,[rule[@"nightMode"] integerValue]))]]];
+ [parts addObject:[rule[@"customWarmth"] boolValue]?([rule[@"warmth"] doubleValue]>0?[NSString stringWithFormat:@"Warmth %.0f%%",[rule[@"warmth"] doubleValue]]:@"Warmth off"):@"Warmth default"];
+ return [parts componentsJoinedByString:@" · "];
+}
+- (void)rebuildWebsiteRulesList {
+ if(!self.websiteRulesList)return;for(NSView *v in self.websiteRulesList.arrangedSubviews.copy){[self.websiteRulesList removeArrangedSubview:v];[v removeFromSuperview];}
+ NSArray *keys=[self.browserBridge.rules.allKeys sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
+ if(!keys.count){NSTextField *empty=[NSTextField labelWithString:@"No website exceptions yet. With a website in front, use “Exception for …” in the menu."];empty.textColor=NSColor.secondaryLabelColor;NSStackView *pad=[self column:@[empty]];pad.edgeInsets=NSEdgeInsetsMake(10,10,10,10);[self.websiteRulesList addArrangedSubview:pad];}
+ BOOL first=YES;for(NSString *key in keys){if(!first){NSBox *line=[self separator];[self.websiteRulesList addArrangedSubview:line];[line.widthAnchor constraintEqualToAnchor:self.websiteRulesList.widthAnchor].active=YES;}first=NO;
+  BOOL exact=[key containsString:@"://"];NSTextField *name=[NSTextField labelWithString:key];name.font=[NSFont systemFontOfSize:13 weight:NSFontWeightSemibold];name.lineBreakMode=NSLineBreakByTruncatingMiddle;name.toolTip=key;[name setContentCompressionResistancePriority:1 forOrientation:NSLayoutConstraintOrientationHorizontal];
+  NSTextField *kind=[self note:exact?@"Exact page":@"Whole domain, including subdomains"];NSTextField *summary=[self note:[self websiteRuleSummary:self.browserBridge.rules[key]]];
+  NSButton *enable=[NSButton checkboxWithTitle:@"Use this exception" target:self action:@selector(toggleWebsiteRule:)];enable.identifier=key;enable.state=RuleEnabled(self.browserBridge.rules[key]);enable.font=[NSFont systemFontOfSize:12];[self helpView:enable text:@"Off keeps the settings but does not apply them." label:[NSString stringWithFormat:@"Use the exception for %@",key]];
+  NSButton *remove=[NSButton buttonWithTitle:@"Remove" target:self action:@selector(removeWebsiteRule:)];remove.identifier=key;remove.bezelStyle=NSBezelStyleInline;[self helpView:remove text:@"Remove this website exception. The site then uses the inherited settings." label:[NSString stringWithFormat:@"Remove exception for %@",key]];
+  NSStackView *row=[self column:@[[self row:@[name,[self spacer],enable,remove]],kind,summary]];row.spacing=3;row.edgeInsets=NSEdgeInsetsMake(8,10,8,10);NSView *head=row.arrangedSubviews[0];[head.widthAnchor constraintEqualToAnchor:row.widthAnchor constant:-20].active=YES;
+  [self.websiteRulesList addArrangedSubview:row];[row.widthAnchor constraintEqualToAnchor:self.websiteRulesList.widthAnchor].active=YES;}
+}
+- (void)toggleWebsiteRule:(NSButton *)sender {NSString *key=sender.identifier;NSDictionary *rule=self.browserBridge.rules[key];if(!rule)return;NSMutableDictionary *updated=[rule mutableCopy];updated[@"enabled"]=@(sender.state==NSControlStateValueOn);[self.browserBridge handle:@{@"type":@"set",@"scope":[key containsString:@"://"]?@"url":@"domain",@"site":key,@"rule":updated}];[self rebuildWebsiteRulesList];}
+- (void)removeWebsiteRule:(NSButton *)sender {NSString *key=sender.identifier;if(!key)return;[self.browserBridge handle:@{@"type":@"remove",@"scope":[key containsString:@"://"]?@"url":@"domain",@"site":key}];[self rebuildWebsiteRulesList];}
+- (NSStackView *)aboutTab {
+ NSImageView *icon=[NSImageView imageViewWithImage:NSApp.applicationIconImage];[icon.widthAnchor constraintEqualToConstant:64].active=YES;[icon.heightAnchor constraintEqualToConstant:64].active=YES;icon.accessibilityLabel=@"Less Pull app icon";
+ NSTextField *name=[NSTextField labelWithString:@"Less Pull"];name.font=[NSFont systemFontOfSize:20 weight:NSFontWeightSemibold];
+ NSTextField *version=[NSTextField labelWithString:[NSString stringWithFormat:@"Version %@",[self runningVersionLabel]]];version.textColor=NSColor.secondaryLabelColor;version.toolTip=@"It will always be 1.4.4. The build number is what changes.";version.accessibilityHelp=version.toolTip;
+ NSTextField *credit=[NSTextField labelWithString:@"© 2026 Jiri Arion Rose"];credit.font=[NSFont systemFontOfSize:11];credit.textColor=NSColor.secondaryLabelColor;
+ NSTextField *forever=[NSTextField labelWithString:@"It will always be 1.4.4. The build number is what changes."];forever.font=[NSFont systemFontOfSize:10];forever.textColor=NSColor.tertiaryLabelColor;
+ NSStackView *identity=[self column:@[name,version,forever,credit]];identity.spacing=2;
+ NSButton *help=[NSButton buttonWithTitle:@"Help" target:self action:@selector(showHelp:)];[self helpView:help text:@"A short guide to Less Pull." label:@"Help"];
+ NSButton *diagnostics=[NSButton buttonWithTitle:@"Diagnostics…" target:self action:@selector(diagnostics:)];[self helpView:diagnostics text:@"Technical details for troubleshooting." label:@"Diagnostics"];
+ NSButton *licenses=[NSButton buttonWithTitle:@"Licenses" target:self action:@selector(showLicenses:)];[self helpView:licenses text:@"Show the app and source license files included with Less Pull." label:@"Show licenses"];
+ self.updateCheckbox=[NSButton checkboxWithTitle:@"Check for updates automatically" target:self action:@selector(toggleUpdateChecks:)];[self helpView:self.updateCheckbox text:@"Once a day, Less Pull asks GitHub whether a newer build exists. Nothing about you is sent." label:@"Check for updates automatically"];
+ self.updateButton=[NSButton buttonWithTitle:@"Check for Updates…" target:self action:@selector(checkForUpdatesNow:)];[self helpView:self.updateButton text:@"Ask GitHub now whether a newer version exists." label:@"Check for Updates"];
+ self.updateStatusLabel=[self note:@""];
+ NSStackView *column=[self column:@[[self row:@[icon,identity]],[self row:[self authorLinkButtons]],[self separator],[self row:@[help,diagnostics,licenses]],[self separator],self.updateCheckbox,[self note:@"Once a day, one request to GitHub asks whether a newer build exists; a second one reads which macOS versions it is made for, so only builds for your macOS are offered. Nothing about you is sent, and you can turn this off."],[self row:@[self.updateButton,[self spacer]]],self.updateStatusLabel,[self note:@"Everything else stays on this Mac: no account, no analytics, no network service. The browser extension talks only to the app."]]];
+ [(NSStackView *)column.arrangedSubviews[0] setSpacing:16];[column setCustomSpacing:4 afterView:self.updateCheckbox];[column setCustomSpacing:4 afterView:column.arrangedSubviews[7]];[self refreshUpdateControls];
+ return column;
+}
+- (NSString *)websiteStatusLine {
+ NSMutableArray *browsers=[NSMutableArray new];for(NSString *browser in self.browserBridge.contexts){NSDictionary *c=self.browserBridge.contexts[browser];if([NSDate.date timeIntervalSinceDate:c[@"time"]?:NSDate.distantPast]<=65)[browsers addObject:@{@"com.brave.Browser":@"Brave",@"org.mozilla.firefox":@"Firefox",@"com.operasoftware.Opera":@"Opera",@"com.microsoft.edgemac":@"Edge",@"com.apple.Safari":@"Safari"}[browser]?:@"Chrome"];}
+ return browsers.count?[NSString stringWithFormat:@"Extension connected in %@.",[browsers componentsJoinedByString:@" and "]]:@"The extension is not connected right now. Open a browser with the extension installed.";
+}
+- (void)dismissWelcome:(id)sender {
+ NSView *card=self.welcomeCard;if(!card)return;NSStackView *column=(NSStackView *)card.superview;
+ [column removeArrangedSubview:card];[card removeFromSuperview];self.welcomeCard=nil;self.welcomeWanted=NO;
+ // The tab's root view echoes its frame as fitting size; measure the column, then
+ // reselect the tab so the tab controller applies the smaller size to the window.
+ [column layoutSubtreeIfNeeded];self.settingsTabs.tabViewItems.firstObject.viewController.preferredContentSize=NSMakeSize(500,column.fittingSize.height);
+ self.settingsTabs.selectedTabViewItemIndex=1;self.settingsTabs.selectedTabViewItemIndex=0;
+}
+- (void)showLicenses:(id)sender {NSURL *folder=NSBundle.mainBundle.resourceURL;[NSWorkspace.sharedWorkspace activateFileViewerSelectingURLs:@[[folder URLByAppendingPathComponent:@"LICENSE-APP.txt"],[folder URLByAppendingPathComponent:@"LICENSE-SOURCE.txt"]]];}
 - (void)showSettings:(id)sender {
  if(!self.settings){
- self.settings=[[NSWindow alloc]initWithContentRect:NSMakeRect(0,0,480,526) styleMask:NSWindowStyleMaskTitled|NSWindowStyleMaskClosable backing:NSBackingStoreBuffered defer:NO];self.settings.title=@"Less Pull";self.settings.releasedWhenClosed=NO;
- self.statusText=[self label:@"" y:366 height:32];self.statusText.font=[NSFont systemFontOfSize:18 weight:NSFontWeightSemibold];
- self.statusDetail=[self label:@"" y:338 height:24];self.statusDetail.font=[NSFont systemFontOfSize:12];self.statusDetail.textColor=NSColor.secondaryLabelColor;
- [self separatorAt:324];
- self.grayscaleButton=[NSButton checkboxWithTitle:@"Grayscale" target:self action:@selector(toggleGrayscale:)];self.grayscaleButton.frame=NSMakeRect(24,284,430,26);[self helpView:self.grayscaleButton text:self.grayHelp label:@"Grayscale"];[self.settings.contentView addSubview:self.grayscaleButton];
- self.warmthTitle=[self label:@"Extra Warmth" y:246 height:24];self.warmthTitle.font=[NSFont systemFontOfSize:13 weight:NSFontWeightMedium];[self helpView:self.warmthTitle text:self.warmthHelp label:nil];
- self.resetButton=[NSButton buttonWithTitle:@"Reset" target:self action:@selector(resetWarmth:)];self.resetButton.bezelStyle=NSBezelStyleInline;self.resetButton.frame=NSMakeRect(395,244,60,24);[self helpView:self.resetButton text:@"Set Extra Warmth to 0%. Keeps the current Color/Grayscale choice and does not switch Night Shift. With warmth following enabled, this is a temporary override and the new saved nighttime setting." label:@"Reset Extra Warmth"];[self.settings.contentView addSubview:self.resetButton];
- self.warmthSlider=[NSSlider sliderWithValue:[self currentWarmth]/3*100 minValue:0 maxValue:100 target:self action:@selector(warmthChanged:)];self.warmthSlider.frame=NSMakeRect(24,214,340,26);self.warmthSlider.continuous=YES;self.warmthSlider.numberOfTickMarks=5;self.warmthSlider.allowsTickMarkValuesOnly=NO;[self helpView:self.warmthSlider text:self.warmthHelp label:@"Extra Warmth, percent"];[self.settings.contentView addSubview:self.warmthSlider];
- for(int i=0;i<5;i++){NSTextField *r=[NSTextField labelWithString:@[@"Off",@"25",@"50",@"75",@"Red"][i]];r.font=[NSFont systemFontOfSize:10];r.alignment=NSTextAlignmentCenter;r.frame=NSMakeRect(34+80*i-20,190,40,18);[self.settings.contentView addSubview:r];}
- self.warmthLabel=[NSTextField labelWithString:@""];self.warmthLabel.frame=NSMakeRect(388,214,65,24);self.warmthLabel.alignment=NSTextAlignmentRight;self.warmthLabel.font=[NSFont monospacedDigitSystemFontOfSize:14 weight:NSFontWeightMedium];[self helpView:self.warmthLabel text:self.warmthHelp label:@"Extra Warmth percentage"];[self.settings.contentView addSubview:self.warmthLabel];
- [self separatorAt:176];
- self.nightButton=[NSButton checkboxWithTitle:@"Night Shift" target:self action:@selector(toggleNightShift:)];self.nightButton.frame=NSMakeRect(24,134,198,26);[self helpView:self.nightButton text:self.nightHelp label:@"Night Shift"];[self.settings.contentView addSubview:self.nightButton];
- self.pausePopup=[[NSPopUpButton alloc]initWithFrame:NSMakeRect(226,134,230,26) pullsDown:YES];[self helpView:self.pausePopup text:self.pauseHelp label:@"Turn Night Shift off for…"];[self.settings.contentView addSubview:self.pausePopup];
- self.endPauseButton=[NSButton buttonWithTitle:@"End timed pause" target:self action:@selector(endPauseNow:)];self.endPauseButton.frame=NSMakeRect(226,134,230,26);[self helpView:self.endPauseButton text:self.pauseHelp label:@"End timed pause"];[self.settings.contentView addSubview:self.endPauseButton];
- self.autoButton=[NSButton checkboxWithTitle:@"Extra Warmth follows Night Shift" target:self action:@selector(toggleAuto:)];self.autoButton.frame=NSMakeRect(24,96,285,26);[self helpView:self.autoButton text:self.autoHelp label:@"Extra Warmth follows Night Shift"];[self.settings.contentView addSubview:self.autoButton];
- self.resumeButton=[NSButton buttonWithTitle:@"Resume Following" target:self action:@selector(resume:)];self.resumeButton.frame=NSMakeRect(320,96,136,26);[self helpView:self.resumeButton text:@"Apply your warmth for the current Night Shift state now and end the temporary override. Warmth following remains enabled." label:@"Resume Following Now"];[self.settings.contentView addSubview:self.resumeButton];
- self.loginButton=[NSButton checkboxWithTitle:@"Launch at login" target:self action:@selector(login:)];self.loginButton.frame=NSMakeRect(24,58,432,26);[self helpView:self.loginButton text:@"Start this menu-bar app when you sign in. Install it in Applications first. macOS may ask you to allow it in Login Items." label:@"Launch at login"];[self.settings.contentView addSubview:self.loginButton];
- NSButton *help=[NSButton buttonWithTitle:@"Help" target:self action:@selector(showHelp:)];help.bezelStyle=NSBezelStyleInline;help.frame=NSMakeRect(399,16,57,22);[self helpView:help text:@"Read usage help and access troubleshooting diagnostics." label:@"Help"];[self.settings.contentView addSubview:help];
- NSTextField *hint=[self label:@"Hover over a control for help." y:16 height:22];hint.font=[NSFont systemFontOfSize:11];hint.textColor=NSColor.secondaryLabelColor;hint.frame=NSMakeRect(24,16,300,22);
- for(NSView *view in self.settings.contentView.subviews){NSRect frame=view.frame;frame.origin.y+=26;view.frame=frame;}
- NSTextField *credit=[NSTextField labelWithString:@"© 2026 Jiri Arion Rose"];credit.font=[NSFont systemFontOfSize:10];credit.textColor=NSColor.secondaryLabelColor;credit.frame=NSMakeRect(24,10,185,18);[self.settings.contentView addSubview:credit];
- NSButton *website=[NSButton buttonWithTitle:@"jiriarion.com" target:self action:@selector(openWebsite:)];website.bezelStyle=NSBezelStyleInline;website.font=[NSFont systemFontOfSize:10];website.contentTintColor=NSColor.linkColor;website.frame=NSMakeRect(212,8,100,22);[self helpView:website text:@"Open jiriarion.com in your default browser." label:@"Visit Jiri Arion Rose’s website"];[self.settings.contentView addSubview:website];
- NSButton *support=[NSButton buttonWithTitle:@"Buy me a coffee" target:self action:@selector(openSupport:)];support.bezelStyle=NSBezelStyleInline;support.font=[NSFont systemFontOfSize:10];support.contentTintColor=NSColor.linkColor;support.frame=NSMakeRect(316,8,140,22);[self helpView:support text:@"Open buymeacoffee.com/HsERf62fiZ in your default browser." label:@"Support Jiri Arion Rose — Buy me a coffee"];[self.settings.contentView addSubview:support];
- for(NSView *view in self.settings.contentView.subviews){if(view.frame.origin.y>=84){NSRect f=view.frame;f.origin.y+=40;view.frame=f;}}
- self.exclusionText=[NSTextField labelWithString:@"No foreground exclusions"];self.exclusionText.font=[NSFont systemFontOfSize:11];self.exclusionText.textColor=NSColor.secondaryLabelColor;self.exclusionText.frame=NSMakeRect(24,84,282,24);[self.settings.contentView addSubview:self.exclusionText];
- NSButton *exclusions=[NSButton buttonWithTitle:@"App Exceptions…" target:self action:@selector(showExclusions:)];exclusions.frame=NSMakeRect(316,82,140,28);[self helpView:exclusions text:[self exclusionHelp] label:@"Configure foreground app exceptions"];[self.settings.contentView addSubview:exclusions];
- for(NSView *view in self.settings.contentView.subviews){if(view.frame.origin.y>=64){NSRect f=view.frame;f.origin.y+=40;view.frame=f;}}
- NSButton *browserInstall=[NSButton buttonWithTitle:@"Install Browser Extension…" target:self action:@selector(installBrowserExtension:)];browserInstall.frame=NSMakeRect(24,84,432,28);[self helpView:browserInstall text:@"Set up the local Less Pull bridge and install website exceptions in Brave or Chrome. The Mac app must stay running." label:@"Install Browser Extension"];[self.settings.contentView addSubview:browserInstall];
- self.settings.initialFirstResponder=self.grayscaleButton;[self.settings recalculateKeyViewLoop];[self.settings center];
+  self.settingsTabs=[NSTabViewController new];self.settingsTabs.tabStyle=NSTabViewControllerTabStyleToolbar;self.settingsTabs.transitionOptions=NSViewControllerTransitionNone;
+  [self.settingsTabs addTabViewItem:[self tab:@"General" symbol:@"circle.lefthalf.filled" content:[self generalTab]]];
+  [self.settingsTabs addTabViewItem:[self tab:@"Shortcuts" symbol:@"keyboard" content:[self shortcutsTab]]];
+  [self.settingsTabs addTabViewItem:[self tab:@"Apps" symbol:@"macwindow" content:[self appsTab]]];
+  [self.settingsTabs addTabViewItem:[self tab:@"Websites" symbol:@"globe" content:[self websitesTab]]];
+  [self.settingsTabs addTabViewItem:[self tab:@"About" symbol:@"info.circle" content:[self aboutTab]]];
+  self.settings=[NSWindow windowWithContentViewController:self.settingsTabs];self.settings.styleMask=NSWindowStyleMaskTitled|NSWindowStyleMaskClosable;self.settings.title=@"Less Pull";self.settings.releasedWhenClosed=NO;if(@available(macOS 11,*))self.settings.toolbarStyle=NSWindowToolbarStylePreference;
+  self.settings.initialFirstResponder=self.grayscaleButton;[self.settings center];
  }
- self.loginButton.state=SMAppService.mainAppService.status==SMAppServiceStatusEnabled;[self sync];[NSApp activateIgnoringOtherApps:YES];[self.settings makeKeyAndOrderFront:nil];
+ self.loginButton.state=SMAppService.mainAppService.status==SMAppServiceStatusEnabled;[self rebuildExclusionsList];[self sync];[NSApp activateIgnoringOtherApps:YES];[self.settings makeKeyAndOrderFront:nil];
+}
+// Before anything is installed: what the extension can see, in plain words.
+- (BOOL)confirmExtensionData {
+ NSAlert *a=[NSAlert new];a.messageText=@"What the browser extension can see";
+ a.informativeText=@"The extension reads the address and title of your tabs, so Less Pull knows which website is in front. Your browser will call this “browsing history”.\n\nIt cannot read or change what is on a page, see what you type, or reach your passwords, cookies or forms. It has no buttons and no network connection of its own; it talks only to the Less Pull app on this Mac. Private tabs are never reported.\n\nWhat is kept: the website exceptions you save, on this Mac. The address of the site in front stays in memory and is dropped when the browser disconnects.";
+ [a addButtonWithTitle:@"Continue"];[a addButtonWithTitle:@"Cancel"];[a addButtonWithTitle:@"Read the Privacy Page"];[NSApp activateIgnoringOtherApps:YES];NSModalResponse r=[a runModal];
+ if(r==NSAlertThirdButtonReturn){[NSWorkspace.sharedWorkspace openURL:[NSURL URLWithString:@"https://github.com/Archangeloi89/less-pull/blob/main/docs/PRIVACY.md"]];return NO;}
+ return r==NSAlertFirstButtonReturn;
 }
 - (void)installBrowserExtension:(id)sender {
- NSAlert *choose=[NSAlert new];choose.messageText=@"Install Browser Extension";choose.informativeText=@"Choose your browser. Less Pull will set up its local connection and open the browser’s extension installer. This test build uses Load unpacked; the public release will use the official store. The extension needs this Mac app installed and running.";[choose addButtonWithTitle:@"Brave"];[choose addButtonWithTitle:@"Chrome"];[choose addButtonWithTitle:@"Cancel"];[NSApp activateIgnoringOtherApps:YES];NSModalResponse choice=[choose runModal];if(choice!=NSAlertFirstButtonReturn&&choice!=NSAlertSecondButtonReturn)return;
- NSString *browser=choice==NSAlertFirstButtonReturn?@"Brave":@"Chrome",*identifier=choice==NSAlertFirstButtonReturn?@"com.brave.Browser":@"com.google.Chrome";NSURL *browserURL=[NSWorkspace.sharedWorkspace URLForApplicationWithBundleIdentifier:identifier];if(!browserURL){NSAlert *missing=[NSAlert new];missing.messageText=[browser stringByAppendingString:@" is not installed"];missing.informativeText=@"Install the browser, then return to Browser Extension setup.";[missing runModal];return;}
+ if(![self confirmExtensionData])return;
+ NSAlert *choose=[NSAlert new];choose.messageText=@"Install Browser Extension";choose.informativeText=@"Choose your browser. Less Pull will connect to it and open its extensions page. Until the extension is in the stores, it is loaded from the folder inside the app. Less Pull must stay open for website exceptions to work.";[choose addButtonWithTitle:@"Safari"];[choose addButtonWithTitle:@"Brave"];[choose addButtonWithTitle:@"Chrome"];[choose addButtonWithTitle:@"Firefox"];[choose addButtonWithTitle:@"Opera"];[choose addButtonWithTitle:@"Edge"];[choose addButtonWithTitle:@"Cancel"];[NSApp activateIgnoringOtherApps:YES];NSModalResponse choice=[choose runModal];
+ if(choice==NSAlertFirstButtonReturn){[self installSafariExtension];return;}choice-=1;
+ NSArray *browsers=@[@[@"Brave",@"com.brave.Browser",@"brave://extensions"],@[@"Chrome",@"com.google.Chrome",@"chrome://extensions"],@[@"Firefox",@"org.mozilla.firefox",@"about:debugging#/runtime/this-firefox"],@[@"Opera",@"com.operasoftware.Opera",@"opera://extensions"],@[@"Edge",@"com.microsoft.edgemac",@"edge://extensions"]];NSInteger index=choice-NSAlertFirstButtonReturn;if(index<0||index>4)return;
+ NSString *browser=browsers[index][0],*identifier=browsers[index][1];BOOL firefox=index==2;NSURL *browserURL=[NSWorkspace.sharedWorkspace URLForApplicationWithBundleIdentifier:identifier];if(!browserURL){NSAlert *missing=[NSAlert new];missing.messageText=[browser stringByAppendingString:@" is not installed"];missing.informativeText=@"Install the browser, then return to Browser Extension setup.";[missing runModal];return;}
  NSTask *setup=[NSTask new];setup.executableURL=[NSBundle.mainBundle.bundleURL URLByAppendingPathComponent:@"Contents/MacOS/LessPullBrowserHost"];setup.arguments=@[@"--install"];setup.standardOutput=[NSPipe pipe];setup.standardError=[NSPipe pipe];NSError *error=nil;BOOL started=[setup launchAndReturnError:&error];if(started)[setup waitUntilExit];if(!started||setup.terminationStatus!=0){NSAlert *failed=[NSAlert new];failed.messageText=@"Browser setup could not finish";failed.informativeText=error.localizedDescription?:@"Try again from a permanent local copy of Less Pull. The local bridge could not be registered.";[failed runModal];return;}
- NSURL *folder=[NSBundle.mainBundle.resourceURL URLByAppendingPathComponent:@"Browser Extension"];[NSWorkspace.sharedWorkspace activateFileViewerSelectingURLs:@[folder]];
- [NSWorkspace.sharedWorkspace openURLs:@[[NSURL URLWithString:choice==NSAlertFirstButtonReturn?@"brave://extensions":@"chrome://extensions"]] withApplicationAtURL:browserURL configuration:NSWorkspaceOpenConfiguration.configuration completionHandler:nil];
- NSAlert *guide=[NSAlert new];guide.messageText=[NSString stringWithFormat:@"Finish installation in %@",browser];guide.informativeText=@"1. Turn on Developer mode on the Extensions page.\n2. Click Load unpacked.\n3. Select the Browser Extension folder shown in Finder.\n4. Pin Less Pull in the browser toolbar.\n\nClick its icon on a website to customize the domain or exact URL. Keep the app and extension folder in their installed locations. Rerun setup after moving the app.";[guide addButtonWithTitle:@"Done"];[guide addButtonWithTitle:@"Copy extension folder path"];[NSApp activateIgnoringOtherApps:YES];if([guide runModal]==NSAlertSecondButtonReturn){[NSPasteboard.generalPasteboard clearContents];[NSPasteboard.generalPasteboard setString:folder.path forType:NSPasteboardTypeString];}
+ NSURL *folder=[NSBundle.mainBundle.resourceURL URLByAppendingPathComponent:firefox?@"Browser Extension (Firefox)":@"Browser Extension"];[NSWorkspace.sharedWorkspace activateFileViewerSelectingURLs:@[folder]];
+ [NSWorkspace.sharedWorkspace openURLs:@[[NSURL URLWithString:browsers[index][2]]] withApplicationAtURL:browserURL configuration:NSWorkspaceOpenConfiguration.configuration completionHandler:nil];
+ NSAlert *guide=[NSAlert new];guide.messageText=[NSString stringWithFormat:@"Finish installation in %@",browser];
+ guide.informativeText=firefox?@"1. On the page that opened, click Load Temporary Add-on….\n2. Select manifest.json in the Browser Extension (Firefox) folder shown in Finder.\n\nFirefox removes temporary add-ons when it quits; load it again next time, or use Firefox Developer Edition with signing turned off. The extension has no buttons: with a website in front, use “Exception for …” in the Less Pull menu. Keep Less Pull where it is installed; run this setup again if you move it.":@"1. Turn on Developer mode on the Extensions page.\n2. Click Load unpacked.\n3. Select the Browser Extension folder shown in Finder.\n\nThe extension has no buttons: with a website in front, use “Exception for …” in the Less Pull menu. Keep Less Pull where it is installed; run this setup again if you move it.";
+ [guide addButtonWithTitle:@"Done"];[guide addButtonWithTitle:@"Copy extension folder path"];[NSApp activateIgnoringOtherApps:YES];if([guide runModal]==NSAlertSecondButtonReturn){[NSPasteboard.generalPasteboard clearContents];[NSPasteboard.generalPasteboard setString:folder.path forType:NSPasteboardTypeString];}
 }
-- (void)openWebsite:(id)sender {[NSWorkspace.sharedWorkspace openURL:[NSURL URLWithString:@"https://jiriarion.com"]];}
-- (void)openSupport:(id)sender {[NSWorkspace.sharedWorkspace openURL:[NSURL URLWithString:@"https://buymeacoffee.com/HsERf62fiZ"]];}
-- (void)showAbout:(id)sender {
- NSAlert *a=[NSAlert new];a.messageText=@"Less Pull";a.informativeText=[NSString stringWithFormat:@"Version %@\n\n© 2026 Jiri Arion Rose",[NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"]];
- NSButton *website=[NSButton buttonWithTitle:@"jiriarion.com" target:self action:@selector(openWebsite:)];website.bezelStyle=NSBezelStyleInline;website.frame=NSMakeRect(0,0,200,28);website.contentTintColor=NSColor.linkColor;[self helpView:website text:@"Open jiriarion.com in your default browser." label:@"Visit Jiri Arion Rose’s website"];NSView *links=[[NSView alloc]initWithFrame:NSMakeRect(0,0,240,60)];website.frame=NSMakeRect(0,30,240,28);[links addSubview:website];NSButton *support=[NSButton buttonWithTitle:@"Buy me a coffee" target:self action:@selector(openSupport:)];support.bezelStyle=NSBezelStyleInline;support.frame=NSMakeRect(0,0,240,28);support.contentTintColor=NSColor.linkColor;[self helpView:support text:@"Open buymeacoffee.com/HsERf62fiZ in your default browser." label:@"Support Jiri Arion Rose — Buy me a coffee"];[links addSubview:support];a.accessoryView=links;[NSApp activateIgnoringOtherApps:YES];[a runModal];
+// Safari: the extension lives in a small companion app inside Less Pull. Opening it
+// once registers the extension; Safari then lists it under Settings → Extensions.
+- (void)installSafariExtension {
+ NSURL *companion=[NSBundle.mainBundle.resourceURL URLByAppendingPathComponent:@"Less Pull for Safari.app"];
+ if(![NSFileManager.defaultManager fileExistsAtPath:companion.path]){NSAlert *missing=[NSAlert new];missing.messageText=@"The Safari extension is not in this build";missing.informativeText=@"This copy of Less Pull was built without Xcode, so the Safari companion app is missing. A build with Xcode includes it.";[missing runModal];return;}
+ [NSWorkspace.sharedWorkspace openURL:companion];
+ NSAlert *guide=[NSAlert new];guide.messageText=@"Finish installation in Safari";guide.informativeText=@"1. The Less Pull for Safari app opens; click its Open Safari Settings button.\n2. Until this build is signed by Apple, Safari needs Allow Unsigned Extensions from the Develop menu (turn on the Develop menu under Settings → Advanced). That choice lasts until Safari quits.\n3. Turn on Less Pull in Settings → Extensions and allow it on all websites.\n\nThe extension has no buttons: with a website in front, use “Exception for …” in the Less Pull menu. Keep Less Pull where it is installed.";[guide addButtonWithTitle:@"Done"];[NSApp activateIgnoringOtherApps:YES];[guide runModal];
+}
+- (void)openWebsite:(id)sender {[NSWorkspace.sharedWorkspace openURL:[NSURL URLWithString:LessPullWebsite]];}
+- (void)openSupport:(id)sender {[NSWorkspace.sharedWorkspace openURL:[NSURL URLWithString:LessPullCoffee]];}
+- (void)openLink:(NSButton *)sender {if(sender.identifier.length)[NSWorkspace.sharedWorkspace openURL:[NSURL URLWithString:sender.identifier]];}
+// Link buttons for the About tab and the thanks window; empty addresses are skipped.
+- (NSArray<NSButton *> *)authorLinkButtons {
+ NSMutableArray *buttons=[NSMutableArray new];
+ for(NSArray *link in @[@[@"jiriarion.com",LessPullWebsite,@"Open jiriarion.com in your default browser.",@"Visit Jiri Arion Rose’s website"],@[@"Buy me a coffee",LessPullCoffee,@"Open buymeacoffee.com/HsERf62fiZ in your default browser.",@"Support Jiri Arion Rose — Buy me a coffee"],@[@"Substack",LessPullSubstack,@"Open Jiri Arion Rose’s Substack in your default browser.",@"Jiri Arion Rose on Substack"],@[@"YouTube",LessPullYouTube,@"Open Jiri Arion Rose’s YouTube channel in your default browser.",@"Jiri Arion Rose on YouTube"],@[@"X",LessPullX,@"Open Jiri Arion Rose on X in your default browser.",@"Jiri Arion Rose on X"]]){
+  if(![link[1] length])continue;NSButton *b=[NSButton buttonWithTitle:link[0] target:self action:@selector(openLink:)];b.identifier=link[1];b.bezelStyle=NSBezelStyleInline;b.contentTintColor=NSColor.linkColor;[self helpView:b text:link[2] label:link[3]];[buttons addObject:b];}
+ return buttons;
+}
+// A thank-you after 30 days of use: shown once, Later asks again in 90 days,
+// Don't show again never does. Nothing is sent anywhere.
+- (void)scheduleThanks {
+ NSUserDefaults *d=NSUserDefaults.standardUserDefaults;if(![d objectForKey:@"firstLaunchDate"])[d setObject:NSDate.date forKey:@"firstLaunchDate"];
+ [self.thanksTimer invalidate];self.thanksTimer=[NSTimer timerWithTimeInterval:3600 target:self selector:@selector(maybeShowThanks) userInfo:nil repeats:YES];[NSRunLoop.mainRunLoop addTimer:self.thanksTimer forMode:NSRunLoopCommonModes];
+ if([NSProcessInfo.processInfo.arguments containsObject:@"--thanks"])[self showThanks:nil];else [self performSelector:@selector(maybeShowThanks) withObject:nil afterDelay:120];
+}
+- (void)maybeShowThanks {
+ NSUserDefaults *d=NSUserDefaults.standardUserDefaults;if([d boolForKey:@"thanksDismissed"]||self.thanksWindow.visible)return;
+ NSDate *first=[d objectForKey:@"firstLaunchDate"],*next=[d objectForKey:@"thanksNextDate"];NSDate *due=[next isKindOfClass:NSDate.class]?next:[[first isKindOfClass:NSDate.class]?first:NSDate.date dateByAddingTimeInterval:30*86400];
+ if([NSDate.date compare:due]==NSOrderedAscending)return;[self showThanks:nil];
+}
+- (void)showThanks:(id)sender {
+ if(!self.thanksWindow){
+  self.thanksWindow=[[NSWindow alloc]initWithContentRect:NSMakeRect(0,0,460,380) styleMask:NSWindowStyleMaskTitled|NSWindowStyleMaskClosable backing:NSBackingStoreBuffered defer:NO];self.thanksWindow.title=@"Thank you";self.thanksWindow.releasedWhenClosed=NO;
+  NSImageView *icon=[NSImageView imageViewWithImage:NSApp.applicationIconImage];[icon.widthAnchor constraintEqualToConstant:56].active=YES;[icon.heightAnchor constraintEqualToConstant:56].active=YES;icon.accessibilityLabel=@"Less Pull app icon";
+  NSTextField *title=[NSTextField labelWithString:@"Are you enjoying Less Pull?"];title.font=[NSFont systemFontOfSize:18 weight:NSFontWeightSemibold];
+  NSTextField *body=[NSTextField wrappingLabelWithString:@"This app is a gift from the universe to you. It has been fully funded by life.\n\nMy future projects and my work are still being developed, and they benefit from any kind of support: a contribution, telling a friend, or whatever you choose.\n\nThanks for being part of life and making it more beautiful for everyone.\n\n— Jiri Arion Rose"];body.preferredMaxLayoutWidth=412;
+  NSStackView *links=[self row:[self authorLinkButtons]];links.spacing=6;
+  NSButton *later=[NSButton buttonWithTitle:@"Later" target:self action:@selector(thanksLater:)];[self helpView:later text:@"Close this and show it again in about three months." label:@"Later"];
+  NSButton *never=[NSButton buttonWithTitle:@"Don’t Show Again" target:self action:@selector(thanksNever:)];[self helpView:never text:@"Close this and never show it again." label:@"Don’t show again"];
+  NSButton *done=[NSButton buttonWithTitle:@"Thanks" target:self action:@selector(thanksNever:)];done.keyEquivalent=@"\r";[self helpView:done text:@"Close this window; it will not come back." label:@"Thanks"];
+  NSStackView *buttons=[self row:@[never,[self spacer],later,done]];
+  NSStackView *header=[self row:@[icon,title]];header.spacing=14;
+  NSStackView *stack=[self column:@[header,body,links,buttons]];stack.spacing=16;stack.edgeInsets=NSEdgeInsetsMake(22,24,20,24);stack.translatesAutoresizingMaskIntoConstraints=NO;[stack setCustomSpacing:10 afterView:body];
+  NSView *content=self.thanksWindow.contentView;[content addSubview:stack];
+  [NSLayoutConstraint activateConstraints:@[[stack.topAnchor constraintEqualToAnchor:content.topAnchor],[stack.leadingAnchor constraintEqualToAnchor:content.leadingAnchor],[stack.trailingAnchor constraintEqualToAnchor:content.trailingAnchor],[stack.bottomAnchor constraintEqualToAnchor:content.bottomAnchor],[content.widthAnchor constraintEqualToConstant:460],[buttons.widthAnchor constraintEqualToAnchor:stack.widthAnchor constant:-48]]];
+  [content layoutSubtreeIfNeeded];[self.thanksWindow setContentSize:content.fittingSize];[self.thanksWindow center];
+ }
+ [NSApp activateIgnoringOtherApps:YES];[self.thanksWindow makeKeyAndOrderFront:nil];
+}
+- (void)thanksLater:(id)sender {[NSUserDefaults.standardUserDefaults setObject:[NSDate.date dateByAddingTimeInterval:90*86400] forKey:@"thanksNextDate"];[self.thanksWindow close];}
+- (void)thanksNever:(id)sender {[NSUserDefaults.standardUserDefaults setBool:YES forKey:@"thanksDismissed"];[NSUserDefaults.standardUserDefaults removeObjectForKey:@"thanksNextDate"];[self.thanksWindow close];}
+- (NSArray<NSArray<NSString *> *> *)helpSections {
+ return @[
+  @[@"What Less Pull does",@"Less Pull takes the color out of your screen so it pulls at your attention less. You can add warmth, from amber to red, and keep color where you need it."],
+  @[@"Grayscale",@"Shows everything in shades of gray, day and night. Turn it off to see color again."],
+  @[@"Extra Warmth",@"Adds warmth on top of Night Shift. Off adds none; 100% is red. The slider is in the menu and in Settings."],
+  @[@"Night Shift",@"Less Pull can turn Night Shift on or off now, or off for a while; your schedule in System Settings stays as it is. With “Extra Warmth follows Night Shift” on, the warmth you set is added only while Night Shift is on, and there is none in the daytime. With it off, Extra Warmth stays on all day. If you move the slider by hand while following, that warmth stays until Night Shift next changes, or until you choose Resume Following."],
+  @[@"Exceptions for apps",@"Give an app its own settings in Settings → Apps, or choose “Exception for …” in the menu. They apply while that app is in front with a window open. Each setting can keep the default or get its own value. “Use this exception” switches a rule off and keeps its settings; changing a setting away from default switches it on again."],
+  @[@"Exceptions for websites",@"Install the browser extension from Settings, for Safari, Brave, Chrome, Firefox, Opera or Edge. It only connects the browser; it has no buttons. With a website in front, the menu offers “Exception for that site”, for the whole domain or one exact page. Pages inherit from their domain, and domains from the browser’s app exception. Several browsers can use it at the same time; private tabs are left alone."],
+  @[@"Peek in color",@"Record a shortcut in Settings → Shortcuts, or let Suggest pick one that is free. Hold it to see the plain display; let go and Less Pull fades back. Choose there what peeking turns off: Grayscale, Extra Warmth, and Night Shift if you like. Nothing is saved and no exception is made."],
+  @[@"Grayscale off for a while",@"In the menu or in Settings, turn Grayscale off for 1 hour, 4 hours, or until Night Shift next changes. It comes back by itself; your setting stays saved."],
+  @[@"The menu-bar icon and shortcuts",@"By default a click opens the menu and a right-click (or Control-click) toggles Grayscale; Settings → Shortcuts can swap the two. A Toggle Grayscale shortcut can be recorded there as well."],
+  @[@"Pausing",@"Pause Less Pull shows the plain display for 15 minutes, an hour, or until you resume: color and no added warmth, with Night Shift left alone. Your settings and exceptions are kept, and the menu-bar icon shows a pause mark."],
+  @[@"Quitting",@"Quitting returns the display to normal and lets Night Shift follow its schedule again. Your settings and exceptions are kept."],
+  @[@"Updates",@"Once a day Less Pull asks GitHub whether a newer build exists, and only offers builds made for your macOS version; the menu-bar icon then shows a small dot and the menu offers “Update available”. Nothing about you is sent. Turn it off in Settings → About."],
+  @[@"Something not working?",@"Diagnostics shows technical details you can include when asking for help. Nothing is sent anywhere."]];
 }
 - (void)showHelp:(id)sender {
- NSAlert *a=[NSAlert new];a.messageText=@"Less Pull";a.informativeText=[NSString stringWithFormat:@"%@\n\n%@\n\nThe Night Shift checkbox and On/Off Now menu action change the current system state; the system schedule may change it later. Timed off is the pause function: its expiry stays visible, it survives unexpected restart, and safe schedule rules decide whether Night Shift can resume. Warmth following controls only Extra Warmth. While timed off, following stays enabled and uses the selected Color/Grayscale with warmth off; manual overrides remain available. At expiry the app follows actual Night Shift, without forcing daytime activation. Extra Warmth runs independently of Night Shift. Quit removes app-added warmth and ends the timed pause safely. Hover help is also available to accessibility tools.",self.autoHelp,self.pauseHelp];[a addButtonWithTitle:@"Done"];[a addButtonWithTitle:@"Diagnostics…"];[NSApp activateIgnoringOtherApps:YES];if([a runModal]==NSAlertSecondButtonReturn)[self diagnostics:nil];
+ if(!self.helpWindow){
+  self.helpWindow=[[NSWindow alloc]initWithContentRect:NSMakeRect(0,0,440,520) styleMask:NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskResizable backing:NSBackingStoreBuffered defer:NO];self.helpWindow.title=@"Less Pull Help";self.helpWindow.releasedWhenClosed=NO;self.helpWindow.minSize=NSMakeSize(360,320);
+  NSMutableAttributedString *text=[NSMutableAttributedString new];NSMutableParagraphStyle *body=[NSMutableParagraphStyle new];body.paragraphSpacing=14;body.lineHeightMultiple=1.15;NSMutableParagraphStyle *head=[NSMutableParagraphStyle new];head.paragraphSpacing=4;
+  for(NSArray *section in [self helpSections]){[text appendAttributedString:[[NSAttributedString alloc]initWithString:[section[0] stringByAppendingString:@"\n"] attributes:@{NSFontAttributeName:[NSFont systemFontOfSize:13 weight:NSFontWeightSemibold],NSForegroundColorAttributeName:NSColor.labelColor,NSParagraphStyleAttributeName:head}]];[text appendAttributedString:[[NSAttributedString alloc]initWithString:[section[1] stringByAppendingString:@"\n"] attributes:@{NSFontAttributeName:[NSFont systemFontOfSize:13],NSForegroundColorAttributeName:NSColor.labelColor,NSParagraphStyleAttributeName:body}]];}
+  NSScrollView *scroll=[NSTextView scrollableTextView];NSTextView *view=scroll.documentView;view.editable=NO;view.selectable=YES;view.textContainerInset=NSMakeSize(16,16);view.drawsBackground=NO;[view.textStorage setAttributedString:text];view.accessibilityLabel=@"Less Pull Help";scroll.drawsBackground=NO;scroll.translatesAutoresizingMaskIntoConstraints=NO;
+  NSButton *diagnostics=[NSButton buttonWithTitle:@"Diagnostics…" target:self action:@selector(diagnostics:)];diagnostics.translatesAutoresizingMaskIntoConstraints=NO;[self helpView:diagnostics text:@"Technical details for troubleshooting." label:@"Diagnostics"];
+  NSView *content=self.helpWindow.contentView;[content addSubview:scroll];[content addSubview:diagnostics];
+  [NSLayoutConstraint activateConstraints:@[[scroll.topAnchor constraintEqualToAnchor:content.topAnchor],[scroll.leadingAnchor constraintEqualToAnchor:content.leadingAnchor],[scroll.trailingAnchor constraintEqualToAnchor:content.trailingAnchor],[scroll.bottomAnchor constraintEqualToAnchor:diagnostics.topAnchor constant:-12],[diagnostics.trailingAnchor constraintEqualToAnchor:content.trailingAnchor constant:-20],[diagnostics.bottomAnchor constraintEqualToAnchor:content.bottomAnchor constant:-16]]];
+  [self.helpWindow center];
+ }
+ [NSApp activateIgnoringOtherApps:YES];[self.helpWindow makeKeyAndOrderFront:nil];
 }
 - (void)login:(NSButton *)sender {
  NSError *error=nil;
  if(sender.state==NSControlStateValueOn)[SMAppService.mainAppService registerAndReturnError:&error];else [SMAppService.mainAppService unregisterAndReturnError:&error];
  if(error){NSAlert *a=[NSAlert new];a.messageText=@"Login setting needs attention";a.informativeText=error.localizedDescription;[a runModal];}
- sender.state=SMAppService.mainAppService.status==SMAppServiceStatusEnabled;
+ sender.state=SMAppService.mainAppService.status==SMAppServiceStatusEnabled;if(sender.state==NSControlStateValueOn)self.loginNote.hidden=YES;
 }
 - (void)resetWarmth:(id)sender {NSSlider *slider=[NSSlider new];slider.doubleValue=0;[self warmthChanged:slider];}
-- (void)diagnostics:(id)sender {NSAlert *a=[NSAlert new];a.messageText=@"Diagnostics";a.informativeText=[NSString stringWithFormat:@"%@\n\n%@\n\nBetterDisplay running: %@. HDR state is not read; check BetterDisplay/System Settings.\nNight Shift state drives Extra Warmth follows Night Shift; it does not prove visual warming on every display.",self.engine.diagnostics,[NSString stringWithFormat:@"%@\nPipeline events: %lu; bounded restorations: %lu\nGlobal Grayscale: %@; effective Grayscale: %@; appearance exception: %@",self.warmth.diagnostics,(unsigned long)self.pipelineEvents,(unsigned long)self.pipelineRestorations,(self.selectedMode==100||self.selectedMode==1)?@"On":@"Off",(self.effectiveMode==100||self.effectiveMode==1)?@"On":@"Off",(self.grayOverride||self.customWarmth)?@"active":@"none"],[NSRunningApplication runningApplicationsWithBundleIdentifier:@"pro.betterdisplay.BetterDisplay"].count?@"yes":@"no"];[a runModal];}
+- (void)diagnostics:(id)sender {NSAlert *a=[NSAlert new];a.messageText=@"Diagnostics";NSString *betterDisplay=[NSRunningApplication runningApplicationsWithBundleIdentifier:@"pro.betterdisplay.BetterDisplay"].count?@"\nBetterDisplay is running; it can change how displays look. HDR state is not read.":@"";a.informativeText=[NSString stringWithFormat:@"Less Pull %@ (%@)\n\n%@\n%@\nDisplay events: %lu; recoveries: %lu\nGrayscale setting: %@; grayscale showing now: %@; exception active: %@%@\n\nNight Shift drives “Extra Warmth follows Night Shift”; it does not prove the display looks warmer.",[NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"],[NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleVersion"],self.engine.diagnostics,self.warmth.diagnostics,(unsigned long)self.pipelineEvents,(unsigned long)self.pipelineRestorations,(self.selectedMode==100||self.selectedMode==1)?@"On":@"Off",(self.effectiveMode==100||self.effectiveMode==1)?@"On":@"Off",(self.grayOverride||self.customWarmth)?@"yes":@"no",betterDisplay];[NSApp activateIgnoringOtherApps:YES];[a runModal];}
 - (NSString *)warmthKey {return @"warmth";}
 - (double)currentWarmth {return [NSUserDefaults.standardUserDefaults doubleForKey:[self warmthKey]];}
 - (BOOL)applyMode:(NSInteger)mode {
- NSInteger effective=self.grayOverride==1?100:self.grayOverride==2?101:mode;
+ // A timed Grayscale off shows color at the global level; exceptions still apply on top.
+ NSInteger effective=self.grayOverride==1?100:self.grayOverride==2?101:(self.grayOffUntil?101:mode);
  BOOL nightOn=NO;BOOL known=[self logicalNightShift:&nightOn];
  BOOL warmthOff=self.automatic&&self.policy.overrideMode<0&&known&&!nightOn;
  double strength=self.customWarmth?self.appWarmth/100*3:((mode==100||mode==101)&&!warmthOff?[self currentWarmth]:0);
+ if(self.pausedUntil){effective=101;strength=0;}
+ else if(self.peeking){NSDictionary *e=[self peekEffects];if([e[@"grayscale"] boolValue])effective=101;if([e[@"warmth"] boolValue])strength=0;}
  if(mode!=self.selectedMode||effective!=self.effectiveMode||strength!=self.targetStrength)self.animateAppearance=YES;
  self.targetStrength=strength;
  BOOL gray=effective==100||effective==1;
@@ -462,17 +1169,19 @@
 }
 - (void)toggleGrayscale:(id)sender {NSMenuItem *item=[NSMenuItem new];item.tag=(self.selectedMode==1||self.selectedMode==100)?101:100;[self manual:item];}
 - (void)refreshProfiles {self.grayscaleButton.state=self.selectedMode==1||self.selectedMode==100;
- self.grayscaleButton.title=self.grayOverride?@"Global Grayscale":@"Grayscale";}
+ self.grayscaleButton.title=self.grayOverride?@"Default Grayscale":@"Grayscale";}
 - (void)warmthChanged:(NSSlider *)sender {
  [NSUserDefaults.standardUserDefaults setDouble:sender.doubleValue/100*3 forKey:@"warmth"];self.warmthSlider.doubleValue=sender.doubleValue;
  [self.policy selectManual:self.selectedMode];[self savePolicy];
  NSMenuItem *item=[NSMenuItem new];item.tag=(self.selectedMode==1||self.selectedMode==100)?100:101;[self manual:item];
 }
 - (void)displaysChanged:(id)sender {[self pipelineChanged:sender];}
-- (void)applicationWillTerminate:(NSNotification *)note {self.quitting=YES;[self.eventTimer invalidate];[self.pipelineRecoveryTimer invalidate];[self.menuDismissal end];[self.browserBridge stop];[self.warmth cancelTransition];[self endPauseNow:nil];self.excludeNight=NO;[self reconcileExclusion];if(self.grayOverride||self.customWarmth){self.grayOverride=0;self.customWarmth=NO;self.excludeGray=NO;self.excludeWarmth=NO;self.animateAppearance=NO;[self.warmth cancelTransition];[self applyMode:self.selectedMode];}[self.warmth restore];}
+- (void)applicationWillTerminate:(NSNotification *)note {self.quitting=YES;if(self.peekHotKey)UnregisterEventHotKey(self.peekHotKey);if(self.grayscaleHotKey)UnregisterEventHotKey(self.grayscaleHotKey);[self.grayOffTimer invalidate];[self.pauseAllTimer invalidate];[self.eventTimer invalidate];[self.pipelineRecoveryTimer invalidate];[self.menuDismissal end];[self.browserBridge stop];[self.warmth cancelTransition];[self endPauseNow:nil];self.excludeNight=NO;[self reconcileExclusion];if(self.grayOverride||self.customWarmth){self.grayOverride=0;self.customWarmth=NO;self.excludeGray=NO;self.excludeWarmth=NO;self.animateAppearance=NO;[self.warmth cancelTransition];[self applyMode:self.selectedMode];}[self.warmth restore];}
 - (void)quit:(id)sender {[NSApp terminate:nil];}
 @end
 int main(int argc,const char *argv[]){@autoreleasepool{
  if(argc>1&&strcmp(argv[1],"--diagnostics")==0){FilterEngine *e=[FilterEngine new];puts(e.diagnostics.UTF8String);return e.error?1:0;}
- NSApplication *app=NSApplication.sharedApplication;AppDelegate *delegate=[AppDelegate new];app.delegate=delegate;[app setActivationPolicy:NSApplicationActivationPolicyAccessory];[app run];
+ NSApplication *app=NSApplication.sharedApplication;AppDelegate *delegate=[AppDelegate new];app.delegate=delegate;
+ // --regular keeps a Dock icon so UI automation can reach a test build; production is a menu-bar-only app.
+ if(![NSProcessInfo.processInfo.arguments containsObject:@"--regular"])[app setActivationPolicy:NSApplicationActivationPolicyAccessory];[app run];
 }return 0;}

@@ -35,7 +35,7 @@ static CFStringRef matrixKey;
  int result=setAdjustments((__bridge CFDictionaryRef)dict);
  self.lastRequest=result;
  if(result==0)self.lastMatrix=[NSData dataWithBytes:&matrix length:sizeof(matrix)];
- if(result!=0){self.error=[NSString stringWithFormat:@"Display matrix request failed (%d).",result];return NO;}
+ if(result!=0){self.error=[NSString stringWithFormat:@"The display did not accept the change (%d).",result];return NO;}
  return YES;
 }
 - (BOOL)transitioning {return self.transitionTimer!=nil;}
@@ -74,6 +74,6 @@ static CFStringRef matrixKey;
 }
 - (NSString *)diagnostics {
  double gains[3];WarmthGains(self.strength,gains);
- return [NSString stringWithFormat:@"Extra Warmth matrix: %@; last request result=%d\nStrength %.2f / 3.00; output gains R=%.3f G=%.3f B=%.3f\nDisplay appearance requires visual verification; request success is not an optical measurement.\n%@",self.active?@"active":@"native",self.lastRequest,self.strength,gains[0],gains[1],gains[2],self.error?:@""];
+ return [NSString stringWithFormat:@"Extra Warmth: %@; last request result=%d\nStrength %.2f / 3.00; output gains R=%.3f G=%.3f B=%.3f\nDisplay appearance requires visual verification; request success is not an optical measurement.\n%@",self.active?@"applied by Less Pull":@"not applied",self.lastRequest,self.strength,gains[0],gains[1],gains[2],self.error?:@""];
 }
 @end

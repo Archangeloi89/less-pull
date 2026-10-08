@@ -72,6 +72,119 @@ int main(){@autoreleasepool{
   [t resume:nil];check(fw.value==0&&fw.gray==(base!=100),"resume follows warmth only");
   [d setDouble:1.5 forKey:@"warmth"];
  }
+
+ // Pause Less Pull: the plain display with the normal fade, rules ignored, saved
+ // settings kept, persisted for relaunch, expiry clears it.
+ {
+  TestApp *t=[TestApp new];FakeFilter *fe=[FakeFilter new];fe.on=YES;fe.state=(NSBlueStatus){.mode=0,.available=YES};FakeWarmth *fw=[FakeWarmth new];t.engine=fe;t.warmth=fw;t.exclusion=[ExclusionPolicy new];t.policy=[SwitchingPolicy new];t.policy.known=YES;t.policy.nightShiftOn=YES;t.policy.automatic=YES;t.automatic=YES;t.selectedMode=100;[d setInteger:100 forKey:@"nightMode"];[d setDouble:1.5 forKey:@"warmth"];[d removeObjectForKey:@"lessPullPause"];
+  t.grayOverride=1;t.customWarmth=YES;t.appWarmth=80;t.animateAppearance=YES;[t sync];check(fw.gray&&fabs(fw.value-2.4)<1e-9,"exception active before pause");
+  NSInteger nightWrites=fe.nightWrites;[t pauseLessPullForMinutes:15];check(!fw.gray&&fw.value==0&&fw.lastDuration==0.5&&!fw.lastReduced,"pause shows the plain display with the normal fade");
+  check([d doubleForKey:@"warmth"]==1.5&&[d integerForKey:@"nightMode"]==100,"pause keeps saved settings");check(fe.nightWrites==nightWrites&&fe.on,"pause leaves Night Shift alone");
+  t.grayOverride=1;t.customWarmth=YES;t.appWarmth=80;t.animateAppearance=YES;[t sync];check(!fw.gray&&fw.value==0&&t.grayOverride==0&&!t.customWarmth,"rules are ignored while paused");
+  double until=[[d dictionaryForKey:@"lessPullPause"][@"until"] doubleValue];check(until>NSDate.date.timeIntervalSince1970+14*60&&until<NSDate.date.timeIntervalSince1970+16*60,"timed pause persisted with its expiry");
+  TestApp *again=[TestApp new];again.engine=fe;again.warmth=fw;again.exclusion=[ExclusionPolicy new];again.policy=t.policy;again.automatic=YES;again.selectedMode=100;[again restoreLessPullPause];check(again.pausedUntil!=nil&&fabs(again.pausedUntil.timeIntervalSince1970-until)<1,"pause survives relaunch");
+  [t resumeLessPull:nil];check(fw.gray&&fw.value==1.5&&fw.lastDuration==0.5,"resume restores the saved appearance with the normal fade");check([d dictionaryForKey:@"lessPullPause"]==nil,"resume clears the saved pause");
+  [t pauseLessPullForMinutes:0];check([t.pausedUntil isEqualToDate:NSDate.distantFuture]&&[[d dictionaryForKey:@"lessPullPause"][@"until"] doubleValue]==0,"until-I-resume pause persisted as open-ended");
+  [again restoreLessPullPause];check([again.pausedUntil isEqualToDate:NSDate.distantFuture],"open-ended pause survives relaunch");
+  [d setObject:@{@"until":@(NSDate.date.timeIntervalSince1970-5)} forKey:@"lessPullPause"];[again restoreLessPullPause];check(again.pausedUntil==nil&&[d dictionaryForKey:@"lessPullPause"]==nil,"an expired pause is cleared at launch");
+  t.pausedUntil=[NSDate dateWithTimeIntervalSinceNow:-1];[t sync];check(t.pausedUntil==nil&&fw.gray&&fw.value==1.5,"expiry resumes on the next sync");
+  [d removeObjectForKey:@"lessPullPause"];
+ }
+
+ // Peek in color: held shortcut shows the plain display, release restores; no
+ // saved setting or exception changes. Shortcut rules: a real modifier is required.
+ {
+  TestApp *t=[TestApp new];FakeFilter *fe=[FakeFilter new];fe.on=YES;fe.state=(NSBlueStatus){.mode=0,.available=YES};FakeWarmth *fw=[FakeWarmth new];t.engine=fe;t.warmth=fw;t.exclusion=[ExclusionPolicy new];t.policy=[SwitchingPolicy new];t.policy.known=YES;t.policy.nightShiftOn=YES;t.policy.automatic=YES;t.automatic=YES;t.selectedMode=100;[d setInteger:100 forKey:@"nightMode"];[d setDouble:1.5 forKey:@"warmth"];t.exclusionRules=[NSMutableDictionary new];
+  t.grayOverride=1;t.customWarmth=YES;t.appWarmth=80;t.animateAppearance=YES;[t sync];NSDictionary *before=[d dictionaryRepresentation];
+  t.peeking=YES;check(!fw.gray&&fw.value==0&&fw.lastDuration==0.5,"peek shows the plain display with the normal fade");check(t.grayOverride==1&&t.customWarmth,"peek keeps the exception state intact");
+  t.peeking=NO;check(fw.gray&&fabs(fw.value-2.4)<1e-9&&fw.lastDuration==0.5,"release returns to the exception appearance");
+  t.grayOverride=0;t.customWarmth=NO;t.animateAppearance=YES;[t sync];t.peeking=YES;t.peeking=NO;check(fw.gray&&fw.value==1.5,"release returns to the global appearance");
+  check([[d dictionaryRepresentation] isEqualToDictionary:before]&&t.exclusionRules.count==0,"peek changes no saved setting and creates no exception");
+  check([PeekShortcut isValidKeyCode:8 modifiers:NSEventModifierFlagCommand|NSEventModifierFlagOption],"command-option shortcut valid");
+  check(![PeekShortcut isValidKeyCode:8 modifiers:0]&&![PeekShortcut isValidKeyCode:8 modifiers:NSEventModifierFlagShift],"bare key or shift-only rejected");
+  check(![PeekShortcut isValidKeyCode:53 modifiers:NSEventModifierFlagCommand],"escape rejected");
+  check([PeekShortcut carbonModifiers:NSEventModifierFlagCommand|NSEventModifierFlagControl|NSEventModifierFlagOption|NSEventModifierFlagShift]==(cmdKey|controlKey|optionKey|shiftKey),"carbon modifier mapping");
+  check([[PeekShortcut labelForKeyCode:49 modifiers:NSEventModifierFlagControl|NSEventModifierFlagOption] isEqual:@"⌃⌥Space"],"shortcut label order and key name");
+ }
+
+ // Update check: version comparison and release parsing only; no network in tests.
+ check([UpdateCheck compareVersion:@"1.5.0" to:@"1.4.4"]==NSOrderedDescending&&[UpdateCheck compareVersion:@"1.4.4" to:@"1.4.4"]==NSOrderedSame&&[UpdateCheck compareVersion:@"1.4.10" to:@"1.4.9"]==NSOrderedDescending&&[UpdateCheck compareVersion:@"1.5" to:@"1.5.0"]==NSOrderedSame&&[UpdateCheck compareVersion:@"2" to:@"1.9.9"]==NSOrderedDescending,"numeric version comparison");
+ check([[UpdateCheck versionFromTag:@"v1.5.0"] isEqual:@"1.5.0"]&&[[UpdateCheck versionFromTag:@" 1.5.1 "] isEqual:@"1.5.1"]&&[UpdateCheck versionFromTag:@""]==nil&&[UpdateCheck versionFromTag:(id)@[]]==nil,"tag to version");
+ NSDictionary *release=@{@"tag_name":@"v1.5.0",@"html_url":@"https://github.com/Archangeloi89/less-pull/releases/tag/v1.5.0",@"body":@"Notes",@"draft":@NO,@"prerelease":@NO};
+ NSDictionary *update=[UpdateCheck updateFromRelease:release currentVersion:@"1.4.4"];check([update[@"version"] isEqual:@"1.5.0"]&&[update[@"url"] isEqual:release[@"html_url"]]&&[update[@"notes"] isEqual:@"Notes"],"newer release is offered");
+ check([UpdateCheck updateFromRelease:release currentVersion:@"1.5.0"]==nil&&[UpdateCheck updateFromRelease:release currentVersion:@"1.6.0"]==nil,"same or newer app gets no update");
+ NSMutableDictionary *pre=[release mutableCopy];pre[@"prerelease"]=@YES;check([UpdateCheck updateFromRelease:pre currentVersion:@"1.4.4"]==nil,"prereleases are ignored");
+ NSMutableDictionary *odd=[release mutableCopy];odd[@"html_url"]=@"http://evil.example/";odd[@"body"]=NSNull.null;update=[UpdateCheck updateFromRelease:odd currentVersion:@"1.4.4"];check([update[@"url"] isEqual:@"https://github.com/Archangeloi89/less-pull/releases"]&&[update[@"notes"] isEqual:@""],"non-GitHub link and missing notes fall back safely");
+ check([UpdateCheck updateFromRelease:@"garbage" currentVersion:@"1.4.4"]==nil&&[UpdateCheck updateFromRelease:@{} currentVersion:@"1.4.4"]==nil,"malformed release rejected");
+
+ // Build-numbered tags, compatibility metadata and the release asset link.
+ check([UpdateCheck buildFromTag:@"v1.4.4-17"]==17&&[UpdateCheck buildFromTag:@"v1.4.4"]==0&&[UpdateCheck buildFromTag:@"v1.4.4-"]==0&&[UpdateCheck buildFromTag:@"v1.4.4-1x"]==0&&[UpdateCheck buildFromTag:(id)@3]==0,"build number from tag");
+ NSDictionary *tagged=@{@"tag_name":@"v1.4.4-17",@"html_url":@"https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-17",@"body":@"B",@"assets":@[@{@"name":@"lesspull-update.json",@"browser_download_url":@"https://github.com/Archangeloi89/less-pull/releases/download/v1.4.4-17/lesspull-update.json"},@{@"name":@"Less.Pull.zip",@"browser_download_url":@"https://github.com/x"}]};
+ update=[UpdateCheck updateFromRelease:tagged currentVersion:@"1.4.4" currentBuild:16];check([update[@"version"] isEqual:@"1.4.4"]&&[update[@"build"] integerValue]==17&&[update[@"metadata"] hasSuffix:@"lesspull-update.json"],"same version with a higher build is an update, with its metadata link");
+ check([UpdateCheck updateFromRelease:tagged currentVersion:@"1.4.4" currentBuild:17]==nil&&[UpdateCheck updateFromRelease:tagged currentVersion:@"1.4.4" currentBuild:20]==nil,"same or older build is not an update");
+ check([UpdateCheck updateFromRelease:release currentVersion:@"1.4.4" currentBuild:16][@"metadata"]==nil,"untagged release has no metadata link and still compares by version");
+ NSOperatingSystemVersion os={27,0,0};
+ check([UpdateCheck metadata:@{@"minimumSystemVersion":@"26.0"} allowsSystem:os]&&[UpdateCheck metadata:@{@"minimumSystemVersion":@"27.0"} allowsSystem:os]&&![UpdateCheck metadata:@{@"minimumSystemVersion":@"27.1"} allowsSystem:os],"minimum macOS respected");
+ check([UpdateCheck metadata:@{@"maximumSystemVersion":@"27"} allowsSystem:os]&&[UpdateCheck metadata:@{@"maximumSystemVersion":@"27.0"} allowsSystem:os]&&![UpdateCheck metadata:@{@"maximumSystemVersion":@"26"} allowsSystem:os]&&![UpdateCheck metadata:@{@"minimumSystemVersion":@"26",@"maximumSystemVersion":@"26.4"} allowsSystem:os],"maximum macOS respected, major or major.minor");
+ check([UpdateCheck metadata:nil allowsSystem:os]&&[UpdateCheck metadata:@"garbage" allowsSystem:os]&&[UpdateCheck metadata:@{} allowsSystem:os]&&[UpdateCheck metadata:@{@"minimumSystemVersion":@3} allowsSystem:os],"missing or malformed metadata does not block");
+
+ // Preferences move from the old bundle identifier once, without overwriting newer keys.
+ {
+  NSString *oldDomain=@"local.nightshiftfilters.migration-test";NSUserDefaults *fresh=[[NSUserDefaults alloc]initWithSuiteName:@"com.jiriarion.lesspull.migration-test"];[fresh removePersistentDomainForName:@"com.jiriarion.lesspull.migration-test"];
+  [fresh setPersistentDomain:@{@"nightMode":@100,@"warmth":@1.5,@"appExclusions":@{@"com.example":@{@"name":@"Example"}}} forName:oldDomain];
+  check([PreferenceMigration migrateFromDomain:oldDomain into:fresh]&&[fresh integerForKey:@"nightMode"]==100&&[fresh doubleForKey:@"warmth"]==1.5&&[fresh dictionaryForKey:@"appExclusions"][@"com.example"]!=nil&&[fresh boolForKey:@"migratedPreferences"],"old settings are copied once");
+  [fresh setInteger:101 forKey:@"nightMode"];check(![PreferenceMigration migrateFromDomain:oldDomain into:fresh]&&[fresh integerForKey:@"nightMode"]==101,"a second launch does not migrate again");
+  NSUserDefaults *empty=[[NSUserDefaults alloc]initWithSuiteName:@"com.jiriarion.lesspull.migration-empty"];[empty removePersistentDomainForName:@"com.jiriarion.lesspull.migration-empty"];check(![PreferenceMigration migrateFromDomain:@"local.nightshiftfilters.nothing-here" into:empty]&&![empty boolForKey:@"migratedPreferences"],"no old settings means a plain first launch");
+  [fresh removePersistentDomainForName:oldDomain];[fresh removePersistentDomainForName:@"com.jiriarion.lesspull.migration-test"];[empty removePersistentDomainForName:@"com.jiriarion.lesspull.migration-empty"];
+ }
+
+ // Grayscale off for a while, Peek effects, and shortcut suggestions.
+ {
+  TestApp *t=[TestApp new];FakeFilter *fe=[FakeFilter new];fe.on=YES;fe.state=(NSBlueStatus){.mode=0,.available=YES};FakeWarmth *fw=[FakeWarmth new];t.engine=fe;t.warmth=fw;t.exclusion=[ExclusionPolicy new];t.policy=[SwitchingPolicy new];t.policy.known=YES;t.policy.nightShiftOn=YES;t.policy.automatic=YES;t.automatic=YES;t.selectedMode=100;[d setInteger:100 forKey:@"nightMode"];[d setDouble:1.5 forKey:@"warmth"];t.exclusionRules=[NSMutableDictionary new];[d removeObjectForKey:@"grayscaleOff"];[d removeObjectForKey:@"peekEffects"];
+  [t sync];check(fw.gray&&fw.value==1.5,"grayscale on before timed off");
+  [t grayscaleOffForMinutes:60];check(!fw.gray&&fw.value==1.5&&fw.lastDuration==0.5&&[d integerForKey:@"nightMode"]==100&&t.selectedMode==100,"grayscale off for an hour shows color, keeps warmth and the saved choice");
+  check([[d dictionaryForKey:@"grayscaleOff"][@"until"] doubleValue]>NSDate.date.timeIntervalSince1970+59*60,"timed grayscale off persisted");
+  t.grayOverride=1;t.animateAppearance=YES;[t sync];check(fw.gray,"an app exception for grayscale still wins during timed off");t.grayOverride=0;t.animateAppearance=YES;[t sync];
+  t.grayOffUntil=[NSDate dateWithTimeIntervalSinceNow:-1];[t sync];check(t.grayOffUntil==nil&&fw.gray&&[d dictionaryForKey:@"grayscaleOff"]==nil,"expiry brings grayscale back");
+  [t grayscaleOffForMinutes:0];check(!fw.gray&&[t.grayOffUntil isEqualToDate:NSDate.distantFuture],"off until Night Shift changes");[t sync];check(!fw.gray,"stays off while Night Shift is unchanged");
+  fe.on=NO;[t sync];check(t.grayOffUntil==nil&&fw.gray&&fw.value==0,"a Night Shift change ends it and the morning removes warmth as usual");fe.on=YES;[t sync];
+  TestApp *again=[TestApp new];again.engine=fe;again.warmth=fw;again.exclusion=[ExclusionPolicy new];again.policy=t.policy;[d setObject:@{@"until":@0} forKey:@"grayscaleOff"];[again restoreGrayscaleOff];check([again.grayOffUntil isEqualToDate:NSDate.distantFuture],"open-ended grayscale off survives relaunch");[d removeObjectForKey:@"grayscaleOff"];
+  [t grayscaleBackOn:nil];check(fw.gray&&t.grayOffUntil==nil,"back on now");
+  // Peek effects: default grayscale+warmth; Night Shift when chosen.
+  t.peeking=YES;check(!fw.gray&&fw.value==0&&fe.on,"peek turns off grayscale and warmth, leaves Night Shift");t.peeking=NO;
+  [d setObject:@{@"grayscale":@NO,@"warmth":@YES,@"nightShift":@YES} forKey:@"peekEffects"];t.peeking=YES;[t sync];check(fw.gray&&fw.value==0&&!fe.on,"peek with Night Shift chosen turns it off and keeps grayscale when unticked");
+  t.peeking=NO;t.nightOverride=0;t.excludeNight=NO;[t sync];[t sync];check(fe.on&&fw.gray&&fw.value==1.5,"release restores Night Shift and the appearance");[d removeObjectForKey:@"peekEffects"];
+  // Suggestions avoid macOS and Less Pull's other shortcut.
+  NSDictionary *first=[PeekShortcut suggestionAvoiding:[NSSet set] preferring:@[@{@"keyCode":@8,@"modifiers":@(NSEventModifierFlagControl|NSEventModifierFlagOption)},@{@"keyCode":@9,@"modifiers":@(NSEventModifierFlagControl|NSEventModifierFlagOption)}]];check([first[@"keyCode"] integerValue]==8,"first free candidate is suggested");
+  NSDictionary *second=[PeekShortcut suggestionAvoiding:[NSSet setWithObject:[PeekShortcut keyForKeyCode:8 modifiers:NSEventModifierFlagControl|NSEventModifierFlagOption]] preferring:@[@{@"keyCode":@8,@"modifiers":@(NSEventModifierFlagControl|NSEventModifierFlagOption)},@{@"keyCode":@9,@"modifiers":@(NSEventModifierFlagControl|NSEventModifierFlagOption)}]];check([second[@"keyCode"] integerValue]==9,"a taken shortcut is skipped");
+  check([PeekShortcut suggestionAvoiding:[NSSet set] preferring:@[@{@"keyCode":@8,@"modifiers":@0}]]==nil,"candidates without a real modifier are never suggested");
+  check([[PeekShortcut systemShortcutKeys] isKindOfClass:NSSet.class],"system shortcut list reads without error");
+ }
+
+ // Website exception from the menu: the bridge's active tab, whole domain or exact page.
+ {
+  TestApp *t=[TestApp new];FakeFilter *fe=[FakeFilter new];fe.on=YES;fe.state=(NSBlueStatus){.mode=0,.available=YES};FakeWarmth *fw=[FakeWarmth new];t.engine=fe;t.warmth=fw;t.exclusion=[ExclusionPolicy new];t.policy=[SwitchingPolicy new];t.policy.known=YES;t.policy.nightShiftOn=YES;t.automatic=YES;t.selectedMode=100;t.exclusionRules=[NSMutableDictionary new];
+  BrowserBridge *bridge=[BrowserBridge new];bridge.rules=[NSMutableDictionary new];t.browserBridge=bridge;[bridge handle:@{@"type":@"context",@"browser":@"com.brave.Browser",@"session":@"m",@"site":@"example.com",@"url":@"https://example.com/reading?x=1",@"focused":@YES}];
+  NSDictionary *tab=[bridge activeContextForBrowser:@"com.brave.Browser"];check([tab[@"site"] isEqual:@"example.com"]&&[bridge activeContextForBrowser:@"com.google.Chrome"]==nil,"active tab known per browser");
+  check([[t websiteKeyForTab:tab] isEqual:@"example.com"],"whole domain by default");
+  NSMenuItem *off=[NSMenuItem new];off.tag=2;t.lastExternalApp=nil;
+  [t storeWebsiteRule:@{@"grayMode":@2} forTab:tab];check([bridge.rules[@"example.com"][@"grayMode"] integerValue]==2&&![bridge.rules[@"example.com"][@"customWarmth"] boolValue],"domain rule saved through the bridge");
+  t.websiteScopeExact=YES;check([[t websiteKeyForTab:tab] isEqual:@"https://example.com/reading?x=1"],"exact page key");
+  [t storeWebsiteRule:@{@"customWarmth":@YES,@"warmth":@40} forTab:tab];check([bridge.rules[@"https://example.com/reading?x=1"][@"warmth"] doubleValue]==40&&[bridge.rules[@"https://example.com/reading?x=1"][@"grayMode"] integerValue]==0,"page rule saved with its own warmth only");
+  NSDictionary *inherited=[bridge inheritedForSite:@"https://example.com/reading?x=1" browser:@"com.brave.Browser"];check([inherited[@"grayMode"] integerValue]==2,"page inherits the domain's grayscale for the menu labels");
+  t.websiteScopeExact=NO;bridge.rules=[NSMutableDictionary new];[bridge handle:@{@"type":@"clear",@"browser":@"com.brave.Browser",@"session":@"m"}];(void)off;
+ }
+
+ // Use this exception: off keeps the settings but does not apply them; a change away from default switches it on.
+ {
+  NSMutableDictionary *r=[@{@"name":@"X",@"grayMode":@0,@"nightMode":@0,@"customWarmth":@NO,@"warmth":@0,@"enabled":@NO} mutableCopy];
+  NSMutableDictionary *changed=[r mutableCopy];changed[@"grayMode"]=@2;RuleAfterChange(r,changed);check([changed[@"enabled"] boolValue],"a change away from default switches the exception on");
+  NSMutableDictionary *off=[changed mutableCopy];off[@"enabled"]=@NO;NSMutableDictionary *tweak=[off mutableCopy];tweak[@"warmth"]=@10;RuleAfterChange(off,tweak);check(![tweak[@"enabled"] boolValue],"adjusting a rule that was deliberately switched off leaves it off");
+  NSMutableDictionary *back=[changed mutableCopy];back[@"grayMode"]=@0;RuleAfterChange(changed,back);check([back[@"enabled"] boolValue],"going back to default does not switch it off");
+  check(RuleEnabled(@{@"grayMode":@2})&&!RuleEnabled(@{@"grayMode":@2,@"enabled":@NO})&&!RuleEnabled(nil),"rules without the flag are on");
+  TestApp *t=[TestApp new];FakeFilter *fe=[FakeFilter new];fe.on=YES;fe.state=(NSBlueStatus){.mode=0,.available=YES};FakeWarmth *fw=[FakeWarmth new];t.engine=fe;t.warmth=fw;t.exclusion=[ExclusionPolicy new];t.policy=[SwitchingPolicy new];t.policy.known=YES;t.policy.nightShiftOn=YES;t.automatic=YES;t.selectedMode=100;t.exclusionRules=[@{@"com.example":@{@"name":@"Ex",@"grayMode":@2,@"nightMode":@0,@"customWarmth":@NO,@"warmth":@0,@"enabled":@NO}} mutableCopy];t.browserBridge=[BrowserBridge new];t.browserBridge.rules=[NSMutableDictionary new];
+  check(!RuleEnabled(t.exclusionRules[@"com.example"])&&[t.exclusionRules[@"com.example"][@"grayMode"] integerValue]==2,"disabled app rule keeps its settings");
+ }
  NSUInteger combinations=0;
  for(int follow=0;follow<2;follow++)for(int globalNight=0;globalNight<2;globalNight++)for(int base=100;base<=101;base++)for(int grayRule=0;grayRule<3;grayRule++)for(int nightRule=0;nightRule<3;nightRule++)for(int custom=0;custom<2;custom++)for(NSNumber *percent in @[@0,@25,@77,@100]){
   TestApp *t=[TestApp new];FakeFilter *fe=[FakeFilter new];fe.on=globalNight;fe.state=(NSBlueStatus){.mode=0,.available=YES};FakeWarmth *fw=[FakeWarmth new];t.engine=fe;t.warmth=fw;t.exclusion=[ExclusionPolicy new];t.policy=[SwitchingPolicy new];t.policy.known=YES;t.policy.nightShiftOn=globalNight;t.policy.automatic=follow;t.automatic=follow;t.policy.overrideMode=-1;t.selectedMode=base;[d setInteger:base forKey:@"nightMode"];t.grayOverride=grayRule;t.nightOverride=nightRule;t.excludeNight=nightRule!=0;t.customWarmth=custom;t.appWarmth=percent.doubleValue;t.animateAppearance=YES;
@@ -81,5 +194,5 @@ int main(){@autoreleasepool{
  }
  printf("PASS: %lu combined following/global-state/base/grayscale/Night-Shift/warmth cases and restoration.\n",(unsigned long)combinations);
  check(e.nativeWrites==0,"no native filter toggles / HUD requests");
- puts("PASS: inheritance, independent gray/warmth, Night Shift on/off, own versus genuine transitions, manual off, timed-off precedence/expiry, schedule cutoff, recovery, rapid rule switches.");
+ puts("PASS: Use this exception on/off with auto-enable; Grayscale off for a while, Peek effects, shortcut suggestions; preference migration; update check version/build/compatibility parsing; Peek in color (plain display while held, release restores, nothing saved, shortcut rules); Pause Less Pull (plain display, rules ignored, settings kept, relaunch, expiry); inheritance, independent gray/warmth, Night Shift on/off, own versus genuine transitions, manual off, timed-off precedence/expiry, schedule cutoff, recovery, rapid rule switches.");
 }}

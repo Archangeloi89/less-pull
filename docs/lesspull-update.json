@@ -1,0 +1,7 @@
+{
+  "build": 16,
+  "version": "1.4.4",
+  "minimumSystemVersion": "13.0",
+  "maximumSystemVersion": "27",
+  "note": "Attach this file to each GitHub release (tag v1.4.4-<build>). The app only offers builds whose macOS range includes the running system."
+}
