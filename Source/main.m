@@ -269,8 +269,64 @@ static NSString *const LessPullOldBundleIdentifier=@"local.nightshiftfilters.app
 // The warm bloom drawn behind the glow text: a radial gradient from a soft amber center to nothing.
 @interface GlowView : NSView
 @end
+// A small looping drawing for the welcome: a menu bar that is full, with icons tucked behind a »,
+// and the circle being dragged toward the clock with ⌘ held. Still under Reduce Motion.
+@interface WelcomeHintView : NSView
+@property NSTimer *timer;
+@property NSTimeInterval start;
+@end
+@implementation WelcomeHintView
+- (NSSize)intrinsicContentSize {return NSMakeSize(420,52);}
+- (void)viewDidMoveToWindow {[self.timer invalidate];self.timer=nil;if(!self.window||NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceMotion)return;self.start=NSProcessInfo.processInfo.systemUptime;__weak WelcomeHintView *weak=self;self.timer=[NSTimer timerWithTimeInterval:1.0/30 repeats:YES block:^(NSTimer *t){[weak setNeedsDisplay:YES];}];[NSRunLoop.mainRunLoop addTimer:self.timer forMode:NSRunLoopCommonModes];}
+- (void)drawRect:(NSRect)dirty {
+ NSRect b=self.bounds;NSRect bar=NSMakeRect(0,b.size.height-30,b.size.width,26);[[NSColor.labelColor colorWithAlphaComponent:.08] setFill];[[NSBezierPath bezierPathWithRoundedRect:bar xRadius:7 yRadius:7] fill];
+ double loop=6.0,t=self.timer?fmod(NSProcessInfo.processInfo.systemUptime-self.start,loop)/loop:0.55;  // 0…1 through one loop
+ double k=t<.15?0:t<.75?(t-.15)/.6:1;k=k*k*(3-2*k);
+ CGFloat y=NSMidY(bar),right=NSMaxX(bar)-10;NSColor *ink=NSColor.labelColor;
+ NSDictionary *clock=@{NSFontAttributeName:[NSFont systemFontOfSize:11 weight:NSFontWeightMedium],NSForegroundColorAttributeName:ink};NSString *time=@"Thu 9:41";NSSize ts=[time sizeWithAttributes:clock];[time drawAtPoint:NSMakePoint(right-ts.width,y-ts.height/2) withAttributes:clock];
+ CGFloat x=right-ts.width-14;for(int i=0;i<3;i++){NSRect d=NSMakeRect(x-12,y-6,12,12);[[ink colorWithAlphaComponent:.6] setFill];[[NSBezierPath bezierPathWithRoundedRect:d xRadius:3 yRadius:3] fill];x-=20;}
+ CGFloat chevronX=x-6;NSDictionary *chev=@{NSFontAttributeName:[NSFont systemFontOfSize:13 weight:NSFontWeightSemibold],NSForegroundColorAttributeName:[ink colorWithAlphaComponent:.55]};[@"»" drawAtPoint:NSMakePoint(chevronX-8,y-9) withAttributes:chev];
+ CGFloat hiddenStart=NSMinX(bar)+12,circleFrom=hiddenStart+8,circleTo=x-30;
+ for(int i=0;i<4;i++){NSRect d=NSMakeRect(hiddenStart+28+i*20,y-6,12,12);[[ink colorWithAlphaComponent:.18] setFill];[[NSBezierPath bezierPathWithRoundedRect:d xRadius:3 yRadius:3] fill];}  // the ones that do not fit, faded
+ CGFloat cx=circleFrom+(circleTo-circleFrom)*k;NSRect c=NSMakeRect(cx-7,y-7,14,14);NSBezierPath *o=[NSBezierPath bezierPathWithOvalInRect:c];[NSGraphicsContext saveGraphicsState];NSRect half=c;half.size.width/=2;[[NSBezierPath bezierPathWithRect:half] addClip];[ink setFill];[o fill];[NSGraphicsContext restoreGraphicsState];[ink setStroke];o.lineWidth=1.3;[o stroke];
+ // the pointer, with ⌘ held, riding along
+ NSBezierPath *arrow=[NSBezierPath new];NSPoint p=NSMakePoint(cx+4,y-5);[arrow moveToPoint:p];[arrow lineToPoint:NSMakePoint(p.x,p.y-13)];[arrow lineToPoint:NSMakePoint(p.x+3.5,p.y-10)];[arrow lineToPoint:NSMakePoint(p.x+6,p.y-15)];[arrow lineToPoint:NSMakePoint(p.x+8,p.y-14)];[arrow lineToPoint:NSMakePoint(p.x+5.5,p.y-9)];[arrow lineToPoint:NSMakePoint(p.x+10,p.y-9)];[arrow closePath];[NSColor.windowBackgroundColor setFill];[arrow fill];[ink setStroke];arrow.lineWidth=1;[arrow stroke];
+ NSDictionary *key=@{NSFontAttributeName:[NSFont systemFontOfSize:10 weight:NSFontWeightMedium],NSForegroundColorAttributeName:ink};NSRect cap=NSMakeRect(cx+14,y-24,22,16);[[ink colorWithAlphaComponent:.12] setFill];[[NSBezierPath bezierPathWithRoundedRect:cap xRadius:4 yRadius:4] fill];[@"⌘" drawAtPoint:NSMakePoint(cap.origin.x+6,cap.origin.y+1) withAttributes:key];
+}
+@end
 @implementation GlowView
 - (void)drawRect:(NSRect)dirty {NSGradient *g=[[NSGradient alloc]initWithColorsAndLocations:[NSColor colorWithSRGBRed:1 green:.78 blue:.52 alpha:.42],0.0,[NSColor colorWithSRGBRed:1 green:.72 blue:.45 alpha:.18],0.45,[NSColor colorWithSRGBRed:1 green:.7 blue:.4 alpha:0],1.0,nil];[g drawInRect:self.bounds relativeCenterPosition:NSZeroPoint];}
+@end
+// For the tour's exceptions page: a browser window whose site name travels along an arrow up into the
+// menu-bar circle, where "Exception for news.example" appears. That is all the extension does. Still under Reduce Motion.
+@interface ExtensionHintView : NSView
+@property NSTimer *timer;
+@property NSTimeInterval start;
+@end
+@implementation ExtensionHintView
+- (NSSize)intrinsicContentSize {return NSMakeSize(420,74);}
+- (void)viewDidMoveToWindow {[self.timer invalidate];self.timer=nil;if(!self.window||NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceMotion)return;self.start=NSProcessInfo.processInfo.systemUptime;__weak ExtensionHintView *weak=self;self.timer=[NSTimer timerWithTimeInterval:1.0/30 repeats:YES block:^(NSTimer *t){[weak setNeedsDisplay:YES];}];[NSRunLoop.mainRunLoop addTimer:self.timer forMode:NSRunLoopCommonModes];}
+- (void)drawRect:(NSRect)dirty {
+ NSRect b=self.bounds;NSColor *ink=NSColor.labelColor;double loop=5.0,t=self.timer?fmod(NSProcessInfo.processInfo.systemUptime-self.start,loop)/loop:0.7;
+ // the browser window, bottom left
+ NSRect win=NSMakeRect(0,0,200,50);[[ink colorWithAlphaComponent:.08] setFill];[[NSBezierPath bezierPathWithRoundedRect:win xRadius:7 yRadius:7] fill];
+ for(int i=0;i<3;i++){[[ink colorWithAlphaComponent:.35] setFill];[[NSBezierPath bezierPathWithOvalInRect:NSMakeRect(8+i*11,38,6,6)] fill];}
+ NSRect field=NSMakeRect(44,35,146,12);[[ink colorWithAlphaComponent:.12] setFill];[[NSBezierPath bezierPathWithRoundedRect:field xRadius:4 yRadius:4] fill];
+ NSDictionary *small=@{NSFontAttributeName:[NSFont systemFontOfSize:9 weight:NSFontWeightMedium],NSForegroundColorAttributeName:[ink colorWithAlphaComponent:.8]};[@"news.example" drawAtPoint:NSMakePoint(50,36) withAttributes:small];
+ for(int i=0;i<3;i++){[[ink colorWithAlphaComponent:.14] setFill];[[NSBezierPath bezierPathWithRoundedRect:NSMakeRect(10,24-i*8,160-i*30,4) xRadius:2 yRadius:2] fill];}
+ // the menu bar, top right, with the circle and the menu line that appears
+ NSRect bar=NSMakeRect(220,b.size.height-24,200,22);[[ink colorWithAlphaComponent:.08] setFill];[[NSBezierPath bezierPathWithRoundedRect:bar xRadius:6 yRadius:6] fill];
+ NSPoint cc=NSMakePoint(NSMaxX(bar)-60,NSMidY(bar));NSRect c=NSMakeRect(cc.x-7,cc.y-7,14,14);NSBezierPath *o=[NSBezierPath bezierPathWithOvalInRect:c];[NSGraphicsContext saveGraphicsState];NSRect half=c;half.size.width/=2;[[NSBezierPath bezierPathWithRect:half] addClip];[ink setFill];[o fill];[NSGraphicsContext restoreGraphicsState];[ink setStroke];o.lineWidth=1.3;[o stroke];
+ for(int i=0;i<2;i++){[[ink colorWithAlphaComponent:.5] setFill];[[NSBezierPath bezierPathWithRoundedRect:NSMakeRect(NSMaxX(bar)-36+i*16,cc.y-5,10,10) xRadius:3 yRadius:3] fill];}
+ // the arrow from the address field to the circle, drawn over time, with the site name riding along it
+ NSPoint from=NSMakePoint(NSMaxX(field)+6,NSMidY(field)),to=NSMakePoint(cc.x-10,cc.y-2);double k=t<.1?0:t<.55?(t-.1)/.45:1;k=k*k*(3-2*k);
+ NSBezierPath *path=[NSBezierPath new];[path moveToPoint:from];NSPoint ctrl=NSMakePoint((from.x+to.x)/2,to.y+10);NSPoint end=NSMakePoint(from.x+(to.x-from.x)*k,from.y+(to.y-from.y)*k);
+ // a quadratic curve evaluated by hand so the drawn part grows
+ [path removeAllPoints];NSPoint prev=from;[path moveToPoint:from];for(int i=1;i<=30;i++){double u=(double)i/30*k;NSPoint q=NSMakePoint((1-u)*(1-u)*from.x+2*(1-u)*u*ctrl.x+u*u*to.x,(1-u)*(1-u)*from.y+2*(1-u)*u*ctrl.y+u*u*to.y);[path lineToPoint:q];prev=q;}
+ [[ink colorWithAlphaComponent:.6] setStroke];path.lineWidth=1.5;path.lineCapStyle=NSLineCapStyleRound;[path stroke];(void)end;
+ if(k>.02){NSRect chip=NSMakeRect(prev.x-30,prev.y+6,60,13);[[NSColor colorWithSRGBRed:.93 green:.55 blue:.28 alpha:.9] setFill];[[NSBezierPath bezierPathWithRoundedRect:chip xRadius:6 yRadius:6] fill];NSDictionary *chipText=@{NSFontAttributeName:[NSFont systemFontOfSize:8 weight:NSFontWeightSemibold],NSForegroundColorAttributeName:[NSColor colorWithWhite:.1 alpha:1]};[@"news.example" drawAtPoint:NSMakePoint(chip.origin.x+6,chip.origin.y+2) withAttributes:chipText];}
+ double m=t<.6?0:t<.75?(t-.6)/.15:t<.92?1:(1-(t-.92)/.08);if(m>0){NSRect menu=NSMakeRect(cc.x-96,NSMinY(bar)-24,150,18);[[ink colorWithAlphaComponent:.1*m] setFill];[[NSBezierPath bezierPathWithRoundedRect:menu xRadius:5 yRadius:5] fill];NSDictionary *mt=@{NSFontAttributeName:[NSFont systemFontOfSize:9 weight:NSFontWeightMedium],NSForegroundColorAttributeName:[ink colorWithAlphaComponent:m]};[@"Exception for news.example  ›" drawAtPoint:NSMakePoint(menu.origin.x+8,menu.origin.y+4) withAttributes:mt];}
+}
 @end
 @implementation AppDelegate
 - (PausePolicy *)nightGuard {
@@ -634,7 +690,7 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  [NSDistributedNotificationCenter.defaultCenter addObserver:self selector:@selector(pipelineChanged:) name:@"com.apple.screenIsUnlocked" object:nil];
  [NSWorkspace.sharedWorkspace.notificationCenter addObserver:self selector:@selector(frontmostChanged:) name:NSWorkspaceDidActivateApplicationNotification object:nil];
  [NSWorkspace.sharedWorkspace.notificationCenter addObserver:self selector:@selector(frontmostChanged:) name:NSWorkspaceDidTerminateApplicationNotification object:nil];
- [self restoreLessPullPause];[self scheduleLessPullPauseTimer];[self restoreGrayscaleOff];[self scheduleGrayscaleOffTimer];[self restoreSession];{NSArray *args=NSProcessInfo.processInfo.arguments;NSUInteger i=[args indexOfObject:@"--session"];if(i!=NSNotFound&&i+1<args.count)[self startSessionMinutes:[args[i+1] integerValue]];if([args containsObject:@"--session-soon"]){[self.session startMinutes:1 at:[NSDate dateWithTimeIntervalSinceNow:-54]];[self persistSession];[self scheduleSessionTimer];}if([args containsObject:@"--session-panel"])dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)(1.5*NSEC_PER_SEC)),dispatch_get_main_queue(),^{[self showSessionPanelMode:nil];});}[self registerPeekShortcut];[self scheduleUpdateChecks];[self noteFirstLaunch];[self updateForeground];[self restartTimer];[self schedulePauseTimer];[self sync];
+ [self restoreLessPullPause];[self scheduleLessPullPauseTimer];[self restoreGrayscaleOff];[self scheduleGrayscaleOffTimer];[self restoreSession];{NSArray *args=NSProcessInfo.processInfo.arguments;NSUInteger i=[args indexOfObject:@"--session"];if(i!=NSNotFound&&i+1<args.count)[self startSessionMinutes:[args[i+1] integerValue]];if([args containsObject:@"--session-soon"]){[self.session startMinutes:1 at:[NSDate dateWithTimeIntervalSinceNow:-54]];[self persistSession];[self scheduleSessionTimer];}if([args containsObject:@"--session-panel"])dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)(1.5*NSEC_PER_SEC)),dispatch_get_main_queue(),^{[self showSessionPanelMode:nil];});if([args containsObject:@"--session-start-panel"])dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)(1.5*NSEC_PER_SEC)),dispatch_get_main_queue(),^{[self showSessionPanelMode:@"start"];});}[self registerPeekShortcut];[self scheduleUpdateChecks];[self noteFirstLaunch];[self updateForeground];[self restartTimer];[self schedulePauseTimer];[self sync];
  if([NSProcessInfo.processInfo.arguments containsObject:@"--settings"])[self showSettings:nil];
  // First launch: Settings opens with a one-time welcome card above the real controls.
  self.welcomeWanted=firstLaunch||[NSProcessInfo.processInfo.arguments containsObject:@"--welcome"];if(self.welcomeWanted)[self showSettings:nil];
@@ -697,7 +753,8 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
   else if([e isEqual:@"callBack"]){[self glow:@"Welcome back." sound:@"session-back"];[self closeSessionPanel];}}
  if(events.count)[self persistSession];[self updateStatusIcon];if(self.sessionPanel.visible){if(events.count&&self.session.state!=SessionIdle)[self showSessionPanelMode:nil];else [self refreshSessionPanel];}if(self.session.state==SessionIdle)[self scheduleSessionTimer];
 }
-- (void)startSession:(NSMenuItem *)sender {[self startSessionMinutes:sender.tag];}
+- (void)startSession:(NSMenuItem *)sender {[self startSessionMinutes:sender.tag];[self closeSessionPanel];}
+- (void)openStartPanel:(id)sender {dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)(0.15*NSEC_PER_SEC)),dispatch_get_main_queue(),^{[self showSessionPanelMode:@"start"];});}
 - (void)startSessionMinutes:(NSInteger)minutes {[self.session startMinutes:minutes at:NSDate.date];self.session.remindEvery=[NSUserDefaults.standardUserDefaults integerForKey:@"sessionRemindEvery"];[self persistSession];[self scheduleSessionTimer];self.statusImageName=nil;[self updateStatusIcon];}
 - (void)endSession:(id)sender {[self.session stop];[self persistSession];[self scheduleSessionTimer];[self closeSessionPanel];self.statusImageName=nil;[self updateStatusIcon];}
 - (void)extendSession:(id)sender {[self.session extendMinutes:10];[self persistSession];self.statusImageName=nil;[self updateStatusIcon];[self refreshSessionPanel];}
@@ -730,7 +787,12 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  NSString *mins=[NSString stringWithFormat:@"%ld minute%@",(long)s.minutes,s.minutes==1?@"":@"s"];NSString *subtitle=s.state==SessionRunning?[NSString stringWithFormat:@"of %@",mins]:s.state==SessionOver?[NSString stringWithFormat:@"That was %@.",mins]:@"until the call back";
  NSTextField *sub=[NSTextField labelWithString:subtitle];sub.font=[NSFont systemFontOfSize:13];sub.textColor=NSColor.secondaryLabelColor;sub.alignment=NSTextAlignmentCenter;
  NSMutableArray *buttons=[NSMutableArray new];
- if([mode isEqual:@"callback"]){sub.stringValue=@"Call me back in";time.stringValue=@"Leaving now.";time.font=[NSFont systemFontOfSize:22 weight:NSFontWeightLight];time.textColor=NSColor.labelColor;
+ if([mode isEqual:@"start"]){time.stringValue=@"A session";time.font=[NSFont systemFontOfSize:22 weight:NSFontWeightLight];time.textColor=NSColor.labelColor;sub.stringValue=@"Focused work with a gentle end. How long?";
+  NSMutableArray *chips=[NSMutableArray new];for(NSNumber *m in [self sessionPresets:@"sessionPresets" fallback:@[@25,@45,@60,@90]]){NSButton *c=[self panelButton:[NSString stringWithFormat:@"%@ min",m] action:@selector(startSession:) prominent:NO];c.tag=m.integerValue;[chips addObject:c];}
+  NSStackView *chipRow=[self row:chips];chipRow.spacing=6;chipRow.distribution=NSStackViewDistributionFillEqually;[buttons addObject:chipRow];
+  NSButton *gear=[NSButton buttonWithImage:[NSImage imageWithSystemSymbolName:@"gearshape" accessibilityDescription:@"Session settings"] target:self action:@selector(showSessionsFromPanel:)];gear.bezelStyle=NSBezelStyleInline;gear.bordered=NO;[self helpView:gear text:@"Change the lengths, reminders, sound and glow under Settings → Sessions." label:@"Session settings"];
+  NSButton *later=[self panelButton:@"Not now" action:@selector(closeSessionPanel) prominent:NO];later.bezelStyle=NSBezelStyleInline;later.controlSize=NSControlSizeRegular;[buttons addObject:[self row:@[[self spacer],later,gear]]];}
+ else if([mode isEqual:@"callback"]){sub.stringValue=@"Call me back in";time.stringValue=@"Leaving now.";time.font=[NSFont systemFontOfSize:22 weight:NSFontWeightLight];time.textColor=NSColor.labelColor;
   NSMutableArray *chips=[NSMutableArray new];for(NSNumber *m in [self sessionPresets:@"callBackPresets" fallback:@[@5,@9,@13,@33]]){NSButton *c=[self panelButton:[NSString stringWithFormat:@"%@ min",m] action:@selector(sessionCallBack:) prominent:NO];c.tag=m.integerValue;[chips addObject:c];}
   NSStackView *chipRow=[self row:chips];chipRow.spacing=6;chipRow.distribution=NSStackViewDistributionFillEqually;[buttons addObject:chipRow];
   NSButton *none=[self panelButton:@"Not today" action:@selector(sessionCallBack:) prominent:NO];none.tag=0;none.bezelStyle=NSBezelStyleInline;none.controlSize=NSControlSizeRegular;[buttons addObject:[self row:@[[self spacer],none,[self spacer]]]];}
@@ -748,7 +810,7 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  return column;
 }
 - (void)showSessionPanelMode:(NSString *)mode {
- if(self.session.state==SessionIdle)return;NSView *content=[self sessionPanelContentMode:mode];
+ if(self.session.state==SessionIdle&&![mode isEqual:@"start"])return;NSView *content=[self sessionPanelContentMode:mode];
  if(!self.sessionPanel){NSPanel *p=[[NSPanel alloc]initWithContentRect:NSMakeRect(0,0,320,150) styleMask:NSWindowStyleMaskBorderless|NSWindowStyleMaskNonactivatingPanel backing:NSBackingStoreBuffered defer:NO];p.opaque=NO;p.backgroundColor=NSColor.clearColor;p.level=NSPopUpMenuWindowLevel;p.hasShadow=YES;p.releasedWhenClosed=NO;p.collectionBehavior=NSWindowCollectionBehaviorCanJoinAllSpaces|NSWindowCollectionBehaviorTransient;p.becomesKeyOnlyIfNeeded=YES;
   NSVisualEffectView *back=[NSVisualEffectView new];back.material=NSVisualEffectMaterialPopover;back.blendingMode=NSVisualEffectBlendingModeBehindWindow;back.state=NSVisualEffectStateActive;back.wantsLayer=YES;back.layer.cornerRadius=14;back.layer.masksToBounds=YES;p.contentView=back;self.sessionPanel=p;}
  NSView *back=self.sessionPanel.contentView;NSView *old=back.subviews.firstObject;content.translatesAutoresizingMaskIntoConstraints=NO;[back addSubview:content];
@@ -757,17 +819,21 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  NSRect anchor=self.item.button.window.frame;NSRect frame=NSMakeRect(NSMidX(anchor)-size.width/2,anchor.origin.y-size.height-6,size.width,size.height);NSScreen *screen=self.item.button.window.screen?:NSScreen.mainScreen;if(NSMaxX(frame)>NSMaxX(screen.visibleFrame)-8)frame.origin.x=NSMaxX(screen.visibleFrame)-8-size.width;
  BOOL reduce=NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceMotion;
  if(old){content.alphaValue=0;[self.sessionPanel setFrame:frame display:YES animate:NO];[NSAnimationContext runAnimationGroup:^(NSAnimationContext *c){c.duration=reduce?0:.3;old.animator.alphaValue=0;content.animator.alphaValue=1;} completionHandler:^{[old removeFromSuperview];}];}
- else {NSRect start=frame;start.origin.y+=6;[self.sessionPanel setFrame:start display:NO];self.sessionPanel.alphaValue=0;[self.sessionPanel orderFrontRegardless];
-  for(NSView *v in [(NSStackView *)content arrangedSubviews])v.alphaValue=0;
-  [NSAnimationContext runAnimationGroup:^(NSAnimationContext *c){c.duration=reduce?0:.22;c.timingFunction=[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut];self.sessionPanel.animator.alphaValue=1;[self.sessionPanel.animator setFrame:frame display:YES];} completionHandler:nil];
-  NSInteger k=0;for(NSView *v in [(NSStackView *)content arrangedSubviews]){dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)((reduce?0:.06*k)*NSEC_PER_SEC)),dispatch_get_main_queue(),^{[NSAnimationContext runAnimationGroup:^(NSAnimationContext *c){c.duration=reduce?0:.28;v.animator.alphaValue=1;} completionHandler:nil];});k++;}
+ else {NSRect start=[self sessionPanelOrigin:frame];[self.sessionPanel setFrame:reduce?frame:start display:NO];self.sessionPanel.alphaValue=reduce?1:0;[self.sessionPanel orderFrontRegardless];
+  for(NSView *v in [(NSStackView *)content arrangedSubviews])v.alphaValue=reduce?1:0;
+  if(!reduce){[NSAnimationContext runAnimationGroup:^(NSAnimationContext *c){c.duration=.32;c.timingFunction=[CAMediaTimingFunction functionWithControlPoints:.2 :.9 :.3 :1];self.sessionPanel.animator.alphaValue=1;[self.sessionPanel.animator setFrame:frame display:YES];} completionHandler:nil];
+   NSInteger k=0;for(NSView *v in [(NSStackView *)content arrangedSubviews]){dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)((.12+.05*k)*NSEC_PER_SEC)),dispatch_get_main_queue(),^{[NSAnimationContext runAnimationGroup:^(NSAnimationContext *c){c.duration=.26;v.animator.alphaValue=1;} completionHandler:nil];});k++;}}
   __weak AppDelegate *weak=self;self.sessionClickMonitor=[NSEvent addGlobalMonitorForEventsMatchingMask:NSEventMaskLeftMouseDown|NSEventMaskRightMouseDown handler:^(NSEvent *e){[weak closeSessionPanel];}];
   self.sessionKeyMonitor=[NSEvent addLocalMonitorForEventsMatchingMask:NSEventMaskKeyDown handler:^NSEvent *(NSEvent *e){if(e.keyCode==53){[weak closeSessionPanel];return nil;}return e;}];}
 }
+// The panel's resting place when closed: a small rectangle at the icon, so it grows out of it and folds back into it.
+- (NSRect)sessionPanelOrigin:(NSRect)frame {NSRect icon=self.item.button.window.frame;CGFloat w=MAX(40,icon.size.width),h=22;return NSMakeRect(NSMidX(icon)-w/2,NSMinY(icon)+2,w,h);}
 - (void)refreshSessionPanel {if(!self.sessionPanel.visible)return;NSView *content=self.sessionPanel.contentView.subviews.lastObject;NSTextField *time=(NSTextField *)[content viewWithTag:0];for(NSView *v in [(NSStackView *)content arrangedSubviews])if([v.identifier isEqual:@"time"]&&[v isKindOfClass:NSTextField.class]){time=(NSTextField *)v;NSTimeInterval r=[self.session remainingAt:NSDate.date];NSInteger a=(NSInteger)fabs(r);if(![time.stringValue hasPrefix:@"Leaving"])time.stringValue=[NSString stringWithFormat:@"%@%ld:%02ld",(self.session.state==SessionOver||(r<0&&self.session.state!=SessionAway))?@"−":@"",(long)a/60,(long)a%60];}}
 - (void)closeSessionPanel {
  if(self.sessionClickMonitor){[NSEvent removeMonitor:self.sessionClickMonitor];self.sessionClickMonitor=nil;}if(self.sessionKeyMonitor){[NSEvent removeMonitor:self.sessionKeyMonitor];self.sessionKeyMonitor=nil;}
- NSPanel *p=self.sessionPanel;if(!p.visible)return;[NSAnimationContext runAnimationGroup:^(NSAnimationContext *c){c.duration=NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceMotion?0:.15;p.animator.alphaValue=0;} completionHandler:^{[p orderOut:nil];for(NSView *v in p.contentView.subviews.copy)[v removeFromSuperview];}];
+ NSPanel *p=self.sessionPanel;if(!p.visible)return;BOOL reduce=NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceMotion;NSRect into=[self sessionPanelOrigin:p.frame];
+ for(NSView *v in p.contentView.subviews)v.alphaValue=reduce?v.alphaValue:0;
+ [NSAnimationContext runAnimationGroup:^(NSAnimationContext *c){c.duration=reduce?0:.26;c.timingFunction=[CAMediaTimingFunction functionWithControlPoints:.4 :0 :.8 :.4];p.animator.alphaValue=0;if(!reduce)[p.animator setFrame:into display:YES];} completionHandler:^{[p orderOut:nil];for(NSView *v in p.contentView.subviews.copy)[v removeFromSuperview];}];
 }
 - (void)restartTimer {
  [self.timer invalidate];double t=60;self.timer=[NSTimer timerWithTimeInterval:t target:self selector:@selector(periodicSync) userInfo:nil repeats:YES];
@@ -918,7 +984,7 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
   NSMenuItem *automatic=[self add:@"Extra Warmth follows Night Shift" action:@selector(toggleAuto:) to:night.submenu];automatic.state=self.automatic;automatic.enabled=actualKnown;
   if(self.automatic&&self.policy.overrideMode>=0)[self add:@"Resume Following" action:@selector(resume:) to:night.submenu];}
  Session *session=self.session;
- if(session.state==SessionIdle){NSMenuItem *start=[self add:@"Start a session" action:nil to:menu];start.submenu=[NSMenu new];for(NSNumber *m in [self sessionPresets:@"sessionPresets" fallback:@[@25,@45,@60,@90]]){NSMenuItem *i=[self add:[NSString stringWithFormat:@"%@ minutes",m] action:@selector(startSession:) to:start.submenu];i.tag=m.integerValue;}[start.submenu addItem:NSMenuItem.separatorItem];[self add:@"Session lengths…" action:@selector(showSessions:) to:start.submenu];}
+ if(session.state==SessionIdle){[self add:@"Start a session…" action:@selector(openStartPanel:) to:menu];}
  else {NSDate *now=NSDate.date;NSString *line=session.state==SessionRunning?[NSString stringWithFormat:@"Session · %@ min left",[session labelAt:now]]:session.state==SessionOver?[NSString stringWithFormat:@"Session over · %@ min past",[[session labelAt:now] substringFromIndex:1]]:[NSString stringWithFormat:@"Away · back in %@ min",[session labelAt:now]];
   NSMenuItem *head=[[NSMenuItem alloc]initWithTitle:line action:nil keyEquivalent:@""];head.enabled=NO;[menu addItem:head];
   if(session.state==SessionOver)[self add:@"Leaving now…" action:@selector(sessionLeaving:) to:menu];
@@ -1417,12 +1483,13 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  NSTextField *text=[NSTextField wrappingLabelWithString:texts[page]];text.preferredMaxLayoutWidth=page==0?404:346;  // next to the symbol on the tour pages
  NSMutableArray *parts=[NSMutableArray arrayWithObject:title];
  if(page==0){NSImageView *icon=[NSImageView imageViewWithImage:[self statusImageGray:YES warmth:0]];[icon.widthAnchor constraintEqualToConstant:18].active=YES;[icon.heightAnchor constraintEqualToConstant:18].active=YES;icon.accessibilityLabel=@"The Less Pull menu-bar icon";
-  NSTextField *where=[NSTextField wrappingLabelWithString:@"This is your icon; it is right above this window and fading in and out for a moment. Hold ⌘ and drag it to any spot in the menu bar, for example next to the clock. A short tour shows the four things worth knowing; everything can be changed later."];where.preferredMaxLayoutWidth=376;NSStackView *iconRow=[self row:@[icon,where]];iconRow.alignment=NSLayoutAttributeTop;[parts addObjectsFromArray:@[text,iconRow]];}
+  NSTextField *where=[NSTextField wrappingLabelWithString:@"This is your icon; it is right above this window, fading in and out for a moment. On a small screen the menu bar fills up, and what does not fit is hidden, or tucked behind a » by a menu-bar tool. Hold ⌘ and drag the circle toward the clock to keep it in view."];where.preferredMaxLayoutWidth=376;NSStackView *iconRow=[self row:@[icon,where]];iconRow.alignment=NSLayoutAttributeTop;WelcomeHintView *hint=[WelcomeHintView new];hint.accessibilityLabel=@"A menu bar that is full: hold the Command key and drag the circle toward the clock";[parts addObjectsFromArray:@[text,iconRow,hint]];}
+ else if(page==2){text.preferredMaxLayoutWidth=404;ExtensionHintView *hint=[ExtensionHintView new];hint.accessibilityLabel=@"A browser window; its site travels along an arrow into the menu-bar circle, where Exception for that site appears";[parts addObjectsFromArray:@[hint,text]];}
  else {NSStackView *body=[self row:@[[self tourSymbol:symbols[page] label:titles[page]],text]];body.alignment=NSLayoutAttributeTop;body.spacing=14;[parts addObject:body];}
  NSView *fill=[NSView new];[fill setContentHuggingPriority:1 forOrientation:NSLayoutConstraintOrientationVertical];[parts addObject:fill];
  NSButton *skip=[NSButton buttonWithTitle:@"Skip tour" target:self action:@selector(dismissWelcome:)];skip.bezelStyle=NSBezelStyleInline;skip.font=[NSFont systemFontOfSize:11];[self helpView:skip text:@"Close the welcome and the tour. You can open the tour again from the About tab." label:@"Skip tour"];
  NSMutableArray *nav=[NSMutableArray new];
- if(page==0){NSButton *start=[NSButton buttonWithTitle:@"Start tour" target:self action:@selector(tourNext:)];start.keyEquivalent=@"\r";[self helpView:start text:@"A tour of four pages, right here." label:@"Start tour"];[nav addObjectsFromArray:@[[self spacer],skip,start]];}
+ if(page==0){NSButton *start=[NSButton buttonWithTitle:@"Start tour" target:self action:@selector(tourNext:)];start.keyEquivalent=@"\r";[self helpView:start text:@"A tour of four short pages, right here." label:@"Start tour"];[nav addObjectsFromArray:@[[self spacer],skip,start]];}
  else {NSButton *back=[NSButton buttonWithTitle:@"Back" target:self action:@selector(tourBack:)];[self helpView:back text:@"The previous page." label:@"Back"];
   NSTextField *step=[NSTextField labelWithString:[NSString stringWithFormat:@"%ld of 4",(long)page]];step.font=[NSFont systemFontOfSize:11];step.textColor=NSColor.secondaryLabelColor;
   BOOL last=page==4;NSButton *next=[NSButton buttonWithTitle:last?@"Done":@"Next" target:self action:last?@selector(dismissWelcome:):@selector(tourNext:)];next.keyEquivalent=@"\r";[self helpView:next text:last?@"Close the tour.":@"The next page." label:next.title];

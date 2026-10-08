@@ -1,6 +1,6 @@
 # Release plan
 
-Less Pull 1.4.4 build 32 is a test release shared with friends (build 16 was the first public one); the repository went public on 8 October 2026 at the author's request. The version number stays 1.4.4 for good; releases are tagged `v1.4.4-<build>`.
+Less Pull 1.4.4 build 33 is a test release shared with friends (build 16 was the first public one); the repository went public on 8 October 2026 at the author's request. The version number stays 1.4.4 for good; releases are tagged `v1.4.4-<build>`.
 
 ## Done
 

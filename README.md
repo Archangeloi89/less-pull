@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-32"><b>Download build 32</b></a>
+  <a href="https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-33"><b>Download build 33</b></a>
   &nbsp;·&nbsp; <a href="#install">Install</a>
   &nbsp;·&nbsp; <a href="docs/EXCEPTIONS.md">App and website exceptions</a>
   &nbsp;·&nbsp; <a href="docs/README.md">All docs</a>
@@ -132,7 +132,7 @@ Less Pull changes the display at the very end of the pipeline, after the picture
 
 ## Sessions
 
-A session is a stretch of focused work with a gentle end. Choose a length from **Start a session** in the menu (25, 45, 60 and 90 minutes to begin with; change them under **Settings… → Sessions**). The icon gains a thin ring that fills as the session runs, with the minutes left next to it.
+A session is a stretch of focused work with a gentle end. Choose **Start a session…** in the menu: a small panel grows out of the icon with your lengths (25, 45, 60 and 90 minutes to begin with; change them under **Settings… → Sessions**), and folds back into the icon once you choose. The icon gains a thin ring that fills as the session runs, with the minutes left next to it.
 
 At the end, a warm glow blooms across every display for three seconds with one line of text, and a soft gong sounds, built from pure tones on the 432 Hz reference and the solfeggio pitches, low and short. Nothing to dismiss: the count simply goes on past the end, −0, −1, −2 in the warm color, breathing gently to say it can be clicked, so you can see how far you have stretched. A quieter reminder can come every few minutes if you ask for one; by default it never does.
 
@@ -198,7 +198,7 @@ Choose **Settings…** in the menu. This is the window on the right, with six ta
 - **Websites**: the browser extension and the saved website exceptions, in the same shape as the app rows.
 - **About**: version, links, Help, Diagnostics, licenses, and the update check.
 
-The window shows what is relevant and hides the rest: display options appear only with two or more displays connected, and the fine-tuning (what Peek turns off, what the mouse buttons do, display options with one display) sits behind **Show advanced options** at the bottom of General. Everything keeps working as set while it is hidden. On the very first launch this window opens by itself with a short welcome and a four-page tour: the screen, exceptions, Peek and privacy, in the same card at the same size, with Skip tour always at hand. The two shortcuts are set for new users, ⌥A to peek and ⌥⌘G to toggle, each only if it is free on that Mac and keyboard; the tour shows which ones, and Shortcuts lets you change them. The tour can be opened again from About. After two weeks of use, the next time you open Settings, a small card asks whether you enjoy Less Pull and how to support the author; it never pops up on its own.
+The window shows what is relevant and hides the rest: display options appear only with two or more displays connected, and the fine-tuning (what Peek turns off, what the mouse buttons do, display options with one display) sits behind **Show advanced options** at the bottom of General. Everything keeps working as set while it is hidden. On the very first launch this window opens by itself with a short welcome and a four-page tour: the screen, exceptions (with a small animation of the extension handing a site to the menu), Peek and privacy, in the same card at the same size, with Skip tour always at hand. The two shortcuts are set for new users, ⌥A to peek and ⌥⌘G to toggle, each only if it is free on that Mac and keyboard; the tour shows which ones, and Shortcuts lets you change them. The tour can be opened again from About. After two weeks of use, the next time you open Settings, a small card asks whether you enjoy Less Pull and how to support the author; it never pops up on its own.
 
 <p align="center">
   <img src="docs/assets/settings-tabs.png" width="100%" alt="Four screenshots of the Settings window on a plain backdrop. Shortcuts: Peek in color with the shortcut Option-A, what peeking turns off, a Toggle Grayscale shortcut Option-Command-G, and what clicking the menu-bar icon does. Apps: three app exceptions, Music, Photos and TextEdit, each with its icon, a Use this exception checkbox, Default, On and Off segments for Grayscale and Night Shift, and a warmth slider on the ramp. Websites: the Install Browser Extension button, the extension connected in Firefox, Brave and Opera, and two saved exceptions for example.com and one exact page with the same controls. About: the app icon, version 1.4.4 build 16, the author's links, Help, Diagnostics and Licenses, and the automatic update check.">
@@ -214,15 +214,15 @@ The app changes the display; nothing is injected into pages, and the Mac app has
 
 ## Install
 
-1. Download **Less-Pull-1.4.4-32.zip** from the [build 32 release](https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-32), unzip it, and move **Less Pull.app** to **Applications**.
-2. Open it. The Settings window greets you once; the circle in the menu bar is where you choose Grayscale and Extra Warmth from then on. On the first launch the welcome opens right under it and the icon fades in and out for a moment, so there is no searching; hold ⌘ and drag it where you want it, for example next to the clock. (macOS decides where new icons start, and apps cannot choose a spot.)
+1. Download **Less-Pull-1.4.4-33.zip** from the [build 33 release](https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-33), unzip it, and move **Less Pull.app** to **Applications**.
+2. Open it. The Settings window greets you once; the circle in the menu bar is where you choose Grayscale and Extra Warmth from then on. On the first launch the welcome opens right under it, the icon fades in and out for a moment, and a small animated drawing shows what to do when the menu bar is full: hold ⌘ and drag the circle toward the clock. (macOS decides where new icons start, and apps cannot choose a spot.)
 3. For website rules, open **Settings… → Websites**, choose **Install Browser Extension…**, and follow the steps for [your browser](docs/INSTALL.md#safari-brave-chrome-firefox-opera-or-edge).
 
 > [!TIP]
 > Setting up with an AI agent? The release includes an **agent pack** (`Less-Pull-Agent-Pack.zip`): a script that installs the app and the bridge, and scripts that connect Brave, Chrome, Opera, Edge and Firefox, with the instructions an agent needs. See [tools/agent-pack](tools/agent-pack/README.md).
 
 > [!NOTE]
-> Version 1.4.4 (build 32) is a test build for Apple silicon Macs. The version number stays 1.4.4 on purpose; the build number is what changes. It is ad-hoc signed and not notarized by Apple, so Gatekeeper may block a downloaded copy. It is built for macOS 13 and later and has been tested on macOS 27 only. The browser extension is loaded locally and is not in the Chrome Web Store, on addons.mozilla.org or in the App Store. See [install help](docs/INSTALL.md) and [what is still open](docs/RELEASE-PLAN.md).
+> Version 1.4.4 (build 33) is a test build for Apple silicon Macs. The version number stays 1.4.4 on purpose; the build number is what changes. It is ad-hoc signed and not notarized by Apple, so Gatekeeper may block a downloaded copy. It is built for macOS 13 and later and has been tested on macOS 27 only. The browser extension is loaded locally and is not in the Chrome Web Store, on addons.mozilla.org or in the App Store. See [install help](docs/INSTALL.md) and [what is still open](docs/RELEASE-PLAN.md).
 
 ## Private by design
 
