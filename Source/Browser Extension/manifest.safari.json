@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Less Pull — Website Exceptions",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Connects your browser to the Less Pull Mac app, so websites can have their own display settings. Set them from the Less Pull menu.",
   "permissions": [
     "tabs",

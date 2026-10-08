@@ -15,6 +15,10 @@ zsh tools/store/firefox-amo.sh "/path/to/an/output/folder"
 3. **Fill the listing** with the texts below and the screenshots from `docs/store/` (AMO accepts the 1280 × 800 files). Category: Other, or Privacy & Security. License: choose "Custom license" and paste the first lines of `LICENSE-APP.txt` with the link. Privacy policy: paste the "Website exceptions, in your browser" part of `docs/PRIVACY.md` and the link.
 4. **Submit for review.** Listed add-ons with `nativeMessaging` get a human review; usually days. Firefox users can install as soon as it is approved: the app needs no update.
 
+## Note for the reviewer (paste into "Notes to Reviewer")
+
+The extension sends the address of the active tab to the Less Pull app on the same Mac through native messaging (host `local.less_pull.browser`). That is its only function. Nothing is sent to the developer or to any server; the app keeps the address in memory only and never stores it. The manifest therefore declares `data_collection_permissions: {"required": ["none"]}`. The native host and the app are open to inspection at https://github.com/Archangeloi89/less-pull (Source/BrowserHost.m, Source/BrowserBridge.m, docs/PRIVACY.md).
+
 ## Listing texts
 
 **Name:** Less Pull — Website Exceptions
