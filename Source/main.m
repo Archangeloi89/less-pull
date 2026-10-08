@@ -8,10 +8,25 @@
 #import "ExclusionPolicy.h"
 #import "BrowserBridge.h"
 #import "MenuDismissal.h"
+#import "WarmthCurve.h"
 @interface ExceptionStack : NSStackView
 @end
 @implementation ExceptionStack
 - (BOOL)isFlipped {return YES;}
+@end
+// The slider track shows what the slider does: the real neutral -> amber -> red
+// ramp of WarmthCurve.h, i.e. what white becomes at each strength.
+@interface WarmthSliderCell : NSSliderCell
+@end
+@implementation WarmthSliderCell
+- (void)drawBarInside:(NSRect)rect flipped:(BOOL)flipped {
+ NSMutableArray *colors=[NSMutableArray new];NSMutableArray *locations=[NSMutableArray new];int steps=24;
+ for(int i=0;i<=steps;i++){double gains[3];WarmthGains(3.0*i/steps,gains);[colors addObject:[NSColor colorWithSRGBRed:gains[0] green:gains[1] blue:gains[2] alpha:1]];[locations addObject:@((double)i/steps)];}
+ CGFloat stops[steps+1];for(int i=0;i<=steps;i++)stops[i]=[locations[i] doubleValue];
+ NSGradient *ramp=[[NSGradient alloc]initWithColors:colors atLocations:stops colorSpace:NSColorSpace.sRGBColorSpace];
+ NSRect bar=NSInsetRect(rect,0,(rect.size.height-5)/2);NSBezierPath *path=[NSBezierPath bezierPathWithRoundedRect:bar xRadius:2.5 yRadius:2.5];
+ [ramp drawInBezierPath:path angle:0];[[NSColor.labelColor colorWithAlphaComponent:.2] setStroke];path.lineWidth=.5;[path stroke];
+}
 @end
 @interface AppDelegate : NSObject <NSApplicationDelegate,NSMenuDelegate>
 @property NSStatusItem *item;
@@ -144,7 +159,7 @@
  for(int i=0;i<2;i++){NSTextField *label=[NSTextField labelWithString:titles[i]];NSPopUpButton *choice=[[NSPopUpButton alloc]initWithFrame:NSZeroRect pullsDown:NO];[choice addItemsWithTitles:@[@"Use default",@"On",@"Off"]];[choice selectItemAtIndex:[rule[i==0?@"grayMode":@"nightMode"] integerValue]];choice.target=self;choice.action=@selector(ruleChanged:);choice.identifier=bundle;choice.tag=i;[choice.widthAnchor constraintEqualToConstant:130].active=YES;[self helpView:choice text:[self exclusionHelp] label:[NSString stringWithFormat:@"%@ — %@",rule[@"name"],titles[i]]];[choices addObject:label];[choices addObject:choice];}
  NSStackView *modes=[self row:choices];[modes setCustomSpacing:20 afterView:choices[1]];
  NSButton *inherit=[NSButton checkboxWithTitle:@"Use default warmth" target:self action:@selector(ruleChanged:)];inherit.identifier=bundle;inherit.tag=2;inherit.state=![rule[@"customWarmth"] boolValue];[self helpView:inherit text:@"Uncheck to give this app its own Extra Warmth. Off adds no warmth; 100% is red. Your default warmth stays saved." label:[NSString stringWithFormat:@"%@ — Use default warmth",rule[@"name"]]];
- NSSlider *slider=[NSSlider sliderWithValue:[rule[@"warmth"] doubleValue] minValue:0 maxValue:100 target:self action:@selector(ruleChanged:)];slider.identifier=bundle;slider.tag=3;slider.continuous=YES;slider.enabled=[rule[@"customWarmth"] boolValue];slider.numberOfTickMarks=5;[slider.widthAnchor constraintGreaterThanOrEqualToConstant:180].active=YES;[slider setContentHuggingPriority:1 forOrientation:NSLayoutConstraintOrientationHorizontal];[self helpView:slider text:@"Extra Warmth for this app, from Off to Red." label:[NSString stringWithFormat:@"%@ — Extra Warmth percent",rule[@"name"]]];
+ NSSlider *slider=[self warmthSliderWithValue:[rule[@"warmth"] doubleValue] action:@selector(ruleChanged:)];slider.identifier=bundle;slider.tag=3;slider.enabled=[rule[@"customWarmth"] boolValue];[slider.widthAnchor constraintGreaterThanOrEqualToConstant:180].active=YES;[slider setContentHuggingPriority:1 forOrientation:NSLayoutConstraintOrientationHorizontal];[self helpView:slider text:@"Extra Warmth for this app, from Off to Red." label:[NSString stringWithFormat:@"%@ — Extra Warmth percent",rule[@"name"]]];
  NSTextField *percent=[NSTextField labelWithString:[NSString stringWithFormat:@"%.0f%%",[rule[@"warmth"] doubleValue]]];percent.tag=99;percent.alignment=NSTextAlignmentRight;percent.font=[NSFont monospacedDigitSystemFontOfSize:13 weight:NSFontWeightRegular];[percent.widthAnchor constraintEqualToConstant:44].active=YES;
  NSStackView *warmth=[self row:@[inherit,slider,percent]];
  NSStackView *row=[self column:@[header,modes,warmth]];row.spacing=8;row.edgeInsets=NSEdgeInsetsMake(10,10,10,10);
@@ -249,6 +264,9 @@
  NSArray *arguments=NSProcessInfo.processInfo.arguments;NSUInteger testIndex=[arguments indexOfObject:@"--test-state-path"];if(testIndex!=NSNotFound&&testIndex+1<arguments.count){BOOL actual=NO;[self.engine nightShift:&actual];NSDictionary *state=@{@"front":self.foregroundID?:@"",@"grayOverride":@(self.grayOverride),@"nightOverride":@(self.nightOverride),@"customWarmth":@(self.customWarmth),@"effectiveMode":@(self.effectiveMode),@"strength":@(self.targetStrength),@"logicalNight":@(on),@"actualNight":@(actual),@"override":@(self.policy.overrideMode),@"transitioning":@(self.warmth.transitioning),@"pause":@(self.pause!=nil)};[[NSJSONSerialization dataWithJSONObject:state options:NSJSONWritingPrettyPrinted error:nil] writeToFile:arguments[testIndex+1] atomically:YES];}
 
 }
+- (NSSlider *)warmthSliderWithValue:(double)value action:(SEL)action {
+ NSSlider *slider=[NSSlider new];slider.cell=[WarmthSliderCell new];slider.minValue=0;slider.maxValue=100;slider.doubleValue=value;slider.target=self;slider.action=action;slider.continuous=YES;slider.numberOfTickMarks=5;slider.allowsTickMarkValuesOnly=NO;slider.sliderType=NSSliderTypeLinear;return slider;
+}
 - (NSString *)modeName:(NSInteger)mode {return mode==101?@"Color":mode==100?@"Grayscale":mode==0?@"Natural Colors":mode==1?@"Grayscale":mode==16?@"System Color Tint":@"Other filter";}
 - (NSString *)autoHelp {return @"Extra Warmth comes on with Night Shift and goes away when Night Shift turns off. Grayscale and your Night Shift schedule are not affected. If you move the slider yourself, that warmth stays until Night Shift next changes, or until you choose Resume Following.";}
 - (NSString *)followHelpKnown:(BOOL)known nightOn:(BOOL)on {
@@ -325,7 +343,7 @@
  NSMenuItem *sliderItem=[NSMenuItem new];NSView *view=[[NSView alloc]initWithFrame:NSMakeRect(0,0,300,78)];
  NSTextField *label=[NSTextField labelWithString:self.customWarmth?@"Default Extra Warmth":(self.automatic&&self.policy.overrideMode<0&&known&&!on)?@"Extra Warmth · used at night":@"Extra Warmth"];label.frame=NSMakeRect(18,54,210,18);[self helpView:label text:self.warmthHelp label:nil];[view addSubview:label];
  self.menuWarmthReadout=[NSTextField labelWithString:[NSString stringWithFormat:@"%.0f%%",[self currentWarmth]/3*100]];self.menuWarmthReadout.frame=NSMakeRect(242,54,48,18);self.menuWarmthReadout.alignment=NSTextAlignmentRight;[self helpView:self.menuWarmthReadout text:self.warmthHelp label:@"Extra Warmth percentage"];[view addSubview:self.menuWarmthReadout];
- NSSlider *slider=[NSSlider sliderWithValue:[self currentWarmth]/3*100 minValue:0 maxValue:100 target:self action:@selector(warmthChanged:)];slider.frame=NSMakeRect(18,26,260,26);slider.continuous=YES;slider.numberOfTickMarks=5;slider.allowsTickMarkValuesOnly=NO;[self helpView:slider text:self.warmthHelp label:@"Extra Warmth, percent"];[view addSubview:slider];
+ NSSlider *slider=[self warmthSliderWithValue:[self currentWarmth]/3*100 action:@selector(warmthChanged:)];slider.frame=NSMakeRect(18,26,260,26);[self helpView:slider text:self.warmthHelp label:@"Extra Warmth, percent"];[view addSubview:slider];
  for(int i=0;i<5;i++){NSTextField *r=[NSTextField labelWithString:@[@"Off",@"25",@"50",@"75",@"Red"][i]];r.font=[NSFont systemFontOfSize:10];r.alignment=NSTextAlignmentCenter;r.frame=NSMakeRect(28+60*i-20,4,40,16);[view addSubview:r];}
  [self helpView:view text:self.warmthHelp label:nil];sliderItem.view=view;sliderItem.toolTip=self.warmthHelp;[menu addItem:sliderItem];
  [menu addItem:NSMenuItem.separatorItem];
@@ -432,7 +450,7 @@
  self.grayscaleButton=[NSButton checkboxWithTitle:@"Grayscale" target:self action:@selector(toggleGrayscale:)];[self helpView:self.grayscaleButton text:self.grayHelp label:@"Grayscale"];
  self.warmthTitle=[NSTextField labelWithString:@"Extra Warmth"];self.warmthTitle.font=[NSFont systemFontOfSize:13 weight:NSFontWeightMedium];[self helpView:self.warmthTitle text:self.warmthHelp label:nil];
  self.resetButton=[NSButton buttonWithTitle:@"Reset" target:self action:@selector(resetWarmth:)];self.resetButton.bezelStyle=NSBezelStyleInline;[self helpView:self.resetButton text:@"Set Extra Warmth to Off. Grayscale and Night Shift stay as they are." label:@"Reset Extra Warmth"];
- self.warmthSlider=[NSSlider sliderWithValue:[self currentWarmth]/3*100 minValue:0 maxValue:100 target:self action:@selector(warmthChanged:)];self.warmthSlider.continuous=YES;self.warmthSlider.numberOfTickMarks=5;self.warmthSlider.allowsTickMarkValuesOnly=NO;[self.warmthSlider setContentHuggingPriority:1 forOrientation:NSLayoutConstraintOrientationHorizontal];[self helpView:self.warmthSlider text:self.warmthHelp label:@"Extra Warmth, percent"];
+ self.warmthSlider=[self warmthSliderWithValue:[self currentWarmth]/3*100 action:@selector(warmthChanged:)];[self.warmthSlider setContentHuggingPriority:1 forOrientation:NSLayoutConstraintOrientationHorizontal];[self helpView:self.warmthSlider text:self.warmthHelp label:@"Extra Warmth, percent"];
  self.warmthLabel=[NSTextField labelWithString:@""];self.warmthLabel.alignment=NSTextAlignmentRight;self.warmthLabel.font=[NSFont monospacedDigitSystemFontOfSize:14 weight:NSFontWeightMedium];[self.warmthLabel.widthAnchor constraintEqualToConstant:56].active=YES;[self helpView:self.warmthLabel text:self.warmthHelp label:@"Extra Warmth percentage"];
  NSMutableArray *ticks=[NSMutableArray new];for(NSString *t in @[@"Off",@"25",@"50",@"75",@"Red"]){NSTextField *r=[NSTextField labelWithString:t];r.font=[NSFont systemFontOfSize:10];r.textColor=NSColor.secondaryLabelColor;r.alignment=NSTextAlignmentCenter;[r.widthAnchor constraintEqualToConstant:30].active=YES;[ticks addObject:r];}
  NSStackView *tickRow=[self row:ticks];tickRow.distribution=NSStackViewDistributionEqualSpacing;
