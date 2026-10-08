@@ -134,11 +134,11 @@ Less Pull changes the display at the very end of the pipeline, after the picture
 
 A session is a stretch of focused work with a gentle end. Choose **Start a session…**, the first item in the menu: a small panel grows out of the icon with your lengths (25, 45, 60 and 90 minutes to begin with; change them under **Settings… → Sessions**), and folds back into the icon once you choose. The icon gains a thin ring that fills as the session runs, with the minutes left next to it.
 
-At the end, a warm glow blooms across every display for three seconds with one line of text, and a soft gong sounds, built from pure tones on the 432 Hz reference and the solfeggio pitches, low and short. Nothing to dismiss: the count simply goes on past the end, −0, −1, −2 in the warm color, breathing gently to say it can be clicked, so you can see how far you have stretched. A quieter reminder can come every few minutes if you ask for one; by default it never does.
+At the end, a warm glow blooms across every display for three seconds with one line of text, and a soft gong sounds, built from pure tones on the 432 Hz reference and the solfeggio pitches, low and short. Two sound styles are tuned by ear, "two strokes" and "one chord", or none; they live with the glow switch under the advanced options on the Sessions tab. Nothing to dismiss: the count simply goes on past the end, −0, −1, −2 in the warm color, breathing gently to say it can be clicked, so you can see how far you have stretched. A quieter reminder can come every few minutes if you ask for one; by default it never does.
 
 While a session runs, a click on the icon opens a small panel under it instead of the menu; the other mouse button still opens the menu. Once the session is over, the panel asks **Leaving? Call me back in** and offers your own choices (5, 9, 13 and 33 minutes to begin with), next to **Keep going**, **Leave quietly**, and a gear that opens the Sessions tab. After the call back, two soft rising notes, and the session is over for good. You are called back once.
 
-<sub>The glow never takes focus and never blocks a click. Under Reduce Motion it appears and disappears without animation. Sound and glow can each be turned off under Sessions.</sub>
+<sub>The glow never takes focus and never blocks a click. Under Reduce Motion it appears and disappears without animation.</sub>
 
 ## Night Shift can set the rhythm
 
