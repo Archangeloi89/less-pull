@@ -524,11 +524,11 @@
 "What the browser extension can see" = "浏览器扩展能看到什么";
 "What the left mouse button does on the menu-bar icon." = "鼠标左键在菜单栏图标上做什么。";
 "What the right mouse button does on the menu-bar icon. Control-click and a two-finger tap on the trackpad count as a right-click." = "鼠标右键在菜单栏图标上做什么。按住 Control 点按和触控板双指轻点都算作右键点按。";
-"A Control-click or a two-finger tap on the trackpad counts as a right-click. One of the two always opens the menu. Opens the session panel starts a session, or opens the panel of the one running." = "按住 Control 点按或触控板双指轻点算作右键点按。两个按键中总有一个打开菜单。“打开专注面板”会开始专注，或打开正在进行的专注面板。";
+"A Control-click or a two-finger tap on the trackpad counts as a right-click. One of the two always opens the menu. Opens the session panel starts a session, or opens the panel of the one running. Once a session is over, the two trade places: the menu button opens the session panel and the session button opens the menu." = "按住 Control 点按或触控板双指轻点算作右键点按。两个按键中总有一个打开菜单。“打开专注面板”会开始专注，或打开正在进行的专注面板。专注结束后两者互换：菜单键打开专注面板，专注键打开菜单。";
 "What this display shows. Follows what is on it: the app in front, or the app on top here, or your defaults. Always your defaults: exceptions never apply here. Always plain: never grayscale or warmth here." = "这台显示器显示什么。“跟随其上内容”：前台应用，或在这里最靠前的应用，或你的默认设置。“始终用默认设置”：单独设置在这里从不生效。“始终无滤镜”：这里从不使用灰度或暖色。";
 "Which displays Peek toggles while this app is in front: the display under the pointer, all displays, or any set of connected displays you tick. Works whether or not the exception is used." = "此应用在前台时，一瞥切换哪些显示器：指针所在的显示器、所有显示器，或你勾选的任意已连接显示器。无论单独设置是否启用都有效。";
 "Which displays Peek toggles while this site is in front." = "此网站在前台时，一瞥切换哪些显示器。";
-"While a session runs, a click on the icon opens the session panel; the other mouse button opens the menu. The Peek and Toggle shortcuts keep working." = "专注进行时，点按图标会打开专注面板；另一个鼠标键打开菜单。“一瞥”和切换快捷键继续有效。";
+"While a session runs, a click on the icon opens the session panel; the other mouse button opens the menu. Once the session is over, the two trade places, so a click reaches the panel with Keep going and Leave quietly. The Peek and Toggle shortcuts keep working." = "专注进行时，点按图标会打开专注面板；另一个鼠标键打开菜单。专注结束后两者互换，点按一下就能到达带有“继续”和“就这样”的面板。“一瞥”和切换快捷键继续有效。";
 "While peeking, turn off %@" = "一瞥时关闭：%@";
 "While peeking, turn off:" = "一瞥时关闭：";
 "While this site is in front, its settings cover every display, not only the one the browser window is on." = "此网站在前台时，其设置作用于所有显示器，而不只是浏览器窗口所在的那台。";
