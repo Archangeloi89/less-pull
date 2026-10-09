@@ -87,3 +87,5 @@ Japanese (build 33), experimental. The "Remind me after the end" choices (Never,
 Korean (build 33), experimental.
 
 Simplified Chinese (build 33), experimental. The system-language match now trims regions (zh-Hans-CN → zh-Hans) and sends zh-TW/HK/MO to Traditional Chinese once that table exists.
+
+Traditional Chinese (build 33), experimental. That completes the planned list: 13 languages besides English.
