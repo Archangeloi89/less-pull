@@ -1354,9 +1354,11 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  NSEvent *event=NSApp.currentEvent;BOOL secondary=event.type==NSEventTypeRightMouseUp||event.type==NSEventTypeRightMouseDown||(event.modifierFlags&NSEventModifierFlagControl);
  NSInteger job=[self jobOfButton:secondary],other=[self jobOfButton:!secondary];
  if(job==1){[self toggleGrayscale:nil];return;}
- if(job==2){if(self.session.state!=SessionIdle)[self toggleSessionPanel];else if(self.sessionPanel.visible)[self closeSessionPanel];else [self showSessionPanelMode:@"start"];return;}
+ if(job==2){if(self.session.state==SessionOver||self.session.state==SessionAway){if(other==0){[self closeSessionPanel];self.item.menu=self.statusMenu;[self.item.button performClick:nil];return;}}if(self.session.state!=SessionIdle)[self toggleSessionPanel];else if(self.sessionPanel.visible)[self closeSessionPanel];else [self showSessionPanelMode:@"start"];return;}
  // the menu button: while a session runs and no button is the session's, this one opens the session panel instead, as before
  if(self.session.state!=SessionIdle&&other!=2){[self toggleSessionPanel];return;}
+ // once the session is over (or you are away), the two buttons trade places: this one opens the session panel, the session button opens the menu
+ if((self.session.state==SessionOver||self.session.state==SessionAway)&&other==2){[self toggleSessionPanel];return;}
  [self closeSessionPanel];self.item.menu=self.statusMenu;[self.item.button performClick:nil];
 }
 - (void)clickBehaviorChanged:(NSPopUpButton *)sender {
@@ -1517,7 +1519,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  self.peekNote=[self note:@""];
  NSStackView *column=[self column:@[[self row:@[peekTitle,[self spacer],suggestPeek,self.peekRecorder]],self.peekNote,[self adv:[self row:@[peekEffectsLabel,self.peekGrayButton,self.peekWarmthButton,self.peekNightButton]]],[self multi:[self row:@[peekScopeLabel,self.peekScopePopup]]],[self separator],
   [self row:@[grayShortcutTitle,[self spacer],suggestGray,self.grayscaleRecorder]],self.grayscaleShortcutNote,[self adv:[self separator]],
-  [self adv:[self row:@[clickTitle,[self spacer],self.clickPopup]]],[self adv:[self row:@[rightTitle,[self spacer],self.rightClickPopup]]],[self adv:[self note:L(@"A Control-click or a two-finger tap on the trackpad counts as a right-click. One of the two always opens the menu. Opens the session panel starts a session, or opens the panel of the one running.")]]]];
+  [self adv:[self row:@[clickTitle,[self spacer],self.clickPopup]]],[self adv:[self row:@[rightTitle,[self spacer],self.rightClickPopup]]],[self adv:[self note:L(@"A Control-click or a two-finger tap on the trackpad counts as a right-click. One of the two always opens the menu. Opens the session panel starts a session, or opens the panel of the one running. Once a session is over, the two trade places: the menu button opens the session panel and the session button opens the menu.")]]]];
  [column setCustomSpacing:4 afterView:column.arrangedSubviews[0]];[column setCustomSpacing:6 afterView:column.arrangedSubviews[1]];[column setCustomSpacing:4 afterView:column.arrangedSubviews[5]];[column setCustomSpacing:4 afterView:column.arrangedSubviews[8]];[self refreshPeekRecorder:nil];
  return column;
 }
@@ -1558,7 +1560,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  NSButton *try=[NSButton buttonWithTitle:L(@"Try it") target:self action:@selector(trySessionSound:)];try.bezelStyle=NSBezelStyleInline;[self helpView:try text:L(@"Shows the glow and plays the sound once, as at the end of a session.") label:L(@"Try the glow and sound")];
  NSStackView *column=[self column:@[intro,[self separator],[self row:@[lengthsLabel,[self spacer],self.sessionPresetsField]],[self note:L(@"Minutes, separated by commas. These appear under Start a session in the menu.")],
   [self row:@[backLabel,[self spacer],self.callBackPresetsField]],[self note:L(@"Offered when you choose Leaving now. You are called back once, then the session is over for good.")],[self separator],
-  [self row:@[endLabel,[self spacer],atEnd]],offerBack,[self row:@[remindLabel,[self spacer],remind]],[self adv:[self row:@[soundLabel,[self spacer],sound]]],[self adv:[self row:@[({NSTextField *pl=[NSTextField labelWithString:L(@"Preview:")];pl.font=[NSFont systemFontOfSize:11];pl.textColor=NSColor.secondaryLabelColor;pl;}),previewEnd,previewBack,[self spacer],volumeLabel,volume,volumeReadout]]],[self adv:[self row:@[glow,[self spacer],try]]],[self note:L(@"While a session runs, a click on the icon opens the session panel; the other mouse button opens the menu. The Peek and Toggle shortcuts keep working.")]]];
+  [self row:@[endLabel,[self spacer],atEnd]],offerBack,[self row:@[remindLabel,[self spacer],remind]],[self adv:[self row:@[soundLabel,[self spacer],sound]]],[self adv:[self row:@[({NSTextField *pl=[NSTextField labelWithString:L(@"Preview:")];pl.font=[NSFont systemFontOfSize:11];pl.textColor=NSColor.secondaryLabelColor;pl;}),previewEnd,previewBack,[self spacer],volumeLabel,volume,volumeReadout]]],[self adv:[self row:@[glow,[self spacer],try]]],[self note:L(@"While a session runs, a click on the icon opens the session panel; the other mouse button opens the menu. Once the session is over, the two trade places, so a click reaches the panel with Keep going and Leave quietly. The Peek and Toggle shortcuts keep working.")]]];
  [column setCustomSpacing:4 afterView:column.arrangedSubviews[2]];[column setCustomSpacing:4 afterView:column.arrangedSubviews[4]];return column;
 }
 - (NSStackView *)appsTab {
