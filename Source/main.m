@@ -211,6 +211,7 @@ static NSString *const LessPullOldBundleIdentifier=@"local.nightshiftfilters.app
 @property NSMutableArray<NSWindow *> *glowWindows;
 @property NSSound *sessionSound;
 @property BOOL sessionBreath,welcomePlaced,forceThanks;
+@property NSMutableArray *noteViews;
 @property NSInteger customMinutes,customBackMinutes;
 @property NSTextField *customLabel,*customBackLabel;
 @property NSButton *customStart,*customSave,*customBackStart,*customBackSave;
@@ -399,10 +400,10 @@ static void drawKey(NSRect f,NSString *label,double pressed){NSRect r=NSOffsetRe
   // divider
   [Ink(.12) setFill];[[NSBezierPath bezierPathWithRect:NSMakeRect(212,8,1,124)] fill];
   // right half: a screenshot is taken of the quiet screen, and comes out in color
-  NSRect gray=NSMakeRect(226,34,118,76);drawScreen(gray,1,.3,1);[@"your screen" drawAtPoint:NSMakePoint(228,116) withAttributes:dim];
+  NSRect gray=NSMakeRect(220,52,98,62);drawScreen(gray,1,.3,1);[@"your screen" drawAtPoint:NSMakePoint(222,118) withAttributes:dim];
   double flash=seg(t,.2,.23)*(1-seg(t,.26,.34));if(flash>0){[[NSColor colorWithWhite:1 alpha:.7*flash] setFill];[[NSBezierPath bezierPathWithRoundedRect:gray xRadius:8 yRadius:8] fill];}
   drawKey(NSMakeRect(356,112,20,16),@"⌘",seg(t,.14,.18)*(1-seg(t,.24,.28)));drawKey(NSMakeRect(378,112,20,16),@"⇧",seg(t,.14,.18)*(1-seg(t,.24,.28)));drawKey(NSMakeRect(400,112,18,16),@"3",seg(t,.17,.2)*(1-seg(t,.24,.28)));
-  double lift=seg(t,.28,.5);if(lift>0){NSRect shot=NSMakeRect(300+40*lift,16+8*lift,80+24*lift,52+14*lift);NSRect dst=NSMakeRect(shot.origin.x,shot.origin.y,MIN(shot.size.width,412-shot.origin.x),shot.size.height);drawScreen(dst,0,0,lift);[Ink(.6*lift) setStroke];NSBezierPath *frame=[NSBezierPath bezierPathWithRoundedRect:NSInsetRect(dst,-2,-2) xRadius:7 yRadius:7];frame.lineWidth=1.5;[frame stroke];if(lift>.95)[@"the screenshot: in color" drawAtPoint:NSMakePoint(dst.origin.x-14,dst.origin.y-14) withAttributes:dim];}
+  double lift=seg(t,.28,.5);if(lift>0){NSRect shot=NSMakeRect(296+24*lift,12+4*lift,66+22*lift,42+12*lift);NSRect dst=shot;drawScreen(dst,0,0,lift);[Ink(.6*lift) setStroke];NSBezierPath *frame=[NSBezierPath bezierPathWithRoundedRect:NSInsetRect(dst,-2,-2) xRadius:7 yRadius:7];frame.lineWidth=1.5;[frame stroke];if(lift>.95){[@"the screenshot," drawAtPoint:NSMakePoint(222,30) withAttributes:dim];[@"in color" drawAtPoint:NSMakePoint(222,18) withAttributes:dim];}}
   break;}
  }
 }
@@ -486,7 +487,7 @@ static void drawKey(NSRect f,NSString *label,double pressed){NSRect r=NSOffsetRe
 - (NSView *)multi:(NSView *)v {if(!self.multiDisplayViews)self.multiDisplayViews=[NSMutableArray new];[self.multiDisplayViews addObject:v];v.hidden=![self multiDisplay];return v;}
 - (NSView *)adv:(NSView *)v {if(!self.advancedViews)self.advancedViews=[NSMutableArray new];[self.advancedViews addObject:v];v.hidden=![self advanced];return v;}
 - (void)applyVisibility {
- BOOL multi=[self multiDisplay],adv=[self advanced];for(NSView *v in self.multiDisplayViews)v.hidden=!multi;for(NSView *v in self.advancedViews)v.hidden=!adv;
+ BOOL multi=[self multiDisplay],adv=[self advanced],quiet=[self hideNotes];for(NSView *v in self.multiDisplayViews)v.hidden=!multi;for(NSView *v in self.advancedViews)v.hidden=!adv;if(quiet)for(NSView *v in self.noteViews)v.hidden=YES;else for(NSView *v in self.noteViews)if(![self.advancedViews containsObject:v])v.hidden=NO;
  [self rebuildExclusionsList];[self rebuildWebsiteRulesList];[self relayoutSettings];
 }
 // Hidden views leave the stacks; the tabs then take their new height.
@@ -495,11 +496,13 @@ static void drawKey(NSRect f,NSString *label,double pressed){NSRect r=NSOffsetRe
  NSInteger i=self.settingsTabs.selectedTabViewItemIndex;self.settingsTabs.selectedTabViewItemIndex=i==0?1:0;self.settingsTabs.selectedTabViewItemIndex=i;
 }
 - (void)toggleAdvanced:(NSButton *)sender {[NSUserDefaults.standardUserDefaults setBool:sender.state==NSControlStateValueOn forKey:@"showAdvanced"];[self applyVisibility];}
+- (void)toggleNotes:(NSButton *)sender {[NSUserDefaults.standardUserDefaults setBool:sender.state==NSControlStateValueOn forKey:@"hideNotes"];[self applyVisibility];}
 - (void)toggleAlwaysDisplays:(NSButton *)sender {[NSUserDefaults.standardUserDefaults setBool:sender.state==NSControlStateValueOn forKey:@"alwaysShowDisplays"];[self refreshDisplayRows];[self applyVisibility];}
 - (NSView *)advancedBlock {
  NSButton *show=[NSButton checkboxWithTitle:@"Show advanced options" target:self action:@selector(toggleAdvanced:)];show.state=[self advanced];[self helpView:show text:@"Shows the fine-tuning in every tab: what Peek turns off, what the mouse buttons do, the session sound and glow, and display options with one display. Everything keeps working as set when hidden." label:@"Show advanced options"];
  NSButton *always=[NSButton checkboxWithTitle:@"Show display options with one display" target:self action:@selector(toggleAlwaysDisplays:)];always.state=[NSUserDefaults.standardUserDefaults boolForKey:@"alwaysShowDisplays"];[self helpView:always text:@"Display options appear by themselves when two or more displays are connected. Tick this to keep them visible with one display." label:@"Show display options with one display"];
- NSStackView *column=[self column:@[show,[self adv:always],[self adv:[self note:@"Choices for apps, websites and displays stay saved while hidden, and a display keeps its choices when it is plugged in again."]]]];column.spacing=6;return column;
+ NSButton *quiet=[NSButton checkboxWithTitle:@"Don’t show explanations" target:self action:@selector(toggleNotes:)];quiet.state=[self hideNotes];[self helpView:quiet text:@"Hides the gray lines of explanation under the settings. The ? help on each setting stays." label:@"Don’t show explanations"];
+ NSStackView *column=[self column:@[show,[self adv:always],[self adv:quiet],[self adv:[self note:@"Choices for apps, websites and displays stay saved while hidden, and a display keeps its choices when it is plugged in again."]]]];column.spacing=6;return column;
 }
 - (NSView *)displaysSection {
  NSTextField *title=[NSTextField labelWithString:@"Displays"];title.font=[NSFont systemFontOfSize:13 weight:NSFontWeightMedium];
@@ -1375,7 +1378,8 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
 - (void)resume:(id)sender {[self.policy resume];[self savePolicy];[self sync];}
 // Settings window building blocks: Auto Layout stacks, one short note under each
 // control that is not obvious.
-- (NSTextField *)note:(NSString *)text {NSTextField *n=[NSTextField wrappingLabelWithString:text];n.font=[NSFont systemFontOfSize:11];n.textColor=NSColor.secondaryLabelColor;n.preferredMaxLayoutWidth=440;return n;}
+- (BOOL)hideNotes {return [NSUserDefaults.standardUserDefaults boolForKey:@"hideNotes"];}
+- (NSTextField *)note:(NSString *)text {NSTextField *n=[NSTextField wrappingLabelWithString:text];n.font=[NSFont systemFontOfSize:11];n.textColor=NSColor.secondaryLabelColor;n.preferredMaxLayoutWidth=440;if(!self.noteViews)self.noteViews=[NSMutableArray new];[self.noteViews addObject:n];n.hidden=[self hideNotes];return n;}
 - (NSStackView *)column:(NSArray<NSView *> *)views {NSStackView *s=[NSStackView stackViewWithViews:views];s.orientation=NSUserInterfaceLayoutOrientationVertical;s.alignment=NSLayoutAttributeLeading;s.spacing=12;return s;}
 - (NSStackView *)row:(NSArray<NSView *> *)views {NSStackView *s=[NSStackView stackViewWithViews:views];s.orientation=NSUserInterfaceLayoutOrientationHorizontal;s.alignment=NSLayoutAttributeCenterY;s.spacing=8;return s;}
 - (NSView *)spacer {NSView *v=[NSView new];[v setContentHuggingPriority:1 forOrientation:NSLayoutConstraintOrientationHorizontal];[v setContentCompressionResistancePriority:1 forOrientation:NSLayoutConstraintOrientationHorizontal];return v;}
@@ -1487,7 +1491,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  NSButton *try=[NSButton buttonWithTitle:@"Try it" target:self action:@selector(trySessionSound:)];try.bezelStyle=NSBezelStyleInline;[self helpView:try text:@"Shows the glow and plays the sound once, as at the end of a session." label:@"Try the glow and sound"];
  NSStackView *column=[self column:@[intro,[self separator],[self row:@[lengthsLabel,[self spacer],self.sessionPresetsField]],[self note:@"Minutes, separated by commas. These appear under Start a session in the menu."],
   [self row:@[backLabel,[self spacer],self.callBackPresetsField]],[self note:@"Offered when you choose Leaving now. You are called back once, then the session is over for good."],[self separator],
-  [self row:@[endLabel,[self spacer],atEnd]],offerBack,[self row:@[remindLabel,[self spacer],remind]],[self adv:[self row:@[soundLabel,[self spacer],sound]]],[self adv:[self row:@[[self note:@"Preview:"],previewEnd,previewBack,[self spacer],volumeLabel,volume,volumeReadout]]],[self adv:[self row:@[glow,[self spacer],try]]],[self note:@"While a session runs, a click on the icon opens the session panel; the other mouse button opens the menu. The Peek and Toggle shortcuts keep working."]]];
+  [self row:@[endLabel,[self spacer],atEnd]],offerBack,[self row:@[remindLabel,[self spacer],remind]],[self adv:[self row:@[soundLabel,[self spacer],sound]]],[self adv:[self row:@[({NSTextField *pl=[NSTextField labelWithString:@"Preview:"];pl.font=[NSFont systemFontOfSize:11];pl.textColor=NSColor.secondaryLabelColor;pl;}),previewEnd,previewBack,[self spacer],volumeLabel,volume,volumeReadout]]],[self adv:[self row:@[glow,[self spacer],try]]],[self note:@"While a session runs, a click on the icon opens the session panel; the other mouse button opens the menu. The Peek and Toggle shortcuts keep working."]]];
  [column setCustomSpacing:4 afterView:column.arrangedSubviews[2]];[column setCustomSpacing:4 afterView:column.arrangedSubviews[4]];return column;
 }
 - (NSStackView *)appsTab {
