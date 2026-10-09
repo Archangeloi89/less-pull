@@ -554,3 +554,6 @@
 "Every 5 minutes" = "Elke 5 minuten";
 "Every 10 minutes" = "Elke 10 minuten";
 "Every 15 minutes" = "Elke 15 minuten";
+"Night Shift on the lock screen and screensaver" = "Night Shift op vergrendelscherm en schermbeveiliging";
+"The lock screen and the screensaver are drawn by macOS outside Less Pull’s reach, so they show color. With this on, Less Pull turns Night Shift to full warmth there whenever it is quieting your screen, and puts it back when you return. Your Night Shift schedule stays as it is." = "macOS tekent het vergrendelscherm en de schermbeveiliging buiten het bereik van Less Pull, daarom zijn ze in kleur. Met dit aan zet Less Pull Night Shift daar op volle warmte zolang het je scherm rustig houdt, en zet het terug zoals het was wanneer je terugkomt. Je Night Shift-schema blijft zoals het is.";
+"Drawn by macOS outside Less Pull’s reach, the lock screen and the screensaver show color. While Less Pull is quieting your screen, Night Shift goes to full warmth there and comes back as it was when you return." = "macOS tekent het vergrendelscherm en de schermbeveiliging buiten het bereik van Less Pull; ze zijn in kleur. Zolang Less Pull je scherm rustig houdt, gaat Night Shift daar op volle warmte en is het weer zoals het was wanneer je terugkomt.";

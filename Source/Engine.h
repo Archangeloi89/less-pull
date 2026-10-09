@@ -14,6 +14,9 @@ typedef struct { BOOL active, enabled, sunSchedulePermitted; int mode; struct { 
 - (BOOL)nightShift:(BOOL *)enabled;
 - (BOOL)readNightShiftStatus:(NSBlueStatus *)status;
 - (BOOL)setNightShiftEnabled:(BOOL)enabled;
+// Night Shift color temperature, 0…1 (1 = warmest), the slider in System Settings.
+- (BOOL)nightShiftStrength:(float *)strength;
+- (BOOL)setNightShiftStrength:(float)strength;
 - (BOOL)applyMode:(NSInteger)mode; // 0 Natural, 1 Grayscale, 16 saved tint
 - (NSInteger)currentMode;
 - (NSString *)diagnostics;

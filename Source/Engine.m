@@ -56,6 +56,15 @@ __attribute__((weak)) BOOL LessPullHandsOff=NO;
  if(!method||strcmp(method_getTypeEncoding(method),"B20@0:8B16")!=0)return NO;
  return [self.client setEnabled:enabled];
 }
+- (BOOL)nightShiftStrength:(float *)strength {
+ if(!self.client||self.error||![self.client respondsToSelector:@selector(getStrength:)])return NO;
+ float s=0;BOOL (*get)(id,SEL,float *)=(void *)[self.client methodForSelector:@selector(getStrength:)];if(!get(self.client,@selector(getStrength:),&s))return NO;*strength=s;return YES;
+}
+- (BOOL)setNightShiftStrength:(float)strength {
+ if(LessPullHandsOff)return YES;
+ if(!self.client||self.error||![self.client respondsToSelector:@selector(setStrength:commit:)])return NO;
+ BOOL (*set)(id,SEL,float,BOOL)=(void *)[self.client methodForSelector:@selector(setStrength:commit:)];return set(self.client,@selector(setStrength:commit:),fmaxf(0,fminf(strength,1)),YES);
+}
 - (NSInteger)currentMode { if(!getType||!getEnabled)return -1;return getEnabled(1)?getType(1):0; }
 - (BOOL)applyMode:(NSInteger)mode {
  if(LessPullHandsOff)return YES;

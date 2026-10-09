@@ -554,3 +554,6 @@
 "Every 5 minutes" = "Каждые 5 минут";
 "Every 10 minutes" = "Каждые 10 минут";
 "Every 15 minutes" = "Каждые 15 минут";
+"Night Shift on the lock screen and screensaver" = "Night Shift на экране блокировки и заставке";
+"The lock screen and the screensaver are drawn by macOS outside Less Pull’s reach, so they show color. With this on, Less Pull turns Night Shift to full warmth there whenever it is quieting your screen, and puts it back when you return. Your Night Shift schedule stays as it is." = "Экран блокировки и заставку macOS рисует вне досягаемости Less Pull, поэтому они цветные. Если включено, Less Pull выводит там Night Shift на полную теплоту, пока успокаивает ваш экран, и возвращает всё как было, когда вы вернётесь. Расписание Night Shift не меняется.";
+"Drawn by macOS outside Less Pull’s reach, the lock screen and the screensaver show color. While Less Pull is quieting your screen, Night Shift goes to full warmth there and comes back as it was when you return." = "Экран блокировки и заставку macOS рисует вне досягаемости Less Pull; они цветные. Пока Less Pull успокаивает ваш экран, Night Shift там на полной теплоте, а когда вы вернётесь, всё снова как было.";

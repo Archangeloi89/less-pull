@@ -554,3 +554,6 @@
 "Every 5 minutes" = "Cada 5 minutos";
 "Every 10 minutes" = "Cada 10 minutos";
 "Every 15 minutes" = "Cada 15 minutos";
+"Night Shift on the lock screen and screensaver" = "Night Shift en la pantalla de bloqueo y el salvapantallas";
+"The lock screen and the screensaver are drawn by macOS outside Less Pull’s reach, so they show color. With this on, Less Pull turns Night Shift to full warmth there whenever it is quieting your screen, and puts it back when you return. Your Night Shift schedule stays as it is." = "macOS dibuja la pantalla de bloqueo y el salvapantallas fuera del alcance de Less Pull, por eso se ven en color. Con esto activado, Less Pull pone allí Night Shift a máxima calidez mientras está calmando tu pantalla, y lo deja como estaba cuando vuelves. Tu horario de Night Shift no cambia.";
+"Drawn by macOS outside Less Pull’s reach, the lock screen and the screensaver show color. While Less Pull is quieting your screen, Night Shift goes to full warmth there and comes back as it was when you return." = "macOS dibuja la pantalla de bloqueo y el salvapantallas fuera del alcance de Less Pull; se ven en color. Mientras Less Pull calma tu pantalla, Night Shift pasa allí a máxima calidez y vuelve a estar como estaba cuando regresas.";
