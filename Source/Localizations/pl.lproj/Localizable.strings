@@ -478,7 +478,6 @@
 "Toggle Grayscale shortcut" = "Skala szarości wł./wył.";
 "Toggles Grayscale" = "Przełącza skalę szarości";
 "Tour" = "Tour";
-"Try again from a permanent local copy of Less Pull. The local bridge could not be registered." = "Spróbuj ponownie ze stałej lokalnej kopii Less Pull. Nie udało się zarejestrować lokalnego mostu.";
 "Try it" = "Wypróbuj";
 "Try the glow and sound" = "Wypróbuj poświatę i dźwięk";
 "Turn Grayscale off for…" = "Wróć do koloru na…";
@@ -557,3 +556,5 @@
 "Night Shift on the lock screen and screensaver" = "Night Shift na ekranie blokady i wygaszaczu";
 "The lock screen and the screensaver are drawn by macOS outside Less Pull’s reach, so they show color. With this on, Less Pull turns Night Shift to full warmth there whenever it is quieting your screen, and puts it back when you return. Your Night Shift schedule stays as it is." = "Ekran blokady i wygaszacz macOS rysuje poza zasięgiem Less Pull, dlatego są w kolorze. Gdy to włączysz, Less Pull ustawia tam Night Shift na pełne ciepło, dopóki wycisza Twój ekran, i przywraca stan sprzed, gdy wracasz. Harmonogram Night Shift się nie zmienia.";
 "Drawn by macOS outside Less Pull’s reach, the lock screen and the screensaver show color. While Less Pull is quieting your screen, Night Shift goes to full warmth there and comes back as it was when you return." = "Ekran blokady i wygaszacz macOS rysuje poza zasięgiem Less Pull; są w kolorze. Dopóki Less Pull wycisza Twój ekran, Night Shift jest tam na pełnym cieple, a gdy wracasz, wszystko jest jak przedtem.";
+"The local bridge could not be registered." = "Nie udało się zarejestrować lokalnego połączenia.";
+"Less Pull is running from a temporary copy that macOS makes when an app is opened where it was downloaded. Move Less Pull into the Applications folder, open it from there, and try again." = "Less Pull działa z tymczasowej kopii, którą macOS tworzy, gdy aplikację otwiera się tam, gdzie została pobrana. Przenieś Less Pull do folderu Aplikacje, otwórz go stamtąd i spróbuj ponownie.";

@@ -478,7 +478,6 @@
 "Toggle Grayscale shortcut" = "Cambiar escala de grises";
 "Toggles Grayscale" = "Cambia la escala de grises";
 "Tour" = "Tour";
-"Try again from a permanent local copy of Less Pull. The local bridge could not be registered." = "Inténtalo de nuevo desde una copia local y permanente de Less Pull. No se pudo registrar el puente local.";
 "Try it" = "Probar";
 "Try the glow and sound" = "Probar el resplandor y el sonido";
 "Turn Grayscale off for…" = "Volver al color durante…";
@@ -557,3 +556,5 @@
 "Night Shift on the lock screen and screensaver" = "Night Shift en la pantalla de bloqueo y el salvapantallas";
 "The lock screen and the screensaver are drawn by macOS outside Less Pull’s reach, so they show color. With this on, Less Pull turns Night Shift to full warmth there whenever it is quieting your screen, and puts it back when you return. Your Night Shift schedule stays as it is." = "macOS dibuja la pantalla de bloqueo y el salvapantallas fuera del alcance de Less Pull, por eso se ven en color. Con esto activado, Less Pull pone allí Night Shift a máxima calidez mientras está calmando tu pantalla, y lo deja como estaba cuando vuelves. Tu horario de Night Shift no cambia.";
 "Drawn by macOS outside Less Pull’s reach, the lock screen and the screensaver show color. While Less Pull is quieting your screen, Night Shift goes to full warmth there and comes back as it was when you return." = "macOS dibuja la pantalla de bloqueo y el salvapantallas fuera del alcance de Less Pull; se ven en color. Mientras Less Pull calma tu pantalla, Night Shift pasa allí a máxima calidez y vuelve a estar como estaba cuando regresas.";
+"The local bridge could not be registered." = "No se pudo registrar la conexión local.";
+"Less Pull is running from a temporary copy that macOS makes when an app is opened where it was downloaded. Move Less Pull into the Applications folder, open it from there, and try again." = "Less Pull se está ejecutando desde una copia temporal que macOS crea cuando una app se abre donde se descargó. Mueve Less Pull a la carpeta Aplicaciones, ábrelo desde ahí y vuelve a intentarlo.";

@@ -97,3 +97,5 @@ Developer ID + notarization (build 33, 9 Oct): first notarized release; build.sh
 Session over/away (build 33): statusItemClicked swaps the two jobs while the session is over or away, so the menu button reaches the panel and the session button reaches the menu (Jiri). Explanations updated in 13 languages.
 
 Peek settings (build 33): the "While peeking, turn off" row is always visible on Shortcuts, no longer behind Show advanced options. Default unchanged: peek turns off grayscale and warmth, Night Shift stays on.
+
+Fixes from Anjay (build 33): (1) the launch-time cleanup deleted "NSStatusItem Preferred Position LessPull" every time, which is the key macOS uses for the dragged icon position, so the icon went back to the left after each restart; now a one-time removal of the exact stale value 100000 only. (2) The bridge install wrote five manifests and failed entirely if one folder refused; now per browser, and the host error text reaches the alert, with a dedicated hint when the app runs translocated from Downloads.

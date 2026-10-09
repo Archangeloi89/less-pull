@@ -478,7 +478,6 @@
 "Toggle Grayscale shortcut" = "切换灰度";
 "Toggles Grayscale" = "切换灰度";
 "Tour" = "导览";
-"Try again from a permanent local copy of Less Pull. The local bridge could not be registered." = "请把 Less Pull 放在固定的本地位置后重试。未能注册本地桥接。";
 "Try it" = "试试";
 "Try the glow and sound" = "试试光晕和提示音";
 "Turn Grayscale off for…" = "暂时恢复彩色…";
@@ -557,3 +556,5 @@
 "Night Shift on the lock screen and screensaver" = "在锁定屏幕和屏幕保护程序上开启夜览";
 "The lock screen and the screensaver are drawn by macOS outside Less Pull’s reach, so they show color. With this on, Less Pull turns Night Shift to full warmth there whenever it is quieting your screen, and puts it back when you return. Your Night Shift schedule stays as it is." = "锁定屏幕和屏幕保护程序由 macOS 在 Less Pull 够不到的地方绘制，所以显示彩色。开启后，只要 Less Pull 正在让屏幕安静，就会在那里把夜览调到最暖，你回来时再恢复原样。夜览的时间表保持不变。";
 "Drawn by macOS outside Less Pull’s reach, the lock screen and the screensaver show color. While Less Pull is quieting your screen, Night Shift goes to full warmth there and comes back as it was when you return." = "锁定屏幕和屏幕保护程序由 macOS 在 Less Pull 够不到的地方绘制，显示彩色。只要 Less Pull 正在让屏幕安静，那里的夜览就会调到最暖，你回来时恢复原样。";
+"The local bridge could not be registered." = "无法注册本地连接。";
+"Less Pull is running from a temporary copy that macOS makes when an app is opened where it was downloaded. Move Less Pull into the Applications folder, open it from there, and try again." = "Less Pull 正从 macOS 创建的临时副本运行；在下载位置直接打开应用时会这样。请把 Less Pull 移到“应用程序”文件夹，从那里打开，再试一次。";
