@@ -547,3 +547,8 @@
 "Less Pull, a quieter screen for the Mac: grayscale, warmth, and color where it matters. Free. %@" = "Less Pull, ein ruhigerer Bildschirm für den Mac: Graustufen, Wärme und Farbe, wo sie zählt. Kostenlos. %@";
 "Opens the menu, left toggles Grayscale" = "Öffnet das Menü, links schaltet Graustufen";
 "Opens the session panel" = "Öffnet das Sitzungsfenster";
+"English and German are reviewed line by line. A language marked experimental is written with care but not yet read by a native speaker; if a line sounds wrong, Report a Problem on the About tab reaches me." = "Englisch und Deutsch sind Zeile für Zeile geprüft. Eine Sprache mit dem Zusatz „experimental“ ist sorgfältig geschrieben, aber noch nicht von jemandem gelesen, der sie lebt; klingt eine Zeile falsch, erreicht mich „Problem melden“ unter „Über“.";
+"Grayscale [rule row]" = "Graustufen";
+"Night Shift [rule row]" = "Night Shift";
+"Default [segment]" = "Standard";
+"Default (%@) [segment]" = "Standard (%@)";
