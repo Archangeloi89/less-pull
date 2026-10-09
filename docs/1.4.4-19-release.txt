@@ -63,3 +63,5 @@ Right-click to the session (build 33): the mouse-button setting on Shortcuts now
 Two buttons, two choices (build 33): Shortcuts has one choice for the left and one for the right mouse button on the icon (Opens the menu, Toggles Grayscale, Opens the session panel); one of the two always opens the menu, and they never do the same thing. The settings window remembers where you last put it, across launches and updates.
 
 And the default (build 33): the left button opens the menu, the right button opens the session panel; a copy that had chosen "left toggles Grayscale" keeps that.
+
+Lighter (build 33): closing the settings window now lets go of the window and every view in it, and hands the freed pages back to the system a moment later. Measured on the author's Mac: 19 MB after launch with no window; about 55 MB while Settings is open; back to the low twenties once it is closed, where before the window stayed in memory and the app sat at 65 to 80 MB for the rest of the day. Opening Settings again builds it in a moment.
