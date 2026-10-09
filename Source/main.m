@@ -512,7 +512,7 @@ static void drawKey(NSRect f,NSString *label,double pressed){NSRect r=NSOffsetRe
 }
 // Hidden views leave the stacks; the tabs then take their new height.
 // The settings window never grows taller than the screen it is on: the toolbar and title take about 80 pt, and a margin keeps the window off the Dock.
-- (CGFloat)settingsHeightFor:(CGFloat)contentHeight {NSScreen *screen=self.settings.screen?:NSScreen.mainScreen;CGFloat cap=screen?screen.visibleFrame.size.height-80-24:100000;NSArray *args=NSProcessInfo.processInfo.arguments;NSUInteger ti=[args indexOfObject:@"--screen-height"];if(ti!=NSNotFound&&ti+1<args.count)cap=[args[ti+1] doubleValue]-80-24;return MIN(contentHeight,MAX(cap,240));}
+- (CGFloat)settingsHeightFor:(CGFloat)contentHeight {NSScreen *screen=self.settings.screen?:NSScreen.mainScreen;CGFloat cap=screen?screen.visibleFrame.size.height-80-24:100000;NSArray *args=NSProcessInfo.processInfo.arguments;NSUInteger ti=[args indexOfObject:@"--screen-height"];if(ti!=NSNotFound&&ti+1<args.count)cap=[args[ti+1] doubleValue]-80-24;return MIN(ceil(contentHeight),MAX(cap,240));}
 - (NSView *)settingsContentOf:(NSTabViewItem *)item {NSScrollView *scroll=(NSScrollView *)item.viewController.view.subviews.firstObject;return [scroll isKindOfClass:NSScrollView.class]?scroll.documentView.subviews.firstObject:scroll;}
 - (void)relayoutSettings {
  if(!self.settingsTabs)return;
