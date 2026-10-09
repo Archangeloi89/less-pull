@@ -19,7 +19,7 @@ If you are updating from an earlier build: quit Less Pull, replace the app in Ap
 
 The extension is optional. It adds [website exceptions](EXCEPTIONS.md#website-exceptions). It ships inside the app, so there is nothing else to download.
 
-1. In Less Pull, open **Settings… → Websites**, choose **Install Browser Extension…**, and pick your browser. Less Pull sets up its local connection, opens the browser's extensions page, and shows the extension folder in Finder.
+1. In Less Pull, open **Settings… → Websites** and choose **Install Browser Extension…**. A window lists the supported browsers installed on your Mac, your default browser first; click **Set up…** next to one. Less Pull sets up its local connection, opens the browser's extensions page and shows the steps to finish. The window stays open, so a second browser can follow; close it when you are done.
 2. On the Extensions page, turn on **Developer mode**.
 3. Click **Load unpacked** and select the **Browser Extension** folder shown in Finder. You can also press <kbd>⌘</kbd><kbd>⇧</kbd><kbd>G</kbd> in the file picker and enter `/Applications/Less Pull.app/Contents/Resources/Browser Extension`.
 4. Open a website, then click the Less Pull icon in the **menu bar**: the menu now offers **Exception for [that site]**. The extension itself shows nothing in the browser.
