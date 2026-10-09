@@ -478,7 +478,6 @@
 "Toggle Grayscale shortcut" = "회색조 전환";
 "Toggles Grayscale" = "회색조 전환";
 "Tour" = "둘러보기";
-"Try again from a permanent local copy of Less Pull. The local bridge could not be registered." = "Less Pull을 고정된 위치에 두고 다시 시도하세요. 로컬 브리지를 등록하지 못했습니다.";
 "Try it" = "해 보기";
 "Try the glow and sound" = "빛과 소리 해 보기";
 "Turn Grayscale off for…" = "잠시 컬러로…";
@@ -557,3 +556,5 @@
 "Night Shift on the lock screen and screensaver" = "잠금 화면과 화면 보호기에서 Night Shift";
 "The lock screen and the screensaver are drawn by macOS outside Less Pull’s reach, so they show color. With this on, Less Pull turns Night Shift to full warmth there whenever it is quieting your screen, and puts it back when you return. Your Night Shift schedule stays as it is." = "잠금 화면과 화면 보호기는 macOS가 Less Pull의 손이 닿지 않는 곳에서 그리기 때문에 컬러로 보입니다. 이것을 켜면 Less Pull이 화면을 고요하게 하는 동안 그곳에서는 Night Shift를 최대 따뜻함으로 올리고, 돌아오면 원래대로 되돌립니다. Night Shift 일정은 그대로입니다.";
 "Drawn by macOS outside Less Pull’s reach, the lock screen and the screensaver show color. While Less Pull is quieting your screen, Night Shift goes to full warmth there and comes back as it was when you return." = "잠금 화면과 화면 보호기는 macOS가 Less Pull의 손이 닿지 않는 곳에서 그리므로 컬러로 보입니다. Less Pull이 화면을 고요하게 하는 동안 그곳에서는 Night Shift가 최대 따뜻함이 되고, 돌아오면 원래대로 돌아옵니다.";
+"The local bridge could not be registered." = "로컬 연결을 등록하지 못했습니다.";
+"Less Pull is running from a temporary copy that macOS makes when an app is opened where it was downloaded. Move Less Pull into the Applications folder, open it from there, and try again." = "Less Pull이 다운로드한 자리에서 앱을 열 때 macOS가 만드는 임시 복사본에서 실행되고 있습니다. Less Pull을 ‘응용 프로그램’ 폴더로 옮기고 거기서 연 다음 다시 시도하세요.";

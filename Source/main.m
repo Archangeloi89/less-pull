@@ -156,6 +156,17 @@ static NSString *const LessPullOldBundleIdentifier=@"local.nightshiftfilters.app
 @implementation ExceptionStack
 - (BOOL)isFlipped {return YES;}
 @end
+@interface SettingsDocument : NSView
+@end
+@implementation SettingsDocument
+- (BOOL)isFlipped {return YES;}
+@end
+// The settings tabs always use the overlay scroller, whatever "Show scroll bars" says, so the 500 pt layout never loses width to a bar.
+@interface SettingsScrollView : NSScrollView
+@end
+@implementation SettingsScrollView
+- (NSScrollerStyle)scrollerStyle {return NSScrollerStyleOverlay;}
+@end
 // The slider track shows what the slider does: the real neutral -> amber -> red
 // ramp of WarmthCurve.h, i.e. what white becomes at each strength.
 @interface WarmthSliderCell : NSSliderCell
@@ -500,10 +511,13 @@ static void drawKey(NSRect f,NSString *label,double pressed){NSRect r=NSOffsetRe
  [self rebuildExclusionsList];[self rebuildWebsiteRulesList];[self relayoutSettings];
 }
 // Hidden views leave the stacks; the tabs then take their new height.
+// The settings window never grows taller than the screen it is on: the toolbar and title take about 80 pt, and a margin keeps the window off the Dock.
+- (CGFloat)settingsHeightFor:(CGFloat)contentHeight {NSScreen *screen=self.settings.screen?:NSScreen.mainScreen;CGFloat cap=screen?screen.visibleFrame.size.height-80-24:100000;NSArray *args=NSProcessInfo.processInfo.arguments;NSUInteger ti=[args indexOfObject:@"--screen-height"];if(ti!=NSNotFound&&ti+1<args.count)cap=[args[ti+1] doubleValue]-80-24;return MIN(ceil(contentHeight),MAX(cap,240));}
+- (NSView *)settingsContentOf:(NSTabViewItem *)item {NSScrollView *scroll=(NSScrollView *)item.viewController.view.subviews.firstObject;return [scroll isKindOfClass:NSScrollView.class]?scroll.documentView.subviews.firstObject:scroll;}
 - (void)relayoutSettings {
  if(!self.settingsTabs)return;
  CGFloat width=500;
- for(NSTabViewItem *item in self.settingsTabs.tabViewItems){NSView *root=item.viewController.view;NSView *content=root.subviews.firstObject;[root layoutSubtreeIfNeeded];item.viewController.preferredContentSize=NSMakeSize(width,content.fittingSize.height);}
+ for(NSTabViewItem *item in self.settingsTabs.tabViewItems){NSView *content=[self settingsContentOf:item];[content layoutSubtreeIfNeeded];item.viewController.preferredContentSize=NSMakeSize(width,[self settingsHeightFor:content.fittingSize.height]);}
  NSInteger i=self.settingsTabs.selectedTabViewItemIndex;self.settingsTabs.selectedTabViewItemIndex=i==0?1:0;self.settingsTabs.selectedTabViewItemIndex=i;
 }
 - (void)toggleAdvanced:(NSButton *)sender {[NSUserDefaults.standardUserDefaults setBool:sender.state==NSControlStateValueOn forKey:@"showAdvanced"];[self applyVisibility];}
@@ -801,7 +815,8 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  self.browserBridge=[BrowserBridge new];__weak AppDelegate *browserOwner=self;self.browserBridge.changed=^{[browserOwner sync];[browserOwner rebuildWebsiteRulesList];[browserOwner refreshBrowserRows];};self.browserBridge.defaults=^NSDictionary *(NSString *browser){return [browserOwner browserBaseForBundle:browser];};[self.browserBridge start];
  // The icon's place in the menu bar is macOS's: the user ⌘-drags it and macOS remembers. Builds 25 to 33 wrote a
  // "Preferred Position" value once; it is removed here so nothing of ours can pull the icon back to the left.
- if([d objectForKey:@"NSStatusItem Preferred Position LessPull"]){[d removeObjectForKey:@"NSStatusItem Preferred Position LessPull"];[d removeObjectForKey:@"NSStatusItem Preferred Position Item-0"];[d removeObjectForKey:@"iconPlacedRight"];}
+ // macOS writes that same key when the user drags the icon, so only the exact stale value goes, and only once.
+ if(![d boolForKey:@"statusPositionCleaned"]){if([[d objectForKey:@"NSStatusItem Preferred Position LessPull"] doubleValue]==100000)[d removeObjectForKey:@"NSStatusItem Preferred Position LessPull"];[d removeObjectForKey:@"NSStatusItem Preferred Position Item-0"];[d removeObjectForKey:@"iconPlacedRight"];[d setBool:YES forKey:@"statusPositionCleaned"];}
  self.item=[NSStatusBar.systemStatusBar statusItemWithLength:NSVariableStatusItemLength];self.item.autosaveName=@"LessPull";self.item.button.imagePosition=NSImageLeft;self.item.button.imageHugsTitle=YES;
  self.item.button.image=[self menuBarImage:@"menubar-grayscale" symbol:@"circle.lefthalf.filled"];
  self.item.button.toolTip=L(@"Less Pull");
@@ -1454,11 +1469,16 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
 - (NSTabViewItem *)tab:(NSString *)title symbol:(NSString *)symbol content:(NSStackView *)content {
  content.edgeInsets=NSEdgeInsetsMake(20,24,20,24);content.translatesAutoresizingMaskIntoConstraints=NO;
  // The standard window material: translucent like System Settings when transparency is on, solid under Reduce transparency.
- NSViewController *controller=[NSViewController new];NSVisualEffectView *root=[NSVisualEffectView new];root.material=NSVisualEffectMaterialWindowBackground;root.blendingMode=NSVisualEffectBlendingModeBehindWindow;root.state=NSVisualEffectStateFollowsWindowActiveState;[root addSubview:content];
- [NSLayoutConstraint activateConstraints:@[[content.topAnchor constraintEqualToAnchor:root.topAnchor],[content.leadingAnchor constraintEqualToAnchor:root.leadingAnchor],[content.trailingAnchor constraintEqualToAnchor:root.trailingAnchor],[content.bottomAnchor constraintEqualToAnchor:root.bottomAnchor]]];[root.widthAnchor constraintEqualToConstant:500].active=YES;  // every language fits 500 pt; a line that does not is shortened in its table
+ NSViewController *controller=[NSViewController new];NSVisualEffectView *root=[NSVisualEffectView new];root.material=NSVisualEffectMaterialWindowBackground;root.blendingMode=NSVisualEffectBlendingModeBehindWindow;root.state=NSVisualEffectStateFollowsWindowActiveState;
+ // The tab scrolls when the screen is shorter than its content (a 13-inch Mac with larger text); otherwise the scroller stays hidden and the window takes the content's height.
+ SettingsDocument *doc=[SettingsDocument new];doc.translatesAutoresizingMaskIntoConstraints=NO;[doc addSubview:content];
+ SettingsScrollView *scroll=[SettingsScrollView new];scroll.translatesAutoresizingMaskIntoConstraints=NO;scroll.drawsBackground=NO;scroll.hasVerticalScroller=YES;scroll.hasHorizontalScroller=NO;scroll.autohidesScrollers=YES;scroll.scrollerStyle=NSScrollerStyleOverlay;scroll.verticalScrollElasticity=NSScrollElasticityAllowed;scroll.horizontalScrollElasticity=NSScrollElasticityNone;scroll.documentView=doc;[root addSubview:scroll];
+ [NSLayoutConstraint activateConstraints:@[[scroll.topAnchor constraintEqualToAnchor:root.topAnchor],[scroll.leadingAnchor constraintEqualToAnchor:root.leadingAnchor],[scroll.trailingAnchor constraintEqualToAnchor:root.trailingAnchor],[scroll.bottomAnchor constraintEqualToAnchor:root.bottomAnchor],
+  [doc.topAnchor constraintEqualToAnchor:scroll.contentView.topAnchor],[doc.leadingAnchor constraintEqualToAnchor:scroll.contentView.leadingAnchor],[doc.widthAnchor constraintEqualToAnchor:scroll.contentView.widthAnchor],
+  [content.topAnchor constraintEqualToAnchor:doc.topAnchor],[content.leadingAnchor constraintEqualToAnchor:doc.leadingAnchor],[content.trailingAnchor constraintEqualToAnchor:doc.trailingAnchor],[content.bottomAnchor constraintEqualToAnchor:doc.bottomAnchor]]];[root.widthAnchor constraintEqualToConstant:500].active=YES;  // every language fits 500 pt; a line that does not is shortened in its table
  // Rows, separators and lists span the column; a view marked fixed keeps its own width.
  for(NSView *v in content.arrangedSubviews)if(([v isKindOfClass:NSStackView.class]&&![v.identifier isEqual:@"fixed"])||[v isKindOfClass:NSBox.class]||[v isKindOfClass:NSScrollView.class])[v.widthAnchor constraintEqualToAnchor:content.widthAnchor constant:-48].active=YES;
- controller.view=root;controller.title=title;[root layoutSubtreeIfNeeded];controller.preferredContentSize=root.fittingSize;
+ controller.view=root;controller.title=title;[content layoutSubtreeIfNeeded];controller.preferredContentSize=NSMakeSize(500,[self settingsHeightFor:content.fittingSize.height]);
  NSTabViewItem *item=[NSTabViewItem tabViewItemWithViewController:controller];item.label=title;item.image=[NSImage imageWithSystemSymbolName:symbol accessibilityDescription:title];return item;
 }
 - (NSStackView *)generalTab {
@@ -1760,7 +1780,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  [column removeArrangedSubview:card];[card removeFromSuperview];self.welcomeCard=nil;self.welcomeWanted=NO;
  // The tab's root view echoes its frame as fitting size; measure the column, then
  // reselect the tab so the tab controller applies the smaller size to the window.
- [column layoutSubtreeIfNeeded];self.settingsTabs.tabViewItems.firstObject.viewController.preferredContentSize=NSMakeSize(500,column.fittingSize.height);
+ [column layoutSubtreeIfNeeded];self.settingsTabs.tabViewItems.firstObject.viewController.preferredContentSize=NSMakeSize(500,[self settingsHeightFor:column.fittingSize.height]);
  self.settingsTabs.selectedTabViewItemIndex=1;self.settingsTabs.selectedTabViewItemIndex=0;
 }
 // A prefilled GitHub issue: build, macOS and the diagnostics text, which names no apps or websites.
@@ -1786,6 +1806,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
   // Closed means gone: the window and every view in it are let go, so the app weighs what a menu-bar app should while you are not looking at it. Opening again builds it in a moment.
   [NSNotificationCenter.defaultCenter addObserverForName:NSWindowWillCloseNotification object:self.settings queue:nil usingBlock:^(NSNotification *n){[self releaseSettings];}];
   self.settings.initialFirstResponder=self.grayscaleButton;[self.settings center];{NSString *at=[NSUserDefaults.standardUserDefaults stringForKey:@"settingsTopLeft"];if(at.length&&!self.keepSettingsFrame){NSPoint p=NSPointFromString(at);NSRect f=self.settings.frame;f.origin.x=p.x;f.origin.y=p.y-f.size.height;[self.settings setFrame:[self.settings constrainFrameRect:f toScreen:self.settings.screen?:NSScreen.mainScreen] display:NO];}}
+  [NSNotificationCenter.defaultCenter addObserverForName:NSWindowDidChangeScreenNotification object:self.settings queue:NSOperationQueue.mainQueue usingBlock:^(NSNotification *n){[self relayoutSettings];}];
   [NSNotificationCenter.defaultCenter addObserverForName:NSWindowDidMoveNotification object:self.settings queue:nil usingBlock:^(NSNotification *n){if(self.settings.visible&&!self.welcomeWanted)[NSUserDefaults.standardUserDefaults setObject:NSStringFromPoint(NSMakePoint(self.settings.frame.origin.x,NSMaxY(self.settings.frame))) forKey:@"settingsTopLeft"];}];
   if(self.keepSettingsFrame){NSRect f=self.settings.frame;f.origin.x=self.keptSettingsFrame.origin.x;f.origin.y=NSMaxY(self.keptSettingsFrame)-f.size.height;[self.settings setFrame:[self.settings constrainFrameRect:f toScreen:self.settings.screen?:NSScreen.mainScreen] display:NO];self.keepSettingsFrame=NO;};
  }
@@ -1853,7 +1874,8 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  NSArray *entry=nil;for(NSArray *b in [self browserCatalog])if([b[1] isEqual:identifier])entry=b;if(!entry)return;NSString *browser=entry[0];BOOL firefox=[identifier isEqual:@"org.mozilla.firefox"];
  NSURL *browserURL=[NSWorkspace.sharedWorkspace URLForApplicationWithBundleIdentifier:identifier];
  if(!browserURL){NSAlert *get=[NSAlert new];get.messageText=[NSString stringWithFormat:L(@"%@ is not installed on this Mac"),browser];get.informativeText=[NSString stringWithFormat:L(@"Install %@ first; this list notices it by itself. Then come back to Set up…"),browser];[get addButtonWithTitle:[NSString stringWithFormat:L(@"Get %@"),browser]];[get addButtonWithTitle:L(@"Not now")];NSString *page=entry[3];[get beginSheetModalForWindow:self.browserWindow completionHandler:^(NSModalResponse r){if(r==NSAlertFirstButtonReturn)[NSWorkspace.sharedWorkspace openURL:[NSURL URLWithString:page]];}];return;}
- NSTask *setup=[NSTask new];setup.executableURL=[NSBundle.mainBundle.bundleURL URLByAppendingPathComponent:@"Contents/MacOS/LessPullBrowserHost"];setup.arguments=@[@"--install"];setup.standardOutput=[NSPipe pipe];setup.standardError=[NSPipe pipe];NSError *error=nil;BOOL started=[setup launchAndReturnError:&error];if(started)[setup waitUntilExit];if(!started||setup.terminationStatus!=0){NSAlert *failed=[NSAlert new];failed.messageText=L(@"Browser setup could not finish");failed.informativeText=error.localizedDescription?:L(@"Try again from a permanent local copy of Less Pull. The local bridge could not be registered.");[failed beginSheetModalForWindow:self.browserWindow completionHandler:nil];return;}
+ NSTask *setup=[NSTask new];setup.executableURL=[NSBundle.mainBundle.bundleURL URLByAppendingPathComponent:@"Contents/MacOS/LessPullBrowserHost"];setup.arguments=@[@"--install"];setup.standardOutput=[NSPipe pipe];NSPipe *errPipe=[NSPipe pipe];setup.standardError=errPipe;NSError *error=nil;BOOL started=[setup launchAndReturnError:&error];NSString *reason=nil;if(started){NSData *errData=[errPipe.fileHandleForReading readDataToEndOfFile];[setup waitUntilExit];reason=[[[NSString alloc]initWithData:errData encoding:NSUTF8StringEncoding] stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];}
+ if(!started||setup.terminationStatus!=0){NSAlert *failed=[NSAlert new];failed.messageText=L(@"Browser setup could not finish");BOOL translocated=[NSBundle.mainBundle.bundleURL.path containsString:@"/AppTranslocation/"];NSString *why=error.localizedDescription?:(reason.length?reason:L(@"The local bridge could not be registered."));failed.informativeText=translocated?[NSString stringWithFormat:@"%@\n\n%@",L(@"Less Pull is running from a temporary copy that macOS makes when an app is opened where it was downloaded. Move Less Pull into the Applications folder, open it from there, and try again."),why]:why;[failed beginSheetModalForWindow:self.browserWindow completionHandler:nil];return;}
  NSURL *folder=[NSBundle.mainBundle.resourceURL URLByAppendingPathComponent:firefox?L(@"Browser Extension (Firefox)"):L(@"Browser Extension")];if(firefox)[NSWorkspace.sharedWorkspace activateFileViewerSelectingURLs:@[folder]];  // Chrome, Brave, Edge and Opera install from the Chrome Web Store; Firefox loads the folder until Mozilla’s review is done
  [NSWorkspace.sharedWorkspace openURLs:@[[NSURL URLWithString:entry[2]]] withApplicationAtURL:browserURL configuration:NSWorkspaceOpenConfiguration.configuration completionHandler:nil];
  NSAlert *guide=[NSAlert new];guide.messageText=[NSString stringWithFormat:L(@"Finish in %@"),browser];

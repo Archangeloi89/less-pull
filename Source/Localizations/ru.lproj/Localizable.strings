@@ -478,7 +478,6 @@
 "Toggle Grayscale shortcut" = "Оттенки серого вкл/выкл";
 "Toggles Grayscale" = "Переключает оттенки серого";
 "Tour" = "Тур";
-"Try again from a permanent local copy of Less Pull. The local bridge could not be registered." = "Попробуйте снова из постоянной локальной копии Less Pull. Не удалось зарегистрировать локальный мост.";
 "Try it" = "Пробовать";
 "Try the glow and sound" = "Попробовать свечение и звук";
 "Turn Grayscale off for…" = "Вернуть цвет на…";
@@ -557,3 +556,5 @@
 "Night Shift on the lock screen and screensaver" = "Night Shift на экране блокировки и заставке";
 "The lock screen and the screensaver are drawn by macOS outside Less Pull’s reach, so they show color. With this on, Less Pull turns Night Shift to full warmth there whenever it is quieting your screen, and puts it back when you return. Your Night Shift schedule stays as it is." = "Экран блокировки и заставку macOS рисует вне досягаемости Less Pull, поэтому они цветные. Если включено, Less Pull выводит там Night Shift на полную теплоту, пока успокаивает ваш экран, и возвращает всё как было, когда вы вернётесь. Расписание Night Shift не меняется.";
 "Drawn by macOS outside Less Pull’s reach, the lock screen and the screensaver show color. While Less Pull is quieting your screen, Night Shift goes to full warmth there and comes back as it was when you return." = "Экран блокировки и заставку macOS рисует вне досягаемости Less Pull; они цветные. Пока Less Pull успокаивает ваш экран, Night Shift там на полной теплоте, а когда вы вернётесь, всё снова как было.";
+"The local bridge could not be registered." = "Не удалось зарегистрировать локальное соединение.";
+"Less Pull is running from a temporary copy that macOS makes when an app is opened where it was downloaded. Move Less Pull into the Applications folder, open it from there, and try again." = "Less Pull запущен из временной копии, которую macOS создаёт, когда приложение открывают там, куда его скачали. Переместите Less Pull в папку «Программы», откройте оттуда и попробуйте снова.";

@@ -456,7 +456,6 @@
 "Toggle Grayscale shortcut" = "Graustufen umschalten";
 "Toggles Grayscale" = "Schaltet die Graustufen um";
 "Tour" = "Tour";
-"Try again from a permanent local copy of Less Pull. The local bridge could not be registered." = "Versuch es noch einmal aus einer dauerhaften lokalen Kopie von Less Pull. Die lokale Verbindung ließ sich nicht anmelden.";
 "Try it" = "Ausprobieren";
 "Try the glow and sound" = "Leuchten und Ton ausprobieren";
 "Turn Grayscale off for…" = "Graustufen aus für …";
@@ -560,3 +559,5 @@
 "Night Shift on the lock screen and screensaver" = "Night Shift auf Sperrbildschirm und Bildschirmschoner";
 "The lock screen and the screensaver are drawn by macOS outside Less Pull’s reach, so they show color. With this on, Less Pull turns Night Shift to full warmth there whenever it is quieting your screen, and puts it back when you return. Your Night Shift schedule stays as it is." = "Sperrbildschirm und Bildschirmschoner zeichnet macOS außerhalb der Reichweite von Less Pull, deshalb erscheinen sie in Farbe. Ist dies eingeschaltet, dreht Less Pull dort Night Shift auf volle Wärme, solange es deinen Bildschirm beruhigt, und stellt es bei deiner Rückkehr wieder her. Dein Night-Shift-Zeitplan bleibt unberührt.";
 "Drawn by macOS outside Less Pull’s reach, the lock screen and the screensaver show color. While Less Pull is quieting your screen, Night Shift goes to full warmth there and comes back as it was when you return." = "Sperrbildschirm und Bildschirmschoner zeichnet macOS außerhalb der Reichweite von Less Pull; sie erscheinen in Farbe. Solange Less Pull deinen Bildschirm beruhigt, geht Night Shift dort auf volle Wärme und ist bei deiner Rückkehr wieder wie zuvor.";
+"The local bridge could not be registered." = "Die lokale Verbindung konnte nicht eingerichtet werden.";
+"Less Pull is running from a temporary copy that macOS makes when an app is opened where it was downloaded. Move Less Pull into the Applications folder, open it from there, and try again." = "Less Pull läuft gerade aus einer temporären Kopie, die macOS anlegt, wenn eine App dort geöffnet wird, wo sie heruntergeladen wurde. Verschiebe Less Pull in den Ordner „Programme“, öffne es von dort und versuche es noch einmal.";

@@ -46,3 +46,5 @@ Simulates a display reset after a fade finishes. Checks persistent grayscale, tw
 --session-panel       opens the session panel under the icon 1.5 s after launch (needs a session).
 --session-soon        starts a 1-minute session that ends about 6 s after launch.
 --session-start-panel opens the Start a session panel 1.5 s after launch.
+
+--screen-height N: pretend the screen is N pt tall, to see the settings tabs scroll on a small display.
