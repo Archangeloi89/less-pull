@@ -263,7 +263,7 @@ static NSString *const LessPullOldBundleIdentifier=@"local.nightshiftfilters.app
 @property ShortcutRecorder *peekRecorder,*grayscaleRecorder;
 @property NSTextField *peekNote,*loginNote,*grayscaleShortcutNote;
 @property NSButton *peekGrayButton,*peekWarmthButton,*peekNightButton;
-@property NSPopUpButton *clickPopup,*grayOffPopup;
+@property NSPopUpButton *clickPopup,*rightClickPopup,*grayOffPopup;
 @property NSButton *grayOnButton;
 @property NSDate *grayOffUntil; // nil: not timed off; distantFuture: until Night Shift next changes
 @property NSTimer *grayOffTimer;
@@ -1079,7 +1079,7 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  self.nightButton.state=self.exclusion.active?on:(actualKnown&&actualOn);
  self.nightButton.title=known?(self.exclusion.active?(on?L(@"Default Night Shift: On"):L(@"Default Night Shift: Off")):(on?L(@"Night Shift: On"):L(@"Night Shift: Off"))):L(@"Night Shift unavailable");[self helpView:self.nightButton text:self.exclusion.active?[[self exclusionHelp] stringByAppendingString:L(@" This changes your default; the app in front keeps its own Night Shift exception.")]:self.nightHelp label:nil];
  self.grayscaleButton.state=self.selectedMode==1||self.selectedMode==100;
- self.grayscaleButton.title=self.grayOverride?L(@"Default Grayscale"):L(@"Grayscale");self.grayOnButton.hidden=self.grayOffUntil==nil;self.grayOffPopup.hidden=self.grayOffUntil!=nil||!self.grayscaleButton.state;self.grayOnButton.toolTip=[self grayOffLabel];if(self.clickPopup)[self.clickPopup selectItemAtIndex:MIN(2,MAX(0,[NSUserDefaults.standardUserDefaults integerForKey:@"iconClick"]))?1:0];
+ self.grayscaleButton.title=self.grayOverride?L(@"Default Grayscale"):L(@"Grayscale");self.grayOnButton.hidden=self.grayOffUntil==nil;self.grayOffPopup.hidden=self.grayOffUntil!=nil||!self.grayscaleButton.state;self.grayOnButton.toolTip=[self grayOffLabel];if(self.clickPopup)[self.clickPopup selectItemAtIndex:[self jobOfButton:NO]];[self.rightClickPopup selectItemAtIndex:[self jobOfButton:YES]?1:0];
  self.resumeButton.hidden=!(self.automatic&&self.policy.overrideMode>=0);
  self.endPauseButton.title=[self canResumePause]?L(@"Turn Night Shift back on"):L(@"End timed off");[self helpView:self.endPauseButton text:[self endPauseHelp] label:self.endPauseButton.title];self.endPauseButton.hidden=self.pause==nil;self.pausePopup.hidden=self.pause!=nil;self.pausePopup.enabled=known&&(on||actualOn);
  self.resetButton.enabled=[self currentWarmth]>0;
@@ -1317,18 +1317,27 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
 - (void)populateGrayscaleOffPopup {[self.grayOffPopup removeAllItems];[self.grayOffPopup addItemWithTitle:L(@"Turn Grayscale off for…")];[self populateGrayscaleOff:self.grayOffPopup.menu];}
 // Clicking the menu-bar icon: the menu on the left button and a Grayscale toggle on the
 // right button by default; the preference swaps them.
-- (BOOL)leftClickToggles {return [NSUserDefaults.standardUserDefaults integerForKey:@"iconClick"]==1;}
+// What each mouse button does on the icon: 0 opens the menu, 1 toggles Grayscale, 2 opens the session panel.
+// Older copies had one choice (iconClick); it is read once into the two.
+- (NSInteger)jobOfButton:(BOOL)secondary {
+ NSUserDefaults *d=NSUserDefaults.standardUserDefaults;if(![d objectForKey:@"leftClick"]){NSInteger old=[d integerForKey:@"iconClick"];[d setInteger:old==1?1:0 forKey:@"leftClick"];[d setInteger:old==1?0:2 forKey:@"rightClick"];}
+ return [d integerForKey:secondary?@"rightClick":@"leftClick"];
+}
 - (void)statusItemClicked:(id)sender {
  NSEvent *event=NSApp.currentEvent;BOOL secondary=event.type==NSEventTypeRightMouseUp||event.type==NSEventTypeRightMouseDown||(event.modifierFlags&NSEventModifierFlagControl);
- if([NSUserDefaults.standardUserDefaults integerForKey:@"iconClick"]==2){  // the other button goes straight to the session: start one, or the running one's panel
-  if(secondary){if(self.session.state!=SessionIdle)[self toggleSessionPanel];else if(self.sessionPanel.visible)[self closeSessionPanel];else [self showSessionPanelMode:@"start"];return;}
-  [self closeSessionPanel];self.item.menu=self.statusMenu;[self.item.button performClick:nil];return;}
- BOOL toggle=[self leftClickToggles]?!secondary:secondary;
- if(self.session.state!=SessionIdle){if(!toggle){[self toggleSessionPanel];return;}[self closeSessionPanel];self.item.menu=self.statusMenu;[self.item.button performClick:nil];return;}
- if(toggle){[self toggleGrayscale:nil];return;}
- self.item.menu=self.statusMenu;[self.item.button performClick:nil];
+ NSInteger job=[self jobOfButton:secondary],other=[self jobOfButton:!secondary];
+ if(job==1){[self toggleGrayscale:nil];return;}
+ if(job==2){if(self.session.state!=SessionIdle)[self toggleSessionPanel];else if(self.sessionPanel.visible)[self closeSessionPanel];else [self showSessionPanelMode:@"start"];return;}
+ // the menu button: while a session runs and no button is the session's, this one opens the session panel instead, as before
+ if(self.session.state!=SessionIdle&&other!=2){[self toggleSessionPanel];return;}
+ [self closeSessionPanel];self.item.menu=self.statusMenu;[self.item.button performClick:nil];
 }
-- (void)clickBehaviorChanged:(NSPopUpButton *)sender {[NSUserDefaults.standardUserDefaults setInteger:sender.indexOfSelectedItem forKey:@"iconClick"];[self refreshControlsKnown:NO nightOn:NO];[self sync];}
+- (void)clickBehaviorChanged:(NSPopUpButton *)sender {
+ NSUserDefaults *d=NSUserDefaults.standardUserDefaults;BOOL right=sender==self.rightClickPopup;NSInteger job=sender.indexOfSelectedItem;[d setInteger:job forKey:right?@"rightClick":@"leftClick"];
+ NSPopUpButton *otherPopup=right?self.clickPopup:self.rightClickPopup;NSString *otherKey=right?@"leftClick":@"rightClick";NSInteger other=[d integerForKey:otherKey];
+ if(other==job||(job!=0&&other!=0)){[d setInteger:0 forKey:otherKey];[otherPopup selectItemAtIndex:0];}  // one button always opens the menu, and the two never do the same
+ [self refreshControlsKnown:NO nightOn:NO];[self sync];
+}
 - (NSString *)pauseLessPullHelp {return L(@"Shows the plain display for a while: color and no added warmth. Night Shift is left alone. Your settings and exceptions are kept.");}
 - (void)persistLessPullPause {NSUserDefaults *d=NSUserDefaults.standardUserDefaults;if(self.pausedUntil)[d setObject:@{@"until":@([self.pausedUntil isEqualToDate:NSDate.distantFuture]?0:self.pausedUntil.timeIntervalSince1970)} forKey:@"lessPullPause"];else [d removeObjectForKey:@"lessPullPause"];}
 - (void)restoreLessPullPause {
@@ -1458,8 +1467,9 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  return column;
 }
 - (NSStackView *)shortcutsTab {
- NSTextField *clickTitle=[NSTextField labelWithString:L(@"Right-clicking the menu-bar icon")];clickTitle.font=[NSFont systemFontOfSize:13 weight:NSFontWeightMedium];
- self.clickPopup=[[NSPopUpButton alloc]initWithFrame:NSZeroRect pullsDown:NO];[self.clickPopup addItemsWithTitles:@[L(@"Toggles Grayscale"),L(@"Opens the menu, left toggles Grayscale"),L(@"Opens the session panel")]];self.clickPopup.target=self;self.clickPopup.action=@selector(clickBehaviorChanged:);[self.clickPopup.widthAnchor constraintEqualToConstant:200].active=YES;[self helpView:self.clickPopup text:L(@"What the right mouse button does on the menu-bar icon; the left button does the other. Control-click and a two-finger tap count as a right-click.") label:L(@"Right-clicking the menu-bar icon")];
+ NSTextField *clickTitle=[NSTextField labelWithString:L(@"Left-clicking the menu-bar icon")];NSTextField *rightTitle=[NSTextField labelWithString:L(@"Right-clicking the menu-bar icon")];rightTitle.font=clickTitle.font;clickTitle.font=[NSFont systemFontOfSize:13 weight:NSFontWeightMedium];
+ self.clickPopup=[[NSPopUpButton alloc]initWithFrame:NSZeroRect pullsDown:NO];[self.clickPopup addItemsWithTitles:@[L(@"Opens the menu"),L(@"Toggles Grayscale"),L(@"Opens the session panel")]];self.clickPopup.target=self;self.clickPopup.action=@selector(clickBehaviorChanged:);[self.clickPopup.widthAnchor constraintEqualToConstant:200].active=YES;[self helpView:self.clickPopup text:L(@"What the left mouse button does on the menu-bar icon.") label:L(@"Left-clicking the menu-bar icon")];
+ self.rightClickPopup=[[NSPopUpButton alloc]initWithFrame:NSZeroRect pullsDown:NO];[self.rightClickPopup addItemsWithTitles:@[L(@"Opens the menu"),L(@"Toggles Grayscale"),L(@"Opens the session panel")]];self.rightClickPopup.target=self;self.rightClickPopup.action=@selector(clickBehaviorChanged:);[self.rightClickPopup.widthAnchor constraintEqualToConstant:200].active=YES;[self helpView:self.rightClickPopup text:L(@"What the right mouse button does on the menu-bar icon. Control-click and a two-finger tap on the trackpad count as a right-click.") label:L(@"Right-clicking the menu-bar icon")];
  NSTextField *grayShortcutTitle=[NSTextField labelWithString:L(@"Toggle Grayscale shortcut")];grayShortcutTitle.font=[NSFont systemFontOfSize:13 weight:NSFontWeightMedium];
  self.grayscaleRecorder=[ShortcutRecorder new];self.grayscaleRecorder.bezelStyle=NSBezelStyleRounded;self.grayscaleRecorder.title=L(@"Record Shortcut");self.grayscaleRecorder.target=self;self.grayscaleRecorder.action=@selector(startRecording:);[self.grayscaleRecorder.widthAnchor constraintGreaterThanOrEqualToConstant:150].active=YES;
  __weak AppDelegate *weakGray=self;self.grayscaleRecorder.recorded=^(NSInteger keyCode,NSEventModifierFlags modifiers){[weakGray saveShortcut:@"grayscaleShortcut" keyCode:keyCode modifiers:modifiers];};self.grayscaleRecorder.cleared=^{[weakGray saveShortcut:@"grayscaleShortcut" keyCode:-1 modifiers:0];};
@@ -1479,7 +1489,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  self.peekNote=[self note:@""];
  NSStackView *column=[self column:@[[self row:@[peekTitle,[self spacer],suggestPeek,self.peekRecorder]],self.peekNote,[self adv:[self row:@[peekEffectsLabel,self.peekGrayButton,self.peekWarmthButton,self.peekNightButton]]],[self multi:[self row:@[peekScopeLabel,self.peekScopePopup]]],[self separator],
   [self row:@[grayShortcutTitle,[self spacer],suggestGray,self.grayscaleRecorder]],self.grayscaleShortcutNote,[self adv:[self separator]],
-  [self adv:[self row:@[clickTitle,[self spacer],self.clickPopup]]],[self adv:[self note:L(@"A Control-click or a two-finger tap on the trackpad counts as a right-click. With Opens the session panel, the right button starts a session, or opens the panel of the one running; the left button always opens the menu.")]]]];
+  [self adv:[self row:@[clickTitle,[self spacer],self.clickPopup]]],[self adv:[self row:@[rightTitle,[self spacer],self.rightClickPopup]]],[self adv:[self note:L(@"A Control-click or a two-finger tap on the trackpad counts as a right-click. One of the two always opens the menu. Opens the session panel starts a session, or opens the panel of the one running.")]]]];
  [column setCustomSpacing:4 afterView:column.arrangedSubviews[0]];[column setCustomSpacing:6 afterView:column.arrangedSubviews[1]];[column setCustomSpacing:4 afterView:column.arrangedSubviews[5]];[column setCustomSpacing:4 afterView:column.arrangedSubviews[8]];[self refreshPeekRecorder:nil];
  return column;
 }
@@ -1739,7 +1749,9 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
   [self.settingsTabs addTabViewItem:[self tab:L(@"Websites") symbol:@"globe" content:[self websitesTab]]];
   [self.settingsTabs addTabViewItem:[self tab:L(@"About") symbol:@"info.circle" content:[self aboutTab]]];
   self.settings=[NSWindow windowWithContentViewController:self.settingsTabs];
-  self.settings.initialFirstResponder=self.grayscaleButton;[self.settings center];if(self.keepSettingsFrame){NSRect f=self.settings.frame;f.origin.x=self.keptSettingsFrame.origin.x;f.origin.y=NSMaxY(self.keptSettingsFrame)-f.size.height;[self.settings setFrame:[self.settings constrainFrameRect:f toScreen:self.settings.screen?:NSScreen.mainScreen] display:NO];self.keepSettingsFrame=NO;};
+  self.settings.initialFirstResponder=self.grayscaleButton;[self.settings center];{NSString *at=[NSUserDefaults.standardUserDefaults stringForKey:@"settingsTopLeft"];if(at.length&&!self.keepSettingsFrame){NSPoint p=NSPointFromString(at);NSRect f=self.settings.frame;f.origin.x=p.x;f.origin.y=p.y-f.size.height;[self.settings setFrame:[self.settings constrainFrameRect:f toScreen:self.settings.screen?:NSScreen.mainScreen] display:NO];}}
+  [NSNotificationCenter.defaultCenter addObserverForName:NSWindowDidMoveNotification object:self.settings queue:nil usingBlock:^(NSNotification *n){if(self.settings.visible&&!self.welcomeWanted)[NSUserDefaults.standardUserDefaults setObject:NSStringFromPoint(NSMakePoint(self.settings.frame.origin.x,NSMaxY(self.settings.frame))) forKey:@"settingsTopLeft"];}];
+  if(self.keepSettingsFrame){NSRect f=self.settings.frame;f.origin.x=self.keptSettingsFrame.origin.x;f.origin.y=NSMaxY(self.keptSettingsFrame)-f.size.height;[self.settings setFrame:[self.settings constrainFrameRect:f toScreen:self.settings.screen?:NSScreen.mainScreen] display:NO];self.keepSettingsFrame=NO;};
  }
  self.loginButton.state=SMAppService.mainAppService.status==SMAppServiceStatusEnabled;[self rebuildExclusionsList];[self sync];[NSApp activateIgnoringOtherApps:YES];[self.settings makeKeyAndOrderFront:nil];if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.welcomePlaced=YES;if(first){dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)(0.45*NSEC_PER_SEC)),dispatch_get_main_queue(),^{[self placeSettingsUnderIcon];});}}
 }
@@ -1845,7 +1857,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
   @[L(@"Exceptions for websites"),L(@"Install the browser extension from Settings, for Safari, Brave, Chrome, Firefox, Opera or Edge. It only connects the browser; it has no buttons. With a website in front, the menu offers “Exception for that site”, for the whole domain or one exact page. Pages inherit from their domain, and domains from the browser’s app exception. Several browsers can use it at the same time; private tabs are left alone.")],
   @[L(@"Peek in color"),L(@"Record a shortcut in Settings → Shortcuts, or let Suggest pick one that is free. Hold it to see the plain display; let go and Less Pull fades back. Press it twice quickly to keep the plain display; one more press returns. Choose there what peeking turns off: Grayscale, Extra Warmth, and Night Shift if you like. Nothing is saved and no exception is made.")],
   @[L(@"Grayscale off for a while"),L(@"In the menu or in Settings, turn Grayscale off for 1 hour, 4 hours, or until Night Shift next changes. It comes back by itself; your setting stays saved.")],
-  @[L(@"The menu-bar icon and shortcuts"),L(@"By default a click opens the menu and a right-click (or Control-click) toggles Grayscale; Settings → Shortcuts can swap the two. A Toggle Grayscale shortcut can be recorded there as well.")],
+  @[L(@"The menu-bar icon and shortcuts"),L(@"By default a click opens the menu and a right-click (or Control-click, or a two-finger tap) opens the session panel; Settings → Shortcuts can give either button the menu, Grayscale or the session panel. A Toggle Grayscale shortcut can be recorded there as well.")],
   @[@"Pausing",L(@"Pause Less Pull shows the plain display for 15 minutes, an hour, or until you resume: color and no added warmth, with Night Shift left alone. Your settings and exceptions are kept, and the menu-bar icon shows a pause mark.")],
   @[@"Quitting",L(@"Quitting returns the display to normal and lets Night Shift follow its schedule again. Your settings and exceptions are kept.")],
   @[@"Updates",L(@"Once a day Less Pull asks GitHub whether a newer build exists, and only offers builds made for your macOS version; the menu-bar icon then shows a small dot and the menu offers “Update available”. Nothing about you is sent. Turn it off in Settings → About.")],

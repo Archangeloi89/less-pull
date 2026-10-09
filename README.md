@@ -24,7 +24,7 @@ Warmth is the second step: from a touch of amber all the way to red, it takes th
 
 ## At a glance
 
-- **Grayscale**, on or off, from the menu bar, a shortcut, or a right-click on the icon.
+- **Grayscale**, on or off, from the menu bar or a shortcut; either mouse button on the icon can do it too.
 - **Extra Warmth**, a slider from a touch of amber to red, with or without grayscale.
 - **[Peek in color](#peek-in-color)**: hold a shortcut and the screen is in color for exactly as long as you hold it. Press it twice to keep it.
 - **[Sessions](#sessions)**: a stretch of focused work with a gentle end: a glow, a gong, a count past the end, and one call back after you leave.
@@ -112,7 +112,7 @@ Sometimes you need color for a moment: to tell two lines in a chart apart, to ch
 - **Press it twice quickly to keep the peek.** The plain display then stays until you press the shortcut once more. Nothing is saved and no exception is made.
 - **With more than one display,** Peek works on the display under the mouse pointer, no click needed. A double press keeps that display plain; move the pointer to another display and do the same there, and each one is let go on its own with a press. "All displays" under Shortcuts peeks everywhere at once.
 - **Choose what peeking turns off.** Grayscale and Extra Warmth by default; Night Shift too, if you like.
-- **Toggle Grayscale** is the second shortcut, for switching your default on and off without opening the menu. A right-click on the menu-bar icon does the same.
+- **Toggle Grayscale** is the second shortcut, for switching your default on and off without opening the menu. Either mouse button on the menu-bar icon can do the same, under Settings → Shortcuts; by default the left opens the menu and the right opens the session panel.
 - **For longer than a moment**, there is **Grayscale off for** an hour, four hours, or until Night Shift next changes, and **Pause Less Pull** for 15 minutes, an hour, or until you resume. Both are in the menu.
 
 ## Every display on its own
@@ -183,7 +183,7 @@ Less Pull has two interfaces, both on the Mac: the menu and the Settings window.
 
 ### The menu bar, for quick changes
 
-Click the circle in the menu bar (a right-click toggles Grayscale straight away). This is the dropdown on the left. The icon itself tells you the state: its left half fills while grayscale is showing, its right half warms as you add warmth, and it shows a pause mark while Less Pull or Night Shift is paused.
+Click the circle in the menu bar (a right-click opens the session panel; Settings → Shortcuts can give either button the menu, Grayscale or the session). This is the dropdown on the left. The icon itself tells you the state: its left half fills while grayscale is showing, its right half warms as you add warmth, and it shows a pause mark while Less Pull or Night Shift is paused.
 
 - The first line tells you what is applied right now.
 - **Grayscale** and the **Extra Warmth** slider change your defaults. The slider's track shows the real ramp from neutral through amber to red. **Grayscale off for** gives you color for an hour, four hours, or until Night Shift next changes.
