@@ -84,6 +84,7 @@ static NSString *const LessPullReleasesAPI=@"https://api.github.com/repos/Archan
 static NSString *const LessPullReleasesPage=@"https://github.com/Archangeloi89/less-pull/releases";
 // The author's links. Empty entries are not shown; fill in Substack, YouTube and X when known.
 static NSString *const LessPullWebsite=@"https://jiriarion.com";
+static NSString *const LessPullProjectPage=@"https://github.com/Archangeloi89/less-pull";
 static NSString *const LessPullCoffee=@"https://buymeacoffee.com/HsERf62fiZ";
 static NSString *const LessPullSubstack=@"https://substack.com/@jiriarion";
 static NSString *const LessPullYouTube=@"https://www.youtube.com/@JiriArion";
@@ -177,7 +178,6 @@ static NSString *const LessPullOldBundleIdentifier=@"local.nightshiftfilters.app
 @property FilterEngine *engine;
 @property NSTimer *timer;
 @property NSWindow *settings,*browserWindow;
-@property CGFloat settingsWidth;
 @property NSRect keptSettingsFrame;
 @property BOOL keepSettingsFrame;
 @property NSStackView *browserRows;
@@ -498,10 +498,8 @@ static void drawKey(NSRect f,NSString *label,double pressed){NSRect r=NSOffsetRe
 }
 // Hidden views leave the stacks; the tabs then take their new height.
 - (void)relayoutSettings {
- if(!self.settingsTabs)return;CGFloat width=500;NSMutableArray *widths=[NSMutableArray new];
- // With the width constraint let go for a moment, each tab says how wide it really wants to be; the widest sets the width for all.
- for(NSTabViewItem *item in self.settingsTabs.tabViewItems){NSView *root=item.viewController.view;NSLayoutConstraint *wc=nil;for(NSLayoutConstraint *c in root.constraints)if([c.identifier isEqual:@"settingsWidth"])wc=c;if(wc){wc.priority=1;[widths addObject:wc];}[root layoutSubtreeIfNeeded];width=MAX(width,MIN(640,ceil(root.fittingSize.width)));}
- width=MAX(width,self.settingsWidth);self.settingsWidth=width;for(NSLayoutConstraint *wc in widths){wc.constant=width;wc.priority=750;}
+ if(!self.settingsTabs)return;
+ CGFloat width=500;
  for(NSTabViewItem *item in self.settingsTabs.tabViewItems){NSView *root=item.viewController.view;NSView *content=root.subviews.firstObject;[root layoutSubtreeIfNeeded];item.viewController.preferredContentSize=NSMakeSize(width,content.fittingSize.height);}
  NSInteger i=self.settingsTabs.selectedTabViewItemIndex;self.settingsTabs.selectedTabViewItemIndex=i==0?1:0;self.settingsTabs.selectedTabViewItemIndex=i;
 }
@@ -1416,7 +1414,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  content.edgeInsets=NSEdgeInsetsMake(20,24,20,24);content.translatesAutoresizingMaskIntoConstraints=NO;
  // The standard window material: translucent like System Settings when transparency is on, solid under Reduce transparency.
  NSViewController *controller=[NSViewController new];NSVisualEffectView *root=[NSVisualEffectView new];root.material=NSVisualEffectMaterialWindowBackground;root.blendingMode=NSVisualEffectBlendingModeBehindWindow;root.state=NSVisualEffectStateFollowsWindowActiveState;[root addSubview:content];
- [NSLayoutConstraint activateConstraints:@[[content.topAnchor constraintEqualToAnchor:root.topAnchor],[content.leadingAnchor constraintEqualToAnchor:root.leadingAnchor],[content.trailingAnchor constraintEqualToAnchor:root.trailingAnchor],[content.bottomAnchor constraintEqualToAnchor:root.bottomAnchor]]];NSLayoutConstraint *wc=[root.widthAnchor constraintEqualToConstant:self.settingsWidth?:500];wc.priority=750;wc.identifier=@"settingsWidth";wc.active=YES;  // a language that needs more room may widen every tab alike
+ [NSLayoutConstraint activateConstraints:@[[content.topAnchor constraintEqualToAnchor:root.topAnchor],[content.leadingAnchor constraintEqualToAnchor:root.leadingAnchor],[content.trailingAnchor constraintEqualToAnchor:root.trailingAnchor],[content.bottomAnchor constraintEqualToAnchor:root.bottomAnchor]]];[root.widthAnchor constraintEqualToConstant:500].active=YES;  // every language fits 500 pt; a line that does not is shortened in its table
  // Rows, separators and lists span the column; a view marked fixed keeps its own width.
  for(NSView *v in content.arrangedSubviews)if(([v isKindOfClass:NSStackView.class]&&![v.identifier isEqual:@"fixed"])||[v isKindOfClass:NSBox.class]||[v isKindOfClass:NSScrollView.class])[v.widthAnchor constraintEqualToAnchor:content.widthAnchor constant:-48].active=YES;
  controller.view=root;controller.title=title;[root layoutSubtreeIfNeeded];controller.preferredContentSize=root.fittingSize;
@@ -1614,13 +1612,14 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  NSButton *hide=[NSButton buttonWithTitle:L(@"Hide") target:self action:@selector(thanksHide:)];[self helpView:hide text:L(@"Hides this card for now. Tick the box below to keep it away for good.") label:L(@"Hide")];
  NSButton *never=[NSButton checkboxWithTitle:L(@"Don’t show this again") target:nil action:nil];never.font=[NSFont systemFontOfSize:11];never.identifier=@"thanksNever";[self helpView:never text:L(@"Hide this for good.") label:L(@"Don’t show this again")];
  NSMutableArray *links=[NSMutableArray new];for(NSButton *b in [self authorLinkButtons])if(![b.identifier isEqual:LessPullCoffee]){b.font=[NSFont systemFontOfSize:11];[links addObject:b];}
- NSStackView *buttons=[self row:@[support,later,[self spacer],hide]];buttons.spacing=8;NSStackView *linkRow=[self row:[links arrayByAddingObjectsFromArray:@[[self spacer],never]]];linkRow.spacing=4;
- NSStackView *card=[self column:@[title,body,buttons,linkRow]];card.spacing=10;card.edgeInsets=NSEdgeInsetsMake(14,14,12,14);card.wantsLayer=YES;card.layer.cornerRadius=8;card.layer.backgroundColor=[ember colorWithAlphaComponent:.1].CGColor;card.layer.borderWidth=1;card.layer.borderColor=[ember colorWithAlphaComponent:.25].CGColor;
+ NSButton *tell=[NSButton buttonWithTitle:L(@"Tell a friend") target:self action:@selector(shareLessPull:)];tell.bezelStyle=NSBezelStyleInline;tell.font=[NSFont systemFontOfSize:11];tell.image=[NSImage imageWithSystemSymbolName:@"square.and.arrow.up" accessibilityDescription:nil];tell.imagePosition=NSImageLeading;[self helpView:tell text:L(@"Pass Less Pull on: the project page and one line about it, through Messages, Mail, AirDrop or wherever you share.") label:L(@"Share Less Pull")];
+ NSStackView *buttons=[self row:@[support,later,[self spacer]]];buttons.spacing=8;NSStackView *linkRow=[self row:[links arrayByAddingObjectsFromArray:@[tell,[self spacer],hide]]];linkRow.spacing=4;NSStackView *neverRow=[self row:@[[self spacer],never]];
+ NSStackView *card=[self column:@[title,body,buttons,linkRow,neverRow]];card.spacing=10;card.edgeInsets=NSEdgeInsetsMake(14,14,12,14);card.wantsLayer=YES;card.layer.cornerRadius=8;card.layer.backgroundColor=[ember colorWithAlphaComponent:.1].CGColor;card.layer.borderWidth=1;card.layer.borderColor=[ember colorWithAlphaComponent:.25].CGColor;
  for(NSView *v in card.arrangedSubviews)if([v isKindOfClass:NSStackView.class])[v.widthAnchor constraintEqualToAnchor:card.widthAnchor constant:-28].active=YES;
  return card;
 }
 - (BOOL)thanksNeverTicked {for(NSView *row in ((NSStackView *)self.thanksCard).arrangedSubviews)if([row isKindOfClass:NSStackView.class])for(NSView *v in ((NSStackView *)row).arrangedSubviews)if([v.identifier isEqual:@"thanksNever"])return ((NSButton *)v).state==NSControlStateValueOn;return NO;}
-- (void)removeThanksCard {NSView *card=self.thanksCard;if(!card)return;NSStackView *column=(NSStackView *)card.superview;[column removeArrangedSubview:card];[card removeFromSuperview];self.thanksCard=nil;self.thanksWanted=NO;[column layoutSubtreeIfNeeded];self.settingsTabs.tabViewItems.firstObject.viewController.preferredContentSize=NSMakeSize(self.settingsWidth?:500,column.fittingSize.height);self.settingsTabs.selectedTabViewItemIndex=1;self.settingsTabs.selectedTabViewItemIndex=0;}
+- (void)removeThanksCard {NSView *card=self.thanksCard;if(!card)return;NSStackView *column=(NSStackView *)card.superview;[column removeArrangedSubview:card];[card removeFromSuperview];self.thanksCard=nil;self.thanksWanted=NO;[column layoutSubtreeIfNeeded];self.settingsTabs.tabViewItems.firstObject.viewController.preferredContentSize=NSMakeSize(500,column.fittingSize.height);self.settingsTabs.selectedTabViewItemIndex=1;self.settingsTabs.selectedTabViewItemIndex=0;}
 - (void)thanksSupport:(id)sender {[NSUserDefaults.standardUserDefaults setObject:[NSDate.date dateByAddingTimeInterval:90*86400] forKey:@"thanksNextDate"];[NSWorkspace.sharedWorkspace openURL:[NSURL URLWithString:LessPullCoffee]];}  // the card stays; it comes back by itself in three months at the earliest
 - (void)thanksHide:(id)sender {if([self thanksNeverTicked]){[NSUserDefaults.standardUserDefaults setBool:YES forKey:@"thanksDismissed"];[NSUserDefaults.standardUserDefaults removeObjectForKey:@"thanksNextDate"];}else if(![NSUserDefaults.standardUserDefaults objectForKey:@"thanksNextDate"]||[[NSUserDefaults.standardUserDefaults objectForKey:@"thanksNextDate"] compare:NSDate.date]==NSOrderedAscending)[NSUserDefaults.standardUserDefaults setObject:[NSDate.date dateByAddingTimeInterval:7*86400] forKey:@"thanksNextDate"];[self removeThanksCard];}
 - (void)thanksLater:(id)sender {[NSUserDefaults.standardUserDefaults setObject:[NSDate.date dateByAddingTimeInterval:30*86400] forKey:@"thanksNextDate"];[self removeThanksCard];}
@@ -1635,13 +1634,14 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  NSButton *help=[NSButton buttonWithTitle:L(@"Help") target:self action:@selector(showHelp:)];[self helpView:help text:L(@"A short guide to Less Pull.") label:L(@"Help")];
  NSButton *diagnostics=[NSButton buttonWithTitle:L(@"Diagnostics…") target:self action:@selector(diagnostics:)];[self helpView:diagnostics text:L(@"Technical details for troubleshooting.") label:L(@"Diagnostics")];
  NSButton *support=[NSButton buttonWithTitle:L(@"Support my work") target:self action:@selector(showThanks:)];[self helpView:support text:L(@"Shows the thank-you card with the ways to support Less Pull, the same one that appears after two weeks of use.") label:L(@"Support my work")];
+ NSButton *share=[NSButton buttonWithTitle:L(@"Share") target:self action:@selector(shareLessPull:)];share.image=[NSImage imageWithSystemSymbolName:@"square.and.arrow.up" accessibilityDescription:nil];share.imagePosition=NSImageLeading;[self helpView:share text:L(@"Pass Less Pull on: the project page and one line about it, through Messages, Mail, AirDrop or wherever you share.") label:L(@"Share Less Pull")];
  NSButton *tour=[NSButton buttonWithTitle:L(@"Tour") target:self action:@selector(showTour:)];[self helpView:tour text:L(@"The short tour from the first launch, again.") label:L(@"Show the tour")];
  NSButton *report=[NSButton buttonWithTitle:L(@"Report a Problem…") target:self action:@selector(reportProblem:)];[self helpView:report text:L(@"Opens a new issue on GitHub with the build number, your macOS version and the diagnostics filled in. Nothing is sent until you submit it there.") label:L(@"Report a problem")];
  NSButton *licenses=[NSButton buttonWithTitle:L(@"Licenses") target:self action:@selector(showLicenses:)];[self helpView:licenses text:L(@"Show the app and source license files included with Less Pull.") label:L(@"Show licenses")];
  self.updateCheckbox=[NSButton checkboxWithTitle:L(@"Check for updates automatically") target:self action:@selector(toggleUpdateChecks:)];[self helpView:self.updateCheckbox text:L(@"Once a day, Less Pull asks GitHub whether a newer build exists. Nothing about you is sent.") label:L(@"Check for updates automatically")];
  self.updateButton=[NSButton buttonWithTitle:L(@"Check for Updates…") target:self action:@selector(checkForUpdatesNow:)];[self helpView:self.updateButton text:L(@"Ask GitHub now whether a newer version exists.") label:L(@"Check for Updates")];
  self.updateStatusLabel=[self note:@""];
- NSStackView *column=[self column:@[[self row:@[icon,identity]],[self row:[self authorLinkButtons]],[self separator],[self row:@[help,tour,diagnostics,report,licenses]],[self row:@[support,[self spacer]]],[self separator],self.updateCheckbox,[self note:L(@"Once a day, one request to GitHub asks whether a newer build exists; a second one reads which macOS versions it is made for, so only builds for your macOS are offered. Nothing about you is sent, and you can turn this off.")],[self row:@[self.updateButton,[self spacer]]],self.updateStatusLabel,[self note:L(@"Everything else stays on this Mac: no account, no analytics, no network service. The browser extension talks only to the app.")]]];
+ NSStackView *column=[self column:@[[self row:@[icon,identity]],[self row:[self authorLinkButtons]],[self separator],[self row:@[help,tour,diagnostics,report,licenses]],[self row:@[support,share,[self spacer]]],[self separator],self.updateCheckbox,[self note:L(@"Once a day, one request to GitHub asks whether a newer build exists; a second one reads which macOS versions it is made for, so only builds for your macOS are offered. Nothing about you is sent, and you can turn this off.")],[self row:@[self.updateButton,[self spacer]]],self.updateStatusLabel,[self note:L(@"Everything else stays on this Mac: no account, no analytics, no network service. The browser extension talks only to the app.")]]];
  [(NSStackView *)column.arrangedSubviews[0] setSpacing:16];[column setCustomSpacing:4 afterView:self.updateCheckbox];[column setCustomSpacing:4 afterView:column.arrangedSubviews[7]];[self refreshUpdateControls];
  return column;
 }
@@ -1713,7 +1713,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  [column removeArrangedSubview:card];[card removeFromSuperview];self.welcomeCard=nil;self.welcomeWanted=NO;
  // The tab's root view echoes its frame as fitting size; measure the column, then
  // reselect the tab so the tab controller applies the smaller size to the window.
- [column layoutSubtreeIfNeeded];self.settingsTabs.tabViewItems.firstObject.viewController.preferredContentSize=NSMakeSize(self.settingsWidth?:500,column.fittingSize.height);
+ [column layoutSubtreeIfNeeded];self.settingsTabs.tabViewItems.firstObject.viewController.preferredContentSize=NSMakeSize(500,column.fittingSize.height);
  self.settingsTabs.selectedTabViewItemIndex=1;self.settingsTabs.selectedTabViewItemIndex=0;
 }
 // A prefilled GitHub issue: build, macOS and the diagnostics text, which names no apps or websites.
@@ -1728,7 +1728,6 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  if(!self.settings){
   self.thanksWanted=self.forceThanks||(!self.welcomeWanted&&[self thanksDue]);self.forceThanks=NO;
   self.multiDisplayViews=[NSMutableArray new];self.advancedViews=[NSMutableArray new];if(!self.expandedRules)self.expandedRules=[NSMutableSet new];
-  {double saved=[NSUserDefaults.standardUserDefaults doubleForKey:[@"settingsWidth-" stringByAppendingString:LessPullLanguage.current]];self.settingsWidth=saved>=500&&saved<=640?saved:0;}
   self.settingsTabs=[NSTabViewController new];self.settingsTabs.tabStyle=NSTabViewControllerTabStyleToolbar;self.settingsTabs.transitionOptions=NSViewControllerTransitionNone;
   [self.settingsTabs addTabViewItem:[self tab:L(@"General") symbol:@"circle.lefthalf.filled" content:[self generalTab]]];
   [self.settingsTabs addTabViewItem:[self tab:L(@"Shortcuts") symbol:@"keyboard" content:[self shortcutsTab]]];
@@ -1737,8 +1736,6 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
   [self.settingsTabs addTabViewItem:[self tab:L(@"Websites") symbol:@"globe" content:[self websitesTab]]];
   [self.settingsTabs addTabViewItem:[self tab:L(@"About") symbol:@"info.circle" content:[self aboutTab]]];
   self.settings=[NSWindow windowWithContentViewController:self.settingsTabs];
-  // A tab that needs more room than 500 pt (a longer language) widens the window; from then on every tab keeps that width, so nothing jumps between tabs.
-  [NSNotificationCenter.defaultCenter addObserverForName:NSWindowDidResizeNotification object:self.settings queue:nil usingBlock:^(NSNotification *n){CGFloat w=ceil(self.settings.contentView.frame.size.width);if(w>self.settingsWidth&&w<=640){self.settingsWidth=w;[NSUserDefaults.standardUserDefaults setDouble:w forKey:[@"settingsWidth-" stringByAppendingString:LessPullLanguage.current]];for(NSTabViewItem *item in self.settingsTabs.tabViewItems){for(NSLayoutConstraint *c in item.viewController.view.constraints)if([c.identifier isEqual:@"settingsWidth"])c.constant=w;NSSize p=item.viewController.preferredContentSize;item.viewController.preferredContentSize=NSMakeSize(w,p.height);}}}];self.settings.styleMask=NSWindowStyleMaskTitled|NSWindowStyleMaskClosable;self.settings.title=L(@"Less Pull");self.settings.releasedWhenClosed=NO;if(@available(macOS 11,*))self.settings.toolbarStyle=NSWindowToolbarStylePreference;
   self.settings.initialFirstResponder=self.grayscaleButton;[self.settings center];if(self.keepSettingsFrame){NSRect f=self.settings.frame;f.origin.x=self.keptSettingsFrame.origin.x;f.origin.y=NSMaxY(self.keptSettingsFrame)-f.size.height;[self.settings setFrame:[self.settings constrainFrameRect:f toScreen:self.settings.screen?:NSScreen.mainScreen] display:NO];self.keepSettingsFrame=NO;};
  }
  self.loginButton.state=SMAppService.mainAppService.status==SMAppServiceStatusEnabled;[self rebuildExclusionsList];[self sync];[NSApp activateIgnoringOtherApps:YES];[self.settings makeKeyAndOrderFront:nil];if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.welcomePlaced=YES;if(first){dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)(0.45*NSEC_PER_SEC)),dispatch_get_main_queue(),^{[self placeSettingsUnderIcon];});}}
@@ -1820,6 +1817,10 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  if(![NSFileManager.defaultManager fileExistsAtPath:companion.path]){NSAlert *missing=[NSAlert new];missing.messageText=L(@"The Safari extension is not in this build");missing.informativeText=L(@"This copy of Less Pull was built without Xcode, so the Safari companion app is missing. A build with Xcode includes it.");if(self.browserWindow)[missing beginSheetModalForWindow:self.browserWindow completionHandler:nil];else [missing runModal];return;}
  [NSWorkspace.sharedWorkspace openURL:companion];
  NSAlert *guide=[NSAlert new];guide.messageText=L(@"Finish installation in Safari");guide.informativeText=L(@"1. The Less Pull for Safari app opens; click its Open Safari Settings button.\n2. Until this build is signed by Apple, Safari needs Allow Unsigned Extensions from the Develop menu (turn on the Develop menu under Settings → Advanced). That choice lasts until Safari quits.\n3. Turn on Less Pull in Settings → Extensions and allow it on all websites.\n\nThe extension has no buttons: with a website in front, use “Exception for …” in the Less Pull menu. Keep Less Pull where it is installed.");[guide addButtonWithTitle:L(@"OK")];[NSApp activateIgnoringOtherApps:YES];if(self.browserWindow)[guide beginSheetModalForWindow:self.browserWindow completionHandler:^(NSModalResponse r){[self refreshBrowserRows];}];else [guide runModal];
+}
+- (void)shareLessPull:(NSButton *)sender {
+ NSSharingServicePicker *picker=[[NSSharingServicePicker alloc]initWithItems:@[[NSString stringWithFormat:L(@"Less Pull, a quieter screen for the Mac: grayscale, warmth, and color where it matters. Free. %@"),LessPullProjectPage]]];
+ [picker showRelativeToRect:sender.bounds ofView:sender preferredEdge:NSRectEdgeMaxY];
 }
 - (void)openWebsite:(id)sender {[NSWorkspace.sharedWorkspace openURL:[NSURL URLWithString:LessPullWebsite]];}
 - (void)openSupport:(id)sender {[NSWorkspace.sharedWorkspace openURL:[NSURL URLWithString:LessPullCoffee]];}
