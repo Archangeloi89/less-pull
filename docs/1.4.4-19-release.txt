@@ -69,3 +69,5 @@ Lighter (build 33): closing the settings window now lets go of the window and ev
 Spanish (build 33), marked "(experimental)" in the Language menu with a line under the popup saying what that means; English and German are the reviewed ones. Context keys for the compact rows (Grayscale [rule row], Default [segment]) let a language use a short word there.
 
 French (build 33), experimental.
+
+Italian (build 33), experimental; Spanish and French re-read from the function of each control (the localizing guide now carries a functional glossary): "Turn Grayscale off for…" became "back to color for…", "Leave quietly" became "leave it here", the rule-row checkbox "in use", the segments "Auto".

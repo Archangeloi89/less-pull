@@ -124,7 +124,7 @@
 "Could not find the release list; it is not public yet." = "Liste des versions introuvable ; elle n'est pas encore publique.";
 "Could not reach GitHub. Try again later." = "Impossible de joindre GitHub. Réessaie plus tard.";
 "Could not restore Night Shift after leaving this app." = "Impossible de rétablir Night Shift après avoir quitté cette app.";
-"Count on, so I see how far I stretch" = "Continuer à compter, pour voir jusqu'où je vais";
+"Count on, so I see how far I stretch" = "Continuer à compter jusqu'à ce que je ferme";
 "Count on: after the glow and the sound, the icon counts the minutes past the end and a click offers the way back. Stop quietly: the session simply ends with the glow and the sound, nothing more." = "Continuer à compter : après la lueur et le son, l'icône compte les minutes au-delà de la fin et un clic propose le retour. S'arrêter en silence : la session se termine simplement avec la lueur et le son, rien de plus.";
 "current app" = "app actuelle";
 "Current app" = "App actuelle";
@@ -152,7 +152,7 @@
 "End the session without a call back." = "Termine la session sans rappel.";
 "End the session." = "Termine la session.";
 "End the timed off and show Grayscale again now." = "Termine la pause et réaffiche les niveaux de gris maintenant.";
-"End timed off" = "Terminer la pause";
+"End timed off" = "Terminer plus tôt";
 "Ends the timed off and turns Night Shift back on now." = "Termine la pause et rallume Night Shift maintenant.";
 "Ends the timed off. Night Shift comes back if your schedule wants it on, and the app in front keeps its own Night Shift exception." = "Termine la pause. Night Shift revient si ton horaire le demande, et l'app au premier plan garde sa propre exception Night Shift.";
 "Ends the timed off. Night Shift stays off because your schedule does not want it on right now." = "Termine la pause. Night Shift reste éteint parce que ton horaire ne le demande pas en ce moment.";
@@ -194,13 +194,13 @@
 "grayscale" = "niveaux de gris";
 "Grayscale" = "Niveaux de gris";
 "Grayscale %@" = "Niveaux de gris %@";
-"Grayscale back on now" = "Niveaux de gris de retour maintenant";
+"Grayscale back on now" = "Revenir au gris maintenant";
 "Grayscale off" = "Niveaux de gris désactivés";
-"Grayscale off for" = "Sans niveaux de gris pendant";
-"Grayscale off for  ›" = "Sans niveaux de gris pendant  ›";
-"Grayscale off for a while" = "Niveaux de gris éteints un moment";
-"Grayscale off until %@" = "Sans niveaux de gris jusqu'à %@";
-"Grayscale off until Night Shift changes" = "Sans niveaux de gris jusqu'au changement de Night Shift";
+"Grayscale off for" = "En couleur pendant";
+"Grayscale off for  ›" = "En couleur pendant  ›";
+"Grayscale off for a while" = "La couleur, pour un moment";
+"Grayscale off until %@" = "En couleur jusqu'à %@";
+"Grayscale off until Night Shift changes" = "En couleur jusqu'au changement de Night Shift";
 "Grayscale on" = "Niveaux de gris activés";
 "Help" = "Aide";
 "Hide" = "Masquer";
@@ -227,7 +227,7 @@
 "Jiri Arion Rose on X" = "Jiri Arion Rose sur X";
 "Jiri Arion Rose on YouTube" = "Jiri Arion Rose sur YouTube";
 "Keep going" = "Continuer";
-"Keep going        Leave quietly" = "Continuer        Partir en silence";
+"Keep going        Leave quietly" = "Continuer        En rester là";
 "Keep this length as a chip for next time." = "Garde cette durée pour la prochaine fois.";
 "Keep this time as a chip for next time." = "Garde ce délai pour la prochaine fois.";
 "keep ⌥, tap A twice: it stays" = "⌥ tenu, A deux fois : ça reste";
@@ -235,7 +235,7 @@
 "Language" = "Langue";
 "Later" = "Plus tard";
 "Launch at login" = "Ouvrir à l'ouverture de session";
-"Leave quietly" = "Partir en silence";
+"Leave quietly" = "En rester là";
 "Leaving now." = "Je pars maintenant.";
 "Leaving now…" = "Je pars maintenant…";
 "Leaving? Call me back in" = "Tu pars ? Rappelle-moi dans";
@@ -298,7 +298,7 @@
 "Off keeps the settings below but does not apply them. Changing a setting away from default switches it on again." = "« Non » garde les réglages ci-dessous sans les appliquer. Dès que tu écartes un réglage de la valeur par défaut, elle se réactive.";
 "Off until morning · %@" = "Éteint jusqu'au matin · %@";
 "Off until Night Shift changes" = "Éteint jusqu'au changement de Night Shift";
-"Off: the panel after the end has only Keep going and Leave quietly." = "Non : le panneau après la fin ne propose que « Continuer » et « Partir en silence ».";
+"Off: the panel after the end has only Keep going and Leave quietly." = "Non : le panneau après la fin ne propose que « Continuer » et « En rester là ».";
 "Offer a call back when I leave" = "Proposer un rappel quand je pars";
 "Offered when you choose Leaving now. You are called back once, then the session is over for good." = "Proposé quand tu choisis « Je pars maintenant ». Tu es rappelé une fois, puis la session est terminée pour de bon.";
 "OK" = "OK";
@@ -429,7 +429,7 @@
 "Start a session from the menu: a stretch of focused work with a gentle end. The icon shows the minutes left. At the end, a warm glow and a soft gong, nothing to dismiss, and the count goes on so you can see how far you stretch. When you leave, it can call you back once." = "Lance une session depuis le menu : un moment de travail concentré qui se termine en douceur. L'icône affiche les minutes restantes. À la fin, une lueur chaude et un gong discret, rien à fermer, et le compte continue pour que tu voies jusqu'où tu vas. Quand tu pars, il peut te rappeler une fois.";
 "Start a session…" = "Lancer une session…";
 "Start tour" = "Commencer la visite";
-"Stop quietly" = "S'arrêter en silence";
+"Stop quietly" = "S'arrêter là";
 "Strokes: the gong in three strokes at the end, two rising notes for the call back. Chords: each as one soft chord. Both on 432 Hz and the solfeggio pitches." = "Coups : à la fin, le gong en trois coups ; pour le rappel, deux notes montantes. Accords : chacun comme un accord doux. Les deux sur 432 Hz et les fréquences solfeggio.";
 "Strokes" = "Coups";
 "Chords" = "Accords";
@@ -442,7 +442,7 @@
 "System Color Tint" = "Teinte de couleur du système";
 "tap A once: back" = "A une fois : retour";
 "Technical details for troubleshooting." = "Détails techniques pour le dépannage.";
-"Tell a friend" = "En parler";
+"Tell a friend" = "En parler à quelqu'un";
 "That shortcut could not be registered; it may be taken by another app. Click to choose another." = "Ce raccourci n'a pas pu être enregistré ; une autre app l'utilise peut-être. Clique pour en choisir un autre.";
 "That was %@." = "Ça fait %@.";
 "That was %ld minute%@." = "Ça fait %ld minute%@.";
@@ -481,7 +481,7 @@
 "Try again from a permanent local copy of Less Pull. The local bridge could not be registered." = "Réessaie depuis une copie locale et permanente de Less Pull. Le pont local n'a pas pu être enregistré.";
 "Try it" = "Essayer";
 "Try the glow and sound" = "Essayer la lueur et le son";
-"Turn Grayscale off for…" = "Sans niveaux de gris pendant…";
+"Turn Grayscale off for…" = "Revenir à la couleur pendant…";
 "Turn Night Shift back on" = "Rallumer Night Shift";
 "Turn Night Shift off for…" = "Sans Night Shift pendant…";
 "Turn Off" = "Éteindre";
@@ -501,7 +501,7 @@
 "Use default warmth (%@)" = "Chaleur par défaut (%@)";
 "Use default%@" = "Par défaut%@";
 "Use the exception for %@" = "Utiliser l'exception pour %@";
-"Use this exception" = "Active";
+"Use this exception" = "En service";
 "Using your default settings" = "Avec tes réglages par défaut";
 "Version " = "Version ";
 "Version %@" = "Version %@";
