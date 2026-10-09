@@ -210,7 +210,7 @@ static NSString *const LessPullOldBundleIdentifier=@"local.nightshiftfilters.app
 @property id sessionClickMonitor,sessionKeyMonitor;
 @property NSMutableArray<NSWindow *> *glowWindows;
 @property NSSound *sessionSound;
-@property BOOL sessionBreath,welcomePlaced;
+@property BOOL sessionBreath,welcomePlaced,forceThanks;
 @property NSInteger customMinutes,customBackMinutes;
 @property NSTextField *customLabel,*customBackLabel;
 @property NSButton *customStart,*customSave,*customBackStart,*customBackSave;
@@ -313,7 +313,7 @@ static void drawMenu(NSRect f,NSArray *rows,NSInteger hover,double alpha,NSInteg
 }
 static void drawKey(NSRect f,NSString *label,double pressed){NSRect r=NSOffsetRect(f,0,-2*pressed);[Ink(.12+.25*pressed) setFill];[[NSBezierPath bezierPathWithRoundedRect:r xRadius:5 yRadius:5] fill];[Ink(.4) setStroke];[[NSBezierPath bezierPathWithRoundedRect:r xRadius:5 yRadius:5] stroke];NSDictionary *a=@{NSFontAttributeName:[NSFont systemFontOfSize:12 weight:NSFontWeightMedium],NSForegroundColorAttributeName:Ink(1)};NSSize s=[label sizeWithAttributes:a];[label drawAtPoint:NSMakePoint(NSMidX(r)-s.width/2,NSMidY(r)-s.height/2) withAttributes:a];}
 - (void)drawRect:(NSRect)dirty {
- NSRect b=self.bounds;double loops[]={8,7,8,8,9,7};double L=loops[self.kind];double t=self.timer?fmod(NSProcessInfo.processInfo.systemUptime-self.start,L)/L:0.62;
+ NSRect b=self.bounds;double loops[]={8,7,8,8,13,9};double L=loops[self.kind];double t=self.timer?fmod(NSProcessInfo.processInfo.systemUptime-self.start,L)/L:0.62;
  switch(self.kind){
  case TourSceneMenuBar:{
   NSRect bar=NSMakeRect(0,b.size.height-40,b.size.width,24);[Ink(.08) setFill];[[NSBezierPath bezierPathWithRoundedRect:bar xRadius:7 yRadius:7] fill];CGFloat y=NSMidY(bar);
@@ -337,11 +337,11 @@ static void drawKey(NSRect f,NSString *label,double pressed){NSRect r=NSOffsetRe
   NSRect bar=NSMakeRect(0,b.size.height-24,b.size.width,20);[Ink(.08) setFill];[[NSBezierPath bezierPathWithRoundedRect:bar xRadius:6 yRadius:6] fill];NSPoint c=NSMakePoint(NSMaxX(bar)-150,NSMidY(bar));
   double gray=seg(t,.42,.56),warm=seg(t,.7,.86)*.5;NSRect screen=NSMakeRect(20,16,170,92);drawScreen(screen,gray,warm,1);
   drawCircle(c,7,gray>.5,warm,-1,NO);
-  double open=seg(t,.24,.32);NSRect menu=NSMakeRect(c.x-40,c.y-14-92*open-6,150,92*open);if(open>0)drawMenu(menu,@[@"Grayscale",@"Grayscale off for  ›",@"Extra Warmth",@"Night Shift  ›",@"Start a session…"],t>.36&&t<.6?0:-1,open,gray>.5?0:-1);
-  if(open>.9){CGFloat sx=menu.origin.x+22,sy=NSMaxY(menu)-46;[Ink(.25) setFill];[[NSBezierPath bezierPathWithRoundedRect:NSMakeRect(sx,sy,100,3) xRadius:1.5 yRadius:1.5] fill];[Orange(1) setFill];[[NSBezierPath bezierPathWithRoundedRect:NSMakeRect(sx,sy,100*warm*2,3) xRadius:1.5 yRadius:1.5] fill];[[NSBezierPath bezierPathWithOvalInRect:NSMakeRect(sx+100*warm*2-4,sy-3,9,9)] fill];}
+  double open=seg(t,.24,.32);NSRect menu=NSMakeRect(c.x-40,c.y-14-106*open-6,150,106*open);if(open>0)drawMenu(menu,@[@"Grayscale",@"Grayscale off for  ›",@"Extra Warmth",@"",@"Night Shift  ›",@"Start a session…"],t>.36&&t<.6?0:-1,open,gray>.5?0:-1);
+  if(open>.9){CGFloat sx=menu.origin.x+22,sy=NSMaxY(menu)-16-3*15+5;[Ink(.25) setFill];[[NSBezierPath bezierPathWithRoundedRect:NSMakeRect(sx,sy,100,3) xRadius:1.5 yRadius:1.5] fill];[Orange(1) setFill];[[NSBezierPath bezierPathWithRoundedRect:NSMakeRect(sx,sy,100*warm*2,3) xRadius:1.5 yRadius:1.5] fill];[[NSBezierPath bezierPathWithOvalInRect:NSMakeRect(sx+100*warm*2-4,sy-3,9,9)] fill];}
   double m1=seg(t,0,.2);NSPoint p0=NSMakePoint(120,60),p1=NSMakePoint(c.x+1,c.y-3);NSPoint pp=NSMakePoint(p0.x+(p1.x-p0.x)*m1,p0.y+(p1.y-p0.y)*m1);
   if(t>.34){double m2=seg(t,.34,.4);NSPoint q=NSMakePoint(menu.origin.x+40,NSMaxY(menu)-10);pp=NSMakePoint(p1.x+(q.x-p1.x)*m2,p1.y+(q.y-p1.y)*m2);}
-  if(t>.62){double m3=seg(t,.62,.7);NSPoint q0=pp,q1=NSMakePoint(menu.origin.x+24+100*warm*2,NSMaxY(menu)-44);pp=NSMakePoint(q0.x+(q1.x-q0.x)*m3,q0.y+(q1.y-q0.y)*m3);}
+  if(t>.62){double m3=seg(t,.62,.7);NSPoint q0=pp,q1=NSMakePoint(menu.origin.x+24+100*warm*2,NSMaxY(menu)-16-3*15+8);pp=NSMakePoint(q0.x+(q1.x-q0.x)*m3,q0.y+(q1.y-q0.y)*m3);}
   drawRipple(p1,seg(t,.21,.3));drawRipple(NSMakePoint(menu.origin.x+40,NSMaxY(menu)-10),seg(t,.4,.48));drawPointer(pp,1);
   
   break;}
@@ -350,7 +350,7 @@ static void drawKey(NSRect f,NSString *label,double pressed){NSRect r=NSOffsetRe
   double color=seg(t,.66,.8);NSRect screen=NSMakeRect(20,16,160,92);drawScreen(screen,1-color,0,1);NSDictionary *tag=@{NSFontAttributeName:[NSFont systemFontOfSize:9 weight:NSFontWeightMedium],NSForegroundColorAttributeName:Ink(.6)};[@"Photos" drawAtPoint:NSMakePoint(screen.origin.x+8,NSMaxY(screen)-11) withAttributes:tag];
   drawCircle(c,7,YES,0,-1,NO);
   double open=seg(t,.22,.3);NSRect menu=NSMakeRect(c.x-20,c.y-14-62*open-6,132,62*open);if(open>0)drawMenu(menu,@[@"Grayscale",@"Extra Warmth",@"Exception for Photos ›"],t>.36?2:-1,open,0);
-  double sub=seg(t,.42,.5);NSRect subm=NSMakeRect(NSMaxX(menu)-4,menu.origin.y-20,96,78*sub);if(sub>0)drawMenu(subm,@[@"Use this exception",@"Grayscale",@"   Use default",@"   Off"],t>.56?3:-1,sub,color>.5?3:0);
+  double sub=seg(t,.42,.5);NSRect subm=NSMakeRect(NSMaxX(menu)-4,menu.origin.y-20,96,78*sub);if(sub>0){drawMenu(subm,@[@"Use this exception",@"Grayscale",@"   Use default",@"   Off"],t>.56?3:-1,sub,color>.5?3:(sub>.9?2:-1));if(color>.5){NSDictionary *ck=@{NSFontAttributeName:[NSFont systemFontOfSize:9.5],NSForegroundColorAttributeName:Ink(sub)};[@"✓" drawAtPoint:NSMakePoint(subm.origin.x+7,NSMaxY(subm)-17) withAttributes:ck];}}
   double m1=seg(t,0,.18);NSPoint p0=NSMakePoint(110,70),p1=NSMakePoint(c.x+1,c.y-3);NSPoint pp=NSMakePoint(p0.x+(p1.x-p0.x)*m1,p0.y+(p1.y-p0.y)*m1);
   if(t>.32){double m2=seg(t,.32,.4);NSPoint q=NSMakePoint(menu.origin.x+60,menu.origin.y+10);pp=NSMakePoint(p1.x+(q.x-p1.x)*m2,p1.y+(q.y-p1.y)*m2);if(t>.5){double m3=seg(t,.5,.58);NSPoint q1=NSMakePoint(subm.origin.x+30,subm.origin.y+10);pp=NSMakePoint(q.x+(q1.x-q.x)*m3,q.y+(q1.y-q.y)*m3);}}
   drawRipple(p1,seg(t,.19,.27));if(sub>.9)drawRipple(NSMakePoint(subm.origin.x+30,subm.origin.y+10),seg(t,.6,.68));drawPointer(pp,1);
@@ -358,33 +358,51 @@ static void drawKey(NSRect f,NSString *label,double pressed){NSRect r=NSOffsetRe
   break;}
  case TourScenePeek:{
   NSRect screen=NSMakeRect(20,22,200,104);
-  double held=seg(t,.14,.18)*(1-seg(t,.4,.44)),dbl=seg(t,.56,.6),back=seg(t,.86,.9);double color=MAX(held,dbl*(1-back));drawScreen(screen,1-color,0,1);
-  double p1=seg(t,.12,.16)*(1-seg(t,.38,.42)),p2=seg(t,.54,.57)*(1-seg(t,.6,.63)),p3=seg(t,.65,.68)*(1-seg(t,.71,.74)),p4=seg(t,.84,.87)*(1-seg(t,.9,.93));double press=MAX(MAX(p1,p2),MAX(p3,p4));
-  drawKey(NSMakeRect(262,64,48,36),@"⌥",press);drawKey(NSMakeRect(318,64,48,36),@"A",press);
-  NSDictionary *cap=@{NSFontAttributeName:[NSFont systemFontOfSize:10],NSForegroundColorAttributeName:Ink(.7)};NSString *w=t<.44?@"hold: color while held":t<.84?@"press twice: it stays":@"press once: back";[w drawAtPoint:NSMakePoint(262,46) withAttributes:cap];
+  // ⌥ goes down first and stays; A is held (color while held), then tapped twice quickly (it stays), then tapped once (back)
+  double opt=seg(t,.08,.1)*(1-seg(t,.42,.44))+seg(t,.5,.52)*(1-seg(t,.94,.96));
+  double a1=seg(t,.12,.14)*(1-seg(t,.36,.38)),a2=seg(t,.54,.555)*(1-seg(t,.575,.59)),a3=seg(t,.6,.615)*(1-seg(t,.635,.65)),a4=seg(t,.84,.855)*(1-seg(t,.875,.89));
+  double color=MAX(a1,seg(t,.6,.615)*(1-seg(t,.84,.855)));drawScreen(screen,1-color,0,1);
+  drawKey(NSMakeRect(262,64,48,36),@"⌥",MIN(1,opt));drawKey(NSMakeRect(318,64,48,36),@"A",MAX(MAX(a1,a2),MAX(a3,a4)));
+  NSDictionary *cap=@{NSFontAttributeName:[NSFont systemFontOfSize:10],NSForegroundColorAttributeName:Ink(.7)};NSString *w=t<.46?@"hold ⌥ A: color while held":t<.8?@"keep ⌥, tap A twice: it stays":@"tap A once: back";[w drawAtPoint:NSMakePoint(262,46) withAttributes:cap];
   
   break;}
  case TourSceneSession:{
+  // the story: click the circle, Start a session…, the panel, 25 min, the ring fills, the glow and the gong, the count past the end, the panel with the way back, held long enough to read
   NSRect bar=NSMakeRect(0,b.size.height-24,b.size.width,20);[Ink(.08) setFill];[[NSBezierPath bezierPathWithRoundedRect:bar xRadius:6 yRadius:6] fill];NSPoint c=NSMakePoint(NSMaxX(bar)-150,NSMidY(bar));
-  double run=seg(t,.05,.58);BOOL over=t>.6;double minutes=25*(1-run);NSString *label=over?[NSString stringWithFormat:@"−%ld",(long)floor((t-.6)*12)]:[NSString stringWithFormat:@"%ld",(long)ceil(minutes)];
-  drawCircle(c,6,YES,0,run,over);NSDictionary *la=@{NSFontAttributeName:[NSFont monospacedDigitSystemFontOfSize:11 weight:NSFontWeightMedium],NSForegroundColorAttributeName:over?Orange(.6+.4*fabs(sin(t*40))):Ink(1)};[label drawAtPoint:NSMakePoint(c.x+14,c.y-7) withAttributes:la];
+  double run=seg(t,.34,.6);BOOL started=t>.3,over=t>.62;NSString *label=!started?@"":over?[NSString stringWithFormat:@"−%ld",(long)floor((t-.62)*10)]:[NSString stringWithFormat:@"%ld",(long)ceil(25*(1-run))];
+  drawCircle(c,6,YES,0,started?run:-1,over);if(label.length){NSDictionary *la=@{NSFontAttributeName:[NSFont monospacedDigitSystemFontOfSize:11 weight:NSFontWeightMedium],NSForegroundColorAttributeName:over?Orange(.6+.4*fabs(sin(t*60))):Ink(1)};[label drawAtPoint:NSMakePoint(c.x+14,c.y-7) withAttributes:la];}
   NSRect screen=NSMakeRect(20,16,170,92);drawScreen(screen,1,.3,1);
-  double glow=seg(t,.6,.66)*(1-seg(t,.74,.84));if(glow>0){NSRect g=NSInsetRect(screen,-6,-6);[[NSColor colorWithSRGBRed:1 green:.78 blue:.52 alpha:.45*glow] setFill];[[NSBezierPath bezierPathWithRoundedRect:g xRadius:10 yRadius:10] fill];NSDictionary *gt=@{NSFontAttributeName:[NSFont systemFontOfSize:12 weight:NSFontWeightLight],NSForegroundColorAttributeName:[NSColor colorWithWhite:1 alpha:glow]};NSSize gs=[@"That was 25 minutes." sizeWithAttributes:gt];[@"That was 25 minutes." drawAtPoint:NSMakePoint(NSMidX(screen)-gs.width/2,NSMidY(screen)-gs.height/2) withAttributes:gt];}
-  double panel=seg(t,.84,.9);if(panel>0){NSRect pr=NSMakeRect(c.x-70,c.y-14-70*panel-6,170,70*panel);[[NSColor.windowBackgroundColor colorWithAlphaComponent:.96*panel] setFill];[[NSBezierPath bezierPathWithRoundedRect:pr xRadius:8 yRadius:8] fill];[Ink(.15*panel) setStroke];[[NSBezierPath bezierPathWithRoundedRect:pr xRadius:8 yRadius:8] stroke];if(panel>.9){NSDictionary *pa=@{NSFontAttributeName:[NSFont systemFontOfSize:9.5],NSForegroundColorAttributeName:Ink(.8)};[@"Leaving? Call me back in" drawAtPoint:NSMakePoint(pr.origin.x+12,NSMaxY(pr)-18) withAttributes:pa];for(int i=0;i<4;i++){[Ink(.12) setFill];[[NSBezierPath bezierPathWithRoundedRect:NSMakeRect(pr.origin.x+12+i*38,NSMaxY(pr)-42,32,16) xRadius:5 yRadius:5] fill];[@[@"5",@"9",@"13",@"33"][i] drawAtPoint:NSMakePoint(pr.origin.x+22+i*38,NSMaxY(pr)-40) withAttributes:pa];}[@"Keep going        Leave quietly" drawAtPoint:NSMakePoint(pr.origin.x+12,pr.origin.y+8) withAttributes:pa];}}
-  
+  double open=seg(t,.1,.14)*(1-seg(t,.2,.22));if(open>0){NSRect menu=NSMakeRect(c.x-40,c.y-14-76*open-6,150,76*open);drawMenu(menu,@[@"Grayscale",@"Extra Warmth",@"Night Shift  ›",@"Start a session…"],t>.16?3:-1,open,0);}
+  double panel=seg(t,.22,.26)*(1-seg(t,.3,.32));if(panel>0){NSRect pr=NSMakeRect(c.x-80,c.y-14-60*panel-6,170,60*panel);[[NSColor.windowBackgroundColor colorWithAlphaComponent:.96*panel] setFill];[[NSBezierPath bezierPathWithRoundedRect:pr xRadius:8 yRadius:8] fill];[Ink(.15*panel) setStroke];[[NSBezierPath bezierPathWithRoundedRect:pr xRadius:8 yRadius:8] stroke];if(panel>.9){NSDictionary *pa=@{NSFontAttributeName:[NSFont systemFontOfSize:9.5],NSForegroundColorAttributeName:Ink(.8)};[@"A session. How long?" drawAtPoint:NSMakePoint(pr.origin.x+12,NSMaxY(pr)-18) withAttributes:pa];for(int i=0;i<4;i++){[Ink(i==0&&t>.27?.3:.12) setFill];[[NSBezierPath bezierPathWithRoundedRect:NSMakeRect(pr.origin.x+12+i*38,NSMaxY(pr)-44,32,16) xRadius:5 yRadius:5] fill];[@[@"25",@"45",@"60",@"90"][i] drawAtPoint:NSMakePoint(pr.origin.x+20+i*38,NSMaxY(pr)-42) withAttributes:pa];}}}
+  double glow=seg(t,.62,.67)*(1-seg(t,.76,.84));if(glow>0){NSRect g=NSInsetRect(screen,-6,-6);[[NSColor colorWithSRGBRed:1 green:.78 blue:.52 alpha:.45*glow] setFill];[[NSBezierPath bezierPathWithRoundedRect:g xRadius:10 yRadius:10] fill];NSDictionary *gt=@{NSFontAttributeName:[NSFont systemFontOfSize:12 weight:NSFontWeightLight],NSForegroundColorAttributeName:[NSColor colorWithWhite:1 alpha:glow]};NSSize gs=[@"That was 25 minutes." sizeWithAttributes:gt];[@"That was 25 minutes." drawAtPoint:NSMakePoint(NSMidX(screen)-gs.width/2,NSMidY(screen)-gs.height/2) withAttributes:gt];}
+  double back=seg(t,.8,.84);if(back>0){NSRect pr=NSMakeRect(c.x-80,c.y-14-70*back-6,170,70*back);[[NSColor.windowBackgroundColor colorWithAlphaComponent:.96*back] setFill];[[NSBezierPath bezierPathWithRoundedRect:pr xRadius:8 yRadius:8] fill];[Ink(.15*back) setStroke];[[NSBezierPath bezierPathWithRoundedRect:pr xRadius:8 yRadius:8] stroke];if(back>.9){NSDictionary *pa=@{NSFontAttributeName:[NSFont systemFontOfSize:9.5],NSForegroundColorAttributeName:Ink(.8)};[@"Leaving? Call me back in" drawAtPoint:NSMakePoint(pr.origin.x+12,NSMaxY(pr)-18) withAttributes:pa];for(int i=0;i<4;i++){[Ink(.12) setFill];[[NSBezierPath bezierPathWithRoundedRect:NSMakeRect(pr.origin.x+12+i*38,NSMaxY(pr)-42,32,16) xRadius:5 yRadius:5] fill];[@[@"5",@"9",@"13",@"33"][i] drawAtPoint:NSMakePoint(pr.origin.x+22+i*38,NSMaxY(pr)-40) withAttributes:pa];}[@"Keep going        Leave quietly" drawAtPoint:NSMakePoint(pr.origin.x+12,pr.origin.y+8) withAttributes:pa];}}
+  // the pointer: to the circle, click, to Start a session…, click, to 25 min, click; later to the circle again for the way back
+  double m1=seg(t,0,.08);NSPoint p0=NSMakePoint(120,60),p1=NSMakePoint(c.x+1,c.y-3);NSPoint pp=NSMakePoint(p0.x+(p1.x-p0.x)*m1,p0.y+(p1.y-p0.y)*m1);
+  if(t>.14){double m2=seg(t,.14,.17);NSPoint q=NSMakePoint(c.x+20,c.y-14-76+12);pp=NSMakePoint(p1.x+(q.x-p1.x)*m2,p1.y+(q.y-p1.y)*m2);if(t>.24){double m3=seg(t,.24,.27);NSPoint q1=NSMakePoint(c.x-80+28,c.y-14-60+16);pp=NSMakePoint(q.x+(q1.x-q.x)*m3,q.y+(q1.y-q.y)*m3);if(t>.34){double m4=seg(t,.34,.42);NSPoint q2=NSMakePoint(120,60);pp=NSMakePoint(q1.x+(q2.x-q1.x)*m4,q1.y+(q2.y-q1.y)*m4);if(t>.74){double m5=seg(t,.74,.8);pp=NSMakePoint(q2.x+(p1.x-q2.x)*m5,q2.y+(p1.y-q2.y)*m5);}}}}
+  drawRipple(p1,seg(t,.09,.14));drawRipple(NSMakePoint(c.x+20,c.y-14-76+12),seg(t,.18,.22));drawRipple(NSMakePoint(c.x-80+28,c.y-14-60+16),seg(t,.27,.31));drawRipple(p1,seg(t,.8,.85));drawPointer(pp,1);
   break;}
  case TourScenePrivacy:{
-  NSRect win=NSMakeRect(10,64,150,66);[Ink(.08) setFill];[[NSBezierPath bezierPathWithRoundedRect:win xRadius:7 yRadius:7] fill];for(int i=0;i<3;i++){[Ink(.35) setFill];[[NSBezierPath bezierPathWithOvalInRect:NSMakeRect(18+i*11,NSMaxY(win)-14,6,6)] fill];}
-  NSRect field=NSMakeRect(win.origin.x+34,NSMaxY(win)-19,105,12);[Ink(.12) setFill];[[NSBezierPath bezierPathWithRoundedRect:field xRadius:4 yRadius:4] fill];NSDictionary *tiny=@{NSFontAttributeName:[NSFont systemFontOfSize:9 weight:NSFontWeightMedium],NSForegroundColorAttributeName:Ink(.8)};[@"news.example" drawAtPoint:NSMakePoint(field.origin.x+6,field.origin.y+1) withAttributes:tiny];
-  NSPoint app=NSMakePoint(240,97);drawCircle(app,12,YES,0,-1,NO);[@"Less Pull, in memory" drawAtPoint:NSMakePoint(app.x-40,app.y-30) withAttributes:tiny];
-  double travel=seg(t,.1,.4);NSPoint from=NSMakePoint(NSMaxX(field),NSMidY(field)),to=NSMakePoint(app.x-16,app.y);NSPoint q=NSMakePoint(from.x+(to.x-from.x)*travel,from.y+(to.y-from.y)*travel);
-  [Ink(.3) setStroke];NSBezierPath *line=[NSBezierPath new];[line moveToPoint:from];[line lineToPoint:to];line.lineWidth=1;[line stroke];
-  if(travel>0&&travel<1){NSRect chip=NSMakeRect(q.x-28,q.y+6,56,12);[Orange(.9) setFill];[[NSBezierPath bezierPathWithRoundedRect:chip xRadius:6 yRadius:6] fill];NSDictionary *ct=@{NSFontAttributeName:[NSFont systemFontOfSize:8 weight:NSFontWeightSemibold],NSForegroundColorAttributeName:[NSColor colorWithWhite:.1 alpha:1]};[@"news.example" drawAtPoint:NSMakePoint(chip.origin.x+5,chip.origin.y+2) withAttributes:ct];}
-  // the cloud, crossed: nothing leaves the Mac
-  double cloud=seg(t,.45,.55);if(cloud>0){NSPoint cc=NSMakePoint(340,100);for(int i=0;i<3;i++){CGFloat r=10+4*(i==1);[Ink(.18*cloud) setFill];[[NSBezierPath bezierPathWithOvalInRect:NSMakeRect(cc.x-18+i*14-r,cc.y-r+(i==1?4:0),2*r,2*r)] fill];}NSBezierPath *x=[NSBezierPath new];[x moveToPoint:NSMakePoint(cc.x-16,cc.y-16)];[x lineToPoint:NSMakePoint(cc.x+16,cc.y+16)];[x moveToPoint:NSMakePoint(cc.x+16,cc.y-16)];[x lineToPoint:NSMakePoint(cc.x-16,cc.y+16)];x.lineWidth=2.5;[[NSColor colorWithSRGBRed:1 green:.38 blue:.34 alpha:cloud] setStroke];[x stroke];[@"no server, no sync" drawAtPoint:NSMakePoint(cc.x-38,cc.y-34) withAttributes:tiny];}
-  // the screenshot stays in color
-  double shot=seg(t,.62,.74);if(shot>0){NSRect gray=NSMakeRect(10,10,70,44);drawScreen(gray,1,.3,shot);NSRect col=NSMakeRect(96,10,70,44);drawScreen(col,0,0,shot);[Ink(.5*shot) setStroke];NSBezierPath *frame=[NSBezierPath bezierPathWithRoundedRect:NSInsetRect(col,-3,-3) xRadius:6 yRadius:6];frame.lineWidth=1.5;[frame stroke];NSDictionary *c2=@{NSFontAttributeName:[NSFont systemFontOfSize:9],NSForegroundColorAttributeName:Ink(.7*shot)};[@"your screen" drawAtPoint:NSMakePoint(14,56) withAttributes:c2];[@"the screenshot" drawAtPoint:NSMakePoint(96,56) withAttributes:c2];}
-  
+  NSDictionary *tiny=@{NSFontAttributeName:[NSFont systemFontOfSize:9.5 weight:NSFontWeightMedium],NSForegroundColorAttributeName:Ink(.8)};NSDictionary *dim=@{NSFontAttributeName:[NSFont systemFontOfSize:9.5],NSForegroundColorAttributeName:Ink(.55)};
+  // left half: the address goes to the app on this Mac and nowhere else
+  NSRect win=NSMakeRect(6,68,118,56);[Ink(.08) setFill];[[NSBezierPath bezierPathWithRoundedRect:win xRadius:7 yRadius:7] fill];for(int i=0;i<3;i++){[Ink(.35) setFill];[[NSBezierPath bezierPathWithOvalInRect:NSMakeRect(13+i*10,NSMaxY(win)-13,5,5)] fill];}
+  NSRect field=NSMakeRect(win.origin.x+34,NSMaxY(win)-18,80,12);[Ink(.12) setFill];[[NSBezierPath bezierPathWithRoundedRect:field xRadius:4 yRadius:4] fill];[@"news.example" drawAtPoint:NSMakePoint(field.origin.x+5,field.origin.y+1) withAttributes:@{NSFontAttributeName:[NSFont systemFontOfSize:8.5 weight:NSFontWeightMedium],NSForegroundColorAttributeName:Ink(.8)}];
+  [@"the website in front" drawAtPoint:NSMakePoint(8,50) withAttributes:dim];
+  NSPoint app=NSMakePoint(176,96);drawCircle(app,11,YES,0,-1,NO);[@"Less Pull" drawAtPoint:NSMakePoint(app.x-20,app.y-27) withAttributes:tiny];[@"on this Mac" drawAtPoint:NSMakePoint(app.x-26,app.y-39) withAttributes:dim];
+  double travel=seg(t,.08,.34),gone=seg(t,.36,.46);NSPoint from=NSMakePoint(NSMaxX(field)-2,NSMidY(field)),to=NSMakePoint(app.x-12,app.y);
+  if(travel<1||gone<1){NSPoint q=NSMakePoint(from.x+(to.x-from.x)*travel,from.y+(to.y-from.y)*travel);NSRect chip=NSMakeRect(q.x-58,q.y+5,60,11);[Orange(.9*(1-gone)) setFill];[[NSBezierPath bezierPathWithRoundedRect:chip xRadius:5 yRadius:5] fill];[@"news.example" drawAtPoint:NSMakePoint(chip.origin.x+5,chip.origin.y+1) withAttributes:@{NSFontAttributeName:[NSFont systemFontOfSize:7 weight:NSFontWeightSemibold],NSForegroundColorAttributeName:[NSColor colorWithWhite:.1 alpha:1-gone]}];}
+  double say=seg(t,.46,.52);if(say>0){[@"for the look, then gone" drawAtPoint:NSMakePoint(104,20) withAttributes:@{NSFontAttributeName:[NSFont systemFontOfSize:9.5],NSForegroundColorAttributeName:Ink(.75*say)}];
+   // never to a server, never to disk: two small marks, crossed
+   NSPoint cl=NSMakePoint(40,22);for(int i=0;i<3;i++){CGFloat r=5+2*(i==1);[Ink(.18*say) setFill];[[NSBezierPath bezierPathWithOvalInRect:NSMakeRect(cl.x-9+i*7-r,cl.y-r+(i==1?2:0),2*r,2*r)] fill];}
+   NSRect disk=NSMakeRect(78,14,16,14);[Ink(.18*say) setFill];[[NSBezierPath bezierPathWithRoundedRect:disk xRadius:2 yRadius:2] fill];
+   for(NSValue *m in @[[NSValue valueWithPoint:cl],[NSValue valueWithPoint:NSMakePoint(86,21)]]){NSPoint cc=[m pointValue];NSBezierPath *x=[NSBezierPath new];[x moveToPoint:NSMakePoint(cc.x-9,cc.y-9)];[x lineToPoint:NSMakePoint(cc.x+9,cc.y+9)];[x moveToPoint:NSMakePoint(cc.x+9,cc.y-9)];[x lineToPoint:NSMakePoint(cc.x-9,cc.y+9)];x.lineWidth=2;[[NSColor colorWithSRGBRed:1 green:.38 blue:.34 alpha:say] setStroke];[x stroke];}
+   [@"no server" drawAtPoint:NSMakePoint(20,2) withAttributes:@{NSFontAttributeName:[NSFont systemFontOfSize:8.5],NSForegroundColorAttributeName:Ink(.6*say)}];[@"no disk" drawAtPoint:NSMakePoint(72,2) withAttributes:@{NSFontAttributeName:[NSFont systemFontOfSize:8.5],NSForegroundColorAttributeName:Ink(.6*say)}];}
+  // divider
+  [Ink(.12) setFill];[[NSBezierPath bezierPathWithRect:NSMakeRect(212,8,1,124)] fill];
+  // right half: a screenshot is taken of the quiet screen, and comes out in color
+  NSRect gray=NSMakeRect(226,34,118,76);drawScreen(gray,1,.3,1);[@"your screen" drawAtPoint:NSMakePoint(228,116) withAttributes:dim];
+  double flash=seg(t,.2,.23)*(1-seg(t,.26,.34));if(flash>0){[[NSColor colorWithWhite:1 alpha:.7*flash] setFill];[[NSBezierPath bezierPathWithRoundedRect:gray xRadius:8 yRadius:8] fill];}
+  drawKey(NSMakeRect(356,112,20,16),@"⌘",seg(t,.14,.18)*(1-seg(t,.24,.28)));drawKey(NSMakeRect(378,112,20,16),@"⇧",seg(t,.14,.18)*(1-seg(t,.24,.28)));drawKey(NSMakeRect(400,112,18,16),@"3",seg(t,.17,.2)*(1-seg(t,.24,.28)));
+  double lift=seg(t,.28,.5);if(lift>0){NSRect shot=NSMakeRect(300+40*lift,16+8*lift,80+24*lift,52+14*lift);NSRect dst=NSMakeRect(shot.origin.x,shot.origin.y,MIN(shot.size.width,412-shot.origin.x),shot.size.height);drawScreen(dst,0,0,lift);[Ink(.6*lift) setStroke];NSBezierPath *frame=[NSBezierPath bezierPathWithRoundedRect:NSInsetRect(dst,-2,-2) xRadius:7 yRadius:7];frame.lineWidth=1.5;[frame stroke];if(lift>.95)[@"the screenshot: in color" drawAtPoint:NSMakePoint(dst.origin.x-14,dst.origin.y-14) withAttributes:dim];}
   break;}
  }
 }
@@ -1058,6 +1076,7 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  else if(action==@selector(diagnostics:))help=@"Technical details for troubleshooting.";
  else if(action==@selector(reportProblem:))help=@"Open a new GitHub issue with the technical details filled in.";
  else if(action==@selector(showTour:))help=@"The short tour from the first launch, again.";
+ else if(action==@selector(showThanks:))help=@"The thank-you card with the ways to support Less Pull.";
  else if(action==@selector(quit:)){help=@"Quit Less Pull. The display returns to normal and Night Shift follows its schedule again.";i.keyEquivalent=@"q";}
  // Menu items carry no tooltips: on macOS a tooltip competes with the submenu. Settings and Help explain.
  (void)help;[menu addItem:i];return i;
@@ -1579,13 +1598,14 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  NSStackView *identity=[self column:@[name,version,forever,credit]];identity.spacing=2;
  NSButton *help=[NSButton buttonWithTitle:@"Help" target:self action:@selector(showHelp:)];[self helpView:help text:@"A short guide to Less Pull." label:@"Help"];
  NSButton *diagnostics=[NSButton buttonWithTitle:@"Diagnostics…" target:self action:@selector(diagnostics:)];[self helpView:diagnostics text:@"Technical details for troubleshooting." label:@"Diagnostics"];
+ NSButton *support=[NSButton buttonWithTitle:@"Support my work" target:self action:@selector(showThanks:)];[self helpView:support text:@"Shows the thank-you card with the ways to support Less Pull, the same one that appears after two weeks of use." label:@"Support my work"];
  NSButton *tour=[NSButton buttonWithTitle:@"Tour" target:self action:@selector(showTour:)];[self helpView:tour text:@"The short tour from the first launch, again." label:@"Show the tour"];
  NSButton *report=[NSButton buttonWithTitle:@"Report a Problem…" target:self action:@selector(reportProblem:)];[self helpView:report text:@"Opens a new issue on GitHub with the build number, your macOS version and the diagnostics filled in. Nothing is sent until you submit it there." label:@"Report a problem"];
  NSButton *licenses=[NSButton buttonWithTitle:@"Licenses" target:self action:@selector(showLicenses:)];[self helpView:licenses text:@"Show the app and source license files included with Less Pull." label:@"Show licenses"];
  self.updateCheckbox=[NSButton checkboxWithTitle:@"Check for updates automatically" target:self action:@selector(toggleUpdateChecks:)];[self helpView:self.updateCheckbox text:@"Once a day, Less Pull asks GitHub whether a newer build exists. Nothing about you is sent." label:@"Check for updates automatically"];
  self.updateButton=[NSButton buttonWithTitle:@"Check for Updates…" target:self action:@selector(checkForUpdatesNow:)];[self helpView:self.updateButton text:@"Ask GitHub now whether a newer version exists." label:@"Check for Updates"];
  self.updateStatusLabel=[self note:@""];
- NSStackView *column=[self column:@[[self row:@[icon,identity]],[self row:[self authorLinkButtons]],[self separator],[self row:@[help,tour,diagnostics,report,licenses]],[self separator],self.updateCheckbox,[self note:@"Once a day, one request to GitHub asks whether a newer build exists; a second one reads which macOS versions it is made for, so only builds for your macOS are offered. Nothing about you is sent, and you can turn this off."],[self row:@[self.updateButton,[self spacer]]],self.updateStatusLabel,[self note:@"Everything else stays on this Mac: no account, no analytics, no network service. The browser extension talks only to the app."]]];
+ NSStackView *column=[self column:@[[self row:@[icon,identity]],[self row:[self authorLinkButtons]],[self separator],[self row:@[help,tour,diagnostics,report,licenses]],[self row:@[support,[self spacer]]],[self separator],self.updateCheckbox,[self note:@"Once a day, one request to GitHub asks whether a newer build exists; a second one reads which macOS versions it is made for, so only builds for your macOS are offered. Nothing about you is sent, and you can turn this off."],[self row:@[self.updateButton,[self spacer]]],self.updateStatusLabel,[self note:@"Everything else stays on this Mac: no account, no analytics, no network service. The browser extension talks only to the app."]]];
  [(NSStackView *)column.arrangedSubviews[0] setSpacing:16];[column setCustomSpacing:4 afterView:self.updateCheckbox];[column setCustomSpacing:4 afterView:column.arrangedSubviews[7]];[self refreshUpdateControls];
  return column;
 }
@@ -1612,7 +1632,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
   @"Some things need color: a photo app, a video site, a chart. Choose Exception for the app you are in, right in the menu, and set only what should differ. Websites work the same way once the small browser extension connects, under Websites.",
   [NSString stringWithFormat:@"Hold %@ and the screen is in color for exactly as long as you hold it. Press it twice quickly to keep it; one more press returns. %@ turns Grayscale on or off. Both are set for you; change them under Shortcuts.",peekLabel,toggleLabel],
   @"Start a session from the menu: a stretch of focused work with a gentle end. The icon shows the minutes left. At the end, a warm glow and a soft gong, nothing to dismiss, and the count goes on so you can see how far you stretch. When you leave, it can call you back once.",
-  @"No account, no analytics, nothing leaves your Mac. The addresses of websites you visit pass through memory and are never stored. And because Less Pull changes the display itself, not the picture, screenshots, recordings and screen sharing keep their normal colors."];
+  @"No account, no analytics, nothing leaves your Mac. The website in front is known to the app only for as long as it is in front, then forgotten: never sent anywhere, never written to disk. And because Less Pull changes the display, not the picture, screenshots, recordings and screen sharing keep their normal colors."];
   NSTextField *title=[NSTextField labelWithString:titles[page]];title.font=[NSFont systemFontOfSize:15 weight:NSFontWeightSemibold];
  NSTextField *text=[NSTextField wrappingLabelWithString:texts[page]];text.preferredMaxLayoutWidth=page==0?404:346;  // next to the symbol on the tour pages
  NSMutableArray *parts=[NSMutableArray arrayWithObject:title];
@@ -1649,6 +1669,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  NSView *button=self.item.button;if(NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceMotion)return;
  for(int k=0;k<4;k++){dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)((0.6+k*1.2)*NSEC_PER_SEC)),dispatch_get_main_queue(),^{[NSAnimationContext runAnimationGroup:^(NSAnimationContext *c){c.duration=.5;button.animator.alphaValue=.25;} completionHandler:^{[NSAnimationContext runAnimationGroup:^(NSAnimationContext *c){c.duration=.6;button.animator.alphaValue=1;} completionHandler:nil];}];});}
 }
+- (void)showThanks:(id)sender {[self.settings close];self.settings=nil;self.welcomeWanted=NO;self.forceThanks=YES;[self showSettings:nil];}
 - (void)showTour:(id)sender {[self.settings close];self.settings=nil;self.welcomeWanted=YES;[self showSettings:nil];}
 - (void)dismissWelcome:(id)sender {
  NSView *card=self.welcomeCard;if(!card)return;self.tourCard=nil;NSStackView *column=(NSStackView *)card.superview;
@@ -1668,7 +1689,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
 - (void)showLicenses:(id)sender {NSURL *folder=NSBundle.mainBundle.resourceURL;[NSWorkspace.sharedWorkspace activateFileViewerSelectingURLs:@[[folder URLByAppendingPathComponent:@"LICENSE-APP.txt"],[folder URLByAppendingPathComponent:@"LICENSE-SOURCE.txt"]]];}
 - (void)showSettings:(id)sender {
  if(!self.settings){
-  self.thanksWanted=!self.welcomeWanted&&[self thanksDue];
+  self.thanksWanted=self.forceThanks||(!self.welcomeWanted&&[self thanksDue]);self.forceThanks=NO;
   self.multiDisplayViews=[NSMutableArray new];self.advancedViews=[NSMutableArray new];if(!self.expandedRules)self.expandedRules=[NSMutableSet new];
   self.settingsTabs=[NSTabViewController new];self.settingsTabs.tabStyle=NSTabViewControllerTabStyleToolbar;self.settingsTabs.transitionOptions=NSViewControllerTransitionNone;
   [self.settingsTabs addTabViewItem:[self tab:@"General" symbol:@"circle.lefthalf.filled" content:[self generalTab]]];
