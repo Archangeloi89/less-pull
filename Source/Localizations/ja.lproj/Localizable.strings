@@ -240,7 +240,7 @@
 "Leaving now…" = "離れます…";
 "Leaving? Call me back in" = "離れますか? 呼び戻すまで";
 "Left-clicking the menu-bar icon" = "アイコンを左クリック";
-"Less" = "控えめ";
+"Less" = "たたむ";
 "Less Pull" = "Less Pull";
 "Less Pull %@ (%@)\n\n%@\n%@\nDisplays: %lu, each with its own matrix\nDisplay events: %lu; recoveries: %lu\nGrayscale setting: %@; grayscale showing now: %@; exception active: %@%@\n\nNight Shift drives “Extra Warmth follows Night Shift”; it does not prove the display looks warmer." = "Less Pull %@ (%@)\n\n%@\n%@\nディスプレイ: %lu 台、それぞれ独自の行列\nディスプレイのイベント: %lu、復旧: %lu\nグレイスケールの設定: %@、現在の表示: %@、個別設定が有効: %@%@\n\nNight Shift は「暖かさは Night Shift に従う」を動かします。ディスプレイが実際に暖かく見えることの証明ではありません。";
 "Less Pull %@ is available" = "Less Pull %@ が利用できます";
@@ -260,7 +260,7 @@
 "Looks again for installed browsers. The list also checks by itself every few seconds while this window is open." = "インストール済みのブラウザをもう一度探します。このウインドウが開いている間は、数秒ごとに自動でも確認します。";
 "Minutes, separated by commas. Offered when you leave after a session; you are called back once." = "分数をコンマで区切ります。セッションのあと離れるときに提示され、一度だけ呼び戻されます。";
 "Minutes, separated by commas. These appear under Start a session in the menu." = "分数をコンマで区切ります。メニューの「セッションを始める」の下に表示されます。";
-"More" = "その他";
+"More" = "詳細";
 "More in Settings…" = "その他は設定で…";
 "Natural Colors" = "自然な色";
 "news.example" = "news.example";

@@ -83,3 +83,5 @@ Polish (build 33), experimental.
 Ukrainian (build 33), experimental.
 
 Japanese (build 33), experimental. The "Remind me after the end" choices (Never, Every 3/5/10/15 minutes) are now localized in every language.
+
+Korean (build 33), experimental.
