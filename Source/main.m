@@ -520,7 +520,8 @@ static void drawKey(NSRect f,NSString *label,double pressed){NSRect r=NSOffsetRe
  for(NSTabViewItem *item in self.settingsTabs.tabViewItems){NSView *content=[self settingsContentOf:item];[content layoutSubtreeIfNeeded];item.viewController.preferredContentSize=NSMakeSize(width,[self settingsHeightFor:content.fittingSize.height]);}
  NSInteger i=self.settingsTabs.selectedTabViewItemIndex;self.settingsTabs.selectedTabViewItemIndex=i==0?1:0;self.settingsTabs.selectedTabViewItemIndex=i;
 }
-- (void)toggleAdvanced:(NSButton *)sender {[NSUserDefaults.standardUserDefaults setBool:sender.state==NSControlStateValueOn forKey:@"showAdvanced"];[self applyVisibility];}
+- (void)toggleAdvanced:(NSButton *)sender {[NSUserDefaults.standardUserDefaults setBool:sender.state==NSControlStateValueOn forKey:@"showAdvanced"];[self applyVisibility];
+ if(sender.state==NSControlStateValueOn)dispatch_async(dispatch_get_main_queue(),^{for(NSView *v in self.advancedViews)if(!v.hidden&&v.window&&[v isDescendantOf:self.settingsTabs.tabView.selectedTabViewItem.view]){[v scrollRectToVisible:v.bounds];break;}});}
 - (void)toggleNotes:(NSButton *)sender {[NSUserDefaults.standardUserDefaults setBool:sender.state==NSControlStateValueOn forKey:@"hideNotes"];[self applyVisibility];}
 - (void)toggleAlwaysDisplays:(NSButton *)sender {[NSUserDefaults.standardUserDefaults setBool:sender.state==NSControlStateValueOn forKey:@"alwaysShowDisplays"];[self refreshDisplayRows];[self applyVisibility];}
 // Language: the system's by default, or one chosen here. A change rebuilds the windows and the menu; no restart.
@@ -894,6 +895,14 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
 - (NSArray<NSNumber *> *)sessionPresets:(NSString *)key fallback:(NSArray *)fallback {NSArray *a=[NSUserDefaults.standardUserDefaults arrayForKey:key];NSMutableArray *out=[NSMutableArray new];for(id n in a)if([n respondsToSelector:@selector(integerValue)]&&[n integerValue]>0&&[n integerValue]<=24*60)[out addObject:@([n integerValue])];return out.count?out:fallback;}
 // Existing installs: the host manifests (which extension ids may talk to the app) are rewritten at launch, so a new
 // allowed id, such as the Chrome Web Store copy, reaches every Mac with the next app build. Only if they exist already.
+// True once the connection file exists for any browser: the setup page of the tour then stays away.
+- (BOOL)browserSetUp {
+ if([NSProcessInfo.processInfo.arguments containsObject:@"--setup-page"])return NO;
+ NSString *base=[NSHomeDirectory() stringByAppendingPathComponent:@"Library/Application Support"];
+ for(NSString *dir in @[@"Google/Chrome",@"BraveSoftware/Brave-Browser",@"Mozilla",@"com.operasoftware.Opera",@"Microsoft Edge"])if([NSFileManager.defaultManager fileExistsAtPath:[base stringByAppendingPathComponent:[dir stringByAppendingPathComponent:@"NativeMessagingHosts/local.less_pull.browser.json"]]])return YES;
+ return NO;
+}
+- (NSInteger)tourLastPage {return [self browserSetUp]?5:6;}
 - (void)refreshBrowserHostManifests {
  NSString *base=[NSHomeDirectory() stringByAppendingPathComponent:@"Library/Application Support"];BOOL any=NO;
  for(NSString *dir in @[@"Google/Chrome",@"BraveSoftware/Brave-Browser",@"Mozilla",@"com.operasoftware.Opera",@"Microsoft Edge"])if([NSFileManager.defaultManager fileExistsAtPath:[base stringByAppendingPathComponent:[dir stringByAppendingPathComponent:@"NativeMessagingHosts/local.less_pull.browser.json"]]])any=YES;
@@ -1722,7 +1731,32 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  NSImage *image=[NSImage imageWithSystemSymbolName:name accessibilityDescription:label];image=[image imageWithSymbolConfiguration:[NSImageSymbolConfiguration configurationWithPointSize:30 weight:NSFontWeightLight]];
  NSImageView *v=[NSImageView imageViewWithImage:image];v.contentTintColor=[NSColor colorWithSRGBRed:.93 green:.55 blue:.28 alpha:1];[v.widthAnchor constraintEqualToConstant:44].active=YES;[v.heightAnchor constraintEqualToConstant:44].active=YES;v.accessibilityLabel=label;return v;
 }
+- (NSView *)tourSetupPageView {
+ NSTextField *title=[NSTextField labelWithString:L(@"One browser for website exceptions")];title.font=[NSFont systemFontOfSize:15 weight:NSFontWeightSemibold];
+ NSTextField *text=[NSTextField wrappingLabelWithString:L(@"Apps get their exceptions right away. Websites need a small extension in your browser, and it is worth knowing what it does: it tells Less Pull which website is in front, nothing more. It cannot read pages or what you type, has no buttons and no network of its own, and never reports private tabs. Without it, website exceptions stay unavailable; Settings → Websites can set it up any time.")];text.preferredMaxLayoutWidth=404;
+ NSMutableArray *names=[NSMutableArray new],*icons=[NSMutableArray new];
+ for(NSArray *b in [self browserCatalog]){NSURL *url=[NSWorkspace.sharedWorkspace URLForApplicationWithBundleIdentifier:b[1]];if(!url)continue;[names addObject:b[0]];
+  NSImageView *icon=[NSImageView imageViewWithImage:[NSWorkspace.sharedWorkspace iconForFile:url.path]];icon.imageScaling=NSImageScaleProportionallyUpOrDown;[icon.widthAnchor constraintEqualToConstant:44].active=YES;[icon.heightAnchor constraintEqualToConstant:44].active=YES;icon.accessibilityLabel=b[0];
+  NSTextField *name=[NSTextField labelWithString:b[0]];name.font=[NSFont systemFontOfSize:11];name.textColor=NSColor.secondaryLabelColor;NSStackView *one=[self column:@[icon,name]];one.alignment=NSLayoutAttributeCenterX;one.spacing=4;[icons addObject:one];}
+ NSStackView *iconRow=[self row:icons];iconRow.spacing=18;iconRow.identifier=@"fixed";
+ NSTextField *found=[NSTextField wrappingLabelWithString:names.count?L(@"Found on this Mac. One is enough; more can follow any time."):L(@"No supported browser found on this Mac yet.")];found.preferredMaxLayoutWidth=404;found.textColor=NSColor.secondaryLabelColor;found.font=[NSFont systemFontOfSize:12];
+ NSView *fill=[NSView new];[fill setContentHuggingPriority:1 forOrientation:NSLayoutConstraintOrientationVertical];
+ NSButton *back=[NSButton buttonWithTitle:L(@"Back") target:self action:@selector(tourBack:)];[self helpView:back text:L(@"The previous page.") label:L(@"Back")];
+ NSButton *later=[NSButton buttonWithTitle:L(@"Not now") target:self action:@selector(dismissWelcome:)];[self helpView:later text:L(@"Close the tour without a browser connection. Settings → Websites can set one up later.") label:L(@"Not now")];
+ NSButton *go=[NSButton buttonWithTitle:L(@"Set up a browser") target:self action:@selector(tourSetUpBrowser:)];go.keyEquivalent=@"\r";[self helpView:go text:L(@"Opens the browser window, where one click connects a browser.") label:L(@"Set up a browser")];
+ NSView *gap=[NSView new];[gap.heightAnchor constraintEqualToConstant:6].active=YES;
+ NSStackView *column=[self column:names.count?@[title,text,gap,iconRow,found,fill,[self row:@[back,[self spacer],later,go]]]:@[title,text,found,fill,[self row:@[back,[self spacer],later,go]]]];column.spacing=8;return column;
+}
+- (void)tourSetUpBrowser:(id)sender {[NSUserDefaults.standardUserDefaults setBool:YES forKey:@"extensionNoticeSeen"];[self dismissWelcome:nil];[self installBrowserExtension:nil];}
+// Skipping before the setup page, with no browser connected yet, asks once; later tours skip quietly.
+- (void)skipTour:(id)sender {
+ if([self browserSetUp]||!self.settings){[self dismissWelcome:sender];return;}
+ NSAlert *ask=[NSAlert new];ask.messageText=L(@"Website exceptions need one browser connected");ask.informativeText=L(@"The connection takes a minute and is explained first. Apps get their exceptions either way; websites only with it. Settings → Websites can do it later.");
+ [ask addButtonWithTitle:L(@"Set up a browser")];[ask addButtonWithTitle:L(@"Skip for now")];
+ [ask beginSheetModalForWindow:self.settings completionHandler:^(NSModalResponse r){if(r==NSAlertFirstButtonReturn)[self tourSetUpBrowser:nil];else [self dismissWelcome:nil];}];
+}
 - (NSView *)tourPageView:(NSInteger)page {
+ if(page==6)return [self tourSetupPageView];
  NSArray *titles=@[L(@"Welcome to Less Pull"),L(@"The screen, quieter"),L(@"Color where it matters"),L(@"A peek, when you need it"),L(@"A session, with a gentle end"),L(@"Yours, and nobody else’s")];
  NSDictionary *peek=[self shortcutForKey:@"peekShortcut"],*toggle=[self shortcutForKey:@"grayscaleShortcut"];
  NSString *peekLabel=peek?[PeekShortcut labelForKeyCode:[peek[@"keyCode"] integerValue] modifiers:[peek[@"modifiers"] integerValue]]:L(@"the Peek shortcut"),*toggleLabel=toggle?[PeekShortcut labelForKeyCode:[toggle[@"keyCode"] integerValue] modifiers:[toggle[@"modifiers"] integerValue]]:L(@"The Toggle Grayscale shortcut");
@@ -1739,12 +1773,12 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
   NSTextField *where=[NSTextField wrappingLabelWithString:L(@"This is your icon, right above this window. If the menu bar is full, a » shows what is hidden; hold ⌘ and drag the circle toward the clock.")];where.preferredMaxLayoutWidth=376;NSStackView *iconRow=[self row:@[icon,where]];iconRow.alignment=NSLayoutAttributeTop;TourScene *hint=[TourScene new];hint.kind=TourSceneMenuBar;hint.accessibilityLabel=L(@"A menu bar that is full: the » reveals the hidden icons; hold the Command key and drag the circle toward the clock");[parts addObjectsFromArray:@[text,iconRow,hint]];}
  else {text.preferredMaxLayoutWidth=404;TourScene *scene=[TourScene new];scene.kind=(TourSceneKind)page;scene.accessibilityLabel=titles[page];[parts addObjectsFromArray:@[scene,text]];}
  NSView *fill=[NSView new];[fill setContentHuggingPriority:1 forOrientation:NSLayoutConstraintOrientationVertical];[parts addObject:fill];
- NSButton *skip=[NSButton buttonWithTitle:L(@"Skip tour") target:self action:@selector(dismissWelcome:)];skip.bezelStyle=NSBezelStyleInline;skip.font=[NSFont systemFontOfSize:11];[self helpView:skip text:L(@"Close the welcome and the tour. You can open the tour again from the About tab.") label:L(@"Skip tour")];
+ NSButton *skip=[NSButton buttonWithTitle:L(@"Skip tour and setup") target:self action:@selector(skipTour:)];skip.bezelStyle=NSBezelStyleInline;skip.font=[NSFont systemFontOfSize:11];[self helpView:skip text:L(@"Close the welcome, the tour and the setup. You can open them again from the About tab.") label:L(@"Skip tour and setup")];
  NSMutableArray *nav=[NSMutableArray new];
- if(page==0){NSButton *start=[NSButton buttonWithTitle:L(@"Start tour") target:self action:@selector(tourNext:)];start.keyEquivalent=@"\r";[self helpView:start text:L(@"A tour of five short pages, right here.") label:L(@"Start tour")];[nav addObjectsFromArray:@[[self spacer],skip,start]];}
+ if(page==0){NSButton *start=[NSButton buttonWithTitle:L(@"Start tour and setup") target:self action:@selector(tourNext:)];start.keyEquivalent=@"\r";[self helpView:start text:L(@"Five short pages and the browser connection, right here.") label:L(@"Start tour and setup")];[nav addObjectsFromArray:@[[self spacer],skip,start]];}
  else {NSButton *back=[NSButton buttonWithTitle:L(@"Back") target:self action:@selector(tourBack:)];[self helpView:back text:L(@"The previous page.") label:L(@"Back")];
   NSTextField *step=[NSTextField labelWithString:[NSString stringWithFormat:L(@"%ld of 5"),(long)page]];step.font=[NSFont systemFontOfSize:11];step.textColor=NSColor.secondaryLabelColor;
-  BOOL last=page==5;NSButton *next=[NSButton buttonWithTitle:last?L(@"Done"):L(@"Next") target:self action:last?@selector(dismissWelcome:):@selector(tourNext:)];next.keyEquivalent=@"\r";[self helpView:next text:last?L(@"Close the tour."):L(@"The next page.") label:next.title];
+  BOOL last=page==[self tourLastPage];NSButton *next=[NSButton buttonWithTitle:last?L(@"Done"):L(@"Next") target:self action:last?@selector(dismissWelcome:):@selector(tourNext:)];next.keyEquivalent=@"\r";[self helpView:next text:last?L(@"Close the tour."):L(@"The next page.") label:next.title];
   [nav addObjectsFromArray:@[back,[self spacer],step,[self spacer]]];if(!last)[nav addObject:skip];[nav addObject:next];}
  [parts addObject:[self row:nav]];
  NSStackView *column=[self column:parts];column.spacing=8;return column;
@@ -1758,7 +1792,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  if(animated&&!NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceMotion){next.alphaValue=0;[NSAnimationContext runAnimationGroup:^(NSAnimationContext *ctx){ctx.duration=.5;next.animator.alphaValue=1;} completionHandler:nil];}
  if(self.settings)[self.settings makeFirstResponder:nil];
 }
-- (void)tourNext:(id)sender {if(self.tourPage<5)[self showTourPage:self.tourPage+1 animated:YES];}
+- (void)tourNext:(id)sender {if(self.tourPage<[self tourLastPage])[self showTourPage:self.tourPage+1 animated:YES];}
 - (void)tourBack:(id)sender {if(self.tourPage>0)[self showTourPage:self.tourPage-1 animated:YES];}
 // Reopens the welcome and tour from the About tab: the window is rebuilt with the card in place.
 // Where the icon is: the welcome opens under it, and the icon fades in and out a few times.
