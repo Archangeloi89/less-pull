@@ -54,7 +54,7 @@ if [[ -n "${LESS_PULL_NOTARY_PROFILE:-}" ]]; then
  # Notarize the whole app (it contains the host and the Safari companion) and staple the ticket.
  NOTARIZE_ZIP="$BUILD_ROOT/notarize.zip"; ditto -c -k --keepParent --norsrc "$APP" "$NOTARIZE_ZIP"
  xcrun notarytool submit "$NOTARIZE_ZIP" --keychain-profile "$LESS_PULL_NOTARY_PROFILE" --wait
- xcrun stapler staple "$APP"; [[ -d "$APP/Contents/Resources/Less Pull for Safari.app" ]] && xcrun stapler staple "$APP/Contents/Resources/Less Pull for Safari.app" || true
+ xcrun stapler staple "$APP"  # outer app only: stapling the nested Safari app afterwards breaks the outer seal; its ticket is covered by the same notarization
  spctl --assess --type execute --verbose=2 "$APP"
 fi
 rm -rf "../Less Pull.app"
