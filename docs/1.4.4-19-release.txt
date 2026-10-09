@@ -85,3 +85,5 @@ Ukrainian (build 33), experimental.
 Japanese (build 33), experimental. The "Remind me after the end" choices (Never, Every 3/5/10/15 minutes) are now localized in every language.
 
 Korean (build 33), experimental.
+
+Simplified Chinese (build 33), experimental. The system-language match now trims regions (zh-Hans-CN → zh-Hans) and sends zh-TW/HK/MO to Traditional Chinese once that table exists.

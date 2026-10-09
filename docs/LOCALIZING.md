@@ -26,6 +26,7 @@ Less Pull speaks the language of the Mac it runs on, and you can choose another 
 | uk | Українська | experimental |
 | ja | 日本語 | experimental |
 | ko | 한국어 | experimental |
+| zh-Hans | 简体中文 | experimental; zh, zh-CN, zh-SG fall back to it |
 
 Languages added from here on are marked **experimental** in the Language menu until a native speaker has read them line by line: written with the same care and method, but not yet reviewed. If a line sounds wrong to you, Report a Problem on the About tab is the way to say so. The list of reviewed languages is `isReviewed:` in `Source/Localize.m`.
 

@@ -14,7 +14,11 @@ NSString *L(NSString *english){if(!english)return nil;NSString *t=table[english]
 + (NSString *)current {return currentCode;}
 + (NSString *)systemChoice {
  NSArray *have=[self available];
- for(NSString *pref in NSLocale.preferredLanguages){NSString *code=[pref componentsSeparatedByString:@"-"].firstObject.lowercaseString;if([have containsObject:pref])return pref;if([have containsObject:code])return code;for(NSString *h in have)if([h hasPrefix:[code stringByAppendingString:@"-"]])return h;}  // pt-PT falls back to pt-BR, zh to zh-Hans
+ for(NSString *pref in NSLocale.preferredLanguages){
+  NSMutableArray *parts=[[pref componentsSeparatedByString:@"-"] mutableCopy];NSString *code=((NSString *)parts.firstObject).lowercaseString;
+  while(parts.count){NSString *c=[parts componentsJoinedByString:@"-"];if([have containsObject:c])return c;[parts removeLastObject];}  // zh-Hans-CN → zh-Hans, pt-BR → pt-BR
+  if([code isEqualToString:@"zh"]){NSString *u=pref.uppercaseString;NSString *t=([u containsString:@"HANT"]||[u hasSuffix:@"-TW"]||[u hasSuffix:@"-HK"]||[u hasSuffix:@"-MO"])?@"zh-Hant":@"zh-Hans";if([have containsObject:t])return t;}
+  for(NSString *h in have)if([h hasPrefix:[code stringByAppendingString:@"-"]])return h;}  // pt-PT falls back to pt-BR
  return @"en";
 }
 + (NSString *)nameOf:(NSString *)code {
