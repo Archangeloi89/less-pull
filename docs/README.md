@@ -26,3 +26,4 @@ For people working on Less Pull:
 | [Publishing safely](PUBLISHING.md) | Signing, stores, and account protection for the app and the extension |
 | [Testing](../Source/TESTING.txt) | How to build and run the test suites |
 | [About the pictures](assets/README.md) | Which images are screenshots, which are illustrations, and how they are made |
+- [LOCALIZING.md](LOCALIZING.md): the languages Less Pull speaks, and how to add one.
