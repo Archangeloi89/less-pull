@@ -79,3 +79,5 @@ Dutch (build 33), experimental.
 Russian (build 33), experimental.
 
 Polish (build 33), experimental.
+
+Ukrainian (build 33), experimental.
