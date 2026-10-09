@@ -1079,7 +1079,7 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  self.nightButton.state=self.exclusion.active?on:(actualKnown&&actualOn);
  self.nightButton.title=known?(self.exclusion.active?(on?L(@"Default Night Shift: On"):L(@"Default Night Shift: Off")):(on?L(@"Night Shift: On"):L(@"Night Shift: Off"))):L(@"Night Shift unavailable");[self helpView:self.nightButton text:self.exclusion.active?[[self exclusionHelp] stringByAppendingString:L(@" This changes your default; the app in front keeps its own Night Shift exception.")]:self.nightHelp label:nil];
  self.grayscaleButton.state=self.selectedMode==1||self.selectedMode==100;
- self.grayscaleButton.title=self.grayOverride?L(@"Default Grayscale"):L(@"Grayscale");self.grayOnButton.hidden=self.grayOffUntil==nil;self.grayOffPopup.hidden=self.grayOffUntil!=nil||!self.grayscaleButton.state;self.grayOnButton.toolTip=[self grayOffLabel];if(self.clickPopup)[self.clickPopup selectItemAtIndex:[self leftClickToggles]?1:0];
+ self.grayscaleButton.title=self.grayOverride?L(@"Default Grayscale"):L(@"Grayscale");self.grayOnButton.hidden=self.grayOffUntil==nil;self.grayOffPopup.hidden=self.grayOffUntil!=nil||!self.grayscaleButton.state;self.grayOnButton.toolTip=[self grayOffLabel];if(self.clickPopup)[self.clickPopup selectItemAtIndex:MIN(2,MAX(0,[NSUserDefaults.standardUserDefaults integerForKey:@"iconClick"]))?1:0];
  self.resumeButton.hidden=!(self.automatic&&self.policy.overrideMode>=0);
  self.endPauseButton.title=[self canResumePause]?L(@"Turn Night Shift back on"):L(@"End timed off");[self helpView:self.endPauseButton text:[self endPauseHelp] label:self.endPauseButton.title];self.endPauseButton.hidden=self.pause==nil;self.pausePopup.hidden=self.pause!=nil;self.pausePopup.enabled=known&&(on||actualOn);
  self.resetButton.enabled=[self currentWarmth]>0;
@@ -1320,6 +1320,9 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
 - (BOOL)leftClickToggles {return [NSUserDefaults.standardUserDefaults integerForKey:@"iconClick"]==1;}
 - (void)statusItemClicked:(id)sender {
  NSEvent *event=NSApp.currentEvent;BOOL secondary=event.type==NSEventTypeRightMouseUp||event.type==NSEventTypeRightMouseDown||(event.modifierFlags&NSEventModifierFlagControl);
+ if([NSUserDefaults.standardUserDefaults integerForKey:@"iconClick"]==2){  // the other button goes straight to the session: start one, or the running one's panel
+  if(secondary){if(self.session.state!=SessionIdle)[self toggleSessionPanel];else if(self.sessionPanel.visible)[self closeSessionPanel];else [self showSessionPanelMode:@"start"];return;}
+  [self closeSessionPanel];self.item.menu=self.statusMenu;[self.item.button performClick:nil];return;}
  BOOL toggle=[self leftClickToggles]?!secondary:secondary;
  if(self.session.state!=SessionIdle){if(!toggle){[self toggleSessionPanel];return;}[self closeSessionPanel];self.item.menu=self.statusMenu;[self.item.button performClick:nil];return;}
  if(toggle){[self toggleGrayscale:nil];return;}
@@ -1455,8 +1458,8 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  return column;
 }
 - (NSStackView *)shortcutsTab {
- NSTextField *clickTitle=[NSTextField labelWithString:L(@"Left-clicking the menu-bar icon")];clickTitle.font=[NSFont systemFontOfSize:13 weight:NSFontWeightMedium];
- self.clickPopup=[[NSPopUpButton alloc]initWithFrame:NSZeroRect pullsDown:NO];[self.clickPopup addItemsWithTitles:@[L(@"Opens the menu"),L(@"Toggles Grayscale")]];self.clickPopup.target=self;self.clickPopup.action=@selector(clickBehaviorChanged:);[self.clickPopup.widthAnchor constraintEqualToConstant:200].active=YES;[self helpView:self.clickPopup text:L(@"What the left and right mouse buttons do on the menu-bar icon. Control-click counts as a right-click.") label:L(@"Clicking the menu-bar icon")];
+ NSTextField *clickTitle=[NSTextField labelWithString:L(@"Right-clicking the menu-bar icon")];clickTitle.font=[NSFont systemFontOfSize:13 weight:NSFontWeightMedium];
+ self.clickPopup=[[NSPopUpButton alloc]initWithFrame:NSZeroRect pullsDown:NO];[self.clickPopup addItemsWithTitles:@[L(@"Toggles Grayscale"),L(@"Opens the menu, left toggles Grayscale"),L(@"Opens the session panel")]];self.clickPopup.target=self;self.clickPopup.action=@selector(clickBehaviorChanged:);[self.clickPopup.widthAnchor constraintEqualToConstant:200].active=YES;[self helpView:self.clickPopup text:L(@"What the right mouse button does on the menu-bar icon; the left button does the other. Control-click and a two-finger tap count as a right-click.") label:L(@"Right-clicking the menu-bar icon")];
  NSTextField *grayShortcutTitle=[NSTextField labelWithString:L(@"Toggle Grayscale shortcut")];grayShortcutTitle.font=[NSFont systemFontOfSize:13 weight:NSFontWeightMedium];
  self.grayscaleRecorder=[ShortcutRecorder new];self.grayscaleRecorder.bezelStyle=NSBezelStyleRounded;self.grayscaleRecorder.title=L(@"Record Shortcut");self.grayscaleRecorder.target=self;self.grayscaleRecorder.action=@selector(startRecording:);[self.grayscaleRecorder.widthAnchor constraintGreaterThanOrEqualToConstant:150].active=YES;
  __weak AppDelegate *weakGray=self;self.grayscaleRecorder.recorded=^(NSInteger keyCode,NSEventModifierFlags modifiers){[weakGray saveShortcut:@"grayscaleShortcut" keyCode:keyCode modifiers:modifiers];};self.grayscaleRecorder.cleared=^{[weakGray saveShortcut:@"grayscaleShortcut" keyCode:-1 modifiers:0];};
@@ -1476,7 +1479,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  self.peekNote=[self note:@""];
  NSStackView *column=[self column:@[[self row:@[peekTitle,[self spacer],suggestPeek,self.peekRecorder]],self.peekNote,[self adv:[self row:@[peekEffectsLabel,self.peekGrayButton,self.peekWarmthButton,self.peekNightButton]]],[self multi:[self row:@[peekScopeLabel,self.peekScopePopup]]],[self separator],
   [self row:@[grayShortcutTitle,[self spacer],suggestGray,self.grayscaleRecorder]],self.grayscaleShortcutNote,[self adv:[self separator]],
-  [self adv:[self row:@[clickTitle,[self spacer],self.clickPopup]]],[self adv:[self note:L(@"With Opens the menu, a right-click (or Control-click) toggles Grayscale. With Toggles Grayscale, a right-click opens the menu.")]]]];
+  [self adv:[self row:@[clickTitle,[self spacer],self.clickPopup]]],[self adv:[self note:L(@"A Control-click or a two-finger tap on the trackpad counts as a right-click. With Opens the session panel, the right button starts a session, or opens the panel of the one running; the left button always opens the menu.")]]]];
  [column setCustomSpacing:4 afterView:column.arrangedSubviews[0]];[column setCustomSpacing:6 afterView:column.arrangedSubviews[1]];[column setCustomSpacing:4 afterView:column.arrangedSubviews[5]];[column setCustomSpacing:4 afterView:column.arrangedSubviews[8]];[self refreshPeekRecorder:nil];
  return column;
 }
