@@ -162,6 +162,11 @@ static NSString *const LessPullOldBundleIdentifier=@"local.nightshiftfilters.app
 - (BOOL)isFlipped {return YES;}
 @end
 // The settings tabs always use the overlay scroller, whatever "Show scroll bars" says, so the 500 pt layout never loses width to a bar.
+@interface SettingsClipView : NSClipView
+@end
+@implementation SettingsClipView
+- (NSRect)constrainBoundsRect:(NSRect)proposed {NSRect r=[super constrainBoundsRect:proposed];r.origin.x=0;return r;}
+@end
 @interface SettingsScrollView : NSScrollView
 @end
 @implementation SettingsScrollView
@@ -512,8 +517,18 @@ static void drawKey(NSRect f,NSString *label,double pressed){NSRect r=NSOffsetRe
 }
 // Hidden views leave the stacks; the tabs then take their new height.
 // The settings window never grows taller than the screen it is on: the toolbar and title take about 80 pt, and a margin keeps the window off the Dock.
-- (CGFloat)settingsHeightFor:(CGFloat)contentHeight {NSScreen *screen=self.settings.screen?:NSScreen.mainScreen;CGFloat cap=screen?screen.visibleFrame.size.height-80-24:100000;NSArray *args=NSProcessInfo.processInfo.arguments;NSUInteger ti=[args indexOfObject:@"--screen-height"];if(ti!=NSNotFound&&ti+1<args.count)cap=[args[ti+1] doubleValue]-80-24;return MIN(ceil(contentHeight),MAX(cap,240));}
+- (CGFloat)settingsHeightFor:(CGFloat)contentHeight {NSScreen *screen=self.settings.screen?:NSScreen.mainScreen;CGFloat cap=screen?screen.visibleFrame.size.height-80-24:100000;NSArray *args=NSProcessInfo.processInfo.arguments;NSUInteger ti=[args indexOfObject:@"--screen-height"];if(ti!=NSNotFound&&ti+1<args.count)cap=[args[ti+1] doubleValue]-80-24;return MIN(ceil(contentHeight)+2,MAX(cap,240));}
 - (NSView *)settingsContentOf:(NSTabViewItem *)item {NSScrollView *scroll=(NSScrollView *)item.viewController.view.subviews.firstObject;return [scroll isKindOfClass:NSScrollView.class]?scroll.documentView.subviews.firstObject:scroll;}
+// Wrapped text can end a few points taller than measured; the window then grows by exactly that, within the screen, so no hairline scroll bar appears.
+- (void)fixSettingsOverflow {
+ NSTabViewItem *item=self.settingsTabs.tabView.selectedTabViewItem;NSScrollView *s=(NSScrollView *)item.viewController.view.subviews.firstObject;if(![s isKindOfClass:NSScrollView.class]||!s.window||s.window!=self.settings)return;
+ [s layoutSubtreeIfNeeded];CGFloat over=NSHeight(s.documentView.frame)-NSHeight(s.contentView.bounds);if(over<=0||over>24)return;
+ CGFloat want=[self settingsHeightFor:NSHeight(s.frame)+over],grow=want-NSHeight(s.frame);if(grow<=0.5)return;
+ item.viewController.preferredContentSize=NSMakeSize(500,want);NSRect f=self.settings.frame;f.size.height+=grow;f.origin.y-=grow;[self.settings setFrame:f display:YES];
+}
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
+ if(object==self.settingsTabs)dispatch_async(dispatch_get_main_queue(),^{[self fixSettingsOverflow];});
+}
 - (void)relayoutSettings {
  if(!self.settingsTabs)return;
  CGFloat width=500;
@@ -1481,9 +1496,9 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  NSViewController *controller=[NSViewController new];NSVisualEffectView *root=[NSVisualEffectView new];root.material=NSVisualEffectMaterialWindowBackground;root.blendingMode=NSVisualEffectBlendingModeBehindWindow;root.state=NSVisualEffectStateFollowsWindowActiveState;
  // The tab scrolls when the screen is shorter than its content (a 13-inch Mac with larger text); otherwise the scroller stays hidden and the window takes the content's height.
  SettingsDocument *doc=[SettingsDocument new];doc.translatesAutoresizingMaskIntoConstraints=NO;[doc addSubview:content];
- SettingsScrollView *scroll=[SettingsScrollView new];scroll.translatesAutoresizingMaskIntoConstraints=NO;scroll.drawsBackground=NO;scroll.hasVerticalScroller=YES;scroll.hasHorizontalScroller=NO;scroll.autohidesScrollers=YES;scroll.scrollerStyle=NSScrollerStyleOverlay;scroll.verticalScrollElasticity=NSScrollElasticityAllowed;scroll.horizontalScrollElasticity=NSScrollElasticityNone;scroll.documentView=doc;[root addSubview:scroll];
+ SettingsScrollView *scroll=[SettingsScrollView new];scroll.contentView=[SettingsClipView new];scroll.translatesAutoresizingMaskIntoConstraints=NO;scroll.drawsBackground=NO;scroll.hasVerticalScroller=YES;scroll.hasHorizontalScroller=NO;scroll.autohidesScrollers=YES;scroll.scrollerStyle=NSScrollerStyleOverlay;scroll.verticalScrollElasticity=NSScrollElasticityAllowed;scroll.horizontalScrollElasticity=NSScrollElasticityNone;scroll.documentView=doc;[root addSubview:scroll];
  [NSLayoutConstraint activateConstraints:@[[scroll.topAnchor constraintEqualToAnchor:root.topAnchor],[scroll.leadingAnchor constraintEqualToAnchor:root.leadingAnchor],[scroll.trailingAnchor constraintEqualToAnchor:root.trailingAnchor],[scroll.bottomAnchor constraintEqualToAnchor:root.bottomAnchor],
-  [doc.topAnchor constraintEqualToAnchor:scroll.contentView.topAnchor],[doc.leadingAnchor constraintEqualToAnchor:scroll.contentView.leadingAnchor],[doc.widthAnchor constraintEqualToAnchor:scroll.contentView.widthAnchor],
+  [doc.topAnchor constraintEqualToAnchor:scroll.contentView.topAnchor],[doc.leadingAnchor constraintEqualToAnchor:scroll.contentView.leadingAnchor],[doc.widthAnchor constraintEqualToAnchor:scroll.widthAnchor],  // the full 500 pt, even when an old-style bar is drawn over the right margin
   [content.topAnchor constraintEqualToAnchor:doc.topAnchor],[content.leadingAnchor constraintEqualToAnchor:doc.leadingAnchor],[content.trailingAnchor constraintEqualToAnchor:doc.trailingAnchor],[content.bottomAnchor constraintEqualToAnchor:doc.bottomAnchor]]];[root.widthAnchor constraintEqualToConstant:500].active=YES;  // every language fits 500 pt; a line that does not is shortened in its table
  // Rows, separators and lists span the column; a view marked fixed keeps its own width.
  for(NSView *v in content.arrangedSubviews)if(([v isKindOfClass:NSStackView.class]&&![v.identifier isEqual:@"fixed"])||[v isKindOfClass:NSBox.class]||[v isKindOfClass:NSScrollView.class])[v.widthAnchor constraintEqualToAnchor:content.widthAnchor constant:-48].active=YES;
@@ -1596,7 +1611,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  NSTextField *intro=[self explain:L(@"Give an app its own display settings. They apply while that app is in front with a window open; your default settings stay saved.")];
  self.exclusionText=[self note:L(@"Using your default settings")];
  NSScrollView *scroll=[NSScrollView new];scroll.hasVerticalScroller=YES;scroll.borderType=NSBezelBorder;[scroll.heightAnchor constraintEqualToConstant:300].active=YES;
- self.exclusionsList=[ExceptionStack new];self.exclusionsList.orientation=NSUserInterfaceLayoutOrientationVertical;self.exclusionsList.alignment=NSLayoutAttributeLeading;self.exclusionsList.spacing=0;self.exclusionsList.translatesAutoresizingMaskIntoConstraints=NO;scroll.documentView=self.exclusionsList;[self.exclusionsList.widthAnchor constraintEqualToAnchor:scroll.contentView.widthAnchor].active=YES;
+ self.exclusionsList=[ExceptionStack new];self.exclusionsList.orientation=NSUserInterfaceLayoutOrientationVertical;self.exclusionsList.alignment=NSLayoutAttributeLeading;self.exclusionsList.spacing=0;self.exclusionsList.translatesAutoresizingMaskIntoConstraints=NO;scroll.documentView=self.exclusionsList;scroll.hasHorizontalScroller=NO;scroll.autohidesScrollers=YES;[self.exclusionsList.widthAnchor constraintEqualToAnchor:scroll.contentView.widthAnchor].active=YES;[self.exclusionsList.heightAnchor constraintGreaterThanOrEqualToAnchor:scroll.contentView.heightAnchor].active=YES;
  NSPopUpButton *add=[[NSPopUpButton alloc]initWithFrame:NSZeroRect pullsDown:YES];self.addAppMenu=add.menu;add.menu.delegate=self;[add.menu addItemWithTitle:L(@"Add app…") action:nil keyEquivalent:@""];[add.widthAnchor constraintEqualToConstant:150].active=YES;[self helpView:add text:L(@"Pick one of the apps running now, or choose another app.") label:L(@"Add an app exception")];
  NSStackView *column=[self column:@[intro,self.exclusionText,scroll,[self row:@[add,[self spacer]]],[self note:L(@"If Night Shift is turned off for a while, that wins over an app’s Night Shift On. Grayscale Off, warmth Off and Night Shift Off together show the plain display.")]]];
  [column setCustomSpacing:6 afterView:intro];
@@ -1608,7 +1623,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  NSButton *install=[NSButton buttonWithTitle:L(@"Install Browser Extension…") target:self action:@selector(installBrowserExtension:)];[self helpView:install text:L(@"Add the Less Pull extension to your browser so websites can have their own settings. Less Pull must stay open.") label:L(@"Install Browser Extension")];
  NSTextField *savedTitle=[NSTextField labelWithString:L(@"Saved website exceptions")];savedTitle.font=[NSFont systemFontOfSize:13 weight:NSFontWeightMedium];
  NSScrollView *scroll=[NSScrollView new];scroll.hasVerticalScroller=YES;scroll.borderType=NSBezelBorder;[scroll.heightAnchor constraintEqualToConstant:300].active=YES;
- self.websiteRulesList=[ExceptionStack new];self.websiteRulesList.orientation=NSUserInterfaceLayoutOrientationVertical;self.websiteRulesList.alignment=NSLayoutAttributeLeading;self.websiteRulesList.spacing=0;self.websiteRulesList.translatesAutoresizingMaskIntoConstraints=NO;scroll.documentView=self.websiteRulesList;[self.websiteRulesList.widthAnchor constraintEqualToAnchor:scroll.contentView.widthAnchor].active=YES;
+ self.websiteRulesList=[ExceptionStack new];self.websiteRulesList.orientation=NSUserInterfaceLayoutOrientationVertical;self.websiteRulesList.alignment=NSLayoutAttributeLeading;self.websiteRulesList.spacing=0;self.websiteRulesList.translatesAutoresizingMaskIntoConstraints=NO;scroll.documentView=self.websiteRulesList;scroll.hasHorizontalScroller=NO;scroll.autohidesScrollers=YES;[self.websiteRulesList.widthAnchor constraintEqualToAnchor:scroll.contentView.widthAnchor].active=YES;[self.websiteRulesList.heightAnchor constraintGreaterThanOrEqualToAnchor:scroll.contentView.heightAnchor].active=YES;
  NSStackView *column=[self column:@[intro,[self row:@[install,[self spacer]]],self.websiteStatus,[self separator],savedTitle,scroll,[self note:L(@"Change a website’s settings here or from the menu while the site is in front. Less Pull must stay open for website exceptions to work; private tabs are left alone.")]]];
  [column setCustomSpacing:4 afterView:column.arrangedSubviews[1]];[column setCustomSpacing:6 afterView:savedTitle];[self rebuildWebsiteRulesList];
  return column;
@@ -1803,7 +1818,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  for(int k=0;k<4;k++){dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)((0.6+k*1.2)*NSEC_PER_SEC)),dispatch_get_main_queue(),^{[NSAnimationContext runAnimationGroup:^(NSAnimationContext *c){c.duration=.5;button.animator.alphaValue=.25;} completionHandler:^{[NSAnimationContext runAnimationGroup:^(NSAnimationContext *c){c.duration=.6;button.animator.alphaValue=1;} completionHandler:nil];}];});}
 }
 - (void)releaseSettings {
- self.settings=nil;self.settingsTabs=nil;self.statusText=nil;self.statusDetail=nil;self.autoButton=nil;self.lockNightButton=nil;self.loginButton=nil;self.grayscaleButton=nil;self.nightButton=nil;self.resumeButton=nil;self.endPauseButton=nil;self.resetButton=nil;self.pausePopup=nil;self.peekScopePopup=nil;self.websiteStatus=nil;self.exclusionsList=nil;self.displaysList=nil;self.sessionPresetsField=nil;self.callBackPresetsField=nil;self.exclusionText=nil;self.warmthSlider=nil;self.warmthLabel=nil;self.warmthTitle=nil;self.welcomeCard=nil;self.updateCheckbox=nil;self.updateButton=nil;self.updateStatusLabel=nil;self.thanksCard=nil;self.peekRecorder=nil;self.grayscaleRecorder=nil;self.peekNote=nil;self.loginNote=nil;self.grayscaleShortcutNote=nil;self.peekGrayButton=nil;self.peekWarmthButton=nil;self.peekNightButton=nil;self.clickPopup=nil;self.rightClickPopup=nil;self.grayOffPopup=nil;self.grayOnButton=nil;self.websiteRulesList=nil;self.tourCard=nil;self.noteViews=nil;self.advancedViews=nil;self.multiDisplayViews=nil;
+ [self.settingsTabs removeObserver:self forKeyPath:@"selectedTabViewItemIndex"];self.settings=nil;self.settingsTabs=nil;self.statusText=nil;self.statusDetail=nil;self.autoButton=nil;self.lockNightButton=nil;self.loginButton=nil;self.grayscaleButton=nil;self.nightButton=nil;self.resumeButton=nil;self.endPauseButton=nil;self.resetButton=nil;self.pausePopup=nil;self.peekScopePopup=nil;self.websiteStatus=nil;self.exclusionsList=nil;self.displaysList=nil;self.sessionPresetsField=nil;self.callBackPresetsField=nil;self.exclusionText=nil;self.warmthSlider=nil;self.warmthLabel=nil;self.warmthTitle=nil;self.welcomeCard=nil;self.updateCheckbox=nil;self.updateButton=nil;self.updateStatusLabel=nil;self.thanksCard=nil;self.peekRecorder=nil;self.grayscaleRecorder=nil;self.peekNote=nil;self.loginNote=nil;self.grayscaleShortcutNote=nil;self.peekGrayButton=nil;self.peekWarmthButton=nil;self.peekNightButton=nil;self.clickPopup=nil;self.rightClickPopup=nil;self.grayOffPopup=nil;self.grayOnButton=nil;self.websiteRulesList=nil;self.tourCard=nil;self.noteViews=nil;self.advancedViews=nil;self.multiDisplayViews=nil;
  for(NSNumber *after in @[@1.0,@6.0])dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)(after.doubleValue*NSEC_PER_SEC)),dispatch_get_main_queue(),^{if(!self.settings)malloc_zone_pressure_relief(NULL,0);});  // once the window is truly gone, hand the freed pages back
 }
 - (void)rememberSettingsFrame {if(self.settings){self.keptSettingsFrame=self.settings.frame;self.keepSettingsFrame=YES;}}
@@ -1829,7 +1844,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  if(!self.settings){
   self.thanksWanted=self.forceThanks||(!self.welcomeWanted&&[self thanksDue]);self.forceThanks=NO;
   self.multiDisplayViews=[NSMutableArray new];self.advancedViews=[NSMutableArray new];if(!self.expandedRules)self.expandedRules=[NSMutableSet new];
-  self.settingsTabs=[NSTabViewController new];self.settingsTabs.tabStyle=NSTabViewControllerTabStyleToolbar;self.settingsTabs.transitionOptions=NSViewControllerTransitionNone;
+  self.settingsTabs=[NSTabViewController new];[self.settingsTabs addObserver:self forKeyPath:@"selectedTabViewItemIndex" options:0 context:NULL];self.settingsTabs.tabStyle=NSTabViewControllerTabStyleToolbar;self.settingsTabs.transitionOptions=NSViewControllerTransitionNone;
   [self.settingsTabs addTabViewItem:[self tab:L(@"General") symbol:@"circle.lefthalf.filled" content:[self generalTab]]];
   [self.settingsTabs addTabViewItem:[self tab:L(@"Shortcuts") symbol:@"keyboard" content:[self shortcutsTab]]];
   [self.settingsTabs addTabViewItem:[self tab:L(@"Sessions") symbol:@"timer" content:[self sessionsTab]]];
@@ -1844,7 +1859,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
   [NSNotificationCenter.defaultCenter addObserverForName:NSWindowDidMoveNotification object:self.settings queue:nil usingBlock:^(NSNotification *n){if(self.settings.visible&&!self.welcomeWanted)[NSUserDefaults.standardUserDefaults setObject:NSStringFromPoint(NSMakePoint(self.settings.frame.origin.x,NSMaxY(self.settings.frame))) forKey:@"settingsTopLeft"];}];
   if(self.keepSettingsFrame){NSRect f=self.settings.frame;f.origin.x=self.keptSettingsFrame.origin.x;f.origin.y=NSMaxY(self.keptSettingsFrame)-f.size.height;[self.settings setFrame:[self.settings constrainFrameRect:f toScreen:self.settings.screen?:NSScreen.mainScreen] display:NO];self.keepSettingsFrame=NO;};
  }
- self.loginButton.state=SMAppService.mainAppService.status==SMAppServiceStatusEnabled;[self rebuildExclusionsList];[self sync];[NSApp activateIgnoringOtherApps:YES];[self.settings makeKeyAndOrderFront:nil];if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.welcomePlaced=YES;if(first){dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)(0.45*NSEC_PER_SEC)),dispatch_get_main_queue(),^{[self placeSettingsUnderIcon];});}}
+ self.loginButton.state=SMAppService.mainAppService.status==SMAppServiceStatusEnabled;[self rebuildExclusionsList];[self sync];dispatch_async(dispatch_get_main_queue(),^{[self fixSettingsOverflow];});[NSApp activateIgnoringOtherApps:YES];[self.settings makeKeyAndOrderFront:nil];if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.welcomePlaced=YES;if(first){dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)(0.45*NSEC_PER_SEC)),dispatch_get_main_queue(),^{[self placeSettingsUnderIcon];});}}
 }
 // Before anything is installed: what the extension can see, in plain words.
 - (BOOL)confirmExtensionData {
