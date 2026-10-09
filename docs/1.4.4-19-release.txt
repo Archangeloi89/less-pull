@@ -75,3 +75,5 @@ Italian (build 33), experimental; Spanish and French re-read from the function o
 Brazilian Portuguese (build 33), experimental; a Mac set to another regional form of a language (pt-PT, zh) falls back to the regional table the app has.
 
 Dutch (build 33), experimental.
+
+Russian (build 33), experimental.
