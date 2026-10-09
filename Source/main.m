@@ -177,6 +177,7 @@ static NSString *const LessPullOldBundleIdentifier=@"local.nightshiftfilters.app
 @property NSTimer *timer;
 @property NSWindow *settings,*browserWindow;
 @property NSStackView *browserRows;
+@property NSTimer *browserWatch;
 @property NSTextField *statusText;
 @property NSButton *autoButton;
 @property NSButton *loginButton;
@@ -1720,7 +1721,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
 // The browser list: every supported browser that is installed, the default browser first. The window
 // stays open so a second browser can follow; Close is the only way out. Set up… runs the setup for that
 // row and the finishing steps come as a sheet on this window.
-- (NSArray *)browserCatalog {return @[@[@"Safari",@"com.apple.Safari",@""],@[@"Chrome",@"com.google.Chrome",@"chrome://extensions"],@[@"Firefox",@"org.mozilla.firefox",@"about:debugging#/runtime/this-firefox"],@[@"Brave",@"com.brave.Browser",@"brave://extensions"],@[@"Edge",@"com.microsoft.edgemac",@"edge://extensions"],@[@"Opera",@"com.operasoftware.Opera",@"opera://extensions"]];}
+- (NSArray *)browserCatalog {return @[@[@"Safari",@"com.apple.Safari",@"",@""],@[@"Chrome",@"com.google.Chrome",@"chrome://extensions",@"https://www.google.com/chrome/"],@[@"Firefox",@"org.mozilla.firefox",@"about:debugging#/runtime/this-firefox",@"https://www.mozilla.org/firefox/"],@[@"Brave",@"com.brave.Browser",@"brave://extensions",@"https://brave.com/download/"],@[@"Edge",@"com.microsoft.edgemac",@"edge://extensions",@"https://www.microsoft.com/edge"],@[@"Opera",@"com.operasoftware.Opera",@"opera://extensions",@"https://www.opera.com/download"]];}
 - (NSString *)defaultBrowserIdentifier {NSURL *u=[NSWorkspace.sharedWorkspace URLForApplicationToOpenURL:[NSURL URLWithString:@"https://example.com"]];return u?[NSBundle bundleWithURL:u].bundleIdentifier:nil;}
 - (void)installBrowserExtension:(id)sender {
  if(self.browserWindow){[self.browserWindow makeKeyAndOrderFront:nil];[NSApp activateIgnoringOtherApps:YES];return;}
@@ -1731,7 +1732,8 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  NSButton *close=[NSButton buttonWithTitle:@"Close" target:self action:@selector(closeBrowserWindow:)];close.keyEquivalent=@"\r";
  NSStackView *column=[self column:@[intro,self.browserRows,stay,[self row:@[[self spacer],close]]]];column.spacing=14;column.edgeInsets=NSEdgeInsetsMake(20,20,20,20);
  NSWindow *w=[[NSWindow alloc]initWithContentRect:NSMakeRect(0,0,460,100) styleMask:NSWindowStyleMaskTitled|NSWindowStyleMaskClosable backing:NSBackingStoreBuffered defer:NO];w.title=@"Browser Extension";w.contentView=column;[w setContentSize:column.fittingSize];w.releasedWhenClosed=NO;[w center];self.browserWindow=w;
- [NSNotificationCenter.defaultCenter addObserverForName:NSWindowWillCloseNotification object:w queue:nil usingBlock:^(NSNotification *n){self.browserWindow=nil;self.browserRows=nil;}];
+ [NSNotificationCenter.defaultCenter addObserverForName:NSWindowWillCloseNotification object:w queue:nil usingBlock:^(NSNotification *n){[self.browserWatch invalidate];self.browserWatch=nil;self.browserWindow=nil;self.browserRows=nil;}];
+ self.browserWatch=[NSTimer scheduledTimerWithTimeInterval:3 repeats:YES block:^(NSTimer *t){[self refreshBrowserRows];}];
  [NSApp activateIgnoringOtherApps:YES];[w makeKeyAndOrderFront:nil];
 }
 - (void)closeBrowserWindow:(id)sender {[self.browserWindow close];}
@@ -1741,29 +1743,34 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  if(!self.browserRows.arrangedSubviews.count){
   NSMutableArray *order=[NSMutableArray new],*missing=[NSMutableArray new];for(NSArray *b in [self browserCatalog]){BOOL have=[NSWorkspace.sharedWorkspace URLForApplicationWithBundleIdentifier:b[1]]!=nil;if([b[1] isEqual:preferred])[order insertObject:b atIndex:0];else if(have){NSUInteger at=0;for(NSArray *o in order)if([NSWorkspace.sharedWorkspace URLForApplicationWithBundleIdentifier:o[1]])at++;[order insertObject:b atIndex:at];}else [order addObject:b];}
   for(NSArray *b in order){
-   NSURL *url=[NSWorkspace.sharedWorkspace URLForApplicationWithBundleIdentifier:b[1]];NSImage *image=url?[NSWorkspace.sharedWorkspace iconForFile:url.path]:[NSImage imageWithSystemSymbolName:@"globe" accessibilityDescription:nil];NSImageView *icon=[NSImageView imageViewWithImage:image];icon.imageScaling=NSImageScaleProportionallyUpOrDown;[icon.widthAnchor constraintEqualToConstant:32].active=YES;[icon.heightAnchor constraintEqualToConstant:32].active=YES;if(!url){icon.contentTintColor=NSColor.tertiaryLabelColor;icon.alphaValue=.6;}
-   NSTextField *name=[NSTextField labelWithString:b[0]];name.font=[NSFont systemFontOfSize:13 weight:NSFontWeightMedium];if(!url)name.textColor=NSColor.secondaryLabelColor;
+   NSURL *url=[NSWorkspace.sharedWorkspace URLForApplicationWithBundleIdentifier:b[1]];NSImage *image=url?[NSWorkspace.sharedWorkspace iconForFile:url.path]:[[NSImage imageWithSystemSymbolName:@"app.dashed" accessibilityDescription:nil] imageWithSymbolConfiguration:[NSImageSymbolConfiguration configurationWithPointSize:26 weight:NSFontWeightLight]];NSImageView *icon=[NSImageView imageViewWithImage:image];icon.imageScaling=NSImageScaleProportionallyUpOrDown;icon.identifier=[@"icon:" stringByAppendingString:b[1]];[icon.widthAnchor constraintEqualToConstant:32].active=YES;[icon.heightAnchor constraintEqualToConstant:32].active=YES;
+   NSTextField *name=[NSTextField labelWithString:b[0]];name.font=[NSFont systemFontOfSize:13 weight:NSFontWeightMedium];
    NSTextField *sub=[NSTextField labelWithString:@""];sub.font=[NSFont systemFontOfSize:11];sub.identifier=[@"state:" stringByAppendingString:b[1]];
    NSStackView *text=[self column:@[name,sub]];text.spacing=1;
-   NSButton *go=[NSButton buttonWithTitle:@"Set up…" target:self action:@selector(setUpBrowser:)];go.identifier=b[1];go.enabled=url!=nil;[go.widthAnchor constraintEqualToConstant:86].active=YES;[self helpView:go text:url?[NSString stringWithFormat:@"Connects Less Pull to %@ and opens its extensions page with the steps to finish.",b[0]]:[NSString stringWithFormat:@"%@ is not installed on this Mac.",b[0]] label:[NSString stringWithFormat:@"Set up %@",b[0]]];
-   NSStackView *row=[self row:@[icon,text,[self spacer],go]];row.spacing=10;[row.widthAnchor constraintEqualToConstant:420].active=YES;if(!url){row.identifier=@"missing";row.hidden=YES;[missing addObject:b[0]];}[self.browserRows addArrangedSubview:row];
+   NSButton *go=[NSButton buttonWithTitle:@"Set up…" target:self action:@selector(setUpBrowser:)];go.identifier=b[1];[go.widthAnchor constraintEqualToConstant:86].active=YES;[self helpView:go text:[NSString stringWithFormat:@"Connects Less Pull to %@ and opens its extensions page with the steps to finish.",b[0]] label:[NSString stringWithFormat:@"Set up %@",b[0]]];
+   NSStackView *row=[self row:@[icon,text,[self spacer],go]];row.spacing=10;[row.widthAnchor constraintEqualToConstant:420].active=YES;if(!url){row.identifier=@"missing";row.hidden=YES;[missing addObject:b[0]];}row.toolTip=url?nil:[NSString stringWithFormat:@"%@ is not installed on this Mac.",b[0]];[self.browserRows addArrangedSubview:row];
   }
-  if(missing.count){NSButton *more=[NSButton buttonWithTitle:[NSString stringWithFormat:@"Show %@ too",[missing componentsJoinedByString:@" and "]] target:self action:@selector(toggleMissingBrowsers:)];more.bezelStyle=NSBezelStyleInline;more.font=[NSFont systemFontOfSize:11];more.identifier=@"more";[self helpView:more text:@"Shows the supported browsers that are not installed on this Mac." label:@"Show the browsers not installed"];[self.browserRows addArrangedSubview:[self row:@[more,[self spacer]]]];}
+  if(missing.count){NSButton *more=[NSButton buttonWithTitle:@"Show uninstalled browsers" target:self action:@selector(toggleMissingBrowsers:)];more.bezelStyle=NSBezelStyleInline;more.font=[NSFont systemFontOfSize:11];more.identifier=@"more";[self helpView:more text:@"Shows the supported browsers that are not installed on this Mac." label:@"Show the browsers not installed"];[self.browserRows addArrangedSubview:[self row:@[more,[self spacer]]]];}
  }
- for(NSStackView *row in self.browserRows.arrangedSubviews){NSTextField *sub=nil;NSButton *go=nil;for(NSView *v in row.arrangedSubviews){if([v isKindOfClass:NSButton.class])go=(NSButton *)v;else if([v isKindOfClass:NSStackView.class])for(NSView *t in ((NSStackView *)v).arrangedSubviews)if([t.identifier hasPrefix:@"state:"])sub=(NSTextField *)t;}
-  if(!sub||!go)continue;NSString *bundle=go.identifier;BOOL have=[NSWorkspace.sharedWorkspace URLForApplicationWithBundleIdentifier:bundle]!=nil,connected=have&&self.browserBridge.contexts[bundle]!=nil;
+ BOOL changed=NO;NSInteger stillMissing=0;NSButton *more=nil;
+ for(NSStackView *row in self.browserRows.arrangedSubviews){NSTextField *sub=nil;NSButton *go=nil;NSImageView *icon=nil;for(NSView *v in row.arrangedSubviews){if([v isKindOfClass:NSButton.class]){if([((NSButton *)v).identifier isEqual:@"more"])more=(NSButton *)v;else go=(NSButton *)v;}else if([v isKindOfClass:NSImageView.class])icon=(NSImageView *)v;else if([v isKindOfClass:NSStackView.class])for(NSView *t in ((NSStackView *)v).arrangedSubviews)if([t.identifier hasPrefix:@"state:"])sub=(NSTextField *)t;}
+  if(!sub||!go)continue;NSString *bundle=go.identifier;NSURL *url=[NSWorkspace.sharedWorkspace URLForApplicationWithBundleIdentifier:bundle];BOOL have=url!=nil,connected=have&&self.browserBridge.contexts[bundle]!=nil;
+  if(have&&[row.identifier isEqual:@"missing"]){row.identifier=nil;row.hidden=NO;row.toolTip=nil;icon.image=[NSWorkspace.sharedWorkspace iconForFile:url.path];changed=YES;}if([row.identifier isEqual:@"missing"])stillMissing++;
   NSString *state=!have?@"Not installed":connected?@"Connected":[bundle isEqual:preferred]?@"Your default browser":@"Not set up yet";if(![sub.stringValue isEqual:state])sub.stringValue=state;
-  sub.textColor=connected?[NSColor colorWithSRGBRed:.3 green:.6 blue:.4 alpha:1]:!have?NSColor.tertiaryLabelColor:NSColor.secondaryLabelColor;}
+  sub.textColor=connected?[NSColor colorWithSRGBRed:.3 green:.6 blue:.4 alpha:1]:NSColor.secondaryLabelColor;}
+ if(more&&!stillMissing&&!more.superview.hidden){more.superview.hidden=YES;changed=YES;}
+ if(changed)[self fitBrowserWindow];
 }
+- (void)fitBrowserWindow {NSView *c=self.browserWindow.contentView;[c layoutSubtreeIfNeeded];NSSize want=c.fittingSize;NSRect f=self.browserWindow.frame;CGFloat chrome=f.size.height-c.frame.size.height;CGFloat top=NSMaxY(f);f.size.height=want.height+chrome;f.size.width=want.width;f.origin.y=top-f.size.height;[self.browserWindow setFrame:f display:YES animate:YES];}
 - (void)toggleMissingBrowsers:(NSButton *)sender {
  BOOL show=NO;for(NSView *row in self.browserRows.arrangedSubviews)if([row.identifier isEqual:@"missing"]){row.hidden=!row.hidden;show=!row.hidden;}
- NSString *names=[[sender.title stringByReplacingOccurrencesOfString:@"Show " withString:@""] stringByReplacingOccurrencesOfString:@"Hide " withString:@""];sender.title=show?[@"Hide " stringByAppendingString:[names stringByReplacingOccurrencesOfString:@" too" withString:@""]]:[NSString stringWithFormat:@"Show %@ too",names];
- NSView *c=self.browserWindow.contentView;[c layoutSubtreeIfNeeded];NSSize want=c.fittingSize;NSRect f=self.browserWindow.frame;CGFloat chrome=f.size.height-c.frame.size.height;CGFloat top=NSMaxY(f);f.size.height=want.height+chrome;f.size.width=want.width;f.origin.y=top-f.size.height;[self.browserWindow setFrame:f display:YES animate:YES];
+ sender.title=show?@"Hide uninstalled browsers":@"Show uninstalled browsers";[self fitBrowserWindow];
 }
 - (void)setUpBrowser:(NSButton *)sender {
  NSString *identifier=sender.identifier;if([identifier isEqual:@"com.apple.Safari"]){[self installSafariExtension];return;}
  NSArray *entry=nil;for(NSArray *b in [self browserCatalog])if([b[1] isEqual:identifier])entry=b;if(!entry)return;NSString *browser=entry[0];BOOL firefox=[identifier isEqual:@"org.mozilla.firefox"];
- NSURL *browserURL=[NSWorkspace.sharedWorkspace URLForApplicationWithBundleIdentifier:identifier];if(!browserURL)return;
+ NSURL *browserURL=[NSWorkspace.sharedWorkspace URLForApplicationWithBundleIdentifier:identifier];
+ if(!browserURL){NSAlert *get=[NSAlert new];get.messageText=[NSString stringWithFormat:@"%@ is not installed on this Mac",browser];get.informativeText=[NSString stringWithFormat:@"Install %@ first; this list notices it by itself. Then come back to Set up…",browser];[get addButtonWithTitle:[NSString stringWithFormat:@"Get %@",browser]];[get addButtonWithTitle:@"Not now"];NSString *page=entry[3];[get beginSheetModalForWindow:self.browserWindow completionHandler:^(NSModalResponse r){if(r==NSAlertFirstButtonReturn)[NSWorkspace.sharedWorkspace openURL:[NSURL URLWithString:page]];}];return;}
  NSTask *setup=[NSTask new];setup.executableURL=[NSBundle.mainBundle.bundleURL URLByAppendingPathComponent:@"Contents/MacOS/LessPullBrowserHost"];setup.arguments=@[@"--install"];setup.standardOutput=[NSPipe pipe];setup.standardError=[NSPipe pipe];NSError *error=nil;BOOL started=[setup launchAndReturnError:&error];if(started)[setup waitUntilExit];if(!started||setup.terminationStatus!=0){NSAlert *failed=[NSAlert new];failed.messageText=@"Browser setup could not finish";failed.informativeText=error.localizedDescription?:@"Try again from a permanent local copy of Less Pull. The local bridge could not be registered.";[failed beginSheetModalForWindow:self.browserWindow completionHandler:nil];return;}
  NSURL *folder=[NSBundle.mainBundle.resourceURL URLByAppendingPathComponent:firefox?@"Browser Extension (Firefox)":@"Browser Extension"];[NSWorkspace.sharedWorkspace activateFileViewerSelectingURLs:@[folder]];
  [NSWorkspace.sharedWorkspace openURLs:@[[NSURL URLWithString:entry[2]]] withApplicationAtURL:browserURL configuration:NSWorkspaceOpenConfiguration.configuration completionHandler:nil];
