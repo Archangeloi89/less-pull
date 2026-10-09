@@ -231,7 +231,7 @@
 "Leaving now." = "Ich gehe jetzt.";
 "Leaving now…" = "Ich gehe jetzt …";
 "Leaving? Call me back in" = "Du gehst? Hol mich zurück in";
-"Left-clicking the menu-bar icon" = "Linksklick aufs Symbol";
+"Right-clicking the menu-bar icon" = "Rechtsklick aufs Symbol";
 "Less Pull" = "Less Pull";
 "Less Pull %@ (%@)\n\n%@\n%@\nDisplays: %lu, each with its own matrix\nDisplay events: %lu; recoveries: %lu\nGrayscale setting: %@; grayscale showing now: %@; exception active: %@%@\n\nNight Shift drives “Extra Warmth follows Night Shift”; it does not prove the display looks warmer." = "Less Pull %@ (%@)\n\n%@\n%@\nDisplays: %lu, jedes mit eigener Matrix\nDisplay-Ereignisse: %lu; Wiederherstellungen: %lu\nGraustufen eingestellt: %@; Graustufen gerade sichtbar: %@; Ausnahme aktiv: %@%@\n\nNight Shift steuert „Extra-Wärme folgt Night Shift“; es beweist nicht, dass das Display wärmer aussieht.";
 "Less Pull %@ is available" = "Less Pull %@ ist verfügbar";
@@ -494,7 +494,7 @@
 "Welcome to Less Pull" = "Willkommen bei Less Pull";
 "What Less Pull does" = "Was Less Pull tut";
 "What the browser extension can see" = "Was die Browser-Erweiterung sehen kann";
-"What the left and right mouse buttons do on the menu-bar icon. Control-click counts as a right-click." = "Was linke und rechte Maustaste auf dem Symbol in der Menüleiste tun. Ein Ctrl-Klick zählt als Rechtsklick.";
+"What the right mouse button does on the menu-bar icon; the left button does the other. Control-click and a two-finger tap count as a right-click." = "Was die rechte Maustaste auf dem Symbol in der Menüleiste tut; die linke tut das andere. Ctrl-Klick und Zwei-Finger-Tippen zählen als Rechtsklick.";
 "What this display shows. Follows what is on it: the app in front, or the app on top here, or your defaults. Always your defaults: exceptions never apply here. Always plain: never grayscale or warmth here." = "Was dieses Display zeigt. „Folgt dem, was darauf liegt“: die App im Vordergrund, oder die App, die hier zuoberst liegt, oder deine Standards. „Immer deine Standards“: Ausnahmen gelten hier nie. „Immer ohne Filter“: hier nie Graustufen oder Wärme.";
 "Which displays Peek toggles while this app is in front: the display under the pointer, all displays, or any set of connected displays you tick. Works whether or not the exception is used." = "Welche Displays der Farbblick schaltet, solange diese App vorn liegt: das Display unter dem Zeiger, alle Displays oder die angeschlossenen Displays, die du ankreuzt. Wirkt unabhängig davon, ob die Ausnahme verwendet wird.";
 "Which displays Peek toggles while this site is in front." = "Welche Displays der Farbblick schaltet, solange diese Site vorn liegt.";
@@ -506,7 +506,7 @@
 "Whole domain · %@" = "Ganze Domain · %@";
 "Whole domain, including subdomains" = "Ganze Domain, mit Subdomains";
 "With more than one display: peek only on the display under the mouse pointer (a double press keeps that display plain; the next press there lets go, so each display is toggled on its own), or everywhere at once." = "Bei mehreren Displays: Farbblick nur auf dem Display unter dem Mauszeiger (ein Doppeldruck behält das unveränderte Bild dort; der nächste Druck dort lässt los, so wird jedes Display für sich geschaltet), oder überall zugleich.";
-"With Opens the menu, a right-click (or Control-click) toggles Grayscale. With Toggles Grayscale, a right-click opens the menu." = "Bei „Öffnet das Menü“ schaltet ein Rechtsklick (oder Ctrl-Klick) die Graustufen um. Bei „Schaltet die Graustufen um“ öffnet ein Rechtsklick das Menü.";
+"A Control-click or a two-finger tap on the trackpad counts as a right-click. With Opens the session panel, the right button starts a session, or opens the panel of the one running; the left button always opens the menu." = "Ein Ctrl-Klick oder ein Tippen mit zwei Fingern aufs Trackpad zählt als Rechtsklick. Bei „Öffnet das Sitzungsfenster“ startet die rechte Taste eine Sitzung oder öffnet das Fenster der laufenden; die linke öffnet immer das Menü.";
 "You have %@.\n\n%@\n\nInstalling is still by hand: download the new version, quit Less Pull, and replace it in Applications. Your settings and exceptions are kept." = "Du hast %@.\n\n%@\n\nInstalliert wird noch von Hand: Lade die neue Version, beende Less Pull und ersetze es im Ordner „Programme“. Deine Einstellungen und Ausnahmen bleiben erhalten.";
 "You have arrived somewhere quieter.\n\nLess Pull takes the color out of your screen, so it pulls at you less — a little like stepping out of a loud room into a still one, or leaving the devices behind for a day outside. What matters is still here. It just stops shouting." = "Du bist an einem ruhigeren Ort angekommen.\n\nLess Pull nimmt deinem Bildschirm die Farbe, damit er weniger an dir zerrt – ein bisschen, wie aus einem lauten Raum in einen stillen zu treten, oder die Geräte für einen Tag draußen liegen zu lassen. Was zählt, ist noch da. Es schreit nur nicht mehr.";
 "Your default browser" = "Dein Standardbrowser";
@@ -541,3 +541,5 @@
 "Tell a friend" = "Weitersagen";
 "Pass Less Pull on: the project page and one line about it, through Messages, Mail, AirDrop or wherever you share." = "Gib Less Pull weiter: die Projektseite und ein Satz dazu, über Nachrichten, Mail, AirDrop oder wo immer du teilst.";
 "Less Pull, a quieter screen for the Mac: grayscale, warmth, and color where it matters. Free. %@" = "Less Pull, ein ruhigerer Bildschirm für den Mac: Graustufen, Wärme und Farbe, wo sie zählt. Kostenlos. %@";
+"Opens the menu, left toggles Grayscale" = "Öffnet das Menü, links schaltet Graustufen";
+"Opens the session panel" = "Öffnet das Sitzungsfenster";
