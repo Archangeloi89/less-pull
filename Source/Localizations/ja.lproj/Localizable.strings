@@ -416,7 +416,7 @@
 "Shows color for a while, then Grayscale comes back by itself. Your Grayscale setting stays saved; exceptions still apply." = "しばらくカラーを表示し、そのあとグレイスケールが自動で戻ります。グレイスケールの設定はそのまま残り、個別設定も効き続けます。";
 "Shows everything in shades of gray, day and night. Night Shift does not change this. Exceptions for apps and websites can." = "昼も夜も、すべてをグレーの濃淡で表示します。Night Shift はこれを変えません。アプリとウェブサイトの個別設定なら変えられます。";
 "Shows everything in shades of gray, day and night. Turn it off to see color again." = "昼も夜も、すべてをグレーの濃淡で表示します。オフにするとカラーに戻ります。";
-"Shows the fine-tuning in every tab: what Peek turns off, what the mouse buttons do, the session sound and glow, and display options with one display. Everything keeps working as set when hidden." = "各タブの細かな調整を表示します。ひと目で外すもの、マウスボタンの働き、セッションの音と光、ディスプレイ 1 台のときの項目。隠しても、設定どおりに働き続けます。";
+"Shows the fine-tuning in every tab: what the mouse buttons do, the session sound and glow, Night Shift on the lock screen, and display options with one display. Everything keeps working as set when hidden." = "各タブの細かな調整を表示します。マウスボタンの働き、セッションの音と光、ロック画面での Night Shift、ディスプレイ 1 台のときの項目。隠しても、設定どおりに働き続けます。";
 "Shows the glow and plays the sound once, as at the end of a session." = "セッションの終わりと同じように、光と音を一度だけ鳴らします。";
 "Shows the plain display for a while: color and no added warmth. Night Shift is left alone. Your settings and exceptions are kept." = "しばらくフィルターなしの画面にします。カラーで、暖かさも加えません。Night Shift には触れません。設定と個別設定はそのまま残ります。";
 "Shows the supported browsers that are not installed on this Mac." = "この Mac にインストールされていない対応ブラウザを表示します。";

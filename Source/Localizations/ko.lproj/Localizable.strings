@@ -416,7 +416,7 @@
 "Shows color for a while, then Grayscale comes back by itself. Your Grayscale setting stays saved; exceptions still apply." = "잠시 컬러를 보여 준 뒤 회색조가 저절로 돌아옵니다. 회색조 설정은 그대로 저장되고 개별 설정도 계속 적용됩니다.";
 "Shows everything in shades of gray, day and night. Night Shift does not change this. Exceptions for apps and websites can." = "낮에도 밤에도 모든 것을 회색 톤으로 보여 줍니다. Night Shift는 이것을 바꾸지 않습니다. 앱과 웹사이트 개별 설정은 바꿀 수 있습니다.";
 "Shows everything in shades of gray, day and night. Turn it off to see color again." = "낮에도 밤에도 모든 것을 회색 톤으로 보여 줍니다. 끄면 다시 컬러가 보입니다.";
-"Shows the fine-tuning in every tab: what Peek turns off, what the mouse buttons do, the session sound and glow, and display options with one display. Everything keeps working as set when hidden." = "모든 탭의 세부 조정을 표시합니다. 잠깐 볼 때 끌 항목, 마우스 버튼의 역할, 세션 소리와 빛, 디스플레이 한 대일 때의 항목. 숨겨도 설정대로 계속 작동합니다.";
+"Shows the fine-tuning in every tab: what the mouse buttons do, the session sound and glow, Night Shift on the lock screen, and display options with one display. Everything keeps working as set when hidden." = "모든 탭의 세부 조정을 표시합니다. 마우스 버튼의 역할, 세션 소리와 빛, 잠금 화면의 Night Shift, 디스플레이 한 대일 때의 항목. 숨겨도 설정대로 계속 작동합니다.";
 "Shows the glow and plays the sound once, as at the end of a session." = "세션이 끝날 때처럼 빛과 소리를 한 번 보여 줍니다.";
 "Shows the plain display for a while: color and no added warmth. Night Shift is left alone. Your settings and exceptions are kept." = "잠시 필터 없는 화면을 보여 줍니다. 컬러이고 따뜻함도 더하지 않습니다. Night Shift는 건드리지 않습니다. 설정과 개별 설정은 유지됩니다.";
 "Shows the supported browsers that are not installed on this Mac." = "이 Mac에 설치되지 않은 지원 브라우저를 표시합니다.";
