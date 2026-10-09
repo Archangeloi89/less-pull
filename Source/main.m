@@ -178,6 +178,8 @@ static NSString *const LessPullOldBundleIdentifier=@"local.nightshiftfilters.app
 @property NSTimer *timer;
 @property NSWindow *settings,*browserWindow;
 @property CGFloat settingsWidth;
+@property NSRect keptSettingsFrame;
+@property BOOL keepSettingsFrame;
 @property NSStackView *browserRows;
 @property NSTimer *browserWatch;
 @property NSTextField *statusText;
@@ -392,10 +394,10 @@ static void drawKey(NSRect f,NSString *label,double pressed){NSRect r=NSOffsetRe
   NSRect win=NSMakeRect(6,68,118,56);[Ink(.08) setFill];[[NSBezierPath bezierPathWithRoundedRect:win xRadius:7 yRadius:7] fill];for(int i=0;i<3;i++){[Ink(.35) setFill];[[NSBezierPath bezierPathWithOvalInRect:NSMakeRect(13+i*10,NSMaxY(win)-13,5,5)] fill];}
   NSRect field=NSMakeRect(win.origin.x+34,NSMaxY(win)-18,80,12);[Ink(.12) setFill];[[NSBezierPath bezierPathWithRoundedRect:field xRadius:4 yRadius:4] fill];[L(@"news.example") drawAtPoint:NSMakePoint(field.origin.x+5,field.origin.y+1) withAttributes:@{NSFontAttributeName:[NSFont systemFontOfSize:8.5 weight:NSFontWeightMedium],NSForegroundColorAttributeName:Ink(.8)}];
   [L(@"the website in front") drawAtPoint:NSMakePoint(8,50) withAttributes:dim];
-  NSPoint app=NSMakePoint(176,96);drawCircle(app,11,YES,0,-1,NO);{NSString *n1=L(@"Less Pull"),*n2=L(@"on this Mac");[n1 drawAtPoint:NSMakePoint(app.x-[n1 sizeWithAttributes:tiny].width/2,app.y-27) withAttributes:tiny];[n2 drawAtPoint:NSMakePoint(app.x-[n2 sizeWithAttributes:dim].width/2,app.y-39) withAttributes:dim];}
+  NSPoint app=NSMakePoint(176,96);drawCircle(app,11,YES,0,-1,NO);{NSString *n1=L(@"Less Pull"),*n2=L(@"on this Mac");[n1 drawAtPoint:NSMakePoint(app.x-[n1 sizeWithAttributes:tiny].width/2,app.y-27) withAttributes:tiny];{NSMutableParagraphStyle *ps=[NSMutableParagraphStyle new];ps.alignment=NSTextAlignmentCenter;NSMutableDictionary *cd=[dim mutableCopy];cd[NSParagraphStyleAttributeName]=ps;[n2 drawInRect:NSMakeRect(app.x-36,app.y-52,72,26) withAttributes:cd];}}
   double travel=seg(t,.08,.34),gone=seg(t,.36,.46);NSPoint from=NSMakePoint(NSMaxX(field)-2,NSMidY(field)),to=NSMakePoint(app.x-12,app.y);
   if(travel<1||gone<1){NSPoint q=NSMakePoint(from.x+(to.x-from.x)*travel,from.y+(to.y-from.y)*travel);NSRect chip=NSMakeRect(q.x-58,q.y+5,60,11);[Orange(.9*(1-gone)) setFill];[[NSBezierPath bezierPathWithRoundedRect:chip xRadius:5 yRadius:5] fill];[L(@"news.example") drawAtPoint:NSMakePoint(chip.origin.x+5,chip.origin.y+1) withAttributes:@{NSFontAttributeName:[NSFont systemFontOfSize:7 weight:NSFontWeightSemibold],NSForegroundColorAttributeName:[NSColor colorWithWhite:.1 alpha:1-gone]}];}
-  double say=seg(t,.46,.52);if(say>0){[L(@"for the look, then gone") drawAtPoint:NSMakePoint(104,20) withAttributes:@{NSFontAttributeName:[NSFont systemFontOfSize:9.5],NSForegroundColorAttributeName:Ink(.75*say)}];
+  double say=seg(t,.46,.52);if(say>0){[L(@"for the look, then gone") drawInRect:NSMakeRect(104,6,106,30) withAttributes:@{NSFontAttributeName:[NSFont systemFontOfSize:9.5],NSForegroundColorAttributeName:Ink(.75*say)}];
    // never to a server, never to disk: two small marks, crossed
    NSPoint cl=NSMakePoint(40,22);for(int i=0;i<3;i++){CGFloat r=5+2*(i==1);[Ink(.18*say) setFill];[[NSBezierPath bezierPathWithOvalInRect:NSMakeRect(cl.x-9+i*7-r,cl.y-r+(i==1?2:0),2*r,2*r)] fill];}
    NSRect disk=NSMakeRect(78,14,16,14);[Ink(.18*say) setFill];[[NSBezierPath bezierPathWithRoundedRect:disk xRadius:2 yRadius:2] fill];
@@ -518,7 +520,7 @@ static void drawKey(NSRect f,NSString *label,double pressed){NSRect r=NSOffsetRe
 - (void)languageChanged:(NSPopUpButton *)sender {NSString *code=sender.selectedItem.representedObject;[LessPullLanguage setPreferred:code.length?code:nil];}
 - (void)languageDidChange {
  NSInteger tab=self.settingsTabs?self.settingsTabs.selectedTabViewItemIndex:0;BOOL open=self.settings!=nil;
- [self.browserWindow close];[self.sessionPanel close];if(open){[self.settings close];self.settings=nil;}
+ [self.browserWindow close];[self.sessionPanel close];if(open){[self rememberSettingsFrame];[self.settings close];self.settings=nil;}
  self.item.button.toolTip=L(@"Less Pull");[self sync];
  if(open){[self showSettings:nil];self.settingsTabs.selectedTabViewItemIndex=tab;}
 }
@@ -1606,17 +1608,21 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
 - (NSView *)thanksCardView {
  NSTextField *title=[NSTextField labelWithString:L(@"Are you enjoying Less Pull?")];title.font=[NSFont systemFontOfSize:15 weight:NSFontWeightSemibold];
  NSTextField *body=[NSTextField wrappingLabelWithString:L(@"This app is a gift from the universe to you. It has been fully funded by life.\n\nMy future projects and my work are still being developed, and they benefit from any kind of support: a contribution, telling a friend, or whatever you choose. Thanks for being part of life and making it more beautiful for everyone.\n\n— Jiri Arion Rose")];body.preferredMaxLayoutWidth=404;
- NSButton *support=[NSButton buttonWithTitle:L(@"Support my work") target:self action:@selector(thanksSupport:)];support.keyEquivalent=@"\r";[self helpView:support text:L(@"Open buymeacoffee.com/HsERf62fiZ in your default browser.") label:L(@"Support my work — Buy me a coffee")];
+ NSColor *ember=[NSColor colorWithSRGBRed:.93 green:.55 blue:.28 alpha:1];
+ NSButton *support=[NSButton buttonWithTitle:L(@"Support my work") target:self action:@selector(thanksSupport:)];support.keyEquivalent=@"\r";support.bezelColor=ember;support.attributedTitle=[[NSAttributedString alloc]initWithString:[@"🧡 " stringByAppendingString:L(@"Support my work")] attributes:@{NSForegroundColorAttributeName:NSColor.whiteColor,NSFontAttributeName:[NSFont systemFontOfSize:13 weight:NSFontWeightSemibold]}];[self helpView:support text:L(@"Open buymeacoffee.com/HsERf62fiZ in your default browser.") label:L(@"Support my work — Buy me a coffee")];
  NSButton *later=[NSButton buttonWithTitle:L(@"Remind me in a month") target:self action:@selector(thanksLater:)];[self helpView:later text:L(@"Hide this and show it again in about a month.") label:L(@"Remind me in a month")];
- NSButton *never=[NSButton buttonWithTitle:L(@"Don’t show again") target:self action:@selector(thanksNever:)];never.bezelStyle=NSBezelStyleInline;never.font=[NSFont systemFontOfSize:11];[self helpView:never text:L(@"Hide this for good.") label:L(@"Don’t show this again")];
+ NSButton *hide=[NSButton buttonWithTitle:L(@"Hide") target:self action:@selector(thanksHide:)];[self helpView:hide text:L(@"Hides this card for now. Tick the box below to keep it away for good.") label:L(@"Hide")];
+ NSButton *never=[NSButton checkboxWithTitle:L(@"Don’t show this again") target:nil action:nil];never.font=[NSFont systemFontOfSize:11];never.identifier=@"thanksNever";[self helpView:never text:L(@"Hide this for good.") label:L(@"Don’t show this again")];
  NSMutableArray *links=[NSMutableArray new];for(NSButton *b in [self authorLinkButtons])if(![b.identifier isEqual:LessPullCoffee]){b.font=[NSFont systemFontOfSize:11];[links addObject:b];}
- NSStackView *linkRow=[self row:links];linkRow.spacing=4;NSStackView *buttons=[self row:@[support,later,[self spacer],never]];buttons.spacing=8;
- NSStackView *card=[self column:@[title,body,buttons,linkRow]];card.spacing=10;card.edgeInsets=NSEdgeInsetsMake(14,14,12,14);card.wantsLayer=YES;card.layer.cornerRadius=8;card.layer.backgroundColor=[NSColor.labelColor colorWithAlphaComponent:.06].CGColor;
+ NSStackView *buttons=[self row:@[support,later,[self spacer],hide]];buttons.spacing=8;NSStackView *linkRow=[self row:[links arrayByAddingObjectsFromArray:@[[self spacer],never]]];linkRow.spacing=4;
+ NSStackView *card=[self column:@[title,body,buttons,linkRow]];card.spacing=10;card.edgeInsets=NSEdgeInsetsMake(14,14,12,14);card.wantsLayer=YES;card.layer.cornerRadius=8;card.layer.backgroundColor=[ember colorWithAlphaComponent:.1].CGColor;card.layer.borderWidth=1;card.layer.borderColor=[ember colorWithAlphaComponent:.25].CGColor;
  for(NSView *v in card.arrangedSubviews)if([v isKindOfClass:NSStackView.class])[v.widthAnchor constraintEqualToAnchor:card.widthAnchor constant:-28].active=YES;
  return card;
 }
+- (BOOL)thanksNeverTicked {for(NSView *row in ((NSStackView *)self.thanksCard).arrangedSubviews)if([row isKindOfClass:NSStackView.class])for(NSView *v in ((NSStackView *)row).arrangedSubviews)if([v.identifier isEqual:@"thanksNever"])return ((NSButton *)v).state==NSControlStateValueOn;return NO;}
 - (void)removeThanksCard {NSView *card=self.thanksCard;if(!card)return;NSStackView *column=(NSStackView *)card.superview;[column removeArrangedSubview:card];[card removeFromSuperview];self.thanksCard=nil;self.thanksWanted=NO;[column layoutSubtreeIfNeeded];self.settingsTabs.tabViewItems.firstObject.viewController.preferredContentSize=NSMakeSize(self.settingsWidth?:500,column.fittingSize.height);self.settingsTabs.selectedTabViewItemIndex=1;self.settingsTabs.selectedTabViewItemIndex=0;}
-- (void)thanksSupport:(id)sender {[NSUserDefaults.standardUserDefaults setBool:YES forKey:@"thanksDismissed"];[NSWorkspace.sharedWorkspace openURL:[NSURL URLWithString:LessPullCoffee]];[self removeThanksCard];}
+- (void)thanksSupport:(id)sender {[NSUserDefaults.standardUserDefaults setObject:[NSDate.date dateByAddingTimeInterval:90*86400] forKey:@"thanksNextDate"];[NSWorkspace.sharedWorkspace openURL:[NSURL URLWithString:LessPullCoffee]];}  // the card stays; it comes back by itself in three months at the earliest
+- (void)thanksHide:(id)sender {if([self thanksNeverTicked]){[NSUserDefaults.standardUserDefaults setBool:YES forKey:@"thanksDismissed"];[NSUserDefaults.standardUserDefaults removeObjectForKey:@"thanksNextDate"];}else if(![NSUserDefaults.standardUserDefaults objectForKey:@"thanksNextDate"]||[[NSUserDefaults.standardUserDefaults objectForKey:@"thanksNextDate"] compare:NSDate.date]==NSOrderedAscending)[NSUserDefaults.standardUserDefaults setObject:[NSDate.date dateByAddingTimeInterval:7*86400] forKey:@"thanksNextDate"];[self removeThanksCard];}
 - (void)thanksLater:(id)sender {[NSUserDefaults.standardUserDefaults setObject:[NSDate.date dateByAddingTimeInterval:30*86400] forKey:@"thanksNextDate"];[self removeThanksCard];}
 - (void)thanksNever:(id)sender {[NSUserDefaults.standardUserDefaults setBool:YES forKey:@"thanksDismissed"];[NSUserDefaults.standardUserDefaults removeObjectForKey:@"thanksNextDate"];[self removeThanksCard];}
 - (NSStackView *)aboutTab {
@@ -1699,8 +1705,9 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  NSView *button=self.item.button;if(NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceMotion)return;
  for(int k=0;k<4;k++){dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)((0.6+k*1.2)*NSEC_PER_SEC)),dispatch_get_main_queue(),^{[NSAnimationContext runAnimationGroup:^(NSAnimationContext *c){c.duration=.5;button.animator.alphaValue=.25;} completionHandler:^{[NSAnimationContext runAnimationGroup:^(NSAnimationContext *c){c.duration=.6;button.animator.alphaValue=1;} completionHandler:nil];}];});}
 }
-- (void)showThanks:(id)sender {[self.settings close];self.settings=nil;self.welcomeWanted=NO;self.forceThanks=YES;[self showSettings:nil];}
-- (void)showTour:(id)sender {[self.settings close];self.settings=nil;self.welcomeWanted=YES;[self showSettings:nil];}
+- (void)rememberSettingsFrame {if(self.settings){self.keptSettingsFrame=self.settings.frame;self.keepSettingsFrame=YES;}}
+- (void)showThanks:(id)sender {[self rememberSettingsFrame];[self.settings close];self.settings=nil;self.welcomeWanted=NO;self.forceThanks=YES;[self showSettings:nil];}
+- (void)showTour:(id)sender {[self rememberSettingsFrame];self.welcomePlaced=YES;[self.settings close];self.settings=nil;self.welcomeWanted=YES;[self showSettings:nil];}
 - (void)dismissWelcome:(id)sender {
  NSView *card=self.welcomeCard;if(!card)return;self.tourCard=nil;NSStackView *column=(NSStackView *)card.superview;
  [column removeArrangedSubview:card];[card removeFromSuperview];self.welcomeCard=nil;self.welcomeWanted=NO;
@@ -1732,7 +1739,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
   self.settings=[NSWindow windowWithContentViewController:self.settingsTabs];
   // A tab that needs more room than 500 pt (a longer language) widens the window; from then on every tab keeps that width, so nothing jumps between tabs.
   [NSNotificationCenter.defaultCenter addObserverForName:NSWindowDidResizeNotification object:self.settings queue:nil usingBlock:^(NSNotification *n){CGFloat w=ceil(self.settings.contentView.frame.size.width);if(w>self.settingsWidth&&w<=640){self.settingsWidth=w;[NSUserDefaults.standardUserDefaults setDouble:w forKey:[@"settingsWidth-" stringByAppendingString:LessPullLanguage.current]];for(NSTabViewItem *item in self.settingsTabs.tabViewItems){for(NSLayoutConstraint *c in item.viewController.view.constraints)if([c.identifier isEqual:@"settingsWidth"])c.constant=w;NSSize p=item.viewController.preferredContentSize;item.viewController.preferredContentSize=NSMakeSize(w,p.height);}}}];self.settings.styleMask=NSWindowStyleMaskTitled|NSWindowStyleMaskClosable;self.settings.title=L(@"Less Pull");self.settings.releasedWhenClosed=NO;if(@available(macOS 11,*))self.settings.toolbarStyle=NSWindowToolbarStylePreference;
-  self.settings.initialFirstResponder=self.grayscaleButton;[self.settings center];
+  self.settings.initialFirstResponder=self.grayscaleButton;[self.settings center];if(self.keepSettingsFrame){NSRect f=self.settings.frame;f.origin.x=self.keptSettingsFrame.origin.x;f.origin.y=NSMaxY(self.keptSettingsFrame)-f.size.height;[self.settings setFrame:[self.settings constrainFrameRect:f toScreen:self.settings.screen?:NSScreen.mainScreen] display:NO];self.keepSettingsFrame=NO;};
  }
  self.loginButton.state=SMAppService.mainAppService.status==SMAppServiceStatusEnabled;[self rebuildExclusionsList];[self sync];[NSApp activateIgnoringOtherApps:YES];[self.settings makeKeyAndOrderFront:nil];if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.welcomePlaced=YES;if(first){dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)(0.45*NSEC_PER_SEC)),dispatch_get_main_queue(),^{[self placeSettingsUnderIcon];});}}
 }
