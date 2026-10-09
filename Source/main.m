@@ -272,64 +272,125 @@ static NSString *const LessPullOldBundleIdentifier=@"local.nightshiftfilters.app
 // The warm bloom drawn behind the glow text: a radial gradient from a soft amber center to nothing.
 @interface GlowView : NSView
 @end
-// A small looping drawing for the welcome: a menu bar that is full, with icons tucked behind a »,
-// and the circle being dragged toward the clock with ⌘ held. Still under Reduce Motion.
-@interface WelcomeHintView : NSView
+// The tour's pictures: one view, six scenes, drawn in code and looping, still under Reduce Motion.
+// Each scene is a small story of a few seconds: a pointer, the menu-bar circle, a tiny screen that
+// goes gray, warm or back to color, a menu that drops, keys that press, a ring that fills.
+typedef NS_ENUM(NSInteger,TourSceneKind){TourSceneMenuBar,TourSceneScreen,TourSceneExceptions,TourScenePeek,TourSceneSession,TourScenePrivacy};
+@interface TourScene : NSView
+@property TourSceneKind kind;
 @property NSTimer *timer;
 @property NSTimeInterval start;
 @end
-@implementation WelcomeHintView
-- (NSSize)intrinsicContentSize {return NSMakeSize(420,52);}
-- (void)viewDidMoveToWindow {[self.timer invalidate];self.timer=nil;if(!self.window||NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceMotion)return;self.start=NSProcessInfo.processInfo.systemUptime;__weak WelcomeHintView *weak=self;self.timer=[NSTimer timerWithTimeInterval:1.0/30 repeats:YES block:^(NSTimer *t){[weak setNeedsDisplay:YES];}];[NSRunLoop.mainRunLoop addTimer:self.timer forMode:NSRunLoopCommonModes];}
+@implementation TourScene
+- (NSSize)intrinsicContentSize {return NSMakeSize(420,140);}
+- (void)viewDidMoveToWindow {[self.timer invalidate];self.timer=nil;if(!self.window||NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceMotion)return;self.start=NSProcessInfo.processInfo.systemUptime;__weak TourScene *weak=self;self.timer=[NSTimer timerWithTimeInterval:1.0/30 repeats:YES block:^(NSTimer *t){[weak setNeedsDisplay:YES];}];[NSRunLoop.mainRunLoop addTimer:self.timer forMode:NSRunLoopCommonModes];}
+static double seg(double t,double a,double b){if(t<=a)return 0;if(t>=b)return 1;double k=(t-a)/(b-a);return k*k*(3-2*k);}
+static NSColor *Ink(double a){return [NSColor.labelColor colorWithAlphaComponent:a];}
+static NSColor *Orange(double a){return [NSColor colorWithSRGBRed:.93 green:.55 blue:.28 alpha:a];}
+// the circle icon: left half fills with grayscale, right half takes the warmth color; a ring if asked
+static void drawCircle(NSPoint c,CGFloat r,BOOL gray,double warm,double ring,BOOL over){
+ NSRect box=NSMakeRect(c.x-r,c.y-r,2*r,2*r);NSBezierPath *o=[NSBezierPath bezierPathWithOvalInRect:box];
+ if(gray){[NSGraphicsContext saveGraphicsState];[[NSBezierPath bezierPathWithRect:NSMakeRect(c.x-r,c.y-r,r,2*r)] addClip];[Ink(1) setFill];[o fill];[NSGraphicsContext restoreGraphicsState];}
+ if(warm>0){[NSGraphicsContext saveGraphicsState];[[NSBezierPath bezierPathWithRect:NSMakeRect(c.x,c.y-r,r,2*r)] addClip];[[NSColor colorWithSRGBRed:1 green:1-.45*warm blue:1-.88*warm alpha:1] setFill];[o fill];[NSGraphicsContext restoreGraphicsState];}
+ [Ink(1) setStroke];o.lineWidth=1.4;[o stroke];
+ if(ring>=0){NSBezierPath *track=[NSBezierPath bezierPathWithOvalInRect:NSInsetRect(box,-5,-5)];track.lineWidth=1.2;[Ink(.25) setStroke];[track stroke];if(ring>0){NSBezierPath *arc=[NSBezierPath new];[arc appendBezierPathWithArcWithCenter:c radius:r+5 startAngle:90 endAngle:90-360*MIN(1,ring) clockwise:YES];arc.lineWidth=2;arc.lineCapStyle=NSLineCapStyleRound;[(over?Orange(1):Ink(1)) setStroke];[arc stroke];}}
+}
+static void drawPointer(NSPoint p,double alpha){NSBezierPath *a=[NSBezierPath new];[a moveToPoint:p];[a lineToPoint:NSMakePoint(p.x,p.y-15)];[a lineToPoint:NSMakePoint(p.x+4,p.y-11.5)];[a lineToPoint:NSMakePoint(p.x+7,p.y-17.5)];[a lineToPoint:NSMakePoint(p.x+9.5,p.y-16.3)];[a lineToPoint:NSMakePoint(p.x+6.5,p.y-10.3)];[a lineToPoint:NSMakePoint(p.x+11.5,p.y-10.3)];[a closePath];[[NSColor.windowBackgroundColor colorWithAlphaComponent:alpha] setFill];[a fill];[Ink(alpha) setStroke];a.lineWidth=1.1;[a stroke];}
+static void drawRipple(NSPoint p,double k){if(k<=0||k>=1)return;CGFloat r=4+14*k;NSBezierPath *o=[NSBezierPath bezierPathWithOvalInRect:NSMakeRect(p.x-r,p.y-r,2*r,2*r)];o.lineWidth=1.5;[Ink(.6*(1-k)) setStroke];[o stroke];}
+// a tiny screen: a wallpaper and four cards whose colors go gray (g) and warm (w)
+static void drawScreen(NSRect f,double g,double w,double alpha){
+ NSColor *(^tone)(double,double,double)=^NSColor *(double r,double gg,double b){double l=.3*r+.59*gg+.11*b;double R=r+(l-r)*g,G=gg+(l-gg)*g,B=b+(l-b)*g;return [NSColor colorWithSRGBRed:R green:G*(1-.45*w) blue:B*(1-.88*w) alpha:alpha];};
+ [tone(.35,.45,.75) setFill];[[NSBezierPath bezierPathWithRoundedRect:f xRadius:8 yRadius:8] fill];
+ NSRect bar=NSMakeRect(f.origin.x,NSMaxY(f)-12,f.size.width,12);[tone(.92,.92,.94) setFill];[[NSBezierPath bezierPathWithRoundedRect:bar xRadius:4 yRadius:4] fill];
+ double cols[4][3]={{.98,.45,.35},{.25,.65,.95},{.35,.78,.45},{.95,.75,.25}};
+ for(int i=0;i<4;i++){NSRect c=NSMakeRect(f.origin.x+8+(i%2)*((f.size.width-16)/2+2),f.origin.y+8+(i/2)*((f.size.height-30)/2+2),(f.size.width-16)/2-4,(f.size.height-30)/2-4);[tone(cols[i][0],cols[i][1],cols[i][2]) setFill];[[NSBezierPath bezierPathWithRoundedRect:c xRadius:5 yRadius:5] fill];}
+}
+static void drawMenu(NSRect f,NSArray *rows,NSInteger hover,double alpha,NSInteger checked){
+ [[NSColor.windowBackgroundColor colorWithAlphaComponent:.96*alpha] setFill];NSBezierPath *p=[NSBezierPath bezierPathWithRoundedRect:f xRadius:7 yRadius:7];[p fill];[Ink(.15*alpha) setStroke];[p stroke];
+ NSDictionary *a=@{NSFontAttributeName:[NSFont systemFontOfSize:9.5],NSForegroundColorAttributeName:Ink(alpha)};CGFloat y=NSMaxY(f)-16;
+ for(NSInteger i=0;i<(NSInteger)rows.count;i++){if(i==hover){[Ink(.1*alpha) setFill];[[NSBezierPath bezierPathWithRoundedRect:NSMakeRect(f.origin.x+4,y-4,f.size.width-8,15) xRadius:4 yRadius:4] fill];}
+  if(i==checked)[@"✓" drawAtPoint:NSMakePoint(f.origin.x+7,y-1) withAttributes:a];[rows[i] drawAtPoint:NSMakePoint(f.origin.x+18,y-1) withAttributes:a];y-=15;}
+}
+static void drawKey(NSRect f,NSString *label,double pressed){NSRect r=NSOffsetRect(f,0,-2*pressed);[Ink(.12+.25*pressed) setFill];[[NSBezierPath bezierPathWithRoundedRect:r xRadius:5 yRadius:5] fill];[Ink(.4) setStroke];[[NSBezierPath bezierPathWithRoundedRect:r xRadius:5 yRadius:5] stroke];NSDictionary *a=@{NSFontAttributeName:[NSFont systemFontOfSize:12 weight:NSFontWeightMedium],NSForegroundColorAttributeName:Ink(1)};NSSize s=[label sizeWithAttributes:a];[label drawAtPoint:NSMakePoint(NSMidX(r)-s.width/2,NSMidY(r)-s.height/2) withAttributes:a];}
 - (void)drawRect:(NSRect)dirty {
- NSRect b=self.bounds;NSRect bar=NSMakeRect(0,b.size.height-30,b.size.width,26);[[NSColor.labelColor colorWithAlphaComponent:.08] setFill];[[NSBezierPath bezierPathWithRoundedRect:bar xRadius:7 yRadius:7] fill];
- double loop=6.0,t=self.timer?fmod(NSProcessInfo.processInfo.systemUptime-self.start,loop)/loop:0.55;  // 0…1 through one loop
- double k=t<.15?0:t<.75?(t-.15)/.6:1;k=k*k*(3-2*k);
- CGFloat y=NSMidY(bar),right=NSMaxX(bar)-10;NSColor *ink=NSColor.labelColor;
- NSDictionary *clock=@{NSFontAttributeName:[NSFont systemFontOfSize:11 weight:NSFontWeightMedium],NSForegroundColorAttributeName:ink};NSString *time=@"Thu 9:41";NSSize ts=[time sizeWithAttributes:clock];[time drawAtPoint:NSMakePoint(right-ts.width,y-ts.height/2) withAttributes:clock];
- CGFloat x=right-ts.width-14;for(int i=0;i<3;i++){NSRect d=NSMakeRect(x-12,y-6,12,12);[[ink colorWithAlphaComponent:.6] setFill];[[NSBezierPath bezierPathWithRoundedRect:d xRadius:3 yRadius:3] fill];x-=20;}
- CGFloat chevronX=x-6;NSDictionary *chev=@{NSFontAttributeName:[NSFont systemFontOfSize:13 weight:NSFontWeightSemibold],NSForegroundColorAttributeName:[ink colorWithAlphaComponent:.55]};[@"»" drawAtPoint:NSMakePoint(chevronX-8,y-9) withAttributes:chev];
- CGFloat hiddenStart=NSMinX(bar)+12,circleFrom=hiddenStart+8,circleTo=x-30;
- for(int i=0;i<4;i++){NSRect d=NSMakeRect(hiddenStart+28+i*20,y-6,12,12);[[ink colorWithAlphaComponent:.18] setFill];[[NSBezierPath bezierPathWithRoundedRect:d xRadius:3 yRadius:3] fill];}  // the ones that do not fit, faded
- CGFloat cx=circleFrom+(circleTo-circleFrom)*k;NSRect c=NSMakeRect(cx-7,y-7,14,14);NSBezierPath *o=[NSBezierPath bezierPathWithOvalInRect:c];[NSGraphicsContext saveGraphicsState];NSRect half=c;half.size.width/=2;[[NSBezierPath bezierPathWithRect:half] addClip];[ink setFill];[o fill];[NSGraphicsContext restoreGraphicsState];[ink setStroke];o.lineWidth=1.3;[o stroke];
- // the pointer, with ⌘ held, riding along
- NSBezierPath *arrow=[NSBezierPath new];NSPoint p=NSMakePoint(cx+4,y-5);[arrow moveToPoint:p];[arrow lineToPoint:NSMakePoint(p.x,p.y-13)];[arrow lineToPoint:NSMakePoint(p.x+3.5,p.y-10)];[arrow lineToPoint:NSMakePoint(p.x+6,p.y-15)];[arrow lineToPoint:NSMakePoint(p.x+8,p.y-14)];[arrow lineToPoint:NSMakePoint(p.x+5.5,p.y-9)];[arrow lineToPoint:NSMakePoint(p.x+10,p.y-9)];[arrow closePath];[NSColor.windowBackgroundColor setFill];[arrow fill];[ink setStroke];arrow.lineWidth=1;[arrow stroke];
- NSDictionary *key=@{NSFontAttributeName:[NSFont systemFontOfSize:10 weight:NSFontWeightMedium],NSForegroundColorAttributeName:ink};NSRect cap=NSMakeRect(cx+14,y-24,22,16);[[ink colorWithAlphaComponent:.12] setFill];[[NSBezierPath bezierPathWithRoundedRect:cap xRadius:4 yRadius:4] fill];[@"⌘" drawAtPoint:NSMakePoint(cap.origin.x+6,cap.origin.y+1) withAttributes:key];
+ NSRect b=self.bounds;double loops[]={8,7,8,8,9,7};double L=loops[self.kind];double t=self.timer?fmod(NSProcessInfo.processInfo.systemUptime-self.start,L)/L:0.62;
+ switch(self.kind){
+ case TourSceneMenuBar:{
+  NSRect bar=NSMakeRect(0,b.size.height-40,b.size.width,24);[Ink(.08) setFill];[[NSBezierPath bezierPathWithRoundedRect:bar xRadius:7 yRadius:7] fill];CGFloat y=NSMidY(bar);
+  NSDictionary *clock=@{NSFontAttributeName:[NSFont systemFontOfSize:11 weight:NSFontWeightMedium],NSForegroundColorAttributeName:Ink(1)};NSSize ts=[@"Thu 9:41" sizeWithAttributes:clock];[@"Thu 9:41" drawAtPoint:NSMakePoint(NSMaxX(bar)-10-ts.width,y-ts.height/2) withAttributes:clock];
+  CGFloat x=NSMaxX(bar)-ts.width-24;for(int i=0;i<4;i++){[Ink(.6) setFill];[[NSBezierPath bezierPathWithRoundedRect:NSMakeRect(x-12,y-6,12,12) xRadius:3 yRadius:3] fill];x-=20;}
+  // the » hides what does not fit; a click on it reveals the hidden icons, our circle among them
+  double reveal=seg(t,.22,.34);CGFloat chevX=x-6;NSDictionary *chev=@{NSFontAttributeName:[NSFont systemFontOfSize:13 weight:NSFontWeightSemibold],NSForegroundColorAttributeName:Ink(.6)};[(reveal>.5?@"«":@"»") drawAtPoint:NSMakePoint(chevX-8,y-9) withAttributes:chev];
+  CGFloat hiddenRight=chevX-18;NSPoint circle=NSMakePoint(hiddenRight-8-3*20,y);
+  if(reveal>0){for(int i=0;i<3;i++){CGFloat hx=hiddenRight-i*20-6-(1-reveal)*30;[Ink(.5*reveal) setFill];[[NSBezierPath bezierPathWithRoundedRect:NSMakeRect(hx-12,y-6,12,12) xRadius:3 yRadius:3] fill];}}
+  double drag=seg(t,.58,.84);NSPoint target=NSMakePoint(NSMaxX(bar)-ts.width-24-4*20+8,y);NSPoint cpos=NSMakePoint(circle.x+(target.x-circle.x)*drag-(1-reveal)*30,y);
+  if(reveal>0)drawCircle(cpos,7,YES,0,-1,NO);
+  // the pointer: to the », click, to the circle, ⌘ held, drag, release
+  double m1=seg(t,0,.2);NSPoint p0=NSMakePoint(b.size.width*.3,b.size.height*.3),p1=NSMakePoint(chevX-4,y-4);NSPoint pp=NSMakePoint(p0.x+(p1.x-p0.x)*m1,p0.y+(p1.y-p0.y)*m1);
+  double m2=seg(t,.38,.54);if(t>.38){NSPoint c0=p1,c1=NSMakePoint(circle.x+2,y-4);pp=NSMakePoint(c0.x+(c1.x-c0.x)*m2,c0.y+(c1.y-c0.y)*m2);}
+  if(t>.58)pp=NSMakePoint(cpos.x+2,y-4);
+  drawRipple(NSMakePoint(chevX-2,y),seg(t,.21,.3)*1.0);drawPointer(pp,1);
+  if(t>.52&&t<.9){drawKey(NSMakeRect(pp.x+14,pp.y-30,24,18),@"⌘",t>.56?1:0);}
+  
+  break;}
+ case TourSceneScreen:{
+  NSRect bar=NSMakeRect(0,b.size.height-24,b.size.width,20);[Ink(.08) setFill];[[NSBezierPath bezierPathWithRoundedRect:bar xRadius:6 yRadius:6] fill];NSPoint c=NSMakePoint(NSMaxX(bar)-150,NSMidY(bar));
+  double gray=seg(t,.42,.56),warm=seg(t,.7,.86)*.5;NSRect screen=NSMakeRect(20,16,170,92);drawScreen(screen,gray,warm,1);
+  drawCircle(c,7,gray>.5,warm,-1,NO);
+  double open=seg(t,.24,.32);NSRect menu=NSMakeRect(c.x-40,c.y-14-92*open-6,150,92*open);if(open>0)drawMenu(menu,@[@"Grayscale",@"Grayscale off for  ›",@"Extra Warmth",@"Night Shift  ›",@"Start a session…"],t>.36&&t<.6?0:-1,open,gray>.5?0:-1);
+  if(open>.9){CGFloat sx=menu.origin.x+22,sy=NSMaxY(menu)-46;[Ink(.25) setFill];[[NSBezierPath bezierPathWithRoundedRect:NSMakeRect(sx,sy,100,3) xRadius:1.5 yRadius:1.5] fill];[Orange(1) setFill];[[NSBezierPath bezierPathWithRoundedRect:NSMakeRect(sx,sy,100*warm*2,3) xRadius:1.5 yRadius:1.5] fill];[[NSBezierPath bezierPathWithOvalInRect:NSMakeRect(sx+100*warm*2-4,sy-3,9,9)] fill];}
+  double m1=seg(t,0,.2);NSPoint p0=NSMakePoint(120,60),p1=NSMakePoint(c.x+1,c.y-3);NSPoint pp=NSMakePoint(p0.x+(p1.x-p0.x)*m1,p0.y+(p1.y-p0.y)*m1);
+  if(t>.34){double m2=seg(t,.34,.4);NSPoint q=NSMakePoint(menu.origin.x+40,NSMaxY(menu)-10);pp=NSMakePoint(p1.x+(q.x-p1.x)*m2,p1.y+(q.y-p1.y)*m2);}
+  if(t>.62){double m3=seg(t,.62,.7);NSPoint q0=pp,q1=NSMakePoint(menu.origin.x+24+100*warm*2,NSMaxY(menu)-44);pp=NSMakePoint(q0.x+(q1.x-q0.x)*m3,q0.y+(q1.y-q0.y)*m3);}
+  drawRipple(p1,seg(t,.21,.3));drawRipple(NSMakePoint(menu.origin.x+40,NSMaxY(menu)-10),seg(t,.4,.48));drawPointer(pp,1);
+  
+  break;}
+ case TourSceneExceptions:{
+  NSRect bar=NSMakeRect(0,b.size.height-24,b.size.width,20);[Ink(.08) setFill];[[NSBezierPath bezierPathWithRoundedRect:bar xRadius:6 yRadius:6] fill];NSPoint c=NSMakePoint(NSMaxX(bar)-200,NSMidY(bar));
+  double color=seg(t,.66,.8);NSRect screen=NSMakeRect(20,16,160,92);drawScreen(screen,1-color,0,1);NSDictionary *tag=@{NSFontAttributeName:[NSFont systemFontOfSize:9 weight:NSFontWeightMedium],NSForegroundColorAttributeName:Ink(.6)};[@"Photos" drawAtPoint:NSMakePoint(screen.origin.x+8,NSMaxY(screen)-11) withAttributes:tag];
+  drawCircle(c,7,YES,0,-1,NO);
+  double open=seg(t,.22,.3);NSRect menu=NSMakeRect(c.x-20,c.y-14-62*open-6,132,62*open);if(open>0)drawMenu(menu,@[@"Grayscale",@"Extra Warmth",@"Exception for Photos ›"],t>.36?2:-1,open,0);
+  double sub=seg(t,.42,.5);NSRect subm=NSMakeRect(NSMaxX(menu)-4,menu.origin.y-20,96,78*sub);if(sub>0)drawMenu(subm,@[@"Use this exception",@"Grayscale",@"   Use default",@"   Off"],t>.56?3:-1,sub,color>.5?3:0);
+  double m1=seg(t,0,.18);NSPoint p0=NSMakePoint(110,70),p1=NSMakePoint(c.x+1,c.y-3);NSPoint pp=NSMakePoint(p0.x+(p1.x-p0.x)*m1,p0.y+(p1.y-p0.y)*m1);
+  if(t>.32){double m2=seg(t,.32,.4);NSPoint q=NSMakePoint(menu.origin.x+60,menu.origin.y+10);pp=NSMakePoint(p1.x+(q.x-p1.x)*m2,p1.y+(q.y-p1.y)*m2);if(t>.5){double m3=seg(t,.5,.58);NSPoint q1=NSMakePoint(subm.origin.x+30,subm.origin.y+10);pp=NSMakePoint(q.x+(q1.x-q.x)*m3,q.y+(q1.y-q.y)*m3);}}
+  drawRipple(p1,seg(t,.19,.27));if(sub>.9)drawRipple(NSMakePoint(subm.origin.x+30,subm.origin.y+10),seg(t,.6,.68));drawPointer(pp,1);
+  
+  break;}
+ case TourScenePeek:{
+  NSRect screen=NSMakeRect(20,22,200,104);
+  double held=seg(t,.14,.18)*(1-seg(t,.4,.44)),dbl=seg(t,.56,.6),back=seg(t,.86,.9);double color=MAX(held,dbl*(1-back));drawScreen(screen,1-color,0,1);
+  double p1=seg(t,.12,.16)*(1-seg(t,.38,.42)),p2=seg(t,.54,.57)*(1-seg(t,.6,.63)),p3=seg(t,.65,.68)*(1-seg(t,.71,.74)),p4=seg(t,.84,.87)*(1-seg(t,.9,.93));double press=MAX(MAX(p1,p2),MAX(p3,p4));
+  drawKey(NSMakeRect(262,64,48,36),@"⌥",press);drawKey(NSMakeRect(318,64,48,36),@"A",press);
+  NSDictionary *cap=@{NSFontAttributeName:[NSFont systemFontOfSize:10],NSForegroundColorAttributeName:Ink(.7)};NSString *w=t<.44?@"hold: color while held":t<.84?@"press twice: it stays":@"press once: back";[w drawAtPoint:NSMakePoint(262,46) withAttributes:cap];
+  
+  break;}
+ case TourSceneSession:{
+  NSRect bar=NSMakeRect(0,b.size.height-24,b.size.width,20);[Ink(.08) setFill];[[NSBezierPath bezierPathWithRoundedRect:bar xRadius:6 yRadius:6] fill];NSPoint c=NSMakePoint(NSMaxX(bar)-150,NSMidY(bar));
+  double run=seg(t,.05,.58);BOOL over=t>.6;double minutes=25*(1-run);NSString *label=over?[NSString stringWithFormat:@"−%ld",(long)floor((t-.6)*12)]:[NSString stringWithFormat:@"%ld",(long)ceil(minutes)];
+  drawCircle(c,6,YES,0,run,over);NSDictionary *la=@{NSFontAttributeName:[NSFont monospacedDigitSystemFontOfSize:11 weight:NSFontWeightMedium],NSForegroundColorAttributeName:over?Orange(.6+.4*fabs(sin(t*40))):Ink(1)};[label drawAtPoint:NSMakePoint(c.x+14,c.y-7) withAttributes:la];
+  NSRect screen=NSMakeRect(20,16,170,92);drawScreen(screen,1,.3,1);
+  double glow=seg(t,.6,.66)*(1-seg(t,.74,.84));if(glow>0){NSRect g=NSInsetRect(screen,-6,-6);[[NSColor colorWithSRGBRed:1 green:.78 blue:.52 alpha:.45*glow] setFill];[[NSBezierPath bezierPathWithRoundedRect:g xRadius:10 yRadius:10] fill];NSDictionary *gt=@{NSFontAttributeName:[NSFont systemFontOfSize:12 weight:NSFontWeightLight],NSForegroundColorAttributeName:[NSColor colorWithWhite:1 alpha:glow]};NSSize gs=[@"That was 25 minutes." sizeWithAttributes:gt];[@"That was 25 minutes." drawAtPoint:NSMakePoint(NSMidX(screen)-gs.width/2,NSMidY(screen)-gs.height/2) withAttributes:gt];}
+  double panel=seg(t,.84,.9);if(panel>0){NSRect pr=NSMakeRect(c.x-70,c.y-14-70*panel-6,170,70*panel);[[NSColor.windowBackgroundColor colorWithAlphaComponent:.96*panel] setFill];[[NSBezierPath bezierPathWithRoundedRect:pr xRadius:8 yRadius:8] fill];[Ink(.15*panel) setStroke];[[NSBezierPath bezierPathWithRoundedRect:pr xRadius:8 yRadius:8] stroke];if(panel>.9){NSDictionary *pa=@{NSFontAttributeName:[NSFont systemFontOfSize:9.5],NSForegroundColorAttributeName:Ink(.8)};[@"Leaving? Call me back in" drawAtPoint:NSMakePoint(pr.origin.x+12,NSMaxY(pr)-18) withAttributes:pa];for(int i=0;i<4;i++){[Ink(.12) setFill];[[NSBezierPath bezierPathWithRoundedRect:NSMakeRect(pr.origin.x+12+i*38,NSMaxY(pr)-42,32,16) xRadius:5 yRadius:5] fill];[@[@"5",@"9",@"13",@"33"][i] drawAtPoint:NSMakePoint(pr.origin.x+22+i*38,NSMaxY(pr)-40) withAttributes:pa];}[@"Keep going        Leave quietly" drawAtPoint:NSMakePoint(pr.origin.x+12,pr.origin.y+8) withAttributes:pa];}}
+  
+  break;}
+ case TourScenePrivacy:{
+  NSRect win=NSMakeRect(10,64,150,66);[Ink(.08) setFill];[[NSBezierPath bezierPathWithRoundedRect:win xRadius:7 yRadius:7] fill];for(int i=0;i<3;i++){[Ink(.35) setFill];[[NSBezierPath bezierPathWithOvalInRect:NSMakeRect(18+i*11,NSMaxY(win)-14,6,6)] fill];}
+  NSRect field=NSMakeRect(win.origin.x+34,NSMaxY(win)-19,105,12);[Ink(.12) setFill];[[NSBezierPath bezierPathWithRoundedRect:field xRadius:4 yRadius:4] fill];NSDictionary *tiny=@{NSFontAttributeName:[NSFont systemFontOfSize:9 weight:NSFontWeightMedium],NSForegroundColorAttributeName:Ink(.8)};[@"news.example" drawAtPoint:NSMakePoint(field.origin.x+6,field.origin.y+1) withAttributes:tiny];
+  NSPoint app=NSMakePoint(240,97);drawCircle(app,12,YES,0,-1,NO);[@"Less Pull, in memory" drawAtPoint:NSMakePoint(app.x-40,app.y-30) withAttributes:tiny];
+  double travel=seg(t,.1,.4);NSPoint from=NSMakePoint(NSMaxX(field),NSMidY(field)),to=NSMakePoint(app.x-16,app.y);NSPoint q=NSMakePoint(from.x+(to.x-from.x)*travel,from.y+(to.y-from.y)*travel);
+  [Ink(.3) setStroke];NSBezierPath *line=[NSBezierPath new];[line moveToPoint:from];[line lineToPoint:to];line.lineWidth=1;[line stroke];
+  if(travel>0&&travel<1){NSRect chip=NSMakeRect(q.x-28,q.y+6,56,12);[Orange(.9) setFill];[[NSBezierPath bezierPathWithRoundedRect:chip xRadius:6 yRadius:6] fill];NSDictionary *ct=@{NSFontAttributeName:[NSFont systemFontOfSize:8 weight:NSFontWeightSemibold],NSForegroundColorAttributeName:[NSColor colorWithWhite:.1 alpha:1]};[@"news.example" drawAtPoint:NSMakePoint(chip.origin.x+5,chip.origin.y+2) withAttributes:ct];}
+  // the cloud, crossed: nothing leaves the Mac
+  double cloud=seg(t,.45,.55);if(cloud>0){NSPoint cc=NSMakePoint(340,100);for(int i=0;i<3;i++){CGFloat r=10+4*(i==1);[Ink(.18*cloud) setFill];[[NSBezierPath bezierPathWithOvalInRect:NSMakeRect(cc.x-18+i*14-r,cc.y-r+(i==1?4:0),2*r,2*r)] fill];}NSBezierPath *x=[NSBezierPath new];[x moveToPoint:NSMakePoint(cc.x-16,cc.y-16)];[x lineToPoint:NSMakePoint(cc.x+16,cc.y+16)];[x moveToPoint:NSMakePoint(cc.x+16,cc.y-16)];[x lineToPoint:NSMakePoint(cc.x-16,cc.y+16)];x.lineWidth=2.5;[[NSColor colorWithSRGBRed:1 green:.38 blue:.34 alpha:cloud] setStroke];[x stroke];[@"no server, no sync" drawAtPoint:NSMakePoint(cc.x-38,cc.y-34) withAttributes:tiny];}
+  // the screenshot stays in color
+  double shot=seg(t,.62,.74);if(shot>0){NSRect gray=NSMakeRect(10,10,70,44);drawScreen(gray,1,.3,shot);NSRect col=NSMakeRect(96,10,70,44);drawScreen(col,0,0,shot);[Ink(.5*shot) setStroke];NSBezierPath *frame=[NSBezierPath bezierPathWithRoundedRect:NSInsetRect(col,-3,-3) xRadius:6 yRadius:6];frame.lineWidth=1.5;[frame stroke];NSDictionary *c2=@{NSFontAttributeName:[NSFont systemFontOfSize:9],NSForegroundColorAttributeName:Ink(.7*shot)};[@"your screen" drawAtPoint:NSMakePoint(14,56) withAttributes:c2];[@"the screenshot" drawAtPoint:NSMakePoint(96,56) withAttributes:c2];}
+  
+  break;}
+ }
 }
 @end
 @implementation GlowView
 - (void)drawRect:(NSRect)dirty {NSGradient *g=[[NSGradient alloc]initWithColorsAndLocations:[NSColor colorWithSRGBRed:1 green:.78 blue:.52 alpha:.42],0.0,[NSColor colorWithSRGBRed:1 green:.72 blue:.45 alpha:.18],0.45,[NSColor colorWithSRGBRed:1 green:.7 blue:.4 alpha:0],1.0,nil];[g drawInRect:self.bounds relativeCenterPosition:NSZeroPoint];}
-@end
-// For the tour's exceptions page: a browser window whose site name travels along an arrow up into the
-// menu-bar circle, where "Exception for news.example" appears. That is all the extension does. Still under Reduce Motion.
-@interface ExtensionHintView : NSView
-@property NSTimer *timer;
-@property NSTimeInterval start;
-@end
-@implementation ExtensionHintView
-- (NSSize)intrinsicContentSize {return NSMakeSize(420,74);}
-- (void)viewDidMoveToWindow {[self.timer invalidate];self.timer=nil;if(!self.window||NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceMotion)return;self.start=NSProcessInfo.processInfo.systemUptime;__weak ExtensionHintView *weak=self;self.timer=[NSTimer timerWithTimeInterval:1.0/30 repeats:YES block:^(NSTimer *t){[weak setNeedsDisplay:YES];}];[NSRunLoop.mainRunLoop addTimer:self.timer forMode:NSRunLoopCommonModes];}
-- (void)drawRect:(NSRect)dirty {
- NSRect b=self.bounds;NSColor *ink=NSColor.labelColor;double loop=5.0,t=self.timer?fmod(NSProcessInfo.processInfo.systemUptime-self.start,loop)/loop:0.7;
- // the browser window, bottom left
- NSRect win=NSMakeRect(0,0,200,50);[[ink colorWithAlphaComponent:.08] setFill];[[NSBezierPath bezierPathWithRoundedRect:win xRadius:7 yRadius:7] fill];
- for(int i=0;i<3;i++){[[ink colorWithAlphaComponent:.35] setFill];[[NSBezierPath bezierPathWithOvalInRect:NSMakeRect(8+i*11,38,6,6)] fill];}
- NSRect field=NSMakeRect(44,35,146,12);[[ink colorWithAlphaComponent:.12] setFill];[[NSBezierPath bezierPathWithRoundedRect:field xRadius:4 yRadius:4] fill];
- NSDictionary *small=@{NSFontAttributeName:[NSFont systemFontOfSize:9 weight:NSFontWeightMedium],NSForegroundColorAttributeName:[ink colorWithAlphaComponent:.8]};[@"news.example" drawAtPoint:NSMakePoint(50,36) withAttributes:small];
- for(int i=0;i<3;i++){[[ink colorWithAlphaComponent:.14] setFill];[[NSBezierPath bezierPathWithRoundedRect:NSMakeRect(10,24-i*8,160-i*30,4) xRadius:2 yRadius:2] fill];}
- // the menu bar, top right, with the circle and the menu line that appears
- NSRect bar=NSMakeRect(220,b.size.height-24,200,22);[[ink colorWithAlphaComponent:.08] setFill];[[NSBezierPath bezierPathWithRoundedRect:bar xRadius:6 yRadius:6] fill];
- NSPoint cc=NSMakePoint(NSMaxX(bar)-60,NSMidY(bar));NSRect c=NSMakeRect(cc.x-7,cc.y-7,14,14);NSBezierPath *o=[NSBezierPath bezierPathWithOvalInRect:c];[NSGraphicsContext saveGraphicsState];NSRect half=c;half.size.width/=2;[[NSBezierPath bezierPathWithRect:half] addClip];[ink setFill];[o fill];[NSGraphicsContext restoreGraphicsState];[ink setStroke];o.lineWidth=1.3;[o stroke];
- for(int i=0;i<2;i++){[[ink colorWithAlphaComponent:.5] setFill];[[NSBezierPath bezierPathWithRoundedRect:NSMakeRect(NSMaxX(bar)-36+i*16,cc.y-5,10,10) xRadius:3 yRadius:3] fill];}
- // the arrow from the address field to the circle, drawn over time, with the site name riding along it
- NSPoint from=NSMakePoint(NSMaxX(field)+6,NSMidY(field)),to=NSMakePoint(cc.x-10,cc.y-2);double k=t<.1?0:t<.55?(t-.1)/.45:1;k=k*k*(3-2*k);
- NSBezierPath *path=[NSBezierPath new];[path moveToPoint:from];NSPoint ctrl=NSMakePoint((from.x+to.x)/2,to.y+10);NSPoint end=NSMakePoint(from.x+(to.x-from.x)*k,from.y+(to.y-from.y)*k);
- // a quadratic curve evaluated by hand so the drawn part grows
- [path removeAllPoints];NSPoint prev=from;[path moveToPoint:from];for(int i=1;i<=30;i++){double u=(double)i/30*k;NSPoint q=NSMakePoint((1-u)*(1-u)*from.x+2*(1-u)*u*ctrl.x+u*u*to.x,(1-u)*(1-u)*from.y+2*(1-u)*u*ctrl.y+u*u*to.y);[path lineToPoint:q];prev=q;}
- [[ink colorWithAlphaComponent:.6] setStroke];path.lineWidth=1.5;path.lineCapStyle=NSLineCapStyleRound;[path stroke];(void)end;
- if(k>.02){NSRect chip=NSMakeRect(prev.x-30,prev.y+6,60,13);[[NSColor colorWithSRGBRed:.93 green:.55 blue:.28 alpha:.9] setFill];[[NSBezierPath bezierPathWithRoundedRect:chip xRadius:6 yRadius:6] fill];NSDictionary *chipText=@{NSFontAttributeName:[NSFont systemFontOfSize:8 weight:NSFontWeightSemibold],NSForegroundColorAttributeName:[NSColor colorWithWhite:.1 alpha:1]};[@"news.example" drawAtPoint:NSMakePoint(chip.origin.x+6,chip.origin.y+2) withAttributes:chipText];}
- double m=t<.6?0:t<.75?(t-.6)/.15:t<.92?1:(1-(t-.92)/.08);if(m>0){NSRect menu=NSMakeRect(cc.x-96,NSMinY(bar)-24,150,18);[[ink colorWithAlphaComponent:.1*m] setFill];[[NSBezierPath bezierPathWithRoundedRect:menu xRadius:5 yRadius:5] fill];NSDictionary *mt=@{NSFontAttributeName:[NSFont systemFontOfSize:9 weight:NSFontWeightMedium],NSForegroundColorAttributeName:[ink colorWithAlphaComponent:m]};[@"Exception for news.example  ›" drawAtPoint:NSMakePoint(menu.origin.x+8,menu.origin.y+4) withAttributes:mt];}
-}
 @end
 // A preset chip: a right-click (or a two-finger tap) offers to remove it from the presets, right where you are.
 @interface ChipButton : NSButton
@@ -672,7 +733,7 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  // New users get the two shortcuts set for them (Option-A to peek, Option-Command-G to toggle),
  // each only if it is free on this Mac and keyboard; the tour shows which ones. Changeable under Shortcuts.
  if(firstLaunch)for(NSString *key in @[@"peekShortcut",@"grayscaleShortcut"]){if(![d objectForKey:key]){NSDictionary *pick=[self suggestedShortcutFor:key];if(pick)[d setObject:pick forKey:key];}}
- [d registerDefaults:@{@"automatic":@YES,@"overrideMode":@(-1),@"warmth":@0,@"nightMode":@101,@"manualMode":@1,@"checkForUpdates":@YES,@"peekActiveDisplayOnly":@YES,@"sessionPresets":@[@25,@45,@60,@90],@"callBackPresets":@[@5,@9,@13,@33],@"sessionRemindEvery":@0,@"sessionSoundStyle":@2,@"sessionGlow":@YES,@"sessionVolume":@70,@"customMinutes":@30,@"customBackMinutes":@9}];self.peekLockedDisplays=[NSMutableSet new];
+ [d registerDefaults:@{@"automatic":@YES,@"overrideMode":@(-1),@"warmth":@0,@"nightMode":@101,@"manualMode":@1,@"checkForUpdates":@YES,@"peekActiveDisplayOnly":@YES,@"sessionPresets":@[@25,@45,@60,@90],@"callBackPresets":@[@5,@9,@13,@33],@"sessionRemindEvery":@0,@"sessionSoundStyle":@2,@"sessionGlow":@YES,@"sessionVolume":@70,@"customMinutes":@30,@"customBackMinutes":@9,@"sessionStopAtEnd":@NO,@"sessionOfferCallBack":@YES}];self.peekLockedDisplays=[NSMutableSet new];
  self.availableUpdate=[d dictionaryForKey:@"availableUpdate"];
  if([d integerForKey:@"nightMode"]==16)[d setInteger:100 forKey:@"nightMode"];
  if([d integerForKey:@"manualMode"]==16)[d setInteger:100 forKey:@"manualMode"];
@@ -777,7 +838,7 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
 - (void)sessionTick {
  NSDate *now=NSDate.date;NSArray *events=[self.session eventsAt:now];if(self.session.state==SessionOver&&!self.sessionPanel.visible)self.sessionBreath=!self.sessionBreath;else self.sessionBreath=YES;
  for(NSString *e in events){
-  if([e isEqual:@"ended"]){[self glow:[NSString stringWithFormat:@"That was %ld minute%@.",(long)self.session.minutes,self.session.minutes==1?@"":@"s"] sound:@"session-end"];[self runHook:@"session-ended" args:@[[NSString stringWithFormat:@"%ld",(long)self.session.minutes]]];}
+  if([e isEqual:@"ended"]){[self glow:[NSString stringWithFormat:@"That was %ld minute%@.",(long)self.session.minutes,self.session.minutes==1?@"":@"s"] sound:@"session-end"];[self runHook:@"session-ended" args:@[[NSString stringWithFormat:@"%ld",(long)self.session.minutes]]];if([NSUserDefaults.standardUserDefaults boolForKey:@"sessionStopAtEnd"]){[self.session stop];[self closeSessionPanel];}}
   else if([e isEqual:@"reminder"]){NSInteger past=(NSInteger)floor(-[self.session remainingAt:now]/60);[self glow:[NSString stringWithFormat:@"%ld minute%@ past.",(long)past,past==1?@"":@"s"] sound:@"session-remind"];[self runHook:@"session-reminder" args:@[[NSString stringWithFormat:@"%ld",(long)past]]];}
   else if([e isEqual:@"callBack"]){[self glow:@"Welcome back." sound:@"session-back"];[self closeSessionPanel];[self runHook:@"session-call-back" args:@[]];}}
  if(events.count)[self persistSession];[self updateStatusIcon];if(self.sessionPanel.visible){if(events.count&&self.session.state!=SessionIdle)[self showSessionPanelMode:nil];else [self refreshSessionPanel];}if(self.session.state==SessionIdle)[self scheduleSessionTimer];
@@ -843,6 +904,8 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
   [buttons addObjectsFromArray:[self chipRows:chips]];
   NSButton *none=[self panelButton:@"Not today" action:@selector(sessionCallBack:) prominent:NO];none.tag=0;none.bezelStyle=NSBezelStyleInline;none.controlSize=NSControlSizeRegular;[buttons addObject:[self row:@[[self spacer],none,[self spacer]]]];}
  else if(s.state==SessionRunning){[buttons addObject:[self row:@[[self spacer],[self panelButton:@"End session" action:@selector(endSession:) prominent:NO],[self spacer]]]];}
+ else if(s.state==SessionOver&&![NSUserDefaults.standardUserDefaults boolForKey:@"sessionOfferCallBack"]){NSButton *keep=[self panelButton:@"Keep going" action:@selector(closeSessionPanel) prominent:NO];NSButton *quiet=[self panelButton:@"Leave quietly" action:@selector(sessionCallBack:) prominent:YES];quiet.tag=0;[self helpView:quiet text:@"End the session." label:@"Leave quietly"];
+  NSButton *gear=[NSButton buttonWithImage:[NSImage imageWithSystemSymbolName:@"gearshape" accessibilityDescription:@"Session settings"] target:self action:@selector(showSessionsFromPanel:)];gear.bezelStyle=NSBezelStyleInline;gear.bordered=NO;[self helpView:gear text:@"Session settings." label:@"Session settings"];[buttons addObject:[self row:@[keep,[self spacer],quiet,gear]]];}
  else if(s.state==SessionOver){NSTextField *ask=[NSTextField labelWithString:@"Leaving? Call me back in"];ask.font=[NSFont systemFontOfSize:12];ask.textColor=NSColor.secondaryLabelColor;ask.alignment=NSTextAlignmentCenter;[buttons addObject:ask];
   NSMutableArray *chips=[NSMutableArray new];for(NSNumber *m in [self sessionPresets:@"callBackPresets" fallback:@[@5,@9,@13,@33]])[chips addObject:[self chip:m.integerValue key:@"callBackPresets" action:@selector(sessionCallBack:)]];
   [buttons addObjectsFromArray:[self chipRows:chips]];
@@ -853,7 +916,7 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
   self.customBackSave=[NSButton checkboxWithTitle:@"Add to presets" target:nil action:nil];self.customBackSave.font=[NSFont systemFontOfSize:11];self.customBackSave.controlSize=NSControlSizeSmall;[self helpView:self.customBackSave text:@"Keep this time as a chip for next time." label:@"Add this time to the presets"];
   self.customBackStart=[self panelButton:[NSString stringWithFormat:@"Call me back in %ld min",(long)self.customBackMinutes] action:@selector(customCallBack:) prominent:NO];
   [buttons addObject:[self row:@[self.customBackSave,[self spacer],self.customBackStart]]];
-  NSButton *keep=[self panelButton:@"Keep going" action:@selector(closeSessionPanel) prominent:NO];NSButton *quiet=[self panelButton:@"Leave quietly" action:@selector(sessionCallBack:) prominent:NO];quiet.tag=0;quiet.bezelStyle=NSBezelStyleInline;quiet.controlSize=NSControlSizeRegular;[self helpView:quiet text:@"End the session without a call back." label:@"Leave quietly"];
+  NSButton *keep=[self panelButton:@"Keep going" action:@selector(closeSessionPanel) prominent:NO];NSButton *quiet=[self panelButton:@"Leave quietly" action:@selector(sessionCallBack:) prominent:NO];quiet.tag=0;[self helpView:quiet text:@"End the session without a call back." label:@"Leave quietly"];
   NSButton *gear=[NSButton buttonWithImage:[NSImage imageWithSystemSymbolName:@"gearshape" accessibilityDescription:@"Session settings"] target:self action:@selector(showSessionsFromPanel:)];gear.bezelStyle=NSBezelStyleInline;gear.bordered=NO;[self helpView:gear text:@"Change the call-back times, reminders, sound and glow under Settings → Sessions." label:@"Session settings"];
   [buttons addObject:[self row:@[keep,[self spacer],quiet,gear]]];}
  else if(s.state==SessionAway){[buttons addObject:[self row:@[[self spacer],[self panelButton:@"I’m back" action:@selector(sessionBack:) prominent:NO],[self spacer]]]];}
@@ -1378,7 +1441,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
 - (void)controlTextDidEndEditing:(NSNotification *)note {NSTextField *f=note.object;if([f isKindOfClass:NSTextField.class]&&([f.identifier isEqual:@"sessionPresets"]||[f.identifier isEqual:@"callBackPresets"]))[self savePresets:f tidy:YES];}
 // Chips in rows of up to five, so any number of lengths fits the panel.
 - (NSArray<NSView *> *)chipRows:(NSArray<NSButton *> *)chips {NSUInteger per=chips.count<=4?4:5;NSMutableArray *rows=[NSMutableArray new];for(NSUInteger i=0;i<chips.count;i+=per){NSMutableArray *items=[[chips subarrayWithRange:NSMakeRange(i,MIN(per,chips.count-i))] mutableCopy];while(items.count<per)[items addObject:[NSView new]];NSStackView *r=[self row:items];r.spacing=6;r.distribution=NSStackViewDistributionFillEqually;[rows addObject:r];}return rows;}
-- (void)sessionOptionChanged:(NSControl *)sender {NSUserDefaults *d=NSUserDefaults.standardUserDefaults;if([sender.identifier isEqual:@"remind"]){NSInteger v=[(NSPopUpButton *)sender selectedTag];[d setInteger:v forKey:@"sessionRemindEvery"];self.session.remindEvery=v;[self persistSession];}else if([sender.identifier isEqual:@"sound"]){[d setInteger:[(NSPopUpButton *)sender selectedTag] forKey:@"sessionSoundStyle"];[d removeObjectForKey:@"sessionSound"];}else [d setBool:[(NSButton *)sender state]==NSControlStateValueOn forKey:sender.identifier];}
+- (void)sessionOptionChanged:(NSControl *)sender {NSUserDefaults *d=NSUserDefaults.standardUserDefaults;if([sender.identifier isEqual:@"remind"]){NSInteger v=[(NSPopUpButton *)sender selectedTag];[d setInteger:v forKey:@"sessionRemindEvery"];self.session.remindEvery=v;[self persistSession];}else if([sender.identifier isEqual:@"sound"]){[d setInteger:[(NSPopUpButton *)sender selectedTag] forKey:@"sessionSoundStyle"];[d removeObjectForKey:@"sessionSound"];}else if([sender.identifier isEqual:@"atEnd"]){[d setBool:[(NSPopUpButton *)sender indexOfSelectedItem]==1 forKey:@"sessionStopAtEnd"];}else [d setBool:[(NSButton *)sender state]==NSControlStateValueOn forKey:sender.identifier];}
 - (void)trySessionSound:(id)sender {[self glow:@"That was 30 minutes." sound:@"session-end"];}
 - (void)previewSound:(id)sender {BOOL glow=[NSUserDefaults.standardUserDefaults boolForKey:@"sessionGlow"];[NSUserDefaults.standardUserDefaults setBool:NO forKey:@"sessionGlow"];[self glow:@"" sound:@"session-end"];[NSUserDefaults.standardUserDefaults setBool:glow forKey:@"sessionGlow"];}
 - (void)previewBackSound:(id)sender {BOOL glow=[NSUserDefaults.standardUserDefaults boolForKey:@"sessionGlow"];[NSUserDefaults.standardUserDefaults setBool:NO forKey:@"sessionGlow"];[self glow:@"" sound:@"session-back"];[NSUserDefaults.standardUserDefaults setBool:glow forKey:@"sessionGlow"];}
@@ -1389,10 +1452,13 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  self.sessionPresetsField=[NSTextField textFieldWithString:[self minutesList:@"sessionPresets" fallback:@[@25,@45,@60,@90]]];self.sessionPresetsField.identifier=@"sessionPresets";self.sessionPresetsField.target=self;self.sessionPresetsField.action=@selector(presetsChanged:);self.sessionPresetsField.delegate=self;self.sessionPresetsField.placeholderString=@"25, 45, 60, 90";[self.sessionPresetsField.widthAnchor constraintEqualToConstant:220].active=YES;[self helpView:self.sessionPresetsField text:@"Minutes, separated by commas. These appear under Start a session in the menu." label:@"Session lengths in minutes"];
  NSTextField *backLabel=[NSTextField labelWithString:@"Call me back in"];backLabel.font=[NSFont systemFontOfSize:13 weight:NSFontWeightMedium];
  self.callBackPresetsField=[NSTextField textFieldWithString:[self minutesList:@"callBackPresets" fallback:@[@5,@9,@13,@33]]];self.callBackPresetsField.identifier=@"callBackPresets";self.callBackPresetsField.target=self;self.callBackPresetsField.action=@selector(presetsChanged:);self.callBackPresetsField.delegate=self;self.callBackPresetsField.placeholderString=@"5, 9, 13, 33";[self.callBackPresetsField.widthAnchor constraintEqualToConstant:220].active=YES;[self helpView:self.callBackPresetsField text:@"Minutes, separated by commas. Offered when you leave after a session; you are called back once." label:@"Call me back in, minutes"];
+ NSTextField *endLabel=[NSTextField labelWithString:@"At the end"];endLabel.font=[NSFont systemFontOfSize:13 weight:NSFontWeightMedium];
+ NSPopUpButton *atEnd=[[NSPopUpButton alloc]initWithFrame:NSZeroRect pullsDown:NO];[atEnd addItemsWithTitles:@[@"Count on, so I see how far I stretch",@"Stop quietly"]];[atEnd selectItemAtIndex:[NSUserDefaults.standardUserDefaults boolForKey:@"sessionStopAtEnd"]?1:0];atEnd.identifier=@"atEnd";atEnd.target=self;atEnd.action=@selector(sessionOptionChanged:);[atEnd.widthAnchor constraintEqualToConstant:280].active=YES;[self helpView:atEnd text:@"Count on: after the glow and the sound, the icon counts the minutes past the end and a click offers the way back. Stop quietly: the session simply ends with the glow and the sound, nothing more." label:@"At the end"];
+ NSButton *offerBack=[NSButton checkboxWithTitle:@"Offer a call back when I leave" target:self action:@selector(sessionOptionChanged:)];offerBack.identifier=@"sessionOfferCallBack";offerBack.state=[NSUserDefaults.standardUserDefaults boolForKey:@"sessionOfferCallBack"];[self helpView:offerBack text:@"Off: the panel after the end has only Keep going and Leave quietly." label:@"Offer a call back when I leave"];
  NSTextField *remindLabel=[NSTextField labelWithString:@"After the end, remind me"];remindLabel.font=[NSFont systemFontOfSize:13 weight:NSFontWeightMedium];
  NSPopUpButton *remind=[[NSPopUpButton alloc]initWithFrame:NSZeroRect pullsDown:NO];for(NSArray *pair in @[@[@"Never",@0],@[@"Every 3 minutes",@3],@[@"Every 5 minutes",@5],@[@"Every 10 minutes",@10],@[@"Every 15 minutes",@15]]){[remind addItemWithTitle:pair[0]];remind.lastItem.tag=[pair[1] integerValue];}[remind selectItemWithTag:[NSUserDefaults.standardUserDefaults integerForKey:@"sessionRemindEvery"]];remind.identifier=@"remind";remind.target=self;remind.action=@selector(sessionOptionChanged:);[remind.widthAnchor constraintEqualToConstant:220].active=YES;[self helpView:remind text:@"A quieter glow and sound while the session runs past its end, until you leave or end it." label:@"Remind me after the end"];
  NSTextField *soundLabel=[NSTextField labelWithString:@"Sound"];soundLabel.font=[NSFont systemFontOfSize:13 weight:NSFontWeightMedium];
- NSPopUpButton *sound=[[NSPopUpButton alloc]initWithFrame:NSZeroRect pullsDown:NO];for(NSArray *pair in @[@[@"Off",@0],@[@"Two strokes",@1],@[@"One chord",@2]]){[sound addItemWithTitle:pair[0]];sound.lastItem.tag=[pair[1] integerValue];}NSUserDefaults *ud=NSUserDefaults.standardUserDefaults;[sound selectItemWithTag:[ud objectForKey:@"sessionSound"]&&![ud boolForKey:@"sessionSound"]?0:[ud integerForKey:@"sessionSoundStyle"]];sound.identifier=@"sound";sound.target=self;sound.action=@selector(sessionOptionChanged:);[sound.widthAnchor constraintEqualToConstant:220].active=YES;[self helpView:sound text:@"Two strokes: the gong spread over a breath, and two warm notes rising for the call back. One chord: each as one soft chord. Both on 432 Hz and the solfeggio pitches." label:@"Session sound"];
+ NSPopUpButton *sound=[[NSPopUpButton alloc]initWithFrame:NSZeroRect pullsDown:NO];for(NSArray *pair in @[@[@"Off",@0],@[@"Strokes",@1],@[@"Chords",@2]]){[sound addItemWithTitle:pair[0]];sound.lastItem.tag=[pair[1] integerValue];}NSUserDefaults *ud=NSUserDefaults.standardUserDefaults;[sound selectItemWithTag:[ud objectForKey:@"sessionSound"]&&![ud boolForKey:@"sessionSound"]?0:[ud integerForKey:@"sessionSoundStyle"]];sound.identifier=@"sound";sound.target=self;sound.action=@selector(sessionOptionChanged:);[sound.widthAnchor constraintEqualToConstant:220].active=YES;[self helpView:sound text:@"Strokes: the gong in three strokes at the end, two rising notes for the call back. Chords: each as one soft chord. Both on 432 Hz and the solfeggio pitches." label:@"Session sound"];
  NSButton *previewEnd=[NSButton buttonWithTitle:@"End" target:self action:@selector(previewSound:)];previewEnd.bezelStyle=NSBezelStyleInline;[self helpView:previewEnd text:@"Play the end sound of the chosen style." label:@"Preview the end sound"];
  NSButton *previewBack=[NSButton buttonWithTitle:@"Call back" target:self action:@selector(previewBackSound:)];previewBack.bezelStyle=NSBezelStyleInline;[self helpView:previewBack text:@"Play the call-back sound of the chosen style." label:@"Preview the call-back sound"];
  NSTextField *volumeLabel=[NSTextField labelWithString:@"Volume"];volumeLabel.font=[NSFont systemFontOfSize:13 weight:NSFontWeightMedium];
@@ -1402,7 +1468,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  NSButton *try=[NSButton buttonWithTitle:@"Try it" target:self action:@selector(trySessionSound:)];try.bezelStyle=NSBezelStyleInline;[self helpView:try text:@"Shows the glow and plays the sound once, as at the end of a session." label:@"Try the glow and sound"];
  NSStackView *column=[self column:@[intro,[self separator],[self row:@[lengthsLabel,[self spacer],self.sessionPresetsField]],[self note:@"Minutes, separated by commas. These appear under Start a session in the menu."],
   [self row:@[backLabel,[self spacer],self.callBackPresetsField]],[self note:@"Offered when you choose Leaving now. You are called back once, then the session is over for good."],[self separator],
-  [self row:@[remindLabel,[self spacer],remind]],[self adv:[self row:@[soundLabel,[self spacer],sound]]],[self adv:[self row:@[[self note:@"Preview:"],previewEnd,previewBack,[self spacer],volumeLabel,volume,volumeReadout]]],[self adv:[self row:@[glow,[self spacer],try]]],[self note:@"While a session runs, a click on the icon opens the session panel; the other mouse button opens the menu. The Peek and Toggle shortcuts keep working."]]];
+  [self row:@[endLabel,[self spacer],atEnd]],offerBack,[self row:@[remindLabel,[self spacer],remind]],[self adv:[self row:@[soundLabel,[self spacer],sound]]],[self adv:[self row:@[[self note:@"Preview:"],previewEnd,previewBack,[self spacer],volumeLabel,volume,volumeReadout]]],[self adv:[self row:@[glow,[self spacer],try]]],[self note:@"While a session runs, a click on the icon opens the session panel; the other mouse button opens the menu. The Peek and Toggle shortcuts keep working."]]];
  [column setCustomSpacing:4 afterView:column.arrangedSubviews[2]];[column setCustomSpacing:4 afterView:column.arrangedSubviews[4]];return column;
 }
 - (NSStackView *)appsTab {
@@ -1538,29 +1604,28 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  NSImageView *v=[NSImageView imageViewWithImage:image];v.contentTintColor=[NSColor colorWithSRGBRed:.93 green:.55 blue:.28 alpha:1];[v.widthAnchor constraintEqualToConstant:44].active=YES;[v.heightAnchor constraintEqualToConstant:44].active=YES;v.accessibilityLabel=label;return v;
 }
 - (NSView *)tourPageView:(NSInteger)page {
- NSArray *titles=@[@"Welcome to Less Pull",@"The screen, quieter",@"Color where it matters",@"A peek, when you need it",@"Yours, and nobody else’s"];
+ NSArray *titles=@[@"Welcome to Less Pull",@"The screen, quieter",@"Color where it matters",@"A peek, when you need it",@"A session, with a gentle end",@"Yours, and nobody else’s"];
  NSDictionary *peek=[self shortcutForKey:@"peekShortcut"],*toggle=[self shortcutForKey:@"grayscaleShortcut"];
  NSString *peekLabel=peek?[PeekShortcut labelForKeyCode:[peek[@"keyCode"] integerValue] modifiers:[peek[@"modifiers"] integerValue]]:@"the Peek shortcut",*toggleLabel=toggle?[PeekShortcut labelForKeyCode:[toggle[@"keyCode"] integerValue] modifiers:[toggle[@"modifiers"] integerValue]]:@"The Toggle Grayscale shortcut";
- NSArray *texts=@[@"You have arrived somewhere quieter.\n\nLess Pull takes the color out of your screen, so it pulls at you less — a little like stepping out of a loud room into a still one, or leaving the devices behind for a day outside. What matters is still here. It just stops shouting.\n\nWarmth is the second step, and not decoration: from amber to red it takes the blue out of the light, makes the screen quieter still, and puts you back in charge of how your screen speaks to you: how loudly tools and content may push, and what light reaches your eyes — and through them, your mind. Keep color only for the few apps and websites that truly need it.",
-  @"Click the circle in the menu bar, at the top right of your screen. Grayscale takes the color out of everything. Extra Warmth takes the blue out of the light, from a touch of amber all the way to red.\n\nEvery change fades in over half a second, on every display you have.",
-  @"A photo app, a video site, a chart: some things need color. Choose Exception for the app you are in, right in the menu, and set only what should differ. Everything else stays quiet.\n\nWebsites work the same way once the small browser extension connects. It lives under Websites.",
-  [NSString stringWithFormat:@"Hold %@ and the screen is in color for exactly as long as you hold it. Press it twice quickly to keep it; one more press returns.\n\n%@ turns Grayscale on or off.\n\nBoth are set for you now. Change them under Shortcuts whenever you like.",peekLabel,toggleLabel],
-  @"No account, no analytics, nothing leaves your Mac. The addresses of websites you visit pass through memory and are never stored.\n\nAnd because Less Pull changes the display itself, not the picture, screenshots, recordings and screen sharing keep their normal colors."];
- NSArray *symbols=@[@"",@"circle.lefthalf.filled",@"globe",@"eye",@"lock.shield"];
- NSTextField *title=[NSTextField labelWithString:titles[page]];title.font=[NSFont systemFontOfSize:15 weight:NSFontWeightSemibold];
+ NSArray *texts=@[@"You have arrived somewhere quieter.\n\nLess Pull takes the color out of your screen, so it pulls at you less — a little like stepping out of a loud room into a still one, or leaving the devices behind for a day outside. What matters is still here. It just stops shouting.",
+  @"Click the circle in the menu bar. Grayscale takes the color out of everything. Warmth is the second step, and not decoration: from amber to red it takes the blue out of the light, makes the screen quieter still, and puts you back in charge of what light reaches your eyes — and through them, your mind.",
+  @"Some things need color: a photo app, a video site, a chart. Choose Exception for the app you are in, right in the menu, and set only what should differ. Websites work the same way once the small browser extension connects, under Websites.",
+  [NSString stringWithFormat:@"Hold %@ and the screen is in color for exactly as long as you hold it. Press it twice quickly to keep it; one more press returns. %@ turns Grayscale on or off. Both are set for you; change them under Shortcuts.",peekLabel,toggleLabel],
+  @"Start a session from the menu: a stretch of focused work with a gentle end. The icon shows the minutes left. At the end, a warm glow and a soft gong, nothing to dismiss, and the count goes on so you can see how far you stretch. When you leave, it can call you back once.",
+  @"No account, no analytics, nothing leaves your Mac. The addresses of websites you visit pass through memory and are never stored. And because Less Pull changes the display itself, not the picture, screenshots, recordings and screen sharing keep their normal colors."];
+  NSTextField *title=[NSTextField labelWithString:titles[page]];title.font=[NSFont systemFontOfSize:15 weight:NSFontWeightSemibold];
  NSTextField *text=[NSTextField wrappingLabelWithString:texts[page]];text.preferredMaxLayoutWidth=page==0?404:346;  // next to the symbol on the tour pages
  NSMutableArray *parts=[NSMutableArray arrayWithObject:title];
  if(page==0){NSImageView *icon=[NSImageView imageViewWithImage:[self statusImageGray:YES warmth:0]];[icon.widthAnchor constraintEqualToConstant:18].active=YES;[icon.heightAnchor constraintEqualToConstant:18].active=YES;icon.accessibilityLabel=@"The Less Pull menu-bar icon";
-  NSTextField *where=[NSTextField wrappingLabelWithString:@"This is your icon; it is right above this window, fading in and out for a moment. On a small screen the menu bar fills up, and what does not fit is hidden, or tucked behind a » by a menu-bar tool. Hold ⌘ and drag the circle toward the clock to keep it in view."];where.preferredMaxLayoutWidth=376;NSStackView *iconRow=[self row:@[icon,where]];iconRow.alignment=NSLayoutAttributeTop;WelcomeHintView *hint=[WelcomeHintView new];hint.accessibilityLabel=@"A menu bar that is full: hold the Command key and drag the circle toward the clock";[parts addObjectsFromArray:@[text,iconRow,hint]];}
- else if(page==2){text.preferredMaxLayoutWidth=404;ExtensionHintView *hint=[ExtensionHintView new];hint.accessibilityLabel=@"A browser window; its site travels along an arrow into the menu-bar circle, where Exception for that site appears";[parts addObjectsFromArray:@[hint,text]];}
- else {NSStackView *body=[self row:@[[self tourSymbol:symbols[page] label:titles[page]],text]];body.alignment=NSLayoutAttributeTop;body.spacing=14;[parts addObject:body];}
+  NSTextField *where=[NSTextField wrappingLabelWithString:@"This is your icon, right above this window. If the menu bar is full, a » shows what is hidden; hold ⌘ and drag the circle toward the clock."];where.preferredMaxLayoutWidth=376;NSStackView *iconRow=[self row:@[icon,where]];iconRow.alignment=NSLayoutAttributeTop;TourScene *hint=[TourScene new];hint.kind=TourSceneMenuBar;hint.accessibilityLabel=@"A menu bar that is full: the » reveals the hidden icons; hold the Command key and drag the circle toward the clock";[parts addObjectsFromArray:@[text,iconRow,hint]];}
+ else {text.preferredMaxLayoutWidth=404;TourScene *scene=[TourScene new];scene.kind=(TourSceneKind)page;scene.accessibilityLabel=titles[page];[parts addObjectsFromArray:@[scene,text]];}
  NSView *fill=[NSView new];[fill setContentHuggingPriority:1 forOrientation:NSLayoutConstraintOrientationVertical];[parts addObject:fill];
  NSButton *skip=[NSButton buttonWithTitle:@"Skip tour" target:self action:@selector(dismissWelcome:)];skip.bezelStyle=NSBezelStyleInline;skip.font=[NSFont systemFontOfSize:11];[self helpView:skip text:@"Close the welcome and the tour. You can open the tour again from the About tab." label:@"Skip tour"];
  NSMutableArray *nav=[NSMutableArray new];
- if(page==0){NSButton *start=[NSButton buttonWithTitle:@"Start tour" target:self action:@selector(tourNext:)];start.keyEquivalent=@"\r";[self helpView:start text:@"A tour of four short pages, right here." label:@"Start tour"];[nav addObjectsFromArray:@[[self spacer],skip,start]];}
+ if(page==0){NSButton *start=[NSButton buttonWithTitle:@"Start tour" target:self action:@selector(tourNext:)];start.keyEquivalent=@"\r";[self helpView:start text:@"A tour of five short pages, right here." label:@"Start tour"];[nav addObjectsFromArray:@[[self spacer],skip,start]];}
  else {NSButton *back=[NSButton buttonWithTitle:@"Back" target:self action:@selector(tourBack:)];[self helpView:back text:@"The previous page." label:@"Back"];
-  NSTextField *step=[NSTextField labelWithString:[NSString stringWithFormat:@"%ld of 4",(long)page]];step.font=[NSFont systemFontOfSize:11];step.textColor=NSColor.secondaryLabelColor;
-  BOOL last=page==4;NSButton *next=[NSButton buttonWithTitle:last?@"Done":@"Next" target:self action:last?@selector(dismissWelcome:):@selector(tourNext:)];next.keyEquivalent=@"\r";[self helpView:next text:last?@"Close the tour.":@"The next page." label:next.title];
+  NSTextField *step=[NSTextField labelWithString:[NSString stringWithFormat:@"%ld of 5",(long)page]];step.font=[NSFont systemFontOfSize:11];step.textColor=NSColor.secondaryLabelColor;
+  BOOL last=page==5;NSButton *next=[NSButton buttonWithTitle:last?@"Done":@"Next" target:self action:last?@selector(dismissWelcome:):@selector(tourNext:)];next.keyEquivalent=@"\r";[self helpView:next text:last?@"Close the tour.":@"The next page." label:next.title];
   [nav addObjectsFromArray:@[back,[self spacer],step,[self spacer]]];if(!last)[nav addObject:skip];[nav addObject:next];}
  [parts addObject:[self row:nav]];
  NSStackView *column=[self column:parts];column.spacing=8;return column;
@@ -1574,7 +1639,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  if(animated&&!NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceMotion){next.alphaValue=0;[NSAnimationContext runAnimationGroup:^(NSAnimationContext *ctx){ctx.duration=.5;next.animator.alphaValue=1;} completionHandler:nil];}
  if(self.settings)[self.settings makeFirstResponder:nil];
 }
-- (void)tourNext:(id)sender {if(self.tourPage<4)[self showTourPage:self.tourPage+1 animated:YES];}
+- (void)tourNext:(id)sender {if(self.tourPage<5)[self showTourPage:self.tourPage+1 animated:YES];}
 - (void)tourBack:(id)sender {if(self.tourPage>0)[self showTourPage:self.tourPage-1 animated:YES];}
 // Reopens the welcome and tour from the About tab: the window is rebuilt with the card in place.
 // Where the icon is: the welcome opens under it, and the icon fades in and out a few times.
