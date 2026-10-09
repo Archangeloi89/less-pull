@@ -91,3 +91,5 @@ Simplified Chinese (build 33), experimental. The system-language match now trims
 Traditional Chinese (build 33), experimental. That completes the planned list: 13 languages besides English.
 
 Lock screen and screensaver (build 33): macOS draws both outside the display adjustments, so they show color. New General setting "Night Shift on the lock screen and screensaver" (on by default): while Less Pull is quieting the screen, Night Shift goes to full warmth at lock or screensaver start and is restored on return; the schedule is untouched (the restore goes through the same guard as app exceptions). The session is handed over plain at lock, so on return Less Pull fades its filter in over 0.2 s instead of the system snapping it on.
+
+Developer ID + notarization (build 33, 9 Oct): first notarized release; build.sh with LESS_PULL_SIGN_IDENTITY and LESS_PULL_NOTARY_PROFILE=lesspull; release zips come from the build's own Less Pull.zip. Chrome family installs from the Chrome Web Store (published, 0.4.2). Lock-screen Night Shift option moved to Advanced.
