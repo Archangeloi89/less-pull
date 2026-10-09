@@ -47,3 +47,5 @@ Later again on 9 October, build 33: the browser extension setup is a window of i
 And the browser window once more, build 33: the rows are built once (all six browsers, installed first, default on top), only the status line changes, so nothing moves; browsers not installed sit behind "Show Chrome and Edge too". The explanations switch also covers the lines inside the advanced block and the login note.
 
 Browser window, round 3 (build 33): "Show uninstalled browsers" reveals the rest at full strength with a dashed app outline until the browser is on the Mac; Set up… on one of them offers its download page; the window checks every few seconds while open, so a browser installed meanwhile gets its icon and joins the list by itself, and the toggle goes away once every browser is installed.
+
+Browser window, round 4 (build 33): the notice about what the extension can see has a "Don’t show this again" box; browsers not installed show a globe and a grayed Set up…; a small circular-arrow button next to the toggle checks again by hand (the list also checks by itself every few seconds).
