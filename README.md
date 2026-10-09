@@ -260,7 +260,7 @@ Less Pull is source-available, not open source. The [app license](LICENSE-APP.tx
 
 ## In your language
 
-Less Pull speaks the language of your Mac, and you can choose another under Settings → General → Language; the change is immediate, no restart. English and German are reviewed line by line; Spanish, French, Italian, Brazilian Portuguese, Dutch and Russian are in, marked experimental until a native speaker has read it. Each language is one small text file that is read only when in use, so more languages cost nothing. See [docs/LOCALIZING.md](docs/LOCALIZING.md) to add one.
+Less Pull speaks the language of your Mac, and you can choose another under Settings → General → Language; the change is immediate, no restart. English and German are reviewed line by line; Spanish, French, Italian, Brazilian Portuguese, Dutch, Russian and Polish are in, marked experimental until a native speaker has read it. Each language is one small text file that is read only when in use, so more languages cost nothing. See [docs/LOCALIZING.md](docs/LOCALIZING.md) to add one.
 
 ## Make it yours
 
