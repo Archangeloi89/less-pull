@@ -485,10 +485,10 @@ static void drawKey(NSRect f,NSString *label,double pressed){NSRect r=NSOffsetRe
 // only with Show advanced options. Choices stay saved either way.
 - (BOOL)multiDisplay {return [self.warmth displays].count>1||([self advanced]&&[NSUserDefaults.standardUserDefaults boolForKey:@"alwaysShowDisplays"]);}
 - (BOOL)advanced {return [NSUserDefaults.standardUserDefaults boolForKey:@"showAdvanced"];}
-- (NSView *)multi:(NSView *)v {if(!self.multiDisplayViews)self.multiDisplayViews=[NSMutableArray new];[self.multiDisplayViews addObject:v];v.hidden=![self multiDisplay];return v;}
-- (NSView *)adv:(NSView *)v {if(!self.advancedViews)self.advancedViews=[NSMutableArray new];[self.advancedViews addObject:v];v.hidden=![self advanced];return v;}
+- (NSView *)multi:(NSView *)v {if(!self.multiDisplayViews)self.multiDisplayViews=[NSMutableArray new];[self.multiDisplayViews addObject:v];v.hidden=![self multiDisplay]||([self.noteViews containsObject:v]&&[self hideNotes]);return v;}
+- (NSView *)adv:(NSView *)v {if(!self.advancedViews)self.advancedViews=[NSMutableArray new];[self.advancedViews addObject:v];v.hidden=![self advanced]||([self.noteViews containsObject:v]&&[self hideNotes]);return v;}
 - (void)applyVisibility {
- BOOL multi=[self multiDisplay],adv=[self advanced],quiet=[self hideNotes];for(NSView *v in self.multiDisplayViews)v.hidden=!multi;for(NSView *v in self.advancedViews)v.hidden=!adv;if(quiet)for(NSView *v in self.noteViews)v.hidden=YES;else for(NSView *v in self.noteViews)if(![self.advancedViews containsObject:v])v.hidden=NO;
+ BOOL multi=[self multiDisplay],adv=[self advanced],quiet=[self hideNotes];for(NSView *v in self.multiDisplayViews)v.hidden=!multi;for(NSView *v in self.advancedViews)v.hidden=!adv;if(quiet)for(NSView *v in self.noteViews)v.hidden=YES;else for(NSView *v in self.noteViews)if(![self.advancedViews containsObject:v]&&![self.multiDisplayViews containsObject:v]&&v!=self.loginNote)v.hidden=NO;
  [self rebuildExclusionsList];[self rebuildWebsiteRulesList];[self relayoutSettings];
 }
 // Hidden views leave the stacks; the tabs then take their new height.
@@ -1414,7 +1414,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  self.autoButton=[NSButton checkboxWithTitle:@"Extra Warmth follows Night Shift" target:self action:@selector(toggleAuto:)];[self helpView:self.autoButton text:self.autoHelp label:@"Extra Warmth follows Night Shift"];
  self.resumeButton=[NSButton buttonWithTitle:@"Resume Following" target:self action:@selector(resume:)];[self helpView:self.resumeButton text:@"Go back to following Night Shift now." label:@"Resume Following Now"];
  self.loginButton=[NSButton checkboxWithTitle:@"Launch at login" target:self action:@selector(login:)];[self helpView:self.loginButton text:@"Open Less Pull when you sign in to your Mac. Install it in Applications first." label:@"Launch at login"];
- self.loginNote=[self note:@"Less Pull moved its settings to a new home with this update. If you had Launch at login on, check it again here; an older entry may remain in System Settings → Login Items and can be removed there."];self.loginNote.hidden=!([NSUserDefaults.standardUserDefaults boolForKey:@"migratedPreferences"]&&SMAppService.mainAppService.status!=SMAppServiceStatusEnabled);
+ self.loginNote=[self note:@"Less Pull moved its settings to a new home with this update. If you had Launch at login on, check it again here; an older entry may remain in System Settings → Login Items and can be removed there."];self.loginNote.hidden=[self hideNotes]||!([NSUserDefaults.standardUserDefaults boolForKey:@"migratedPreferences"]&&SMAppService.mainAppService.status!=SMAppServiceStatusEnabled);
 // Shortcuts tab: Peek in color, Toggle Grayscale, and what clicking the icon does.
  NSMutableArray *views=[NSMutableArray new];
  if(self.welcomeWanted){self.welcomeCard=[self welcomeCardView];[views addObject:self.welcomeCard];}
@@ -1736,22 +1736,29 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
 }
 - (void)closeBrowserWindow:(id)sender {[self.browserWindow close];}
 - (void)refreshBrowserRows {
- if(!self.browserRows)return;for(NSView *v in self.browserRows.arrangedSubviews.copy)[self.browserRows removeView:v];
- NSString *preferred=[self defaultBrowserIdentifier];NSMutableArray *installed=[NSMutableArray new],*missing=[NSMutableArray new];
- for(NSArray *b in [self browserCatalog]){if([NSWorkspace.sharedWorkspace URLForApplicationWithBundleIdentifier:b[1]]){if([b[1] isEqual:preferred])[installed insertObject:b atIndex:0];else [installed addObject:b];}else [missing addObject:b[0]];}
- [self.browserBridge expireContexts];
- for(NSArray *b in installed){
-  NSURL *url=[NSWorkspace.sharedWorkspace URLForApplicationWithBundleIdentifier:b[1]];NSImageView *icon=[NSImageView imageViewWithImage:[NSWorkspace.sharedWorkspace iconForFile:url.path]];[icon.widthAnchor constraintEqualToConstant:32].active=YES;[icon.heightAnchor constraintEqualToConstant:32].active=YES;
-  NSTextField *name=[NSTextField labelWithString:b[0]];name.font=[NSFont systemFontOfSize:13 weight:NSFontWeightMedium];
-  BOOL connected=self.browserBridge.contexts[b[1]]!=nil;NSString *state=connected?@"Connected":[b[1] isEqual:preferred]?@"Your default browser":@"Not set up yet";
-  NSTextField *sub=[NSTextField labelWithString:state];sub.font=[NSFont systemFontOfSize:11];sub.textColor=connected?[NSColor colorWithSRGBRed:.3 green:.6 blue:.4 alpha:1]:NSColor.secondaryLabelColor;
-  NSStackView *text=[self column:@[name,sub]];text.spacing=1;
-  NSButton *go=[NSButton buttonWithTitle:connected?@"Set up again…":@"Set up…" target:self action:@selector(setUpBrowser:)];go.identifier=b[1];[self helpView:go text:[NSString stringWithFormat:@"Connects Less Pull to %@ and opens its extensions page with the steps to finish.",b[0]] label:[NSString stringWithFormat:@"Set up %@",b[0]]];
-  NSStackView *row=[self row:@[icon,text,[self spacer],go]];row.spacing=10;[self.browserRows addArrangedSubview:row];
+ if(!self.browserRows)return;NSString *preferred=[self defaultBrowserIdentifier];[self.browserBridge expireContexts];
+ // Built once: all six browsers, the installed ones first and the default browser at the top. Later calls only touch the status line, so nothing moves.
+ if(!self.browserRows.arrangedSubviews.count){
+  NSMutableArray *order=[NSMutableArray new],*missing=[NSMutableArray new];for(NSArray *b in [self browserCatalog]){BOOL have=[NSWorkspace.sharedWorkspace URLForApplicationWithBundleIdentifier:b[1]]!=nil;if([b[1] isEqual:preferred])[order insertObject:b atIndex:0];else if(have){NSUInteger at=0;for(NSArray *o in order)if([NSWorkspace.sharedWorkspace URLForApplicationWithBundleIdentifier:o[1]])at++;[order insertObject:b atIndex:at];}else [order addObject:b];}
+  for(NSArray *b in order){
+   NSURL *url=[NSWorkspace.sharedWorkspace URLForApplicationWithBundleIdentifier:b[1]];NSImage *image=url?[NSWorkspace.sharedWorkspace iconForFile:url.path]:[NSImage imageWithSystemSymbolName:@"globe" accessibilityDescription:nil];NSImageView *icon=[NSImageView imageViewWithImage:image];icon.imageScaling=NSImageScaleProportionallyUpOrDown;[icon.widthAnchor constraintEqualToConstant:32].active=YES;[icon.heightAnchor constraintEqualToConstant:32].active=YES;if(!url){icon.contentTintColor=NSColor.tertiaryLabelColor;icon.alphaValue=.6;}
+   NSTextField *name=[NSTextField labelWithString:b[0]];name.font=[NSFont systemFontOfSize:13 weight:NSFontWeightMedium];if(!url)name.textColor=NSColor.secondaryLabelColor;
+   NSTextField *sub=[NSTextField labelWithString:@""];sub.font=[NSFont systemFontOfSize:11];sub.identifier=[@"state:" stringByAppendingString:b[1]];
+   NSStackView *text=[self column:@[name,sub]];text.spacing=1;
+   NSButton *go=[NSButton buttonWithTitle:@"Set up…" target:self action:@selector(setUpBrowser:)];go.identifier=b[1];go.enabled=url!=nil;[go.widthAnchor constraintEqualToConstant:86].active=YES;[self helpView:go text:url?[NSString stringWithFormat:@"Connects Less Pull to %@ and opens its extensions page with the steps to finish.",b[0]]:[NSString stringWithFormat:@"%@ is not installed on this Mac.",b[0]] label:[NSString stringWithFormat:@"Set up %@",b[0]]];
+   NSStackView *row=[self row:@[icon,text,[self spacer],go]];row.spacing=10;[row.widthAnchor constraintEqualToConstant:420].active=YES;if(!url){row.identifier=@"missing";row.hidden=YES;[missing addObject:b[0]];}[self.browserRows addArrangedSubview:row];
+  }
+  if(missing.count){NSButton *more=[NSButton buttonWithTitle:[NSString stringWithFormat:@"Show %@ too",[missing componentsJoinedByString:@" and "]] target:self action:@selector(toggleMissingBrowsers:)];more.bezelStyle=NSBezelStyleInline;more.font=[NSFont systemFontOfSize:11];more.identifier=@"more";[self helpView:more text:@"Shows the supported browsers that are not installed on this Mac." label:@"Show the browsers not installed"];[self.browserRows addArrangedSubview:[self row:@[more,[self spacer]]]];}
  }
- if(!installed.count){NSTextField *none=[NSTextField labelWithString:@"None of the supported browsers is installed."];none.textColor=NSColor.secondaryLabelColor;[self.browserRows addArrangedSubview:none];}
- if(missing.count){NSTextField *also=[NSTextField wrappingLabelWithString:[NSString stringWithFormat:@"Also works with %@, once installed.",[missing componentsJoinedByString:@", "]]];also.font=[NSFont systemFontOfSize:11];also.textColor=NSColor.tertiaryLabelColor;also.preferredMaxLayoutWidth=420;[self.browserRows addArrangedSubview:also];}
- if(self.browserWindow){NSView *c=self.browserWindow.contentView;[c layoutSubtreeIfNeeded];NSRect f=self.browserWindow.frame;NSSize want=c.fittingSize;f.origin.y+=f.size.height-want.height-(self.browserWindow.frame.size.height-c.frame.size.height);[self.browserWindow setContentSize:want];}
+ for(NSStackView *row in self.browserRows.arrangedSubviews){NSTextField *sub=nil;NSButton *go=nil;for(NSView *v in row.arrangedSubviews){if([v isKindOfClass:NSButton.class])go=(NSButton *)v;else if([v isKindOfClass:NSStackView.class])for(NSView *t in ((NSStackView *)v).arrangedSubviews)if([t.identifier hasPrefix:@"state:"])sub=(NSTextField *)t;}
+  if(!sub||!go)continue;NSString *bundle=go.identifier;BOOL have=[NSWorkspace.sharedWorkspace URLForApplicationWithBundleIdentifier:bundle]!=nil,connected=have&&self.browserBridge.contexts[bundle]!=nil;
+  NSString *state=!have?@"Not installed":connected?@"Connected":[bundle isEqual:preferred]?@"Your default browser":@"Not set up yet";if(![sub.stringValue isEqual:state])sub.stringValue=state;
+  sub.textColor=connected?[NSColor colorWithSRGBRed:.3 green:.6 blue:.4 alpha:1]:!have?NSColor.tertiaryLabelColor:NSColor.secondaryLabelColor;}
+}
+- (void)toggleMissingBrowsers:(NSButton *)sender {
+ BOOL show=NO;for(NSView *row in self.browserRows.arrangedSubviews)if([row.identifier isEqual:@"missing"]){row.hidden=!row.hidden;show=!row.hidden;}
+ NSString *names=[[sender.title stringByReplacingOccurrencesOfString:@"Show " withString:@""] stringByReplacingOccurrencesOfString:@"Hide " withString:@""];sender.title=show?[@"Hide " stringByAppendingString:[names stringByReplacingOccurrencesOfString:@" too" withString:@""]]:[NSString stringWithFormat:@"Show %@ too",names];
+ NSView *c=self.browserWindow.contentView;[c layoutSubtreeIfNeeded];NSSize want=c.fittingSize;NSRect f=self.browserWindow.frame;CGFloat chrome=f.size.height-c.frame.size.height;CGFloat top=NSMaxY(f);f.size.height=want.height+chrome;f.size.width=want.width;f.origin.y=top-f.size.height;[self.browserWindow setFrame:f display:YES animate:YES];
 }
 - (void)setUpBrowser:(NSButton *)sender {
  NSString *identifier=sender.identifier;if([identifier isEqual:@"com.apple.Safari"]){[self installSafariExtension];return;}
