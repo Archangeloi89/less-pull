@@ -549,3 +549,8 @@
 "Night Shift [rule row]" = "Night Shift";
 "Default [segment]" = "Авто";
 "Default (%@) [segment]" = "Авто (%@)";
+"Never" = "Никогда";
+"Every 3 minutes" = "Каждые 3 минуты";
+"Every 5 minutes" = "Каждые 5 минут";
+"Every 10 minutes" = "Каждые 10 минут";
+"Every 15 minutes" = "Каждые 15 минут";
