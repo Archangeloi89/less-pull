@@ -1,6 +1,6 @@
 # Chrome Web Store listing
 
-**Status:** draft item created on 9 October 2026, id `lfcjadlpflfdgbgpcbkmdkmnboaakimb`, name "Less Pull Extension" (from the manifest), package 0.4.2. The Mac app allows this id in the native host from the build 33 refresh of 9 October. Not yet submitted for review.
+**Status:** draft item created on 9 October 2026, id `lfcjadlpflfdgbgpcbkmdkmnboaakimb`, name "Less Pull Extension" (from the manifest), package 0.4.2. The Mac app allows this id in the native host from the build 33 refresh of 9 October. Submitted for review on 9 October 2026 (automatic publishing after approval).
 
 The extension for Chrome, Brave, Opera and Edge is published once, in the Chrome Web Store; all four install from there. This page has everything to paste, and the three steps that need the author's Google account.
 

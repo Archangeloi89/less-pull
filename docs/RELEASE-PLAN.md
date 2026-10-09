@@ -36,3 +36,11 @@ Firefox, Safari, Opera and Edge are implemented but need clean-install tests; Sa
 ## Housekeeping
 
 Do not commit credentials, user preferences, personal browsing context, test state files or private conversation documents.
+
+
+## Store submissions (9 October 2026)
+
+- Firefox: "Less Pull Extension" 0.4.2 submitted to addons.mozilla.org, awaiting review. The add-on id is fixed; nothing in the app changes.
+- Chrome Web Store: item `lfcjadlpflfdgbgpcbkmdkmnboaakimb`, package 0.4.2, submitted for review; the app allows that id since the build 33 refresh of 9 October, and refreshes the host manifests at launch.
+- Safari: waits for the Developer ID certificate (program activation pending at Apple).
+- After approval: point the install help, the Websites tab and the agent pack at the store pages.
