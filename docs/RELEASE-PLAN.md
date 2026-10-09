@@ -23,9 +23,9 @@ See [Publishing safely](PUBLISHING.md) for how signing and store hosting protect
 6. Real screenshots of the Settings tabs and of the popup inside Brave, for the project page.
 7. Attach `lesspull-update.json` to each release (the repository is public, so the in-app update check sees releases).
 8. Developer ID signing and notarization also unlock update phase 2 (download, verify and install from the menu; Sparkle 2 is the recommended route and would be the first third-party dependency, so it needs an explicit decision).
-10. Safari: sign and notarize the companion app (built by build.sh with Xcode) so the extension loads without Allow Unsigned Extensions; consider App Store distribution of the companion.
+10. Done 9 Oct 2026: the companion app is signed and notarized with the app, so the extension loads without Allow Unsigned Extensions. App Store distribution of the companion: not planned.
 
-Firefox, Safari, Opera and Edge are implemented but need clean-install tests; Safari also needs Developer ID signing of the companion app before it can be used without Allow Unsigned Extensions.
+Firefox, Safari, Opera and Edge are implemented but need clean-install tests.
 
 ## Not verified
 

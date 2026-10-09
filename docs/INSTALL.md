@@ -9,7 +9,7 @@ Version 1.4.4 (build 33) is a test build. Read [what to expect](#what-to-expect-
 3. Open it. A half-filled circle appears in the menu bar, and on the first launch the Settings window opens with a short welcome.
 4. Click the circle and choose Grayscale and Extra Warmth. Turn on **Extra Warmth follows Night Shift** if you want warmth only at night. The icon fills on the left while grayscale is showing and warms on the right as you add warmth.
 
-If macOS says the app cannot be opened, that is Gatekeeper reacting to a build that is not notarized. Only allow a copy you trust, using the normal macOS security settings.
+The app is signed with a Developer ID and notarized by Apple, so macOS opens it without a warning. If macOS still objects, the download was altered on the way; get it again from the release page.
 
 To start Less Pull when you sign in, open **Settings…** and check **Launch at login**. The app needs to be in Applications first.
 
@@ -20,13 +20,13 @@ If you are updating from an earlier build: quit Less Pull, replace the app in Ap
 The extension is optional. It adds [website exceptions](EXCEPTIONS.md#website-exceptions). It ships inside the app, so there is nothing else to download.
 
 1. In Less Pull, open **Settings… → Websites** and choose **Install Browser Extension…**. A window lists the supported browsers installed on your Mac, your default browser first; click **Set up…** next to one. Less Pull sets up its local connection, opens the browser's extensions page and shows the steps to finish. Browsers not on your Mac sit behind **Show uninstalled browsers**, with a globe and a grayed Set up…; the list notices a newly installed browser by itself, and the circular arrow next to the toggle checks again at once. The first time, a notice says what the extension can see; tick "Don’t show this again" if you do not want it next time. The window stays open, so a second browser can follow; close it when you are done.
-2. On the Extensions page, turn on **Developer mode**.
-3. Click **Load unpacked** and select the **Browser Extension** folder shown in Finder. You can also press <kbd>⌘</kbd><kbd>⇧</kbd><kbd>G</kbd> in the file picker and enter `/Applications/Less Pull.app/Contents/Resources/Browser Extension`.
+2. The browser opens the extension's page in the [Chrome Web Store](https://chromewebstore.google.com/detail/lfcjadlpflfdgbgpcbkmdkmnboaakimb). Click **Add to Chrome**, then **Add extension**. Brave, Edge and Opera install from the same page; Edge asks once to allow extensions from other stores, Opera may first offer its helper for the Chrome Web Store.
+3. Less Pull sets up the local connection by itself.
 4. Open a website, then click the Less Pull icon in the **menu bar**: the menu now offers **Exception for [that site]**. The extension itself shows nothing in the browser.
 
-In Firefox the steps differ: on the **about:debugging** page that opens, click **Load Temporary Add-on…** and select `manifest.json` in the **Browser Extension (Firefox)** folder. Firefox removes temporary add-ons when it quits, so load it again next time, or use Firefox Developer Edition with signing turned off.
+Firefox is in review at Mozilla’s add-on site. Until that is done the steps differ: on the **about:debugging** page that opens, click **Load Temporary Add-on…** and select `manifest.json` in the **Browser Extension (Firefox)** folder. Firefox removes temporary add-ons when it quits, so load it again next time, or use Firefox Developer Edition with signing turned off.
 
-In Safari the extension comes as a small companion app inside Less Pull. Choosing **Safari** opens it; click **Open Safari Settings** there. Until this build is signed by Apple, Safari needs **Allow Unsigned Extensions** from the **Develop** menu (turn the Develop menu on under Settings → Advanced); that choice lasts until Safari quits. Then turn on **Less Pull** under Settings → Extensions and allow it on all websites. The extension shows nothing in Safari itself; website exceptions are set from the Less Pull menu.
+In Safari the extension comes as a small companion app inside Less Pull. Choosing **Safari** opens it; click **Open Safari Settings** there. Then turn on **Less Pull** under Settings → Extensions and allow it on all websites. The extension shows nothing in Safari itself; website exceptions are set from the Less Pull menu.
 
 Opera and Edge take the same steps as Chrome on their own extensions pages. Several browsers can use the extension at the same time; whichever browser window is in front decides.
 
@@ -36,8 +36,8 @@ Keep the Mac app running, and keep it in the place it was installed. If you move
 
 - **Apple silicon only.**
 - **macOS 13 or later** is the build target. Only macOS 27 has been tested.
-- **Ad-hoc signed, not notarized.** Developer ID signing and notarization are planned.
-- **The extension is loaded by hand.** It is not in the Chrome Web Store yet. It asks for access to tab addresses and for a connection to the local app.
+- **Signed with a Developer ID and notarized by Apple** since 9 October 2026 (Team ID CT4CF9Z423).
+- **The extension is in the Chrome Web Store** (published 9 October 2026); the Firefox add-on is in review. It asks for access to tab addresses and for a connection to the local app.
 - **Brave, Firefox, Safari and Opera are confirmed working** on the author's Mac. Chrome and Edge are implemented but have not been through a clean install test; the Safari companion app is included only in builds made with Xcode.
 - **Updates are checked, not installed.** Once a day the app asks GitHub whether a newer build exists and shows a dot on its icon if one is made for your macOS. Installing is still by hand, until the app is signed and notarized.
 - Less Pull uses private macOS display interfaces. A macOS update can change how they behave.
