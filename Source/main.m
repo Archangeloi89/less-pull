@@ -175,7 +175,8 @@ static NSString *const LessPullOldBundleIdentifier=@"local.nightshiftfilters.app
 @property NSString *website;
 @property FilterEngine *engine;
 @property NSTimer *timer;
-@property NSWindow *settings;
+@property NSWindow *settings,*browserWindow;
+@property NSStackView *browserRows;
 @property NSTextField *statusText;
 @property NSButton *autoButton;
 @property NSButton *loginButton;
@@ -742,7 +743,7 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
 
 - (void)applicationDidFinishLaunching:(NSNotification *)n {
  if([NSRunningApplication runningApplicationsWithBundleIdentifier:NSBundle.mainBundle.bundleIdentifier].count>1||[NSRunningApplication runningApplicationsWithBundleIdentifier:LessPullOldBundleIdentifier].count>0){[NSApp terminate:nil];return;}
- BOOL migrated=[PreferenceMigration migrateFromDomain:LessPullOldBundleIdentifier into:NSUserDefaults.standardUserDefaults];
+ BOOL migrated=[NSBundle.mainBundle.bundleIdentifier isEqual:@"com.jiriarion.lesspull"]&&[PreferenceMigration migrateFromDomain:LessPullOldBundleIdentifier into:NSUserDefaults.standardUserDefaults];
  NSMenu *main=[NSMenu new],*application=[NSMenu new];NSMenuItem *root=[NSMenuItem new];root.submenu=application;[main addItem:root];NSMenuItem *quit=[[NSMenuItem alloc]initWithTitle:@"Quit Less Pull" action:@selector(terminate:) keyEquivalent:@"q"];quit.target=NSApp;[application addItem:quit];NSMenuItem *settingsShortcut=[[NSMenuItem alloc]initWithTitle:@"Settings…" action:@selector(showSettings:) keyEquivalent:@","];settingsShortcut.target=self;[application insertItem:settingsShortcut atIndex:0];NSApp.mainMenu=main;
  self.exclusionRules=[[NSUserDefaults.standardUserDefaults dictionaryForKey:@"appExclusions"] mutableCopy]?:[NSMutableDictionary new];self.exclusion=[ExclusionPolicy fromDictionary:[NSUserDefaults.standardUserDefaults dictionaryForKey:@"exclusionRecovery"]]?:[ExclusionPolicy new];
  self.forcedNightOn=[[[NSUserDefaults.standardUserDefaults dictionaryForKey:@"exclusionRecovery"] objectForKey:@"forcedNightOn"] boolValue];self.engine=[FilterEngine new];self.warmth=[WarmthEngine new];self.warmth.perDisplay=YES;[self.warmth restore];self.selectedMode=self.engine.currentMode;
@@ -770,7 +771,7 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  self.policy=[SwitchingPolicy new];self.policy.automatic=self.automatic;
  self.policy.overrideMode=[d integerForKey:@"overrideMode"];
  self.policy.known=[d boolForKey:@"lastNightShiftKnown"];self.policy.nightShiftOn=[d boolForKey:@"lastNightShiftOn"];
- self.browserBridge=[BrowserBridge new];__weak AppDelegate *browserOwner=self;self.browserBridge.changed=^{[browserOwner sync];[browserOwner rebuildWebsiteRulesList];};self.browserBridge.defaults=^NSDictionary *(NSString *browser){return [browserOwner browserBaseForBundle:browser];};[self.browserBridge start];
+ self.browserBridge=[BrowserBridge new];__weak AppDelegate *browserOwner=self;self.browserBridge.changed=^{[browserOwner sync];[browserOwner rebuildWebsiteRulesList];[browserOwner refreshBrowserRows];};self.browserBridge.defaults=^NSDictionary *(NSString *browser){return [browserOwner browserBaseForBundle:browser];};[self.browserBridge start];
  // The icon's place in the menu bar is macOS's: the user ⌘-drags it and macOS remembers. Builds 25 to 33 wrote a
  // "Preferred Position" value once; it is removed here so nothing of ours can pull the icon back to the left.
  if([d objectForKey:@"NSStatusItem Preferred Position LessPull"]){[d removeObjectForKey:@"NSStatusItem Preferred Position LessPull"];[d removeObjectForKey:@"NSStatusItem Preferred Position Item-0"];[d removeObjectForKey:@"iconPlacedRight"];}
@@ -1378,6 +1379,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
 - (void)resume:(id)sender {[self.policy resume];[self savePolicy];[self sync];}
 // Settings window building blocks: Auto Layout stacks, one short note under each
 // control that is not obvious.
+- (NSTextField *)explain:(NSString *)text {NSTextField *n=[NSTextField wrappingLabelWithString:text];n.preferredMaxLayoutWidth=452;if(!self.noteViews)self.noteViews=[NSMutableArray new];[self.noteViews addObject:n];n.hidden=[self hideNotes];return n;}
 - (BOOL)hideNotes {return [NSUserDefaults.standardUserDefaults boolForKey:@"hideNotes"];}
 - (NSTextField *)note:(NSString *)text {NSTextField *n=[NSTextField wrappingLabelWithString:text];n.font=[NSFont systemFontOfSize:11];n.textColor=NSColor.secondaryLabelColor;n.preferredMaxLayoutWidth=440;if(!self.noteViews)self.noteViews=[NSMutableArray new];[self.noteViews addObject:n];n.hidden=[self hideNotes];return n;}
 - (NSStackView *)column:(NSArray<NSView *> *)views {NSStackView *s=[NSStackView stackViewWithViews:views];s.orientation=NSUserInterfaceLayoutOrientationVertical;s.alignment=NSLayoutAttributeLeading;s.spacing=12;return s;}
@@ -1470,7 +1472,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
 - (void)previewBackSound:(id)sender {BOOL glow=[NSUserDefaults.standardUserDefaults boolForKey:@"sessionGlow"];[NSUserDefaults.standardUserDefaults setBool:NO forKey:@"sessionGlow"];[self glow:@"" sound:@"session-back"];[NSUserDefaults.standardUserDefaults setBool:glow forKey:@"sessionGlow"];}
 - (void)volumeChanged:(NSSlider *)sender {[NSUserDefaults.standardUserDefaults setInteger:(NSInteger)round(sender.doubleValue) forKey:@"sessionVolume"];NSTextField *readout=[sender.superview viewWithTag:97];readout.stringValue=[NSString stringWithFormat:@"%ld%%",(long)round(sender.doubleValue)];if(!sender.window.currentEvent||sender.window.currentEvent.type==NSEventTypeLeftMouseUp)[self previewSound:nil];}
 - (NSStackView *)sessionsTab {
- NSTextField *intro=[NSTextField wrappingLabelWithString:@"A session is a stretch of focused work with a gentle end. Start one from the menu. The icon shows the minutes left; at the end, a soft glow and a calm sound, and the count goes on past the end so you can finish your thought. When you leave, Less Pull can call you back once."];intro.preferredMaxLayoutWidth=452;
+ NSTextField *intro=[self explain:@"A session is a stretch of focused work with a gentle end. Start one from the menu. The icon shows the minutes left; at the end, a soft glow and a calm sound, and the count goes on past the end so you can finish your thought. When you leave, Less Pull can call you back once."];
  NSTextField *lengthsLabel=[NSTextField labelWithString:@"Session lengths"];lengthsLabel.font=[NSFont systemFontOfSize:13 weight:NSFontWeightMedium];
  self.sessionPresetsField=[NSTextField textFieldWithString:[self minutesList:@"sessionPresets" fallback:@[@25,@45,@60,@90]]];self.sessionPresetsField.identifier=@"sessionPresets";self.sessionPresetsField.target=self;self.sessionPresetsField.action=@selector(presetsChanged:);self.sessionPresetsField.delegate=self;self.sessionPresetsField.placeholderString=@"25, 45, 60, 90";[self.sessionPresetsField.widthAnchor constraintEqualToConstant:220].active=YES;[self helpView:self.sessionPresetsField text:@"Minutes, separated by commas. These appear under Start a session in the menu." label:@"Session lengths in minutes"];
  NSTextField *backLabel=[NSTextField labelWithString:@"Call me back in"];backLabel.font=[NSFont systemFontOfSize:13 weight:NSFontWeightMedium];
@@ -1495,7 +1497,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  [column setCustomSpacing:4 afterView:column.arrangedSubviews[2]];[column setCustomSpacing:4 afterView:column.arrangedSubviews[4]];return column;
 }
 - (NSStackView *)appsTab {
- NSTextField *intro=[NSTextField wrappingLabelWithString:@"Give an app its own display settings. They apply while that app is in front with a window open; your default settings stay saved."];intro.preferredMaxLayoutWidth=452;
+ NSTextField *intro=[self explain:@"Give an app its own display settings. They apply while that app is in front with a window open; your default settings stay saved."];
  self.exclusionText=[self note:@"Using your default settings"];
  NSScrollView *scroll=[NSScrollView new];scroll.hasVerticalScroller=YES;scroll.borderType=NSBezelBorder;[scroll.heightAnchor constraintEqualToConstant:300].active=YES;
  self.exclusionsList=[ExceptionStack new];self.exclusionsList.orientation=NSUserInterfaceLayoutOrientationVertical;self.exclusionsList.alignment=NSLayoutAttributeLeading;self.exclusionsList.spacing=0;self.exclusionsList.translatesAutoresizingMaskIntoConstraints=NO;scroll.documentView=self.exclusionsList;[self.exclusionsList.widthAnchor constraintEqualToAnchor:scroll.contentView.widthAnchor].active=YES;
@@ -1505,7 +1507,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  return column;
 }
 - (NSStackView *)websitesTab {
- NSTextField *intro=[NSTextField wrappingLabelWithString:@"Websites can have their own settings through the Less Pull browser extension, for Safari, Brave, Chrome, Firefox, Opera and Edge. With a website in front, the menu-bar menu offers “Exception for that site”, like it does for apps; the extension itself has no buttons."];intro.preferredMaxLayoutWidth=452;
+ NSTextField *intro=[self explain:@"Websites can have their own settings through the Less Pull browser extension, for Safari, Brave, Chrome, Firefox, Opera and Edge. With a website in front, the menu-bar menu offers “Exception for that site”, like it does for apps; the extension itself has no buttons."];
  self.websiteStatus=[self note:@""];
  NSButton *install=[NSButton buttonWithTitle:@"Install Browser Extension…" target:self action:@selector(installBrowserExtension:)];[self helpView:install text:@"Add the Less Pull extension to your browser so websites can have their own settings. Less Pull must stay open." label:@"Install Browser Extension"];
  NSTextField *savedTitle=[NSTextField labelWithString:@"Saved website exceptions"];savedTitle.font=[NSFont systemFontOfSize:13 weight:NSFontWeightMedium];
@@ -1715,26 +1717,61 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  if(r==NSAlertThirdButtonReturn){[NSWorkspace.sharedWorkspace openURL:[NSURL URLWithString:@"https://github.com/Archangeloi89/less-pull/blob/main/docs/PRIVACY.md"]];return NO;}
  return r==NSAlertFirstButtonReturn;
 }
+// The browser list: every supported browser that is installed, the default browser first. The window
+// stays open so a second browser can follow; Close is the only way out. Set up… runs the setup for that
+// row and the finishing steps come as a sheet on this window.
+- (NSArray *)browserCatalog {return @[@[@"Safari",@"com.apple.Safari",@""],@[@"Chrome",@"com.google.Chrome",@"chrome://extensions"],@[@"Firefox",@"org.mozilla.firefox",@"about:debugging#/runtime/this-firefox"],@[@"Brave",@"com.brave.Browser",@"brave://extensions"],@[@"Edge",@"com.microsoft.edgemac",@"edge://extensions"],@[@"Opera",@"com.operasoftware.Opera",@"opera://extensions"]];}
+- (NSString *)defaultBrowserIdentifier {NSURL *u=[NSWorkspace.sharedWorkspace URLForApplicationToOpenURL:[NSURL URLWithString:@"https://example.com"]];return u?[NSBundle bundleWithURL:u].bundleIdentifier:nil;}
 - (void)installBrowserExtension:(id)sender {
+ if(self.browserWindow){[self.browserWindow makeKeyAndOrderFront:nil];[NSApp activateIgnoringOtherApps:YES];return;}
  if(![self confirmExtensionData])return;
- NSAlert *choose=[NSAlert new];choose.messageText=@"Install Browser Extension";choose.informativeText=@"Choose your browser. Less Pull will connect to it and open its extensions page. Until the extension is in the stores, it is loaded from the folder inside the app. Less Pull must stay open for website exceptions to work.";[choose addButtonWithTitle:@"Safari"];[choose addButtonWithTitle:@"Brave"];[choose addButtonWithTitle:@"Chrome"];[choose addButtonWithTitle:@"Firefox"];[choose addButtonWithTitle:@"Opera"];[choose addButtonWithTitle:@"Edge"];[choose addButtonWithTitle:@"Cancel"];[NSApp activateIgnoringOtherApps:YES];NSModalResponse choice=[choose runModal];
- if(choice==NSAlertFirstButtonReturn){[self installSafariExtension];return;}choice-=1;
- NSArray *browsers=@[@[@"Brave",@"com.brave.Browser",@"brave://extensions"],@[@"Chrome",@"com.google.Chrome",@"chrome://extensions"],@[@"Firefox",@"org.mozilla.firefox",@"about:debugging#/runtime/this-firefox"],@[@"Opera",@"com.operasoftware.Opera",@"opera://extensions"],@[@"Edge",@"com.microsoft.edgemac",@"edge://extensions"]];NSInteger index=choice-NSAlertFirstButtonReturn;if(index<0||index>4)return;
- NSString *browser=browsers[index][0],*identifier=browsers[index][1];BOOL firefox=index==2;NSURL *browserURL=[NSWorkspace.sharedWorkspace URLForApplicationWithBundleIdentifier:identifier];if(!browserURL){NSAlert *missing=[NSAlert new];missing.messageText=[browser stringByAppendingString:@" is not installed"];missing.informativeText=@"Install the browser, then return to Browser Extension setup.";[missing runModal];return;}
- NSTask *setup=[NSTask new];setup.executableURL=[NSBundle.mainBundle.bundleURL URLByAppendingPathComponent:@"Contents/MacOS/LessPullBrowserHost"];setup.arguments=@[@"--install"];setup.standardOutput=[NSPipe pipe];setup.standardError=[NSPipe pipe];NSError *error=nil;BOOL started=[setup launchAndReturnError:&error];if(started)[setup waitUntilExit];if(!started||setup.terminationStatus!=0){NSAlert *failed=[NSAlert new];failed.messageText=@"Browser setup could not finish";failed.informativeText=error.localizedDescription?:@"Try again from a permanent local copy of Less Pull. The local bridge could not be registered.";[failed runModal];return;}
+ NSTextField *intro=[NSTextField wrappingLabelWithString:@"Pick a browser. Less Pull connects to it and opens its extensions page, with the steps to finish. Until the extension is in the stores, it is loaded from the folder inside the app."];intro.preferredMaxLayoutWidth=420;
+ self.browserRows=[self column:@[]];self.browserRows.spacing=8;[self refreshBrowserRows];
+ NSTextField *stay=[NSTextField wrappingLabelWithString:@"Less Pull must stay open for website exceptions to work. Come back here for another browser whenever you like."];stay.font=[NSFont systemFontOfSize:11];stay.textColor=NSColor.secondaryLabelColor;stay.preferredMaxLayoutWidth=420;
+ NSButton *close=[NSButton buttonWithTitle:@"Close" target:self action:@selector(closeBrowserWindow:)];close.keyEquivalent=@"\r";
+ NSStackView *column=[self column:@[intro,self.browserRows,stay,[self row:@[[self spacer],close]]]];column.spacing=14;column.edgeInsets=NSEdgeInsetsMake(20,20,20,20);
+ NSWindow *w=[[NSWindow alloc]initWithContentRect:NSMakeRect(0,0,460,100) styleMask:NSWindowStyleMaskTitled|NSWindowStyleMaskClosable backing:NSBackingStoreBuffered defer:NO];w.title=@"Browser Extension";w.contentView=column;[w setContentSize:column.fittingSize];w.releasedWhenClosed=NO;[w center];self.browserWindow=w;
+ [NSNotificationCenter.defaultCenter addObserverForName:NSWindowWillCloseNotification object:w queue:nil usingBlock:^(NSNotification *n){self.browserWindow=nil;self.browserRows=nil;}];
+ [NSApp activateIgnoringOtherApps:YES];[w makeKeyAndOrderFront:nil];
+}
+- (void)closeBrowserWindow:(id)sender {[self.browserWindow close];}
+- (void)refreshBrowserRows {
+ if(!self.browserRows)return;for(NSView *v in self.browserRows.arrangedSubviews.copy)[self.browserRows removeView:v];
+ NSString *preferred=[self defaultBrowserIdentifier];NSMutableArray *installed=[NSMutableArray new],*missing=[NSMutableArray new];
+ for(NSArray *b in [self browserCatalog]){if([NSWorkspace.sharedWorkspace URLForApplicationWithBundleIdentifier:b[1]]){if([b[1] isEqual:preferred])[installed insertObject:b atIndex:0];else [installed addObject:b];}else [missing addObject:b[0]];}
+ [self.browserBridge expireContexts];
+ for(NSArray *b in installed){
+  NSURL *url=[NSWorkspace.sharedWorkspace URLForApplicationWithBundleIdentifier:b[1]];NSImageView *icon=[NSImageView imageViewWithImage:[NSWorkspace.sharedWorkspace iconForFile:url.path]];[icon.widthAnchor constraintEqualToConstant:32].active=YES;[icon.heightAnchor constraintEqualToConstant:32].active=YES;
+  NSTextField *name=[NSTextField labelWithString:b[0]];name.font=[NSFont systemFontOfSize:13 weight:NSFontWeightMedium];
+  BOOL connected=self.browserBridge.contexts[b[1]]!=nil;NSString *state=connected?@"Connected":[b[1] isEqual:preferred]?@"Your default browser":@"Not set up yet";
+  NSTextField *sub=[NSTextField labelWithString:state];sub.font=[NSFont systemFontOfSize:11];sub.textColor=connected?[NSColor colorWithSRGBRed:.3 green:.6 blue:.4 alpha:1]:NSColor.secondaryLabelColor;
+  NSStackView *text=[self column:@[name,sub]];text.spacing=1;
+  NSButton *go=[NSButton buttonWithTitle:connected?@"Set up again…":@"Set up…" target:self action:@selector(setUpBrowser:)];go.identifier=b[1];[self helpView:go text:[NSString stringWithFormat:@"Connects Less Pull to %@ and opens its extensions page with the steps to finish.",b[0]] label:[NSString stringWithFormat:@"Set up %@",b[0]]];
+  NSStackView *row=[self row:@[icon,text,[self spacer],go]];row.spacing=10;[self.browserRows addArrangedSubview:row];
+ }
+ if(!installed.count){NSTextField *none=[NSTextField labelWithString:@"None of the supported browsers is installed."];none.textColor=NSColor.secondaryLabelColor;[self.browserRows addArrangedSubview:none];}
+ if(missing.count){NSTextField *also=[NSTextField wrappingLabelWithString:[NSString stringWithFormat:@"Also works with %@, once installed.",[missing componentsJoinedByString:@", "]]];also.font=[NSFont systemFontOfSize:11];also.textColor=NSColor.tertiaryLabelColor;also.preferredMaxLayoutWidth=420;[self.browserRows addArrangedSubview:also];}
+ if(self.browserWindow){NSView *c=self.browserWindow.contentView;[c layoutSubtreeIfNeeded];NSRect f=self.browserWindow.frame;NSSize want=c.fittingSize;f.origin.y+=f.size.height-want.height-(self.browserWindow.frame.size.height-c.frame.size.height);[self.browserWindow setContentSize:want];}
+}
+- (void)setUpBrowser:(NSButton *)sender {
+ NSString *identifier=sender.identifier;if([identifier isEqual:@"com.apple.Safari"]){[self installSafariExtension];return;}
+ NSArray *entry=nil;for(NSArray *b in [self browserCatalog])if([b[1] isEqual:identifier])entry=b;if(!entry)return;NSString *browser=entry[0];BOOL firefox=[identifier isEqual:@"org.mozilla.firefox"];
+ NSURL *browserURL=[NSWorkspace.sharedWorkspace URLForApplicationWithBundleIdentifier:identifier];if(!browserURL)return;
+ NSTask *setup=[NSTask new];setup.executableURL=[NSBundle.mainBundle.bundleURL URLByAppendingPathComponent:@"Contents/MacOS/LessPullBrowserHost"];setup.arguments=@[@"--install"];setup.standardOutput=[NSPipe pipe];setup.standardError=[NSPipe pipe];NSError *error=nil;BOOL started=[setup launchAndReturnError:&error];if(started)[setup waitUntilExit];if(!started||setup.terminationStatus!=0){NSAlert *failed=[NSAlert new];failed.messageText=@"Browser setup could not finish";failed.informativeText=error.localizedDescription?:@"Try again from a permanent local copy of Less Pull. The local bridge could not be registered.";[failed beginSheetModalForWindow:self.browserWindow completionHandler:nil];return;}
  NSURL *folder=[NSBundle.mainBundle.resourceURL URLByAppendingPathComponent:firefox?@"Browser Extension (Firefox)":@"Browser Extension"];[NSWorkspace.sharedWorkspace activateFileViewerSelectingURLs:@[folder]];
- [NSWorkspace.sharedWorkspace openURLs:@[[NSURL URLWithString:browsers[index][2]]] withApplicationAtURL:browserURL configuration:NSWorkspaceOpenConfiguration.configuration completionHandler:nil];
- NSAlert *guide=[NSAlert new];guide.messageText=[NSString stringWithFormat:@"Finish installation in %@",browser];
+ [NSWorkspace.sharedWorkspace openURLs:@[[NSURL URLWithString:entry[2]]] withApplicationAtURL:browserURL configuration:NSWorkspaceOpenConfiguration.configuration completionHandler:nil];
+ NSAlert *guide=[NSAlert new];guide.messageText=[NSString stringWithFormat:@"Finish in %@",browser];
  guide.informativeText=firefox?@"1. On the page that opened, click Load Temporary Add-on….\n2. Select manifest.json in the Browser Extension (Firefox) folder shown in Finder.\n\nFirefox removes temporary add-ons when it quits; load it again next time, or use Firefox Developer Edition with signing turned off. The extension has no buttons: with a website in front, use “Exception for …” in the Less Pull menu. Keep Less Pull where it is installed; run this setup again if you move it.":@"1. Turn on Developer mode on the Extensions page.\n2. Click Load unpacked.\n3. Select the Browser Extension folder shown in Finder.\n\nThe extension has no buttons: with a website in front, use “Exception for …” in the Less Pull menu. Keep Less Pull where it is installed; run this setup again if you move it.";
- [guide addButtonWithTitle:@"Done"];[guide addButtonWithTitle:@"Copy extension folder path"];[NSApp activateIgnoringOtherApps:YES];if([guide runModal]==NSAlertSecondButtonReturn){[NSPasteboard.generalPasteboard clearContents];[NSPasteboard.generalPasteboard setString:folder.path forType:NSPasteboardTypeString];}
+ [guide addButtonWithTitle:@"OK"];[guide addButtonWithTitle:@"Copy folder path"];[NSApp activateIgnoringOtherApps:YES];
+ [guide beginSheetModalForWindow:self.browserWindow completionHandler:^(NSModalResponse r){if(r==NSAlertSecondButtonReturn){[NSPasteboard.generalPasteboard clearContents];[NSPasteboard.generalPasteboard setString:folder.path forType:NSPasteboardTypeString];}[self refreshBrowserRows];}];
 }
 // Safari: the extension lives in a small companion app inside Less Pull. Opening it
 // once registers the extension; Safari then lists it under Settings → Extensions.
 - (void)installSafariExtension {
  NSURL *companion=[NSBundle.mainBundle.resourceURL URLByAppendingPathComponent:@"Less Pull for Safari.app"];
- if(![NSFileManager.defaultManager fileExistsAtPath:companion.path]){NSAlert *missing=[NSAlert new];missing.messageText=@"The Safari extension is not in this build";missing.informativeText=@"This copy of Less Pull was built without Xcode, so the Safari companion app is missing. A build with Xcode includes it.";[missing runModal];return;}
+ if(![NSFileManager.defaultManager fileExistsAtPath:companion.path]){NSAlert *missing=[NSAlert new];missing.messageText=@"The Safari extension is not in this build";missing.informativeText=@"This copy of Less Pull was built without Xcode, so the Safari companion app is missing. A build with Xcode includes it.";if(self.browserWindow)[missing beginSheetModalForWindow:self.browserWindow completionHandler:nil];else [missing runModal];return;}
  [NSWorkspace.sharedWorkspace openURL:companion];
- NSAlert *guide=[NSAlert new];guide.messageText=@"Finish installation in Safari";guide.informativeText=@"1. The Less Pull for Safari app opens; click its Open Safari Settings button.\n2. Until this build is signed by Apple, Safari needs Allow Unsigned Extensions from the Develop menu (turn on the Develop menu under Settings → Advanced). That choice lasts until Safari quits.\n3. Turn on Less Pull in Settings → Extensions and allow it on all websites.\n\nThe extension has no buttons: with a website in front, use “Exception for …” in the Less Pull menu. Keep Less Pull where it is installed.";[guide addButtonWithTitle:@"Done"];[NSApp activateIgnoringOtherApps:YES];[guide runModal];
+ NSAlert *guide=[NSAlert new];guide.messageText=@"Finish installation in Safari";guide.informativeText=@"1. The Less Pull for Safari app opens; click its Open Safari Settings button.\n2. Until this build is signed by Apple, Safari needs Allow Unsigned Extensions from the Develop menu (turn on the Develop menu under Settings → Advanced). That choice lasts until Safari quits.\n3. Turn on Less Pull in Settings → Extensions and allow it on all websites.\n\nThe extension has no buttons: with a website in front, use “Exception for …” in the Less Pull menu. Keep Less Pull where it is installed.";[guide addButtonWithTitle:@"OK"];[NSApp activateIgnoringOtherApps:YES];if(self.browserWindow)[guide beginSheetModalForWindow:self.browserWindow completionHandler:^(NSModalResponse r){[self refreshBrowserRows];}];else [guide runModal];
 }
 - (void)openWebsite:(id)sender {[NSWorkspace.sharedWorkspace openURL:[NSURL URLWithString:LessPullWebsite]];}
 - (void)openSupport:(id)sender {[NSWorkspace.sharedWorkspace openURL:[NSURL URLWithString:LessPullCoffee]];}
@@ -1832,7 +1869,8 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
 - (void)applicationWillTerminate:(NSNotification *)note {self.quitting=YES;if(self.peekHotKey)UnregisterEventHotKey(self.peekHotKey);if(self.grayscaleHotKey)UnregisterEventHotKey(self.grayscaleHotKey);[self.grayOffTimer invalidate];[self.pauseAllTimer invalidate];[self.eventTimer invalidate];[self.pipelineRecoveryTimer invalidate];[self.menuDismissal end];[self.browserBridge stop];[self.warmth cancelTransition];[self endPauseNow:nil];self.excludeNight=NO;[self reconcileExclusion];if(self.grayOverride||self.customWarmth){self.grayOverride=0;self.customWarmth=NO;self.excludeGray=NO;self.excludeWarmth=NO;self.animateAppearance=NO;[self.warmth cancelTransition];[self applyMode:self.selectedMode];}[self.warmth restore];}
 - (void)quit:(id)sender {[NSApp terminate:nil];}
 @end
-int main(int argc,const char *argv[]){@autoreleasepool{
+extern BOOL LessPullHandsOff;
+int main(int argc,const char *argv[]){@autoreleasepool{ if([NSProcessInfo.processInfo.arguments containsObject:@"--hands-off"])LessPullHandsOff=YES;
  if(argc>1&&strcmp(argv[1],"--diagnostics")==0){FilterEngine *e=[FilterEngine new];puts(e.diagnostics.UTF8String);return e.error?1:0;}
  NSApplication *app=NSApplication.sharedApplication;AppDelegate *delegate=[AppDelegate new];app.delegate=delegate;
  // --regular keeps a Dock icon so UI automation can reach a test build; production is a menu-bar-only app.

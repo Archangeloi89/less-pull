@@ -48,7 +48,9 @@ static void filterPreferencesChanged(CFNotificationCenterRef center,void *observ
  return YES;
 }
 - (BOOL)readNightShiftStatus:(NSBlueStatus *)status {return self.client&&!self.error&&[self.client getBlueLightStatus:status]&&status->available;}
+__attribute__((weak)) BOOL LessPullHandsOff=NO;
 - (BOOL)setNightShiftEnabled:(BOOL)enabled {
+ if(LessPullHandsOff)return YES;
  if(!self.client||self.error)return NO;
  Method method=class_getInstanceMethod([self.client class],@selector(setEnabled:));
  if(!method||strcmp(method_getTypeEncoding(method),"B20@0:8B16")!=0)return NO;
@@ -56,6 +58,7 @@ static void filterPreferencesChanged(CFNotificationCenterRef center,void *observ
 }
 - (NSInteger)currentMode { if(!getType||!getEnabled)return -1;return getEnabled(1)?getType(1):0; }
 - (BOOL)applyMode:(NSInteger)mode {
+ if(LessPullHandsOff)return YES;
  if(!getType||!getEnabled||!setType||!setEnabled||!getHue||!getIntensity)return NO;
  if(mode!=0&&mode!=1&&mode!=16)return NO;
  double hue=getHue(),intensity=getIntensity();

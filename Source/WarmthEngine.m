@@ -52,7 +52,9 @@ static CFStringRef matrixKey,targetKey;
  }
  return self;
 }
+__attribute__((weak)) BOOL LessPullHandsOff=NO;  // --hands-off: a test copy leaves the displays to the installed app
 - (BOOL)send:(FilterMatrix)matrix {
+ if(LessPullHandsOff){self.lastRequest=0;self.lastMatrix=[NSData dataWithBytes:&matrix length:sizeof(matrix)];return YES;}
  float values[9];for(int i=0;i<9;i++)values[i]=matrix.m[i];
  NSData *data=[NSData dataWithBytes:values length:sizeof(values)];NSDictionary *dict=@{(__bridge NSString *)matrixKey:data};
  int result=setAdjustments((__bridge CFDictionaryRef)dict);
@@ -65,6 +67,7 @@ static CFStringRef matrixKey,targetKey;
 // (display 0) addresses all displays and replaces every per-display matrix.
 - (BOOL)sendMatrix:(FilterMatrix)matrix toDisplay:(uint32_t)display {
  if(!display)return [self send:matrix];
+ if(LessPullHandsOff)return YES;
  if(!targetKey){self.error=@"Per-display matrices are unavailable on this macOS.";return NO;}
  float values[9];for(int i=0;i<9;i++)values[i]=matrix.m[i];
  NSDictionary *dict=@{(__bridge NSString *)matrixKey:[NSData dataWithBytes:values length:sizeof(values)],(__bridge NSString *)targetKey:@(display)};

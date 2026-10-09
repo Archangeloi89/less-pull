@@ -12,6 +12,10 @@
   &nbsp;·&nbsp; <a href="docs/README.md">All docs</a>
 </p>
 
+<p align="center">
+  <a href="https://buymeacoffee.com/HsERf62fiZ"><img src="https://img.buymeacoffee.com/button-api/?text=Support%20my%20work&emoji=%F0%9F%A7%A1&slug=HsERf62fiZ&button_colour=E8894A&font_colour=1b1b1b&font_family=Inter&outline_colour=1b1b1b&coffee_colour=FFDD00" height="44" alt="Support my work on Buy Me a Coffee"></a>
+</p>
+
 **A quieter screen.** Less Pull is a small menu-bar app for macOS by [Jiri Arion Rose](https://jiriarion.com). It takes the color out of your screen, so it pulls at you less — a little like stepping out of a loud room into a still one. What matters is still there; it just stops shouting.
 
 Warmth is the second step: from a touch of amber all the way to red, it takes the blue out of the light and puts you back in charge of how your screen speaks to you. And because a few things truly need color, every app and every website can have its own settings.
@@ -222,7 +226,7 @@ The app changes the display; nothing is injected into pages, and the Mac app has
 
 1. Download **Less-Pull-1.4.4-33.zip** from the [build 33 release](https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-33), unzip it, and move **Less Pull.app** to **Applications**.
 2. Open it. The Settings window greets you once; the circle in the menu bar is where you choose Grayscale and Extra Warmth from then on. On the first launch the welcome opens right under it, the icon fades in and out for a moment, and a small animated drawing shows what to do when the menu bar is full: hold ⌘ and drag the circle toward the clock. (macOS decides where new icons start, and apps cannot choose a spot.)
-3. For website rules, open **Settings… → Websites**, choose **Install Browser Extension…**, and follow the steps for [your browser](docs/INSTALL.md#safari-brave-chrome-firefox-opera-or-edge).
+3. For website rules, open **Settings… → Websites**, choose **Install Browser Extension…**, pick a browser from the list, and follow the steps for [your browser](docs/INSTALL.md#safari-brave-chrome-firefox-opera-or-edge).
 
 > [!TIP]
 > Setting up with an AI agent? The release includes an **agent pack** (`Less-Pull-Agent-Pack.zip`): a script that installs the app and the bridge, and scripts that connect Brave, Chrome, Opera, Edge and Firefox, with the instructions an agent needs. See [tools/agent-pack](tools/agent-pack/README.md).
@@ -237,6 +241,16 @@ The app changes the display; nothing is injected into pages, and the Mac app has
 </p>
 
 No account, no analytics, no cloud sync. The extension reads the address of the active tab, passes it to the app on your Mac, and never reads or changes page content. Private tabs are excluded. **The addresses of the sites you visit are never stored.** They pass through memory only: the app keeps the one address in front, overwrites it with the next, and drops it a minute after the browser stops reporting or as soon as it disconnects. Nothing about them is written to disk, not in preferences and not in logs. Only the exceptions you save yourself are kept, on your Mac. The only thing the app sends anywhere is one request to GitHub once a day to ask whether a newer build exists; it carries nothing about you and can be turned off in Settings → About. [Privacy details](docs/PRIVACY.md).
+
+## Support my work
+
+Less Pull is free, and it stays free. If it makes your days a little quieter, a coffee keeps the work going: the app, the browser extensions, the signed builds and what comes next.
+
+<p align="center">
+  <a href="https://buymeacoffee.com/HsERf62fiZ"><img src="https://img.buymeacoffee.com/button-api/?text=Support%20my%20work&emoji=%F0%9F%A7%A1&slug=HsERf62fiZ&button_colour=E8894A&font_colour=1b1b1b&font_family=Inter&outline_colour=1b1b1b&coffee_colour=FFDD00" height="44" alt="Support my work on Buy Me a Coffee"></a><br>
+  <a href="https://buymeacoffee.com/HsERf62fiZ"><img src="docs/assets/support-qr.png" width="160" alt="QR code for buymeacoffee.com/HsERf62fiZ"></a><br>
+  <sub>The same page, as a code for your phone. In the app: About → Support my work.</sub>
+</p>
 
 ## Free to use, including at work
 
