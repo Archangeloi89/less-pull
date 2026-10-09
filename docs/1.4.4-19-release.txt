@@ -51,3 +51,5 @@ Browser window, round 3 (build 33): "Show uninstalled browsers" reveals the rest
 Browser window, round 4 (build 33): the notice about what the extension can see has a "Don’t show this again" box; browsers not installed show a globe and a grayed Set up…; a small circular-arrow button next to the toggle checks again by hand (the list also checks by itself every few seconds).
 
 Languages (build 33): Less Pull speaks the language of the Mac, with a Language choice on the General tab; the change rebuilds the windows and the menu at once, no restart. English is the source and the key; a language is one strings file read once when in use (about 60 KB), and what a table lacks stays English. German is complete. The settings window widens for a longer language and keeps that width across tabs, remembered per language.
+
+German, second pass (build 33): the lines are said again from the meaning rather than carried over from the English, and checked by translating back (a session now "klingt sanft aus", the screen "zerrt weniger an dir", the call back is "zurückholen", the plain display is "ohne Filter").
