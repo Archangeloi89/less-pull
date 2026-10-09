@@ -14,7 +14,7 @@ NSString *L(NSString *english){if(!english)return nil;NSString *t=table[english]
 + (NSString *)current {return currentCode;}
 + (NSString *)systemChoice {
  NSArray *have=[self available];
- for(NSString *pref in NSLocale.preferredLanguages){NSString *code=[pref componentsSeparatedByString:@"-"].firstObject.lowercaseString;if([have containsObject:pref])return pref;if([have containsObject:code])return code;}
+ for(NSString *pref in NSLocale.preferredLanguages){NSString *code=[pref componentsSeparatedByString:@"-"].firstObject.lowercaseString;if([have containsObject:pref])return pref;if([have containsObject:code])return code;for(NSString *h in have)if([h hasPrefix:[code stringByAppendingString:@"-"]])return h;}  // pt-PT falls back to pt-BR, zh to zh-Hans
  return @"en";
 }
 + (NSString *)nameOf:(NSString *)code {
