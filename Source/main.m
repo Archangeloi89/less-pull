@@ -1,5 +1,6 @@
 #import <Cocoa/Cocoa.h>
 #import "Localize.h"
+#import <malloc/malloc.h>
 #import <ServiceManagement/ServiceManagement.h>
 #import <UniformTypeIdentifiers/UniformTypeIdentifiers.h>
 #import "Engine.h"
@@ -1718,6 +1719,10 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  NSView *button=self.item.button;if(NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceMotion)return;
  for(int k=0;k<4;k++){dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)((0.6+k*1.2)*NSEC_PER_SEC)),dispatch_get_main_queue(),^{[NSAnimationContext runAnimationGroup:^(NSAnimationContext *c){c.duration=.5;button.animator.alphaValue=.25;} completionHandler:^{[NSAnimationContext runAnimationGroup:^(NSAnimationContext *c){c.duration=.6;button.animator.alphaValue=1;} completionHandler:nil];}];});}
 }
+- (void)releaseSettings {
+ self.settings=nil;self.settingsTabs=nil;self.statusText=nil;self.statusDetail=nil;self.autoButton=nil;self.loginButton=nil;self.grayscaleButton=nil;self.nightButton=nil;self.resumeButton=nil;self.endPauseButton=nil;self.resetButton=nil;self.pausePopup=nil;self.peekScopePopup=nil;self.websiteStatus=nil;self.exclusionsList=nil;self.displaysList=nil;self.sessionPresetsField=nil;self.callBackPresetsField=nil;self.exclusionText=nil;self.warmthSlider=nil;self.warmthLabel=nil;self.warmthTitle=nil;self.welcomeCard=nil;self.updateCheckbox=nil;self.updateButton=nil;self.updateStatusLabel=nil;self.thanksCard=nil;self.peekRecorder=nil;self.grayscaleRecorder=nil;self.peekNote=nil;self.loginNote=nil;self.grayscaleShortcutNote=nil;self.peekGrayButton=nil;self.peekWarmthButton=nil;self.peekNightButton=nil;self.clickPopup=nil;self.rightClickPopup=nil;self.grayOffPopup=nil;self.grayOnButton=nil;self.websiteRulesList=nil;self.tourCard=nil;self.noteViews=nil;self.advancedViews=nil;self.multiDisplayViews=nil;
+ for(NSNumber *after in @[@1.0,@6.0])dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)(after.doubleValue*NSEC_PER_SEC)),dispatch_get_main_queue(),^{if(!self.settings)malloc_zone_pressure_relief(NULL,0);});  // once the window is truly gone, hand the freed pages back
+}
 - (void)rememberSettingsFrame {if(self.settings){self.keptSettingsFrame=self.settings.frame;self.keepSettingsFrame=YES;}}
 - (void)showThanks:(id)sender {[self rememberSettingsFrame];[self.settings close];self.settings=nil;self.welcomeWanted=NO;self.forceThanks=YES;[self showSettings:nil];}
 - (void)showTour:(id)sender {[self rememberSettingsFrame];self.welcomePlaced=YES;[self.settings close];self.settings=nil;self.welcomeWanted=YES;[self showSettings:nil];}
@@ -1749,6 +1754,8 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
   [self.settingsTabs addTabViewItem:[self tab:L(@"Websites") symbol:@"globe" content:[self websitesTab]]];
   [self.settingsTabs addTabViewItem:[self tab:L(@"About") symbol:@"info.circle" content:[self aboutTab]]];
   self.settings=[NSWindow windowWithContentViewController:self.settingsTabs];
+  // Closed means gone: the window and every view in it are let go, so the app weighs what a menu-bar app should while you are not looking at it. Opening again builds it in a moment.
+  [NSNotificationCenter.defaultCenter addObserverForName:NSWindowWillCloseNotification object:self.settings queue:nil usingBlock:^(NSNotification *n){[self releaseSettings];}];
   self.settings.initialFirstResponder=self.grayscaleButton;[self.settings center];{NSString *at=[NSUserDefaults.standardUserDefaults stringForKey:@"settingsTopLeft"];if(at.length&&!self.keepSettingsFrame){NSPoint p=NSPointFromString(at);NSRect f=self.settings.frame;f.origin.x=p.x;f.origin.y=p.y-f.size.height;[self.settings setFrame:[self.settings constrainFrameRect:f toScreen:self.settings.screen?:NSScreen.mainScreen] display:NO];}}
   [NSNotificationCenter.defaultCenter addObserverForName:NSWindowDidMoveNotification object:self.settings queue:nil usingBlock:^(NSNotification *n){if(self.settings.visible&&!self.welcomeWanted)[NSUserDefaults.standardUserDefaults setObject:NSStringFromPoint(NSMakePoint(self.settings.frame.origin.x,NSMaxY(self.settings.frame))) forKey:@"settingsTopLeft"];}];
   if(self.keepSettingsFrame){NSRect f=self.settings.frame;f.origin.x=self.keptSettingsFrame.origin.x;f.origin.y=NSMaxY(self.keptSettingsFrame)-f.size.height;[self.settings setFrame:[self.settings constrainFrameRect:f toScreen:self.settings.screen?:NSScreen.mainScreen] display:NO];self.keepSettingsFrame=NO;};
