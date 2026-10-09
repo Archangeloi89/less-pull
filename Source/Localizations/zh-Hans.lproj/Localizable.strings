@@ -416,7 +416,7 @@
 "Shows color for a while, then Grayscale comes back by itself. Your Grayscale setting stays saved; exceptions still apply." = "暂时显示彩色，之后灰度自动回来。灰度设置会保留；单独设置仍然生效。";
 "Shows everything in shades of gray, day and night. Night Shift does not change this. Exceptions for apps and websites can." = "日夜皆以灰阶显示一切。夜览不会改变这一点。应用和网站的单独设置可以。";
 "Shows everything in shades of gray, day and night. Turn it off to see color again." = "日夜皆以灰阶显示一切。关闭即可重见彩色。";
-"Shows the fine-tuning in every tab: what Peek turns off, what the mouse buttons do, the session sound and glow, and display options with one display. Everything keeps working as set when hidden." = "在每个标签页显示细调项：一瞥关闭什么、鼠标按键做什么、专注提示音和光晕，以及只有一台显示器时的显示器选项。隐藏后一切仍按设置运行。";
+"Shows the fine-tuning in every tab: what the mouse buttons do, the session sound and glow, Night Shift on the lock screen, and display options with one display. Everything keeps working as set when hidden." = "在每个标签页显示细调项：鼠标按键做什么、专注提示音和光晕、锁定屏幕上的夜览，以及只有一台显示器时的显示器选项。隐藏后一切仍按设置运行。";
 "Shows the glow and plays the sound once, as at the end of a session." = "像专注结束时那样，显示一次光晕并播放一次提示音。";
 "Shows the plain display for a while: color and no added warmth. Night Shift is left alone. Your settings and exceptions are kept." = "暂时显示无滤镜画面：彩色且不叠加暖色。夜览不受影响。设置和单独设置都会保留。";
 "Shows the supported browsers that are not installed on this Mac." = "显示这台 Mac 上未安装的受支持浏览器。";

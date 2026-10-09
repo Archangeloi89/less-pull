@@ -95,3 +95,5 @@ Lock screen and screensaver (build 33): macOS draws both outside the display adj
 Developer ID + notarization (build 33, 9 Oct): first notarized release; build.sh with LESS_PULL_SIGN_IDENTITY and LESS_PULL_NOTARY_PROFILE=lesspull; release zips come from the build's own Less Pull.zip. Chrome family installs from the Chrome Web Store (published, 0.4.2). Lock-screen Night Shift option moved to Advanced.
 
 Session over/away (build 33): statusItemClicked swaps the two jobs while the session is over or away, so the menu button reaches the panel and the session button reaches the menu (Jiri). Explanations updated in 13 languages.
+
+Peek settings (build 33): the "While peeking, turn off" row is always visible on Shortcuts, no longer behind Show advanced options. Default unchanged: peek turns off grayscale and warmth, Night Shift stays on.
