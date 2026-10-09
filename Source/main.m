@@ -193,6 +193,8 @@ static NSString *const LessPullOldBundleIdentifier=@"local.nightshiftfilters.app
 @property NSMutableDictionary *exclusionRules;
 @property ExclusionPolicy *exclusion;
 @property BOOL excludeGray,excludeNight,excludeWarmth,quitting,animateAppearance;
+// Lock screen and screensaver: macOS draws them outside the display adjustments, so the session is handed over plain and faded back in on return; Night Shift, which the system does honor there, is raised to full warmth meanwhile.
+@property BOOL screenLockedFlag,saverFlag,lockQuieting;@property NSNumber *lockStrength;@property double fade;@property NSButton *lockNightButton;
 @property NSTimer *visibilityTimer;
 // Per display: where the frontmost app's windows are, and for the other displays the exception of the app on top there (or the defaults).
 @property NSSet<NSNumber *> *frontDisplays;
@@ -780,7 +782,7 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  // New users get the two shortcuts set for them (Option-A to peek, Option-Command-G to toggle),
  // each only if it is free on this Mac and keyboard; the tour shows which ones. Changeable under Shortcuts.
  if(firstLaunch)for(NSString *key in @[@"peekShortcut",@"grayscaleShortcut"]){if(![d objectForKey:key]){NSDictionary *pick=[self suggestedShortcutFor:key];if(pick)[d setObject:pick forKey:key];}}
- [d registerDefaults:@{@"automatic":@YES,@"overrideMode":@(-1),@"warmth":@0,@"nightMode":@101,@"manualMode":@1,@"checkForUpdates":@YES,@"peekActiveDisplayOnly":@YES,@"sessionPresets":@[@25,@45,@60,@90],@"callBackPresets":@[@5,@9,@13,@33],@"sessionRemindEvery":@0,@"sessionSoundStyle":@2,@"sessionGlow":@YES,@"sessionVolume":@70,@"customMinutes":@30,@"customBackMinutes":@9,@"sessionStopAtEnd":@NO,@"sessionOfferCallBack":@YES}];self.peekLockedDisplays=[NSMutableSet new];
+ [d registerDefaults:@{@"automatic":@YES,@"overrideMode":@(-1),@"warmth":@0,@"nightMode":@101,@"manualMode":@1,@"checkForUpdates":@YES,@"peekActiveDisplayOnly":@YES,@"sessionPresets":@[@25,@45,@60,@90],@"callBackPresets":@[@5,@9,@13,@33],@"sessionRemindEvery":@0,@"sessionSoundStyle":@2,@"sessionGlow":@YES,@"sessionVolume":@70,@"customMinutes":@30,@"customBackMinutes":@9,@"sessionStopAtEnd":@NO,@"sessionOfferCallBack":@YES,@"lockNightShift":@YES}];self.peekLockedDisplays=[NSMutableSet new];
  self.availableUpdate=[d dictionaryForKey:@"availableUpdate"];
  if([d integerForKey:@"nightMode"]==16)[d setInteger:100 forKey:@"nightMode"];
  if([d integerForKey:@"manualMode"]==16)[d setInteger:100 forKey:@"manualMode"];
@@ -809,7 +811,10 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  [NSWorkspace.sharedWorkspace.notificationCenter addObserver:self selector:@selector(pipelineChanged:) name:NSWorkspaceSessionDidBecomeActiveNotification object:nil];
  [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(displaysChanged:) name:NSApplicationDidChangeScreenParametersNotification object:nil];
  [NSWorkspace.sharedWorkspace.notificationCenter addObserver:self selector:@selector(pipelineChanged:) name:NSWorkspaceScreensDidWakeNotification object:nil];
- [NSDistributedNotificationCenter.defaultCenter addObserver:self selector:@selector(pipelineChanged:) name:@"com.apple.screenIsUnlocked" object:nil];
+ [NSDistributedNotificationCenter.defaultCenter addObserver:self selector:@selector(screenUnlocked:) name:@"com.apple.screenIsUnlocked" object:nil];
+ [NSDistributedNotificationCenter.defaultCenter addObserver:self selector:@selector(screenLocked:) name:@"com.apple.screenIsLocked" object:nil];
+ [NSDistributedNotificationCenter.defaultCenter addObserver:self selector:@selector(saverStarted:) name:@"com.apple.screensaver.didstart" object:nil];
+ [NSDistributedNotificationCenter.defaultCenter addObserver:self selector:@selector(saverStopped:) name:@"com.apple.screensaver.didstop" object:nil];
  [NSWorkspace.sharedWorkspace.notificationCenter addObserver:self selector:@selector(frontmostChanged:) name:NSWorkspaceDidActivateApplicationNotification object:nil];
  [NSWorkspace.sharedWorkspace.notificationCenter addObserver:self selector:@selector(frontmostChanged:) name:NSWorkspaceDidTerminateApplicationNotification object:nil];
  [self restoreLessPullPause];[self scheduleLessPullPauseTimer];[self restoreGrayscaleOff];[self scheduleGrayscaleOffTimer];[self restoreSession];[self refreshBrowserHostManifests];{NSArray *args=NSProcessInfo.processInfo.arguments;NSUInteger i=[args indexOfObject:@"--session"];if(i!=NSNotFound&&i+1<args.count)[self startSessionMinutes:[args[i+1] integerValue]];if([args containsObject:@"--session-soon"]){[self.session startMinutes:1 at:[NSDate dateWithTimeIntervalSinceNow:-54]];[self persistSession];[self scheduleSessionTimer];}if([args containsObject:@"--session-panel"])dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)(1.5*NSEC_PER_SEC)),dispatch_get_main_queue(),^{[self showSessionPanelMode:nil];});if([args containsObject:@"--session-start-panel"])dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)(1.5*NSEC_PER_SEC)),dispatch_get_main_queue(),^{[self showSessionPanelMode:@"start"];});}[self registerPeekShortcut];[self scheduleUpdateChecks];[self noteFirstLaunch];[self updateForeground];[self restartTimer];[self schedulePauseTimer];[self sync];
@@ -1005,6 +1010,25 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
 // Once a minute the matrix is sent again even if nothing changed: the system can replace
 // it without telling us, and the display then shows color while Grayscale is ticked.
 - (void)periodicSync {if(!self.warmth.transitioning)[self.warmth invalidate];[self.browserBridge expireContexts];[self sync];}
+- (double)fade {return _fade>0?_fade:0.5;}
+- (BOOL)screenLocked {return self.screenLockedFlag||self.saverFlag;}
+- (void)lockBegan {
+ if(!self.screenLocked||self.lockStrength)return;
+ self.lockQuieting=!self.pausedUntil&&(self.effectiveMode==100||self.effectiveMode==1||self.targetStrength>0);
+ self.lockStrength=@(-1);
+ if(self.lockQuieting&&[NSUserDefaults.standardUserDefaults boolForKey:@"lockNightShift"]){float s=0;if([self.engine nightShiftStrength:&s]&&[self.engine setNightShiftStrength:1])self.lockStrength=@(s);}
+ self.fade=0.2;self.animateAppearance=YES;[self sync];
+}
+- (void)lockEnded {
+ if(self.screenLocked||!self.lockStrength)return;
+ if(self.lockStrength.floatValue>=0)[self.engine setNightShiftStrength:self.lockStrength.floatValue];
+ self.lockStrength=nil;self.lockQuieting=NO;self.fade=0.2;self.animateAppearance=YES;[self pipelineChanged:nil];
+}
+- (void)screenLocked:(id)note {self.screenLockedFlag=YES;[self lockBegan];}
+- (void)screenUnlocked:(id)note {self.screenLockedFlag=NO;[self lockEnded];}
+- (void)saverStarted:(id)note {self.saverFlag=YES;[self lockBegan];}
+- (void)saverStopped:(id)note {self.saverFlag=NO;[self lockEnded];}
+- (void)toggleLockNight:(NSButton *)sender {[NSUserDefaults.standardUserDefaults setBool:sender.state==NSControlStateValueOn forKey:@"lockNightShift"];}
 - (void)pipelineChanged:(id)sender {
  if(self.quitting)return;
  self.pipelineEvents++;
@@ -1032,7 +1056,9 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  [self checkPause];
  [self updateForeground];[self checkLessPullPause];[self checkGrayscaleOff];
  if(self.peeking&&[[self peekEffects][@"nightShift"] boolValue]){self.nightOverride=2;self.excludeNight=YES;}
- if(self.pausedUntil){if(self.grayOverride||self.nightOverride||self.customWarmth)self.animateAppearance=YES;self.grayOverride=0;self.nightOverride=0;self.customWarmth=NO;self.appWarmth=0;self.excludeGray=NO;self.excludeNight=NO;self.excludeWarmth=NO;}[self reconcileExclusion];
+ if(self.pausedUntil){if(self.grayOverride||self.nightOverride||self.customWarmth)self.animateAppearance=YES;self.grayOverride=0;self.nightOverride=0;self.customWarmth=NO;self.appWarmth=0;self.excludeGray=NO;self.excludeNight=NO;self.excludeWarmth=NO;}
+ if(self.screenLocked&&self.lockQuieting&&[NSUserDefaults.standardUserDefaults boolForKey:@"lockNightShift"]){self.nightOverride=1;self.excludeNight=YES;}
+ [self reconcileExclusion];
  BOOL on=NO;BOOL known=[self logicalNightShift:&on];
  self.policy.automatic=self.automatic;[self.policy observeKnown:known on:on];[self savePolicy];
  NSInteger target=self.automatic?[NSUserDefaults.standardUserDefaults integerForKey:@"nightMode"]:self.selectedMode;
@@ -1448,6 +1474,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  self.nightButton=[NSButton checkboxWithTitle:L(@"Night Shift") target:self action:@selector(toggleNightShift:)];[self helpView:self.nightButton text:self.nightHelp label:L(@"Night Shift")];
  self.pausePopup=[[NSPopUpButton alloc]initWithFrame:NSZeroRect pullsDown:YES];[self.pausePopup.widthAnchor constraintEqualToConstant:220].active=YES;[self helpView:self.pausePopup text:self.pauseHelp label:L(@"Turn Night Shift off for…")];
  self.endPauseButton=[NSButton buttonWithTitle:L(@"End timed off") target:self action:@selector(endPauseNow:)];self.endPauseButton.hidden=YES;[self.endPauseButton.widthAnchor constraintEqualToConstant:220].active=YES;[self helpView:self.endPauseButton text:self.pauseHelp label:L(@"End timed off")];
+ self.lockNightButton=[NSButton checkboxWithTitle:L(@"Night Shift on the lock screen and screensaver") target:self action:@selector(toggleLockNight:)];self.lockNightButton.state=[NSUserDefaults.standardUserDefaults boolForKey:@"lockNightShift"];[self helpView:self.lockNightButton text:L(@"The lock screen and the screensaver are drawn by macOS outside Less Pull’s reach, so they show color. With this on, Less Pull turns Night Shift to full warmth there whenever it is quieting your screen, and puts it back when you return. Your Night Shift schedule stays as it is.") label:L(@"Night Shift on the lock screen and screensaver")];
  self.autoButton=[NSButton checkboxWithTitle:L(@"Extra Warmth follows Night Shift") target:self action:@selector(toggleAuto:)];[self helpView:self.autoButton text:self.autoHelp label:L(@"Extra Warmth follows Night Shift")];
  self.resumeButton=[NSButton buttonWithTitle:L(@"Resume Following") target:self action:@selector(resume:)];[self helpView:self.resumeButton text:L(@"Go back to following Night Shift now.") label:L(@"Resume Following Now")];
  self.loginButton=[NSButton checkboxWithTitle:L(@"Launch at login") target:self action:@selector(login:)];[self helpView:self.loginButton text:L(@"Open Less Pull when you sign in to your Mac. Install it in Applications first.") label:L(@"Launch at login")];
@@ -1460,6 +1487,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
   [self row:@[self.grayscaleButton,[self spacer],self.grayOffPopup,self.grayOnButton]],[self note:L(@"Shades of gray, day and night. Exceptions for apps and websites can show color. Off for a while brings it back by itself.")],
   [self row:@[self.warmthTitle,[self spacer],self.resetButton]],[self row:@[self.warmthSlider,self.warmthLabel]],tickRow,[self note:L(@"Adds warmth on top of Night Shift, from Off to Red.")],[self separator],
   [self row:@[self.nightButton,[self spacer],self.pausePopup,self.endPauseButton]],[self note:L(@"Turns Night Shift on or off now; your schedule in System Settings stays as it is.")],
+  self.lockNightButton,[self note:L(@"Drawn by macOS outside Less Pull’s reach, the lock screen and the screensaver show color. While Less Pull is quieting your screen, Night Shift goes to full warmth there and comes back as it was when you return.")],
   [self row:@[self.autoButton,[self spacer],self.resumeButton]],[self note:L(@"On: Extra Warmth only while Night Shift is on, none in the daytime. Off: Extra Warmth stays on all day.")],[self separator],
   self.loginButton,self.loginNote,[self multi:[self separator]],[self multi:[self displaysSection]],[self separator],[self languageRow],[self separator],[self advancedBlock]]];
  NSStackView *column=[self column:views];
@@ -1720,7 +1748,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  for(int k=0;k<4;k++){dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)((0.6+k*1.2)*NSEC_PER_SEC)),dispatch_get_main_queue(),^{[NSAnimationContext runAnimationGroup:^(NSAnimationContext *c){c.duration=.5;button.animator.alphaValue=.25;} completionHandler:^{[NSAnimationContext runAnimationGroup:^(NSAnimationContext *c){c.duration=.6;button.animator.alphaValue=1;} completionHandler:nil];}];});}
 }
 - (void)releaseSettings {
- self.settings=nil;self.settingsTabs=nil;self.statusText=nil;self.statusDetail=nil;self.autoButton=nil;self.loginButton=nil;self.grayscaleButton=nil;self.nightButton=nil;self.resumeButton=nil;self.endPauseButton=nil;self.resetButton=nil;self.pausePopup=nil;self.peekScopePopup=nil;self.websiteStatus=nil;self.exclusionsList=nil;self.displaysList=nil;self.sessionPresetsField=nil;self.callBackPresetsField=nil;self.exclusionText=nil;self.warmthSlider=nil;self.warmthLabel=nil;self.warmthTitle=nil;self.welcomeCard=nil;self.updateCheckbox=nil;self.updateButton=nil;self.updateStatusLabel=nil;self.thanksCard=nil;self.peekRecorder=nil;self.grayscaleRecorder=nil;self.peekNote=nil;self.loginNote=nil;self.grayscaleShortcutNote=nil;self.peekGrayButton=nil;self.peekWarmthButton=nil;self.peekNightButton=nil;self.clickPopup=nil;self.rightClickPopup=nil;self.grayOffPopup=nil;self.grayOnButton=nil;self.websiteRulesList=nil;self.tourCard=nil;self.noteViews=nil;self.advancedViews=nil;self.multiDisplayViews=nil;
+ self.settings=nil;self.settingsTabs=nil;self.statusText=nil;self.statusDetail=nil;self.autoButton=nil;self.lockNightButton=nil;self.loginButton=nil;self.grayscaleButton=nil;self.nightButton=nil;self.resumeButton=nil;self.endPauseButton=nil;self.resetButton=nil;self.pausePopup=nil;self.peekScopePopup=nil;self.websiteStatus=nil;self.exclusionsList=nil;self.displaysList=nil;self.sessionPresetsField=nil;self.callBackPresetsField=nil;self.exclusionText=nil;self.warmthSlider=nil;self.warmthLabel=nil;self.warmthTitle=nil;self.welcomeCard=nil;self.updateCheckbox=nil;self.updateButton=nil;self.updateStatusLabel=nil;self.thanksCard=nil;self.peekRecorder=nil;self.grayscaleRecorder=nil;self.peekNote=nil;self.loginNote=nil;self.grayscaleShortcutNote=nil;self.peekGrayButton=nil;self.peekWarmthButton=nil;self.peekNightButton=nil;self.clickPopup=nil;self.rightClickPopup=nil;self.grayOffPopup=nil;self.grayOnButton=nil;self.websiteRulesList=nil;self.tourCard=nil;self.noteViews=nil;self.advancedViews=nil;self.multiDisplayViews=nil;
  for(NSNumber *after in @[@1.0,@6.0])dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)(after.doubleValue*NSEC_PER_SEC)),dispatch_get_main_queue(),^{if(!self.settings)malloc_zone_pressure_relief(NULL,0);});  // once the window is truly gone, hand the freed pages back
 }
 - (void)rememberSettingsFrame {if(self.settings){self.keptSettingsFrame=self.settings.frame;self.keepSettingsFrame=YES;}}
@@ -1899,7 +1927,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  BOOL nightOn=NO;BOOL known=[self logicalNightShift:&nightOn];
  BOOL warmthOff=self.automatic&&self.policy.overrideMode<0&&known&&!nightOn;
  double strength=self.customWarmth?self.appWarmth/100*3:((mode==100||mode==101)&&!warmthOff?[self currentWarmth]:0);
- if(self.pausedUntil){effective=101;strength=0;}
+ if(self.pausedUntil||self.screenLocked){effective=101;strength=0;}
  else if(self.peeking){NSDictionary *e=[self peekEffects];if([e[@"grayscale"] boolValue])effective=101;if([e[@"warmth"] boolValue])strength=0;}
  if(mode!=self.selectedMode||effective!=self.effectiveMode||strength!=self.targetStrength)self.animateAppearance=YES;
  self.targetStrength=strength;
@@ -1914,15 +1942,15 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
    NSInteger eff=g==1?100:g==2?101:(self.grayOffUntil?101:mode);double str=custom?w/100*3:((mode==100||mode==101)&&!warmthOff?[self currentWarmth]:0);
    if([o[@"plain"] boolValue]){eff=101;str=0;}
    BOOL peekHere=(self.peeking&&(self.frontPeekDisplays?[self.frontPeekDisplays containsObject:dn]:(self.frontPeekSpansAll||!peekActiveOnly||d==self.peekDisplay)))||[self.peekLockedDisplays containsObject:dn];
-   if(self.pausedUntil){eff=101;str=0;}else if(peekHere){NSDictionary *e=[self peekEffects];if([e[@"grayscale"] boolValue])eff=101;if([e[@"warmth"] boolValue])str=0;}
+   if(self.pausedUntil||self.screenLocked){eff=101;str=0;}else if(peekHere){NSDictionary *e=[self peekEffects];if([e[@"grayscale"] boolValue])eff=101;if([e[@"warmth"] boolValue])str=0;}
    BOOL grayHere=eff==100||eff==1;NSArray *last=[self.warmth stateForDisplay:d];
-   if(last&&([last[0] doubleValue]!=str||[last[1] boolValue]!=grayHere)&&!self.quitting){__weak AppDelegate *weak=self;[self.warmth transitionStrength:str grayscale:grayHere display:d reduceMotion:reduce duration:0.5 completion:^{[weak.warmth applyStrength:str grayscale:grayHere display:d];}];}
+   if(last&&([last[0] doubleValue]!=str||[last[1] boolValue]!=grayHere)&&!self.quitting){__weak AppDelegate *weak=self;[self.warmth transitionStrength:str grayscale:grayHere display:d reduceMotion:reduce duration:self.fade completion:^{[weak.warmth applyStrength:str grayscale:grayHere display:d];}];}
    else if(!last||![self.warmth transitioning]){if(![self.warmth applyStrength:str grayscale:grayHere display:d])ok=NO;}
   }
-  return ok;
+  self.fade=0.5;return ok;
  }
  if(self.animateAppearance&&!self.quitting){if(self.engine.class==FilterEngine.class)NSLog(@"Less Pull appearance: global=%ld effective=%ld warmth=%.3f exception=%d following=%d",(long)mode,(long)effective,strength,(self.grayOverride||self.customWarmth),self.automatic);self.animateAppearance=NO;NSUInteger generation=++self.appearanceGeneration;self.selectedMode=mode;self.effectiveMode=effective;
-  [self.warmth transitionStrength:strength grayscale:gray reduceMotion:NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceMotion duration:0.5 completion:^{if(generation!=self.appearanceGeneration)return;[self.warmth applyStrength:strength grayscale:gray];}];return YES;
+  [self.warmth transitionStrength:strength grayscale:gray reduceMotion:NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceMotion duration:self.fade completion:^{if(generation!=self.appearanceGeneration)return;[self.warmth applyStrength:strength grayscale:gray];}];self.fade=0.5;return YES;
  }
  if(self.warmth.transitioning)return YES;
  BOOL ok=[self.warmth applyStrength:strength grayscale:gray];

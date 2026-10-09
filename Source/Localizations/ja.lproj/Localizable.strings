@@ -554,3 +554,6 @@
 "Every 5 minutes" = "5 分ごと";
 "Every 10 minutes" = "10 分ごと";
 "Every 15 minutes" = "15 分ごと";
+"Night Shift on the lock screen and screensaver" = "ロック画面とスクリーンセーバでも Night Shift";
+"The lock screen and the screensaver are drawn by macOS outside Less Pull’s reach, so they show color. With this on, Less Pull turns Night Shift to full warmth there whenever it is quieting your screen, and puts it back when you return. Your Night Shift schedule stays as it is." = "ロック画面とスクリーンセーバは macOS が Less Pull の届かないところで描くため、カラーのままです。これをオンにすると、Less Pull が画面を落ち着かせている間、そこでは Night Shift を最大の暖かさにし、戻ってきたときに元に戻します。Night Shift のスケジュールはそのままです。";
+"Drawn by macOS outside Less Pull’s reach, the lock screen and the screensaver show color. While Less Pull is quieting your screen, Night Shift goes to full warmth there and comes back as it was when you return." = "ロック画面とスクリーンセーバは macOS が Less Pull の届かないところで描くため、カラーのままです。Less Pull が画面を落ち着かせている間、そこでは Night Shift が最大の暖かさになり、戻ってきたときに元どおりになります。";

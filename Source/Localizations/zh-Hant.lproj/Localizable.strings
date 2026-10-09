@@ -554,3 +554,6 @@
 "Every 5 minutes" = "每 5 分鐘";
 "Every 10 minutes" = "每 10 分鐘";
 "Every 15 minutes" = "每 15 分鐘";
+"Night Shift on the lock screen and screensaver" = "在鎖定畫面和螢幕保護程式上開啟夜覽";
+"The lock screen and the screensaver are drawn by macOS outside Less Pull’s reach, so they show color. With this on, Less Pull turns Night Shift to full warmth there whenever it is quieting your screen, and puts it back when you return. Your Night Shift schedule stays as it is." = "鎖定畫面和螢幕保護程式由 macOS 在 Less Pull 碰不到的地方繪製，所以顯示彩色。開啟後，只要 Less Pull 正在讓螢幕安靜，就會在那裡把夜覽調到最暖，你回來時再恢復原狀。夜覽的排程保持不變。";
+"Drawn by macOS outside Less Pull’s reach, the lock screen and the screensaver show color. While Less Pull is quieting your screen, Night Shift goes to full warmth there and comes back as it was when you return." = "鎖定畫面和螢幕保護程式由 macOS 在 Less Pull 碰不到的地方繪製，顯示彩色。只要 Less Pull 正在讓螢幕安靜，那裡的夜覽就會調到最暖，你回來時恢復原狀。";
