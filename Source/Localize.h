@@ -4,6 +4,8 @@
 // only the language in use is in memory, and switching needs no restart: the app rebuilds
 // its windows and menus. L() returns the English text when a table has no entry.
 NSString *L(NSString *english);
+// A context key for a place that needs its own, often shorter, wording: the table may hold "Grayscale [rule row]"; English shows the fallback.
+NSString *LX(NSString *key,NSString *english);
 extern NSString *const LessPullLanguageChanged;
 @interface LessPullLanguage : NSObject
 + (NSArray<NSString *> *)available;        // language codes with a table in the bundle, English first
@@ -12,5 +14,7 @@ extern NSString *const LessPullLanguageChanged;
 + (NSString *)current;                     // the code in use ("en" when the table is English)
 + (NSString *)systemChoice;                // what "follow the system" resolves to
 + (NSString *)nameOf:(NSString *)code;     // the language's own name
++ (BOOL)isReviewed:(NSString *)code;       // read line by line by a native speaker; the others say "(experimental)" in the menu
++ (NSString *)menuNameOf:(NSString *)code; // the own name, with the experimental mark when due
 + (void)load;
 @end
