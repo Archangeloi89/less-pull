@@ -1,4 +1,4 @@
-/* Less Pull, Deutsch. Englisch ist der Schlüssel. Du-Form, wie macOS. Begriffe: Graustufen, Extra-Wärme, Night Shift, Blick in Farbe (Peek), Sitzung, Ausnahme, Kurzbefehl, Menüleiste, Display. */
+/* Less Pull, Deutsch. Englisch ist der Schlüssel. Du-Form, wie macOS. Begriffe: Graustufen, Extra-Wärme, Night Shift, Farbblick (Peek), Sitzung, Ausnahme, Kurzbefehl, Menüleiste, Display. */
 
 "   Off" = "   Aus";
 "   Use default" = "   Standard";
@@ -26,7 +26,7 @@
 "%@ — Extra Warmth percent" = "%@ – Extra-Wärme in Prozent";
 "%@ — more settings" = "%@ – weitere Einstellungen";
 "%@ — On every display" = "%@ – Auf jedem Display";
-"%@ — Peek toggles" = "%@ – Blick in Farbe schaltet";
+"%@ — Peek toggles" = "%@ – Farbblick schaltet";
 "%@ — Use default warmth" = "%@ – Standardwärme verwenden";
 "%@: what it shows" = "%@: was es zeigt";
 "%@\n%@\nClick for Grayscale, Extra Warmth and Night Shift." = "%@\n%@\nKlicken für Graustufen, Extra-Wärme und Night Shift.";
@@ -47,7 +47,7 @@
 "5, 9, 13, 33" = "5, 9, 13, 33";
 "\nBetterDisplay is running; it can change how displays look. HDR state is not read." = "\nBetterDisplay läuft; es kann das Bild der Displays verändern. Der HDR-Zustand wird nicht gelesen.";
 "A menu bar that is full: the » reveals the hidden icons; hold the Command key and drag the circle toward the clock" = "Eine volle Menüleiste: das » zeigt die verborgenen Symbole; halte die Befehlstaste und ziehe den Kreis Richtung Uhr";
-"A peek, when you need it" = "Ein Blick in Farbe, wenn du ihn brauchst";
+"A peek, when you need it" = "Ein Farbblick, wenn du ihn brauchst";
 "A quieter glow and sound while the session runs past its end, until you leave or end it." = "Ein leiseres Leuchten und ein leiserer Ton, solange die Sitzung über ihr Ende hinausläuft, bis du gehst oder sie beendest.";
 "A session" = "Eine Sitzung";
 "A session is a stretch of focused work with a gentle end. Start one from the menu. The icon shows the minutes left; at the end, a soft glow and a calm sound, and the count goes on past the end so you can finish your thought. When you leave, Less Pull can call you back once." = "Eine Sitzung ist eine Zeit konzentrierter Arbeit, die sanft ausklingt. Du startest sie im Menü. Das Symbol zeigt, wie viele Minuten noch bleiben; am Ende ein weiches Leuchten und ein ruhiger Ton, und der Zähler läuft weiter, damit du deinen Gedanken noch zu Ende bringen kannst. Wenn du gehst, kann Less Pull dich einmal zurückholen.";
@@ -65,7 +65,7 @@
 "Adds warmth on top of Night Shift, from Off to Red." = "Wärme zusätzlich zu Night Shift, von Aus bis Rot.";
 "Adds warmth on top of Night Shift. Off adds none; 100% is red. The slider is in the menu and in Settings." = "Legt Wärme über Night Shift. Aus fügt nichts hinzu, 100 % ist Rot. Den Regler findest du im Menü und in den Einstellungen.";
 "Adds warmth on top of Night Shift: Off adds none, 100% is red. The percentage is Less Pull’s own scale. When warmth follows Night Shift, the amount you set is used at night." = "Legt Wärme über Night Shift: Aus fügt nichts hinzu, 100 % ist Rot. Die Prozentzahl ist die eigene Skala von Less Pull. Folgt die Wärme Night Shift, gilt der eingestellte Wert nachts.";
-"After the end, remind me" = "Nach dem Ende erinnern";
+"After the end, remind me" = "Nach dem Sitzungsende erinnern";
 "All displays" = "Alle Displays";
 "All website exceptions…" = "Alle Website-Ausnahmen …";
 "Always plain, in color" = "Immer ohne Filter, in Farbe";
@@ -122,7 +122,7 @@
 "Could not find the release list; it is not public yet." = "Die Liste der Versionen wurde nicht gefunden; sie ist noch nicht öffentlich.";
 "Could not reach GitHub. Try again later." = "GitHub ist nicht erreichbar. Versuch es später noch einmal.";
 "Could not restore Night Shift after leaving this app." = "Night Shift ließ sich nach dem Verlassen dieser App nicht wiederherstellen.";
-"Count on, so I see how far I stretch" = "Weiterzählen, bis ich gehe";
+"Count on, so I see how far I stretch" = "Weiterzählen, bis ich schließe";
 "Count on: after the glow and the sound, the icon counts the minutes past the end and a click offers the way back. Stop quietly: the session simply ends with the glow and the sound, nothing more." = "Weiterzählen: Nach Leuchten und Ton zählt das Symbol die Minuten über das Ende hinaus, und ein Klick bietet den Weg zurück. Still enden: Die Sitzung hört mit Leuchten und Ton einfach auf, mehr nicht.";
 "Current app" = "Aktuelle App";
 "Default" = "Standard";
@@ -143,7 +143,7 @@
 "Don’t show again" = "Nicht mehr anzeigen";
 "Don’t show explanations" = "Erklärungen ausblenden";
 "Don’t show this again" = "Nicht mehr anzeigen";
-"Each display has its own matrix and its own fade. Follows what is on it: the app in front decides its display; every other display follows the app whose window is on top there, with its exception or your defaults. Peek has its own choice under Shortcuts." = "Jedes Display hat seine eigene Matrix und seine eigene Überblendung. „Folgt dem, was darauf liegt“: Die App im Vordergrund bestimmt ihr Display; jedes andere Display folgt der App, deren Fenster dort zuoberst liegt, mit ihrer Ausnahme oder deinen Standards. Der Blick in Farbe hat seine eigene Wahl unter „Kurzbefehle“.";
+"Each display has its own matrix and its own fade. Follows what is on it: the app in front decides its display; every other display follows the app whose window is on top there, with its exception or your defaults. Peek has its own choice under Shortcuts." = "Jedes Display hat seine eigene Matrix und seine eigene Überblendung. „Folgt dem, was darauf liegt“: Die App im Vordergrund bestimmt ihr Display; jedes andere Display folgt der App, deren Fenster dort zuoberst liegt, mit ihrer Ausnahme oder deinen Standards. Der Farbblick hat seine eigene Wahl unter „Kurzbefehle“.";
 "End" = "Ende";
 "End session" = "Sitzung beenden";
 "End the session without a call back." = "Beendet die Sitzung, ohne dich zurückzuholen.";
@@ -204,7 +204,7 @@
 "Hold %@ and the screen is in color for exactly as long as you hold it. Press it twice quickly to keep it; one more press returns. %@ turns Grayscale on or off. Both are set for you; change them under Shortcuts." = "Halte %@ gedrückt, und der Bildschirm ist genau so lange in Farbe, wie du hältst. Zweimal kurz drücken, und die Farbe bleibt; noch ein Druck, und sie geht wieder. %@ schaltet die Graustufen ein oder aus. Beides ist schon eingerichtet; ändern kannst du es unter „Kurzbefehle“.";
 "Hold a shortcut to see the plain display; let go to return. Press it twice quickly to keep the plain display until you press it again. Nothing is saved." = "Halte einen Kurzbefehl gedrückt, und du siehst den Bildschirm ohne Filter; lässt du los, kommt er zurück. Zweimal kurz drücken, und er bleibt ohne Filter, bis du erneut drückst. Nichts wird gespeichert.";
 "Hold the shortcut to see the plain display; let go to return. Press it twice quickly to keep it; press once more to return. Click to change it." = "Halte den Kurzbefehl gedrückt, und du siehst den Bildschirm ohne Filter; lässt du los, kommt er zurück. Zweimal kurz drücken, und er bleibt so; noch ein Druck, und er kommt zurück. Klicken zum Ändern.";
-"hold ⌥ A: color while held" = "⌥ A halten: Farbe, solange du hältst";
+"hold ⌥ A: color while held" = "⌥ A halten: in Farbe";
 "How loud the session sounds play. Let go to hear it." = "Wie laut die Töne der Sitzung sind. Loslassen, und du hörst es.";
 "If Night Shift is turned off for a while, that wins over an app’s Night Shift On. Grayscale Off, warmth Off and Night Shift Off together show the plain display." = "Ist Night Shift eine Weile ausgeschaltet, geht das vor dem „Night Shift ein“ einer App. Graustufen aus, Wärme aus und Night Shift aus zusammen zeigen den Bildschirm ohne Filter.";
 "in color" = "in Farbe";
@@ -222,7 +222,7 @@
 "Keep going        Leave quietly" = "Weitermachen        Leise gehen";
 "Keep this length as a chip for next time." = "Merkt sich diese Länge als Vorgabe fürs nächste Mal.";
 "Keep this time as a chip for next time." = "Merkt sich diese Zeit als Vorgabe fürs nächste Mal.";
-"keep ⌥, tap A twice: it stays" = "⌥ halten, A zweimal tippen: es bleibt";
+"keep ⌥, tap A twice: it stays" = "⌥ halten, A 2× tippen: bleibt";
 "Key %ld" = "Taste %ld";
 "Language" = "Sprache";
 "Later" = "Später";
@@ -320,15 +320,15 @@
 "Pause Less Pull shows the plain display for 15 minutes, an hour, or until you resume: color and no added warmth, with Night Shift left alone. Your settings and exceptions are kept, and the menu-bar icon shows a pause mark." = "„Less Pull pausieren“ zeigt den Bildschirm für 15 Minuten, eine Stunde oder bis du weitermachst ohne Filter: in Farbe und ohne zusätzliche Wärme, Night Shift bleibt unberührt. Deine Einstellungen und Ausnahmen bleiben erhalten, und das Symbol in der Menüleiste zeigt ein Pausezeichen.";
 "Paused until %@" = "Pausiert bis %@";
 "Paused until you resume" = "Pausiert, bis du weitermachst";
-"Peek in color" = "Blick in Farbe";
-"Peek in color shortcut" = "Kurzbefehl für den Blick in Farbe";
-"Peek on" = "Blick in Farbe auf";
-"Peek on:" = "Blick in Farbe auf:";
-"Peek toggles:" = "Blick in Farbe schaltet:";
-"Peek toggles: %@" = "Blick in Farbe schaltet: %@";
-"Peeking on one display · press the shortcut there to return" = "Blick in Farbe auf einem Display · dort den Kurzbefehl drücken, um zurückzukehren";
-"Peeking on several displays · press the shortcut on each to return" = "Blick in Farbe auf mehreren Displays · auf jedem den Kurzbefehl drücken, um zurückzukehren";
-"Peeking · press the shortcut to return" = "Blick in Farbe · Kurzbefehl drücken, um zurückzukehren";
+"Peek in color" = "Farbblick";
+"Peek in color shortcut" = "Farbblick-Kurzbefehl";
+"Peek on" = "Farbblick auf";
+"Peek on:" = "Farbblick auf:";
+"Peek toggles:" = "Farbblick schaltet:";
+"Peek toggles: %@" = "Farbblick schaltet: %@";
+"Peeking on one display · press the shortcut there to return" = "Farbblick auf einem Display · dort den Kurzbefehl drücken, um zurückzukehren";
+"Peeking on several displays · press the shortcut on each to return" = "Farbblick auf mehreren Displays · auf jedem den Kurzbefehl drücken, um zurückzukehren";
+"Peeking · press the shortcut to return" = "Farbblick · Kurzbefehl drücken, um zurückzukehren";
 "Photos" = "Fotos";
 "Pick a browser. Less Pull connects to it and opens its extensions page, with the steps to finish. Until the extension is in the stores, it is loaded from the folder inside the app." = "Wähle einen Browser. Less Pull verbindet sich mit ihm und öffnet seine Erweiterungsseite, mit den letzten Schritten. Bis die Erweiterung in den Stores ist, kommt sie aus dem Ordner in der App.";
 "Pick a shortcut that is free of macOS shortcuts and of Less Pull’s other shortcut." = "Wählt einen Kurzbefehl, der sich weder mit macOS noch mit dem anderen Kurzbefehl von Less Pull überschneidet.";
@@ -348,9 +348,9 @@
 "Quit Less Pull. The display returns to normal and Night Shift follows its schedule again." = "Beendet Less Pull. Das Display wird wieder normal, und Night Shift folgt wieder seinem Zeitplan.";
 "Quitting returns the display to normal and lets Night Shift follow its schedule again. Your settings and exceptions are kept." = "Beim Beenden wird das Display wieder normal, und Night Shift folgt wieder seinem Zeitplan. Deine Einstellungen und Ausnahmen bleiben erhalten.";
 "Read the Privacy Page" = "Datenschutzseite lesen";
-"Record a shortcut in Settings → Shortcuts, or let Suggest pick one that is free. Hold it to see the plain display; let go and Less Pull fades back. Press it twice quickly to keep the plain display; one more press returns. Choose there what peeking turns off: Grayscale, Extra Warmth, and Night Shift if you like. Nothing is saved and no exception is made." = "Nimm unter Einstellungen → Kurzbefehle einen Kurzbefehl auf, oder lass dir mit „Vorschlagen“ einen freien geben. Halte ihn gedrückt, und du siehst den Bildschirm ohne Filter; lässt du los, blendet Less Pull wieder ein. Zweimal kurz drücken, und er bleibt ohne Filter; noch ein Druck, und er kommt zurück. Dort wählst du auch, was der Blick in Farbe abschaltet: Graustufen, Extra-Wärme und auf Wunsch Night Shift. Nichts wird gespeichert, keine Ausnahme angelegt.";
+"Record a shortcut in Settings → Shortcuts, or let Suggest pick one that is free. Hold it to see the plain display; let go and Less Pull fades back. Press it twice quickly to keep the plain display; one more press returns. Choose there what peeking turns off: Grayscale, Extra Warmth, and Night Shift if you like. Nothing is saved and no exception is made." = "Nimm unter Einstellungen → Kurzbefehle einen Kurzbefehl auf, oder lass dir mit „Vorschlagen“ einen freien geben. Halte ihn gedrückt, und du siehst den Bildschirm ohne Filter; lässt du los, blendet Less Pull wieder ein. Zweimal kurz drücken, und er bleibt ohne Filter; noch ein Druck, und er kommt zurück. Dort wählst du auch, was der Farbblick abschaltet: Graustufen, Extra-Wärme und auf Wunsch Night Shift. Nichts wird gespeichert, keine Ausnahme angelegt.";
 "Record Shortcut" = "Aufnehmen";
-"Remind me after the end" = "Nach dem Ende erinnern";
+"Remind me after the end" = "Nach dem Sitzungsende erinnern";
 "Remind me in a month" = "In einem Monat erinnern";
 "Remove" = "Entfernen";
 "Remove %@ exception" = "Ausnahme für %@ entfernen";
@@ -394,7 +394,7 @@
 "Shows color for a while, then Grayscale comes back by itself. Your Grayscale setting stays saved; exceptions still apply." = "Zeigt eine Weile Farbe, dann kommen die Graustufen von selbst zurück. Deine Graustufen-Einstellung bleibt gespeichert; Ausnahmen gelten weiter.";
 "Shows everything in shades of gray, day and night. Night Shift does not change this. Exceptions for apps and websites can." = "Zeigt alles in Grautönen, Tag und Nacht. Night Shift ändert daran nichts. Ausnahmen für Apps und Websites schon.";
 "Shows everything in shades of gray, day and night. Turn it off to see color again." = "Zeigt alles in Grautönen, Tag und Nacht. Schalte es aus, um wieder Farbe zu sehen.";
-"Shows the fine-tuning in every tab: what Peek turns off, what the mouse buttons do, the session sound and glow, and display options with one display. Everything keeps working as set when hidden." = "Zeigt in jedem Bereich die Feinheiten: was der Blick in Farbe abschaltet, was die Maustasten tun, Ton und Leuchten der Sitzung, Display-Optionen schon bei einem Display. Ausgeblendet wirkt alles weiter, wie du es eingestellt hast.";
+"Shows the fine-tuning in every tab: what Peek turns off, what the mouse buttons do, the session sound and glow, and display options with one display. Everything keeps working as set when hidden." = "Zeigt in jedem Bereich die Feinheiten: was der Farbblick abschaltet, was die Maustasten tun, Ton und Leuchten der Sitzung, Display-Optionen schon bei einem Display. Ausgeblendet wirkt alles weiter, wie du es eingestellt hast.";
 "Shows the glow and plays the sound once, as at the end of a session." = "Zeigt das Leuchten und spielt den Ton einmal, wie am Ende einer Sitzung.";
 "Shows the plain display for a while: color and no added warmth. Night Shift is left alone. Your settings and exceptions are kept." = "Zeigt den Bildschirm eine Weile ohne Filter: in Farbe und ohne zusätzliche Wärme. Night Shift bleibt unberührt. Deine Einstellungen und Ausnahmen bleiben erhalten.";
 "Shows the supported browsers that are not installed on this Mac." = "Zeigt die unterstützten Browser, die auf diesem Mac nicht installiert sind.";
@@ -410,13 +410,13 @@
 "Stop quietly" = "Still enden";
 "Strokes: the gong in three strokes at the end, two rising notes for the call back. Chords: each as one soft chord. Both on 432 Hz and the solfeggio pitches." = "Schläge: am Ende der Gong in drei Schlägen, zum Zurückholen zwei aufsteigende Töne. Akkorde: jeweils ein weicher Akkord. Beides auf 432 Hz und den Solfeggio-Frequenzen.";
 "Suggest" = "Vorschlagen";
-"Suggest a Peek in color shortcut" = "Einen Kurzbefehl für den Blick in Farbe vorschlagen";
+"Suggest a Peek in color shortcut" = "Einen Kurzbefehl für den Farbblick vorschlagen";
 "Suggest a Toggle Grayscale shortcut" = "Einen Kurzbefehl zum Umschalten der Graustufen vorschlagen";
 "Support Jiri Arion Rose — Buy me a coffee" = "Jiri Arion Rose unterstützen – Spendier mir einen Kaffee";
 "Support my work" = "Meine Arbeit unterstützen";
 "Support my work — Buy me a coffee" = "Meine Arbeit unterstützen – Spendier mir einen Kaffee";
 "System Color Tint" = "Farbtönung des Systems";
-"tap A once: back" = "A einmal tippen: zurück";
+"tap A once: back" = "A tippen: zurück";
 "Technical details for troubleshooting." = "Technische Details zur Fehlersuche.";
 "That shortcut could not be registered; it may be taken by another app. Click to choose another." = "Dieser Kurzbefehl ließ sich nicht anmelden; vielleicht nutzt ihn eine andere App. Klicken, um einen anderen zu wählen.";
 "That was %@." = "Das waren %@.";
@@ -432,7 +432,7 @@
 "The Less Pull menu-bar icon" = "Das Symbol von Less Pull in der Menüleiste";
 "The menu-bar icon and shortcuts" = "Das Symbol in der Menüleiste und die Kurzbefehle";
 "The next page." = "Die nächste Seite.";
-"the Peek shortcut" = "den Kurzbefehl für den Blick in Farbe";
+"the Peek shortcut" = "den Farbblick-Kurzbefehl";
 "The previous page." = "Die vorige Seite.";
 "The Safari extension is not in this build" = "Die Safari-Erweiterung ist in diesem Build nicht enthalten";
 "The screen, quieter" = "Ein ruhigerer Bildschirm";
@@ -460,7 +460,7 @@
 "Turn Night Shift off for…" = "Night Shift aus für …";
 "Turn Off" = "Ausschalten";
 "Turn On" = "Einschalten";
-"Turned off while you hold the Peek shortcut." = "Ist aus, solange du den Kurzbefehl für den Blick in Farbe gedrückt hältst.";
+"Turned off while you hold the Peek shortcut." = "Ist aus, solange du den Kurzbefehl für den Farbblick gedrückt hältst.";
 "Turns Night Shift off for a while and back on afterwards, if your schedule still wants it on. Grayscale stays as it is. Quitting Less Pull ends the timed off." = "Schaltet Night Shift eine Weile aus und danach wieder ein, falls dein Zeitplan es dann noch will. Die Graustufen bleiben, wie sie sind. Beendest du Less Pull, endet die Auszeit.";
 "Turns Night Shift on or off now. Your Night Shift schedule in System Settings stays as it is and may change it again later." = "Schaltet Night Shift jetzt ein oder aus. Dein Night-Shift-Zeitplan in den Systemeinstellungen bleibt, wie er ist, und kann es später wieder ändern.";
 "Turns Night Shift on or off now; your schedule in System Settings stays as it is." = "Schaltet Night Shift jetzt ein oder aus; dein Zeitplan in den Systemeinstellungen bleibt, wie er ist.";
@@ -496,16 +496,16 @@
 "What the browser extension can see" = "Was die Browser-Erweiterung sehen kann";
 "What the left and right mouse buttons do on the menu-bar icon. Control-click counts as a right-click." = "Was linke und rechte Maustaste auf dem Symbol in der Menüleiste tun. Ein Ctrl-Klick zählt als Rechtsklick.";
 "What this display shows. Follows what is on it: the app in front, or the app on top here, or your defaults. Always your defaults: exceptions never apply here. Always plain: never grayscale or warmth here." = "Was dieses Display zeigt. „Folgt dem, was darauf liegt“: die App im Vordergrund, oder die App, die hier zuoberst liegt, oder deine Standards. „Immer deine Standards“: Ausnahmen gelten hier nie. „Immer ohne Filter“: hier nie Graustufen oder Wärme.";
-"Which displays Peek toggles while this app is in front: the display under the pointer, all displays, or any set of connected displays you tick. Works whether or not the exception is used." = "Welche Displays der Blick in Farbe schaltet, solange diese App vorn liegt: das Display unter dem Zeiger, alle Displays oder die angeschlossenen Displays, die du ankreuzt. Wirkt unabhängig davon, ob die Ausnahme verwendet wird.";
-"Which displays Peek toggles while this site is in front." = "Welche Displays der Blick in Farbe schaltet, solange diese Site vorn liegt.";
-"While a session runs, a click on the icon opens the session panel; the other mouse button opens the menu. The Peek and Toggle shortcuts keep working." = "Während eine Sitzung läuft, öffnet ein Klick auf das Symbol das Sitzungsfenster; die andere Maustaste öffnet das Menü. Die Kurzbefehle für Blick in Farbe und Umschalten funktionieren weiter.";
-"While peeking, turn off %@" = "Beim Blick in Farbe abschalten: %@";
-"While peeking, turn off:" = "Beim Blick in Farbe abschalten:";
+"Which displays Peek toggles while this app is in front: the display under the pointer, all displays, or any set of connected displays you tick. Works whether or not the exception is used." = "Welche Displays der Farbblick schaltet, solange diese App vorn liegt: das Display unter dem Zeiger, alle Displays oder die angeschlossenen Displays, die du ankreuzt. Wirkt unabhängig davon, ob die Ausnahme verwendet wird.";
+"Which displays Peek toggles while this site is in front." = "Welche Displays der Farbblick schaltet, solange diese Site vorn liegt.";
+"While a session runs, a click on the icon opens the session panel; the other mouse button opens the menu. The Peek and Toggle shortcuts keep working." = "Während eine Sitzung läuft, öffnet ein Klick auf das Symbol das Sitzungsfenster; die andere Maustaste öffnet das Menü. Die Kurzbefehle für Farbblick und Umschalten funktionieren weiter.";
+"While peeking, turn off %@" = "Beim Farbblick abschalten: %@";
+"While peeking, turn off:" = "Beim Farbblick abschalten:";
 "While this site is in front, its settings cover every display, not only the one the browser window is on." = "Solange diese Site vorn liegt, gelten ihre Einstellungen auf jedem Display, nicht nur auf dem mit dem Browserfenster.";
 "Whole domain" = "Ganze Domain";
 "Whole domain · %@" = "Ganze Domain · %@";
 "Whole domain, including subdomains" = "Ganze Domain, mit Subdomains";
-"With more than one display: peek only on the display under the mouse pointer (a double press keeps that display plain; the next press there lets go, so each display is toggled on its own), or everywhere at once." = "Bei mehreren Displays: Blick in Farbe nur auf dem Display unter dem Mauszeiger (ein Doppeldruck behält das unveränderte Bild dort; der nächste Druck dort lässt los, so wird jedes Display für sich geschaltet), oder überall zugleich.";
+"With more than one display: peek only on the display under the mouse pointer (a double press keeps that display plain; the next press there lets go, so each display is toggled on its own), or everywhere at once." = "Bei mehreren Displays: Farbblick nur auf dem Display unter dem Mauszeiger (ein Doppeldruck behält das unveränderte Bild dort; der nächste Druck dort lässt los, so wird jedes Display für sich geschaltet), oder überall zugleich.";
 "With Opens the menu, a right-click (or Control-click) toggles Grayscale. With Toggles Grayscale, a right-click opens the menu." = "Bei „Öffnet das Menü“ schaltet ein Rechtsklick (oder Ctrl-Klick) die Graustufen um. Bei „Schaltet die Graustufen um“ öffnet ein Rechtsklick das Menü.";
 "You have %@.\n\n%@\n\nInstalling is still by hand: download the new version, quit Less Pull, and replace it in Applications. Your settings and exceptions are kept." = "Du hast %@.\n\n%@\n\nInstalliert wird noch von Hand: Lade die neue Version, beende Less Pull und ersetze es im Ordner „Programme“. Deine Einstellungen und Ausnahmen bleiben erhalten.";
 "You have arrived somewhere quieter.\n\nLess Pull takes the color out of your screen, so it pulls at you less — a little like stepping out of a loud room into a still one, or leaving the devices behind for a day outside. What matters is still here. It just stops shouting." = "Du bist an einem ruhigeren Ort angekommen.\n\nLess Pull nimmt deinem Bildschirm die Farbe, damit er weniger an dir zerrt – ein bisschen, wie aus einem lauten Raum in einen stillen zu treten, oder die Geräte für einen Tag draußen liegen zu lassen. Was zählt, ist noch da. Es schreit nur nicht mehr.";
@@ -534,3 +534,5 @@
 "current app" = "aktuelle App";
 "Less" = "Weniger";
 "More" = "Mehr";
+"Hide" = "Ausblenden";
+"Hides this card for now. Tick the box below to keep it away for good." = "Blendet die Karte vorerst aus. Mit dem Häkchen darunter bleibt sie für immer weg.";
