@@ -73,3 +73,5 @@ French (build 33), experimental.
 Italian (build 33), experimental; Spanish and French re-read from the function of each control (the localizing guide now carries a functional glossary): "Turn Grayscale off for…" became "back to color for…", "Leave quietly" became "leave it here", the rule-row checkbox "in use", the segments "Auto".
 
 Brazilian Portuguese (build 33), experimental; a Mac set to another regional form of a language (pt-PT, zh) falls back to the regional table the app has.
+
+Dutch (build 33), experimental.
