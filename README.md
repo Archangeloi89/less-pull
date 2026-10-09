@@ -258,6 +258,10 @@ Anyone may use the unmodified app and extension for free, at home or in a busine
 
 Less Pull is source-available, not open source. The [app license](LICENSE-APP.txt) and the [source license](LICENSE-SOURCE.txt) are the terms that count, and [the licensing overview](docs/LICENSING.md) summarizes them.
 
+## In your language
+
+Less Pull speaks the language of your Mac, and you can choose another under Settings → General → Language; the change is immediate, no restart. English and German so far. Each language is one small text file that is read only when in use, so more languages cost nothing. See [docs/LOCALIZING.md](docs/LOCALIZING.md) to add one.
+
 ## Make it yours
 
 You may change your own copy as you like; the author's name and links on the About tab stay, and you can add your own beside them. What survives updates is written down: preferences, hook scripts and replaceable sounds need no rebuild and survive every update; a few folders in the source are never rewritten by updates; the rest is internal. The [customizing guide](docs/CUSTOMIZING.md) and the machine-readable [`compat.json`](docs/compat.json) are the contract, and `tools/compat-check.sh` tells you, or your agent, which of your changes are in the compatible range.
