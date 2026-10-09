@@ -86,7 +86,7 @@
 "Browser setup could not finish" = "Die Browser-Einrichtung konnte nicht abgeschlossen werden";
 "Build %@: " = "Build %@: ";
 "Buy me a coffee" = "Kaffee spendieren";
-"By default a click opens the menu and a right-click (or Control-click) toggles Grayscale; Settings → Shortcuts can swap the two. A Toggle Grayscale shortcut can be recorded there as well." = "Standardmäßig öffnet ein Klick das Menü, ein Rechtsklick (oder Ctrl-Klick) schaltet die Graustufen um; unter Einstellungen → Kurzbefehle lässt sich das tauschen. Dort kannst du auch einen Kurzbefehl zum Umschalten der Graustufen aufnehmen.";
+"By default a click opens the menu and a right-click (or Control-click, or a two-finger tap) opens the session panel; Settings → Shortcuts can give either button the menu, Grayscale or the session panel. A Toggle Grayscale shortcut can be recorded there as well." = "Standardmäßig öffnet ein Klick das Menü, ein Rechtsklick (oder Ctrl-Klick, oder Tippen mit zwei Fingern) das Sitzungsfenster; unter Einstellungen → Kurzbefehle bekommt jede Taste das Menü, die Graustufen oder das Sitzungsfenster. Dort kannst du auch einen Kurzbefehl zum Umschalten der Graustufen aufnehmen.";
 "Call back" = "Zurückholen";
 "Call me back in" = "Hol mich zurück in";
 "Call me back in %ld min" = "Hol mich zurück in %ld Min.";
@@ -232,6 +232,10 @@
 "Leaving now…" = "Ich gehe jetzt …";
 "Leaving? Call me back in" = "Du gehst? Hol mich zurück in";
 "Right-clicking the menu-bar icon" = "Rechtsklick aufs Symbol";
+"Left-clicking the menu-bar icon" = "Linksklick aufs Symbol";
+"What the left mouse button does on the menu-bar icon." = "Was die linke Maustaste auf dem Symbol in der Menüleiste tut.";
+"What the right mouse button does on the menu-bar icon. Control-click and a two-finger tap on the trackpad count as a right-click." = "Was die rechte Maustaste auf dem Symbol in der Menüleiste tut. Ctrl-Klick und Zwei-Finger-Tippen aufs Trackpad zählen als Rechtsklick.";
+"A Control-click or a two-finger tap on the trackpad counts as a right-click. One of the two always opens the menu. Opens the session panel starts a session, or opens the panel of the one running." = "Ein Ctrl-Klick oder ein Tippen mit zwei Fingern aufs Trackpad zählt als Rechtsklick. Eine der beiden Tasten öffnet immer das Menü. „Öffnet das Sitzungsfenster“ startet eine Sitzung oder öffnet das Fenster der laufenden.";
 "Less Pull" = "Less Pull";
 "Less Pull %@ (%@)\n\n%@\n%@\nDisplays: %lu, each with its own matrix\nDisplay events: %lu; recoveries: %lu\nGrayscale setting: %@; grayscale showing now: %@; exception active: %@%@\n\nNight Shift drives “Extra Warmth follows Night Shift”; it does not prove the display looks warmer." = "Less Pull %@ (%@)\n\n%@\n%@\nDisplays: %lu, jedes mit eigener Matrix\nDisplay-Ereignisse: %lu; Wiederherstellungen: %lu\nGraustufen eingestellt: %@; Graustufen gerade sichtbar: %@; Ausnahme aktiv: %@%@\n\nNight Shift steuert „Extra-Wärme folgt Night Shift“; es beweist nicht, dass das Display wärmer aussieht.";
 "Less Pull %@ is available" = "Less Pull %@ ist verfügbar";

@@ -59,3 +59,7 @@ Thank-you card and small fixes (build 33): the card has a warm tint, an ember Su
 Share, and one width (build 33): a Share button on About and a quiet "Tell a friend" on the thank-you card open the macOS share sheet with the project page and one line about the app. The thank-you card sits in three rows: Support and Remind; the links with Tell a friend and Hide; the box for good under Hide. The settings window is 500 pt in every language again; the width ratchet is gone, and the German lines that pushed a row past 500 are shorter (Farbblick:, Jedes Display, Farbblick ohne:, Standardwärme, Kaffee spendieren, Tour, Vorschlag).
 
 Right-click to the session (build 33): the mouse-button setting on Shortcuts now names the right button and has a third choice, "Opens the session panel": a right-click (Control-click, two-finger tap) starts a session or opens the panel of the one running, and the left button always opens the menu.
+
+Two buttons, two choices (build 33): Shortcuts has one choice for the left and one for the right mouse button on the icon (Opens the menu, Toggles Grayscale, Opens the session panel); one of the two always opens the menu, and they never do the same thing. The settings window remembers where you last put it, across launches and updates.
+
+And the default (build 33): the left button opens the menu, the right button opens the session panel; a copy that had chosen "left toggles Grayscale" keeps that.
