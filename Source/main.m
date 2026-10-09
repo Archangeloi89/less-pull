@@ -194,7 +194,7 @@ static NSString *const LessPullOldBundleIdentifier=@"local.nightshiftfilters.app
 @property ExclusionPolicy *exclusion;
 @property BOOL excludeGray,excludeNight,excludeWarmth,quitting,animateAppearance;
 // Lock screen and screensaver: macOS draws them outside the display adjustments, so the session is handed over plain and faded back in on return; Night Shift, which the system does honor there, is raised to full warmth meanwhile.
-@property BOOL screenLockedFlag,saverFlag,lockQuieting;@property NSNumber *lockStrength;@property double fade;@property NSButton *lockNightButton;
+@property BOOL screenLockedFlag,saverFlag,lockQuieting;@property NSNumber *lockStrength;@property(nonatomic) double fade;@property NSButton *lockNightButton;
 @property NSTimer *visibilityTimer;
 // Per display: where the frontmost app's windows are, and for the other displays the exception of the app on top there (or the defaults).
 @property NSSet<NSNumber *> *frontDisplays;

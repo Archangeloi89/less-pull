@@ -59,4 +59,5 @@ if [[ -n "${LESS_PULL_NOTARY_PROFILE:-}" ]]; then
 fi
 rm -rf "../Less Pull.app"
 ditto --norsrc "$APP" "../Less Pull.app"
+xattr -cr "../Less Pull.app"  # Finder attributes on the copy would count as detritus for Gatekeeper
 ditto -c -k --keepParent --norsrc "$APP" "../Less Pull.zip"
