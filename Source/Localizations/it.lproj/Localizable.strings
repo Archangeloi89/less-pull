@@ -547,9 +547,6 @@
 "Every 5 minutes" = "Ogni 5 minuti";
 "Every 10 minutes" = "Ogni 10 minuti";
 "Every 15 minutes" = "Ogni 15 minuti";
-"Night Shift on the lock screen and screensaver" = "Night Shift su blocco schermo e salvaschermo";
-"The lock screen and the screensaver are drawn by macOS outside Less Pull’s reach, so they show color. With this on, Less Pull turns Night Shift to full warmth there whenever it is quieting your screen, and puts it back when you return. Your Night Shift schedule stays as it is." = "macOS disegna il blocco schermo e il salvaschermo fuori dalla portata di Less Pull, perciò restano a colori. Con questa opzione, Less Pull porta lì Night Shift al massimo calore finché sta calmando il tuo schermo, e lo rimette com’era al tuo ritorno. La programmazione di Night Shift non cambia.";
-"Drawn by macOS outside Less Pull’s reach, the lock screen and the screensaver show color. While Less Pull is quieting your screen, Night Shift goes to full warmth there and comes back as it was when you return." = "macOS disegna il blocco schermo e il salvaschermo fuori dalla portata di Less Pull; restano a colori. Finché Less Pull calma il tuo schermo, Night Shift va lì al massimo calore e torna com’era al tuo ritorno.";
 "The local bridge could not be registered." = "Non è stato possibile registrare il collegamento locale.";
 "Less Pull is running from a temporary copy that macOS makes when an app is opened where it was downloaded. Move Less Pull into the Applications folder, open it from there, and try again." = "Less Pull sta girando da una copia temporanea che macOS crea quando un’app viene aperta dove è stata scaricata. Sposta Less Pull nella cartella Applicazioni, aprilo da lì e riprova.";
 "Start tour and setup" = "Avvia tour e configurazione";
@@ -593,3 +590,10 @@
 "Downloads the update, checks it, replaces the app and reopens it." = "Scarica l’aggiornamento, lo verifica, sostituisce l’app e la riapre.";
 "Install update" = "Installa aggiornamento";
 "An update is ready." = "Un aggiornamento è pronto.";
+"Lock screen:" = "Blocco schermo:";
+"Screensaver:" = "Salvaschermo:";
+"Grayscale on the lock screen while Less Pull has it on. It needs a built-in display." = "Scala di grigi sul blocco schermo finché Less Pull la tiene attiva. Serve uno schermo integrato.";
+"Night Shift at full warmth on the lock screen while Less Pull is quieting your screen. Your schedule stays as it is." = "Night Shift al massimo calore sul blocco schermo finché Less Pull calma il tuo schermo. La programmazione non cambia.";
+"Grayscale while the screensaver runs and Less Pull has it on. It needs a built-in display." = "Scala di grigi mentre gira il salvaschermo e Less Pull la tiene attiva. Serve uno schermo integrato.";
+"Night Shift at full warmth while the screensaver runs and Less Pull is quieting your screen. Your schedule stays as it is." = "Night Shift al massimo calore mentre gira il salvaschermo e Less Pull calma il tuo schermo. La programmazione non cambia.";
+"What the lock screen and the screensaver keep of Less Pull. Grayscale there needs a built-in display; an external display shows only the Night Shift choice. Everything goes back as it was when you return." = "Cosa blocco schermo e salvaschermo tengono di Less Pull. I grigi lì richiedono uno schermo integrato; uno esterno mostra solo la scelta Night Shift. Tutto torna com’era al tuo ritorno.";

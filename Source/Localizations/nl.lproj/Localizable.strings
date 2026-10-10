@@ -547,9 +547,6 @@
 "Every 5 minutes" = "Elke 5 minuten";
 "Every 10 minutes" = "Elke 10 minuten";
 "Every 15 minutes" = "Elke 15 minuten";
-"Night Shift on the lock screen and screensaver" = "Night Shift op vergrendelscherm en schermbeveiliging";
-"The lock screen and the screensaver are drawn by macOS outside Less Pull’s reach, so they show color. With this on, Less Pull turns Night Shift to full warmth there whenever it is quieting your screen, and puts it back when you return. Your Night Shift schedule stays as it is." = "macOS tekent het vergrendelscherm en de schermbeveiliging buiten het bereik van Less Pull, daarom zijn ze in kleur. Met dit aan zet Less Pull Night Shift daar op volle warmte zolang het je scherm rustig houdt, en zet het terug zoals het was wanneer je terugkomt. Je Night Shift-schema blijft zoals het is.";
-"Drawn by macOS outside Less Pull’s reach, the lock screen and the screensaver show color. While Less Pull is quieting your screen, Night Shift goes to full warmth there and comes back as it was when you return." = "macOS tekent het vergrendelscherm en de schermbeveiliging buiten het bereik van Less Pull; ze zijn in kleur. Zolang Less Pull je scherm rustig houdt, gaat Night Shift daar op volle warmte en is het weer zoals het was wanneer je terugkomt.";
 "The local bridge could not be registered." = "De lokale verbinding kon niet worden geregistreerd.";
 "Less Pull is running from a temporary copy that macOS makes when an app is opened where it was downloaded. Move Less Pull into the Applications folder, open it from there, and try again." = "Less Pull draait vanuit een tijdelijke kopie die macOS maakt wanneer een app wordt geopend waar hij is gedownload. Verplaats Less Pull naar de map Apps, open het van daaruit en probeer het opnieuw.";
 "Start tour and setup" = "Rondleiding en installatie starten";
@@ -593,3 +590,10 @@
 "Downloads the update, checks it, replaces the app and reopens it." = "Downloadt de update, controleert hem, vervangt de app en opent hem opnieuw.";
 "Install update" = "Update installeren";
 "An update is ready." = "Er staat een update klaar.";
+"Lock screen:" = "Vergrendelscherm:";
+"Screensaver:" = "Schermbeveiliging:";
+"Grayscale on the lock screen while Less Pull has it on. It needs a built-in display." = "Grijstinten op het vergrendelscherm zolang Less Pull ze aan heeft. Vereist een ingebouwd scherm.";
+"Night Shift at full warmth on the lock screen while Less Pull is quieting your screen. Your schedule stays as it is." = "Night Shift op volle warmte op het vergrendelscherm zolang Less Pull je scherm rustig houdt. Je schema blijft zoals het is.";
+"Grayscale while the screensaver runs and Less Pull has it on. It needs a built-in display." = "Grijstinten terwijl de schermbeveiliging loopt en Less Pull ze aan heeft. Vereist een ingebouwd scherm.";
+"Night Shift at full warmth while the screensaver runs and Less Pull is quieting your screen. Your schedule stays as it is." = "Night Shift op volle warmte terwijl de schermbeveiliging loopt en Less Pull je scherm rustig houdt. Je schema blijft zoals het is.";
+"What the lock screen and the screensaver keep of Less Pull. Grayscale there needs a built-in display; an external display shows only the Night Shift choice. Everything goes back as it was when you return." = "Wat vergrendelscherm en schermbeveiliging van Less Pull houden. Grijstinten daar vereisen een ingebouwd scherm; een extern scherm toont alleen de Night Shift-keuze. Alles is weer zoals het was wanneer je terugkomt.";
