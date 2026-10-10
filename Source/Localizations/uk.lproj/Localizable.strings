@@ -144,7 +144,7 @@
 "Don’t show again" = "Більше не показувати";
 "Don’t show explanations" = "Сховати пояснення";
 "Don’t show this again" = "Більше не показувати";
-"Each display can follow what is on it: the app you are using sets its own display, and every other display follows the app on top there. Peek has its own choice under Shortcuts." = "Кожен екран може йти за тим, що на ньому: програма, якою ви користуєтеся, визначає свій екран, а кожен інший екран іде за програмою, яка там зверху. У погляду в кольорі своє налаштування в «Сполученнях».";
+"Each display can follow what is on it: the app you are using sets its own display, and every other display follows the app on top there. Peek has its own choice under “Shortcuts”." = "Кожен екран може йти за тим, що на ньому: програма, якою ви користуєтеся, визначає свій екран, а кожен інший екран іде за програмою, яка там зверху. У погляду в кольорі своє налаштування в «Сполученнях».";
 "End" = "Кінець";
 "End session" = "Завершити сесію";
 "End the session without a call back." = "Завершити сесію, не кликати назад.";
@@ -154,7 +154,7 @@
 "Night Shift comes back on now." = "Night Shift знову вмикається зараз.";
 "Night Shift comes back now if your schedule wants it on. The app you are using keeps its own Night Shift setting." = "Night Shift повернеться зараз, якщо розклад хоче його ввімкнути. У програми, якою ви користуєтеся, лишається своє налаштування Night Shift.";
 "Night Shift stays off for now, because your schedule has it off at this hour." = "Night Shift поки лишається вимкненим: у цей час розклад тримає його вимкненим.";
-"English and German are read line by line. A language marked experimental is written with care but not yet checked by a native speaker. If something sounds off, Report a Problem on the About tab reaches me." = "Англійську і німецьку вичитано рядок за рядком. Мова з позначкою «експериментальна» написана уважно, але носій її ще не читав. Якщо щось звучить не так, «Звіт…» на вкладці «Про програму» дійде до мене.";
+"English and German are read line by line. A language marked experimental is written with care but not yet checked by a native speaker. If something sounds off, “Report a Problem…” under “About” reaches me." = "Англійську і німецьку вичитано рядок за рядком. Мова з позначкою «експериментальна» написана уважно, але носій її ще не читав. Якщо щось звучить не так, «Звіт…» на вкладці «Про програму» дійде до мене.";
 "Everything else stays on this Mac: no account, no analytics, no servers. The browser extension talks only to the app." = "Усе інше лишається на цьому Mac: ні облікового запису, ні статистики, ні серверів. Розширення браузера спілкується лише з програмою.";
 "Exact page" = "Лише ця сторінка";
 "Exception for %@" = "Виняток для %@";
@@ -207,9 +207,9 @@
 "Hide uninstalled browsers" = "Сховати невстановлені браузери";
 "Hides the gray explanations under the settings, like this one. The ? next to each setting still explains it." = "Ховає сірі пояснення під налаштуваннями — як це. «?» біля кожного налаштування й далі його пояснює.";
 "Hides this card for now. Tick the box below to hide it for good." = "Ховає цю картку на час. Позначте поле нижче, щоб сховати її назовсім.";
-"Hold %@ and the screen shows color for as long as you hold it. Press it twice quickly to keep it, once more to return. %@ turns Grayscale on or off. You can change both under Shortcuts." = "Утримуйте %@ — і екран у кольорі, поки ви тримаєте. Натисніть двічі швидко, щоб колір лишився, ще раз — щоб повернутися. %@ вмикає й вимикає відтінки сірого. Обидва можна змінити в «Сполученнях».";
+"Hold %@ and the screen shows color for as long as you hold it. Press it twice quickly to keep it, once more to return. %@ turns Grayscale on or off. You can change both under “Shortcuts”." = "Утримуйте %@ — і екран у кольорі, поки ви тримаєте. Натисніть двічі швидко, щоб колір лишився, ще раз — щоб повернутися. %@ вмикає й вимикає відтінки сірого. Обидва можна змінити в «Сполученнях».";
 "Hold the shortcut to see the plain display; let go to return. Press it twice quickly to keep the plain display until you press it again. Your settings stay as they are." = "Утримуйте сполучення, щоб побачити екран без фільтра; відпустіть — і все повернеться. Натисніть двічі швидко, щоб екран лишився без фільтра до наступного натискання. Ваші налаштування не змінюються.";
-"Hold the shortcut to see the plain display; let go to return. Press it twice quickly to keep it, once more to return. Click here to record a different shortcut." = "Утримуйте сполучення, щоб побачити екран без фільтра; відпустіть — і все повернеться. Натисніть двічі швидко, щоб лишити так, ще раз — щоб повернутися. Натисніть тут, щоб записати інше сполучення.";
+"Hold the shortcut to see the plain display; let go to return. Press it twice quickly to keep it, once more to return. Click the shortcut on the right to record a new one." = "Утримуйте сполучення, щоб побачити екран без фільтра; відпустіть — і все повернеться. Натисніть двічі швидко, щоб лишити так, ще раз — щоб повернутися. Натисніть на сполучення праворуч, щоб записати нове.";
 "hold ⌥ A: color while held" = "тримайте ⌥ A: у кольорі";
 "How loud the session sounds are. Let go to hear it." = "Гучність звуків сесії. Відпустіть, щоб почути.";
 "Night Shift turned off for a while stays off, even for an app that turns it on. Grayscale, warmth and Night Shift all off show the plain display." = "Якщо вимкнути Night Shift на час, він лишиться вимкненим навіть для програми, яка його вмикає. Відтінки сірого, тепло і Night Shift, вимкнені разом, дають екран без фільтра.";
@@ -255,7 +255,7 @@
 "Login setting needs attention" = "Налаштування входу потребує уваги";
 "Looks again for installed browsers. The list also checks by itself every few seconds while this window is open." = "Знову шукає встановлені браузери. Поки вікно відкрите, список і сам перевіряє це кожні кілька секунд.";
 "Minutes, separated by commas. Offered when you leave a session; Less Pull calls you back once." = "Хвилини через кому. Пропонуються, коли ви йдете із сесії; Less Pull покличе вас один раз.";
-"Minutes, separated by commas. They appear under Start a session in the menu." = "Хвилини через кому. Вони з’являються в меню під «Почати сесію».";
+"Minutes, separated by commas. They appear under “Start a session…” in the menu." = "Хвилини через кому. Вони з’являються в меню під «Почати сесію».";
 "More" = "Більше";
 "More in Settings…" = "Більше в Параметрах…";
 "Natural Colors" = "Природні кольори";
@@ -296,7 +296,7 @@
 "Off until Night Shift changes" = "Вимк, поки Night Shift не перемкнеться";
 "Off: when the session ends, the panel offers only Keep going and Leave quietly." = "Вимк: коли сесія закінчується, панель пропонує лише «Продовжити» і «Лишити».";
 "Offer a call back when I leave" = "Пропонувати покликати, коли йду";
-"Offered when you choose Leaving now. Less Pull calls you back once, then the session is over." = "Пропонується, коли ви обираєте «Я йду». Less Pull покличе вас один раз, після цього сесія закінчена.";
+"Offered when you choose “Leaving now…”. Less Pull calls you back once, then the session is over." = "Пропонується, коли ви обираєте «Я йду». Less Pull покличе вас один раз, після цього сесія закінчена.";
 "OK" = "OK";
 "On" = "Увімк";
 "on" = "увімк";
@@ -350,7 +350,7 @@
 "Press a shortcut to turn Grayscale on or off from anywhere." = "Натисніть сполучення, щоб вмикати й вимикати відтінки сірого звідусіль.";
 "Press keys…" = "Натисніть клавіші…";
 "Press the keys you want, with ⌘, ⌃ or ⌥. Esc cancels; ⌫ removes the shortcut." = "Натисніть потрібні клавіші з ⌘, ⌃ або ⌥. Esc скасовує; ⌫ прибирає сполучення.";
-"Press the shortcut to turn Grayscale on or off from anywhere. Click here to record a different shortcut." = "Натисніть сполучення, щоб вмикати й вимикати відтінки сірого звідусіль. Натисніть тут, щоб записати інше сполучення.";
+"Press the shortcut to turn Grayscale on or off from anywhere. Click the shortcut on the right to record a new one." = "Натисніть сполучення, щоб вмикати й вимикати відтінки сірого звідусіль. Натисніть на сполучення праворуч, щоб записати нове.";
 "Preview the call-back sound" = "Послухати звук кличу";
 "Preview the end sound" = "Послухати звук кінця";
 "Preview:" = "Звук:";
@@ -397,7 +397,7 @@
 "Set up %@" = "Налаштувати %@";
 "Set up…" = "Налаштувати…";
 "Settings…" = "Параметри…";
-"Shades of gray, day and night. Exceptions bring color back where you need it, and Off for a while returns by itself." = "Відтінки сірого, вдень і вночі. Винятки повертають колір там, де він потрібен, а «Повернути колір на…» закінчується само.";
+"Shades of gray, day and night. Exceptions bring color back where you need it, and “Turn Grayscale off for…” returns by itself." = "Відтінки сірого, вдень і вночі. Винятки повертають колір там, де він потрібен, а «Повернути колір на…» закінчується само.";
 "Share" = "Поділитися";
 "Share Less Pull" = "Поділитися Less Pull";
 "Shortcuts" = "Сполучення";
@@ -417,7 +417,7 @@
 "The plain display for a while: color and no added warmth. Night Shift is left alone, and all your settings stay." = "Екран без фільтра на час: у кольорі й без доданого тепла. Night Shift не чіпається, і всі ваші налаштування лишаються.";
 "Shows the supported browsers that are not installed on this Mac." = "Показує підтримувані браузери, не встановлені на цьому Mac.";
 "Shows the thank-you card with ways to support Less Pull, the one that appears after two weeks." = "Показує картку подяки зі способами підтримати Less Pull — ту саму, що з’являється за два тижні.";
-"Some things need color: a photo app, a video site, a chart. Choose Exception for the app you are in, right from the menu, and change only what should differ. Websites work the same way once the browser extension is connected." = "Дечому колір потрібен: програмі для фото, відеосайту, діаграмі. Виберіть «Виняток для» програми, в якій ви зараз, просто в меню, і змінюйте лише те, що має відрізнятися. Сайти працюють так само, щойно під’єднається розширення браузера.";
+"Some things need color: a photo app, a video site, a chart. Choose “Exception for …” for the app you are in, right from the menu, and change only what should differ. Websites work the same way once the browser extension is connected." = "Дечому колір потрібен: програмі для фото, відеосайту, діаграмі. Виберіть «Виняток для» програми, в якій ви зараз, просто в меню, і змінюйте лише те, що має відрізнятися. Сайти працюють так само, щойно під’єднається розширення браузера.";
 "Something not working?" = "Щось не працює?";
 "Sound" = "Звук";
 "Start %ld min" = "Почати %ld хв";
@@ -516,11 +516,11 @@
 "What the browser extension can see" = "Що бачить розширення браузера";
 "What the left mouse button does on the menu-bar icon." = "Що робить ліва кнопка миші на значку в рядку меню.";
 "What a right-click on the menu-bar icon does. A Control-click or a two-finger tap counts as a right-click." = "Що робить правий клік по значку в рядку меню. Клік із Control або дотик двома пальцями вважається правим кліком.";
-"A Control-click or a two-finger tap counts as a right-click. One of the two buttons always opens the menu. The session panel starts a session, or shows the one running. When a session ends, the two buttons swap, so a click reaches the session panel." = "Клік із Control або дотик двома пальцями вважається правим кліком. Одна з двох кнопок завжди відкриває меню. Панель сесії починає сесію або показує поточну. Коли сесія закінчується, кнопки міняються місцями, і клік веде до панелі сесії.";
+"A Control-click or a two-finger tap counts as a right-click. One of the two buttons always opens the menu. “Opens the session panel” starts a session, or shows the one running. When a session ends, the two buttons swap, so a click reaches the session panel." = "Клік із Control або дотик двома пальцями вважається правим кліком. Одна з двох кнопок завжди відкриває меню. «Відкриває панель сесії» починає сесію або показує поточну. Коли сесія закінчується, кнопки міняються місцями, і клік веде до панелі сесії.";
 "Follows what is on it: the app you are using, the app on top of this display, or your defaults. Always your defaults: exceptions do not apply here. Always plain: never gray or warmth here." = "«Іде за тим, що на ньому»: програма, якою ви користуєтеся, програма зверху на цьому екрані або ваші типові налаштування. «Завжди ваші типові налаштування»: винятки тут не діють. «Завжди без фільтра»: тут ніколи немає ні сірого, ні тепла.";
 "Which displays a peek reaches while you use this app: the one under the pointer, all of them, or the ones you tick. This works even while the exception is off." = "На які екрани діє погляд у кольорі, поки ви користуєтеся цією програмою: екран під вказівником, усі або позначені вами. Це працює, навіть коли виняток вимкнено.";
 "Which displays a peek reaches while this site is in front." = "На які екрани діє погляд у кольорі, поки цей сайт на передньому плані.";
-"While a session runs, a click on the icon opens the session panel and the other button opens the menu. When it ends, they swap, so a click brings Keep going and Leave quietly. The shortcuts keep working." = "Поки йде сесія, клік по значку відкриває панель сесії, а інша кнопка — меню. Коли сесія закінчується, вони міняються місцями, і клік приносить «Продовжити» і «Лишити». Сполучення клавіш працюють далі.";
+"While a session runs, a click on the icon opens the session panel and the other button opens the menu. When it ends, they swap, so a click brings “Keep going” and “Leave quietly”. The shortcuts keep working." = "Поки йде сесія, клік по значку відкриває панель сесії, а інша кнопка — меню. Коли сесія закінчується, вони міняються місцями, і клік приносить «Продовжити» і «Лишити». Сполучення клавіш працюють далі.";
 "While peeking, turn off %@" = "Погляд без %@";
 "While peeking, turn off:" = "Погляд без:";
 "While this site is in front, its settings cover all displays, not only the one with the browser." = "Поки цей сайт на передньому плані, його налаштування діють на всіх екранах, а не лише там, де браузер.";

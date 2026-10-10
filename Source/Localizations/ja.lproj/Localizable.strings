@@ -144,7 +144,7 @@
 "Don’t show again" = "今後は表示しない";
 "Don’t show explanations" = "説明を隠す";
 "Don’t show this again" = "今後は表示しない";
-"Each display can follow what is on it: the app you are using sets its own display, and every other display follows the app on top there. Peek has its own choice under Shortcuts." = "ディスプレイはそれぞれ、映っているものに従えます。使っているアプリが自分のディスプレイを決め、ほかのディスプレイはそこで一番上にあるアプリに従います。「ひと目」の対象は「ショートカット」で別に選べます。";
+"Each display can follow what is on it: the app you are using sets its own display, and every other display follows the app on top there. Peek has its own choice under “Shortcuts”." = "ディスプレイはそれぞれ、映っているものに従えます。使っているアプリが自分のディスプレイを決め、ほかのディスプレイはそこで一番上にあるアプリに従います。「ひと目」の対象は「ショートカット」で別に選べます。";
 "End" = "終了";
 "End session" = "セッションを終える";
 "End the session without a call back." = "呼び戻しなしでセッションを終えます。";
@@ -154,7 +154,7 @@
 "Night Shift comes back on now." = "Night Shift を今オンに戻します。";
 "Night Shift comes back now if your schedule wants it on. The app you are using keeps its own Night Shift setting." = "スケジュールがオンを望めば、Night Shift が今戻ります。使っているアプリには、その Night Shift の設定がそのまま残ります。";
 "Night Shift stays off for now, because your schedule has it off at this hour." = "この時間はスケジュールがオフなので、Night Shift はしばらくオフのままです。";
-"English and German are read line by line. A language marked experimental is written with care but not yet checked by a native speaker. If something sounds off, Report a Problem on the About tab reaches me." = "英語とドイツ語は一行ずつ確認済みです。「実験的」と付いた言語は丁寧に書かれていますが、まだネイティブの確認を受けていません。おかしなところがあれば、「情報」タブの「報告…」がわたしに届きます。";
+"English and German are read line by line. A language marked experimental is written with care but not yet checked by a native speaker. If something sounds off, “Report a Problem…” under “About” reaches me." = "英語とドイツ語は一行ずつ確認済みです。「実験的」と付いた言語は丁寧に書かれていますが、まだネイティブの確認を受けていません。おかしなところがあれば、「情報」タブの「報告…」がわたしに届きます。";
 "Everything else stays on this Mac: no account, no analytics, no servers. The browser extension talks only to the app." = "それ以外はすべてこの Mac の中にとどまります。アカウントも、分析も、サーバもありません。ブラウザ拡張機能はアプリとだけ通信します。";
 "Exact page" = "このページのみ";
 "Exception for %@" = "%@ の個別設定";
@@ -207,9 +207,9 @@
 "Hide uninstalled browsers" = "未インストールのブラウザを隠す";
 "Hides the gray explanations under the settings, like this one. The ? next to each setting still explains it." = "設定の下にあるグレーの説明を、この文のように隠します。各設定の横の「?」は引き続き説明します。";
 "Hides this card for now. Tick the box below to hide it for good." = "このカードをいったん隠します。下にチェックすると、今後は表示しません。";
-"Hold %@ and the screen shows color for as long as you hold it. Press it twice quickly to keep it, once more to return. %@ turns Grayscale on or off. You can change both under Shortcuts." = "%@ を押している間だけ、画面がカラーになります。すばやく 2 回押すとそのまま、もう一度で戻ります。%@ はグレイスケールをオン / オフします。どちらも「ショートカット」で変えられます。";
+"Hold %@ and the screen shows color for as long as you hold it. Press it twice quickly to keep it, once more to return. %@ turns Grayscale on or off. You can change both under “Shortcuts”." = "%@ を押している間だけ、画面がカラーになります。すばやく 2 回押すとそのまま、もう一度で戻ります。%@ はグレイスケールをオン / オフします。どちらも「ショートカット」で変えられます。";
 "Hold the shortcut to see the plain display; let go to return. Press it twice quickly to keep the plain display until you press it again. Your settings stay as they are." = "ショートカットを押している間はフィルターなしの画面になり、離すと戻ります。すばやく 2 回押すと、次に押すまでフィルターなしのままです。設定は変わりません。";
-"Hold the shortcut to see the plain display; let go to return. Press it twice quickly to keep it, once more to return. Click here to record a different shortcut." = "ショートカットを押している間はフィルターなしの画面になり、離すと戻ります。すばやく 2 回押すとそのまま、もう一度で戻ります。ここをクリックすると、別のショートカットを登録できます。";
+"Hold the shortcut to see the plain display; let go to return. Press it twice quickly to keep it, once more to return. Click the shortcut on the right to record a new one." = "ショートカットを押している間はフィルターなしの画面になり、離すと戻ります。すばやく 2 回押すとそのまま、もう一度で戻ります。右のショートカットをクリックすると、新しいものを登録できます。";
 "hold ⌥ A: color while held" = "⌥ A を押している間: カラー";
 "How loud the session sounds are. Let go to hear it." = "セッションの音の大きさ。離すと試聴できます。";
 "Night Shift turned off for a while stays off, even for an app that turns it on. Grayscale, warmth and Night Shift all off show the plain display." = "Night Shift をしばらくオフにしている間は、オンにするアプリでもオフのままです。グレイスケール、暖かさ、Night Shift がすべてオフなら、フィルターなしの画面になります。";
@@ -255,7 +255,7 @@
 "Login setting needs attention" = "ログインの設定を確認してください";
 "Looks again for installed browsers. The list also checks by itself every few seconds while this window is open." = "インストール済みのブラウザをもう一度探します。このウインドウが開いている間は、数秒ごとに自動でも確認します。";
 "Minutes, separated by commas. Offered when you leave a session; Less Pull calls you back once." = "分数をコンマで区切ります。セッションを離れるときに提示され、Less Pull が一度だけ呼び戻します。";
-"Minutes, separated by commas. They appear under Start a session in the menu." = "分数をコンマで区切ります。メニューの「セッションを始める」の下に表示されます。";
+"Minutes, separated by commas. They appear under “Start a session…” in the menu." = "分数をコンマで区切ります。メニューの「セッションを始める」の下に表示されます。";
 "More" = "詳細";
 "More in Settings…" = "その他は設定で…";
 "Natural Colors" = "自然な色";
@@ -296,7 +296,7 @@
 "Off until Night Shift changes" = "Night Shift が切り替わるまでオフ";
 "Off: when the session ends, the panel offers only Keep going and Leave quietly." = "オフ: セッションが終わると、パネルには「続ける」と「このまま」だけが出ます。";
 "Offer a call back when I leave" = "離れるときに呼び戻しを提案";
-"Offered when you choose Leaving now. Less Pull calls you back once, then the session is over." = "「離れます」を選んだときに提示されます。Less Pull が一度だけ呼び戻し、そのあとセッションは終わります。";
+"Offered when you choose “Leaving now…”. Less Pull calls you back once, then the session is over." = "「離れます」を選んだときに提示されます。Less Pull が一度だけ呼び戻し、そのあとセッションは終わります。";
 "OK" = "OK";
 "On" = "オン";
 "on" = "オン";
@@ -350,7 +350,7 @@
 "Press a shortcut to turn Grayscale on or off from anywhere." = "どこからでもグレイスケールをオン / オフできるショートカットを押します。";
 "Press keys…" = "キーを押す…";
 "Press the keys you want, with ⌘, ⌃ or ⌥. Esc cancels; ⌫ removes the shortcut." = "⌘、⌃、⌥ のいずれかと組み合わせて、使いたいキーを押します。Esc でキャンセル、⌫ でショートカットを削除。";
-"Press the shortcut to turn Grayscale on or off from anywhere. Click here to record a different shortcut." = "どこからでも、このショートカットでグレイスケールをオン / オフできます。ここをクリックすると、別のショートカットを登録できます。";
+"Press the shortcut to turn Grayscale on or off from anywhere. Click the shortcut on the right to record a new one." = "どこからでも、このショートカットでグレイスケールをオン / オフできます。右のショートカットをクリックすると、新しいものを登録できます。";
 "Preview the call-back sound" = "呼び戻しの音を試聴";
 "Preview the end sound" = "終了の音を試聴";
 "Preview:" = "試聴:";
@@ -397,7 +397,7 @@
 "Set up %@" = "%@ を設定";
 "Set up…" = "設定…";
 "Settings…" = "設定…";
-"Shades of gray, day and night. Exceptions bring color back where you need it, and Off for a while returns by itself." = "昼も夜もグレーの濃淡で。個別設定で必要なところにカラーを戻せ、「しばらくカラーに…」は自動で終わります。";
+"Shades of gray, day and night. Exceptions bring color back where you need it, and “Turn Grayscale off for…” returns by itself." = "昼も夜もグレーの濃淡で。個別設定で必要なところにカラーを戻せ、「しばらくカラーに…」は自動で終わります。";
 "Share" = "共有";
 "Share Less Pull" = "Less Pull を共有";
 "Shortcuts" = "ショートカット";
@@ -417,7 +417,7 @@
 "The plain display for a while: color and no added warmth. Night Shift is left alone, and all your settings stay." = "しばらくフィルターなしの画面に。カラーで、暖かさも加えません。Night Shift には触れず、設定もすべてそのままです。";
 "Shows the supported browsers that are not installed on this Mac." = "この Mac にインストールされていない対応ブラウザを表示します。";
 "Shows the thank-you card with ways to support Less Pull, the one that appears after two weeks." = "Less Pull を支える方法をまとめた感謝のカードを表示します。2 週間後に出るものと同じです。";
-"Some things need color: a photo app, a video site, a chart. Choose Exception for the app you are in, right from the menu, and change only what should differ. Websites work the same way once the browser extension is connected." = "色が必要なものもあります。写真アプリ、動画サイト、グラフ。今いるアプリの「個別設定」をメニューから選び、変えたいところだけ変えます。ウェブサイトも、ブラウザ拡張機能がつながれば同じように使えます。";
+"Some things need color: a photo app, a video site, a chart. Choose “Exception for …” for the app you are in, right from the menu, and change only what should differ. Websites work the same way once the browser extension is connected." = "色が必要なものもあります。写真アプリ、動画サイト、グラフ。今いるアプリの「個別設定」をメニューから選び、変えたいところだけ変えます。ウェブサイトも、ブラウザ拡張機能がつながれば同じように使えます。";
 "Something not working?" = "うまく動きませんか?";
 "Sound" = "音";
 "Start %ld min" = "%ld 分で始める";
@@ -516,11 +516,11 @@
 "What the browser extension can see" = "ブラウザ拡張機能に見えるもの";
 "What the left mouse button does on the menu-bar icon." = "メニューバーのアイコンで、左のマウスボタンがすること。";
 "What a right-click on the menu-bar icon does. A Control-click or a two-finger tap counts as a right-click." = "メニューバーのアイコンを右クリックしたときの働き。Control + クリックや 2 本指タップも右クリックとして扱われます。";
-"A Control-click or a two-finger tap counts as a right-click. One of the two buttons always opens the menu. The session panel starts a session, or shows the one running. When a session ends, the two buttons swap, so a click reaches the session panel." = "Control + クリックや 2 本指タップは右クリックとして扱われます。どちらかのボタンは常にメニューを開きます。セッションパネルはセッションを始めるか、進行中のものを表示します。セッションが終わると二つのボタンが入れ替わり、クリックでセッションパネルに届きます。";
+"A Control-click or a two-finger tap counts as a right-click. One of the two buttons always opens the menu. “Opens the session panel” starts a session, or shows the one running. When a session ends, the two buttons swap, so a click reaches the session panel." = "Control + クリックや 2 本指タップは右クリックとして扱われます。どちらかのボタンは常にメニューを開きます。「セッションパネルを開く」はセッションを始めるか、進行中のものを表示します。セッションが終わると二つのボタンが入れ替わり、クリックでセッションパネルに届きます。";
 "Follows what is on it: the app you are using, the app on top of this display, or your defaults. Always your defaults: exceptions do not apply here. Always plain: never gray or warmth here." = "「映っているものに従う」: 使っているアプリ、このディスプレイで一番上のアプリ、または標準の設定。「常に標準の設定」: ここでは個別設定が効きません。「常にフィルターなし」: ここではグレーも暖かさも使いません。";
 "Which displays a peek reaches while you use this app: the one under the pointer, all of them, or the ones you tick. This works even while the exception is off." = "このアプリを使っている間、ひと目が届くディスプレイ。ポインタのあるディスプレイ、すべて、またはチェックしたもの。個別設定がオフでも働きます。";
 "Which displays a peek reaches while this site is in front." = "このサイトが手前にある間、ひと目が届くディスプレイ。";
-"While a session runs, a click on the icon opens the session panel and the other button opens the menu. When it ends, they swap, so a click brings Keep going and Leave quietly. The shortcuts keep working." = "セッション中は、アイコンのクリックでセッションパネルが、もう一方のボタンでメニューが開きます。終わると入れ替わり、クリックで「続ける」と「このまま」が出ます。ショートカットはそのまま働きます。";
+"While a session runs, a click on the icon opens the session panel and the other button opens the menu. When it ends, they swap, so a click brings “Keep going” and “Leave quietly”. The shortcuts keep working." = "セッション中は、アイコンのクリックでセッションパネルが、もう一方のボタンでメニューが開きます。終わると入れ替わり、クリックで「続ける」と「このまま」が出ます。ショートカットはそのまま働きます。";
 "While peeking, turn off %@" = "ひと目で外す: %@";
 "While peeking, turn off:" = "ひと目で外す:";
 "While this site is in front, its settings cover all displays, not only the one with the browser." = "このサイトが手前にある間、その設定はブラウザのあるディスプレイだけでなく、すべてのディスプレイに効きます。";

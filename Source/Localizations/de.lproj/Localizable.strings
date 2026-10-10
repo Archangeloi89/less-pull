@@ -141,7 +141,7 @@
 "Don’t show again" = "Nicht mehr anzeigen";
 "Don’t show explanations" = "Erklärungen ausblenden";
 "Don’t show this again" = "Nicht mehr anzeigen";
-"Each display can follow what is on it: the app you are using sets its own display, and every other display follows the app on top there. Peek has its own choice under Shortcuts." = "Jedes Display kann dem folgen, was darauf liegt: Die App, mit der du arbeitest, bestimmt ihr eigenes Display, und jedes andere Display folgt der App, die dort zuoberst liegt. Der Farbblick hat seine eigene Wahl unter „Kurzbefehle“.";
+"Each display can follow what is on it: the app you are using sets its own display, and every other display follows the app on top there. Peek has its own choice under “Shortcuts”." = "Jedes Display kann dem folgen, was darauf liegt: Die App, mit der du arbeitest, bestimmt ihr eigenes Display, und jedes andere Display folgt der App, die dort zuoberst liegt. Der Farbblick hat seine eigene Wahl unter „Kurzbefehle“.";
 "End" = "Ende";
 "End session" = "Sitzung beenden";
 "End the session without a call back." = "Beendet die Sitzung, ohne dich zurückzuholen.";
@@ -199,9 +199,9 @@
 "Hide this for good." = "Blendet das für immer aus.";
 "Hide uninstalled browsers" = "Nicht installierte Browser ausblenden";
 "Hides the gray explanations under the settings, like this one. The ? next to each setting still explains it." = "Blendet die grauen Erklärungen unter den Einstellungen aus, so wie diese hier. Das ? neben jeder Einstellung erklärt sie weiterhin.";
-"Hold %@ and the screen shows color for as long as you hold it. Press it twice quickly to keep it, once more to return. %@ turns Grayscale on or off. You can change both under Shortcuts." = "Halte %@ gedrückt, und der Bildschirm zeigt Farbe, solange du hältst. Zweimal kurz drücken, und sie bleibt; noch ein Druck, und es geht zurück. %@ schaltet die Graustufen ein oder aus. Beides kannst du unter „Kurzbefehle“ ändern.";
+"Hold %@ and the screen shows color for as long as you hold it. Press it twice quickly to keep it, once more to return. %@ turns Grayscale on or off. You can change both under “Shortcuts”." = "Halte %@ gedrückt, und der Bildschirm zeigt Farbe, solange du hältst. Zweimal kurz drücken, und sie bleibt; noch ein Druck, und es geht zurück. %@ schaltet die Graustufen ein oder aus. Beides kannst du unter „Kurzbefehle“ ändern.";
 "Hold the shortcut to see the plain display; let go to return. Press it twice quickly to keep the plain display until you press it again. Your settings stay as they are." = "Halte den Kurzbefehl gedrückt, und du siehst den Bildschirm ohne Filter; lass los, und es geht zurück. Zweimal kurz drücken, und er bleibt ohne Filter, bis du wieder drückst. Deine Einstellungen bleiben, wie sie sind.";
-"Hold the shortcut to see the plain display; let go to return. Press it twice quickly to keep it, once more to return. Click here to record a different shortcut." = "Halte den Kurzbefehl gedrückt, und du siehst den Bildschirm ohne Filter; lass los, und es geht zurück. Zweimal kurz drücken, und er bleibt so; noch ein Druck, und es geht zurück. Klick hier, um einen anderen Kurzbefehl aufzunehmen.";
+"Hold the shortcut to see the plain display; let go to return. Press it twice quickly to keep it, once more to return. Click the shortcut on the right to record a new one." = "Halte den Kurzbefehl gedrückt, und du siehst den Bildschirm ohne Filter; lass los, und es geht zurück. Zweimal kurz drücken, und er bleibt so; noch ein Druck, und es geht zurück. Klick rechts auf den Kurzbefehl, um einen neuen aufzunehmen.";
 "hold ⌥ A: color while held" = "⌥ A halten: in Farbe";
 "How loud the session sounds are. Let go to hear it." = "Wie laut die Töne der Sitzung sind. Lass los, und du hörst es.";
 "Night Shift turned off for a while stays off, even for an app that turns it on. Grayscale, warmth and Night Shift all off show the plain display." = "Hast du Night Shift eine Weile ausgeschaltet, bleibt es aus, auch bei einer App, die es einschaltet. Graustufen, Wärme und Night Shift alle aus zeigen den Bildschirm ohne Filter.";
@@ -233,7 +233,7 @@
 "Left-clicking the menu-bar icon" = "Linksklick aufs Symbol";
 "What the left mouse button does on the menu-bar icon." = "Was die linke Maustaste auf dem Symbol in der Menüleiste tut.";
 "What a right-click on the menu-bar icon does. A Control-click or a two-finger tap counts as a right-click." = "Was ein Rechtsklick auf das Symbol in der Menüleiste tut. Ein Ctrl-Klick oder Tippen mit zwei Fingern zählt als Rechtsklick.";
-"A Control-click or a two-finger tap counts as a right-click. One of the two buttons always opens the menu. The session panel starts a session, or shows the one running. When a session ends, the two buttons swap, so a click reaches the session panel." = "Ein Ctrl-Klick oder Tippen mit zwei Fingern zählt als Rechtsklick. Eine der beiden Tasten öffnet immer das Menü. Das Sitzungsfenster startet eine Sitzung oder zeigt die laufende. Endet eine Sitzung, tauschen die beiden Tasten, sodass ein Klick zum Sitzungsfenster führt.";
+"A Control-click or a two-finger tap counts as a right-click. One of the two buttons always opens the menu. “Opens the session panel” starts a session, or shows the one running. When a session ends, the two buttons swap, so a click reaches the session panel." = "Ein Ctrl-Klick oder Tippen mit zwei Fingern zählt als Rechtsklick. Eine der beiden Tasten öffnet immer das Menü. „Öffnet das Sitzungsfenster“ startet eine Sitzung oder zeigt die laufende. Endet eine Sitzung, tauschen die beiden Tasten, sodass ein Klick zum Sitzungsfenster führt.";
 "Less Pull" = "Less Pull";
 "Less Pull %@ (%@)\n\n%@\n%@\nDisplays: %lu, each with its own matrix\nDisplay events: %lu; recoveries: %lu\nGrayscale setting: %@; grayscale showing now: %@; exception active: %@%@\n\nNight Shift drives “Extra Warmth follows Night Shift”; it does not prove the display looks warmer." = "Less Pull %@ (%@)\n\n%@\n%@\nDisplays: %lu, jedes mit eigener Matrix\nDisplay-Ereignisse: %lu; Wiederherstellungen: %lu\nGraustufen eingestellt: %@; Graustufen gerade sichtbar: %@; Ausnahme aktiv: %@%@\n\nNight Shift steuert „Extra-Wärme folgt Night Shift“; es beweist nicht, dass das Display wärmer aussieht.";
 "Less Pull app icon" = "App-Symbol von Less Pull";
@@ -249,7 +249,7 @@
 "Login setting needs attention" = "Anmeldeeinstellung braucht einen Blick";
 "Looks again for installed browsers. The list also checks by itself every few seconds while this window is open." = "Sieht noch einmal nach installierten Browsern. Die Liste prüft auch von selbst alle paar Sekunden, solange dieses Fenster offen ist.";
 "Minutes, separated by commas. Offered when you leave a session; Less Pull calls you back once." = "Minuten, durch Kommas getrennt. Werden dir angeboten, wenn du eine Sitzung verlässt; Less Pull holt dich einmal zurück.";
-"Minutes, separated by commas. They appear under Start a session in the menu." = "Minuten, durch Kommas getrennt. Sie erscheinen im Menü unter „Sitzung starten“.";
+"Minutes, separated by commas. They appear under “Start a session…” in the menu." = "Minuten, durch Kommas getrennt. Sie erscheinen im Menü unter „Sitzung starten“.";
 "More in Settings…" = "Mehr in den Einstellungen …";
 "Natural Colors" = "Natürliche Farben";
 "news.example" = "news.example";
@@ -288,7 +288,7 @@
 "Off until Night Shift changes" = "Aus, bis Night Shift wechselt";
 "Off: when the session ends, the panel offers only Keep going and Leave quietly." = "Aus: Endet die Sitzung, bietet das Fenster nur „Weitermachen“ und „Leise gehen“.";
 "Offer a call back when I leave" = "Beim Gehen anbieten, mich zurückzuholen";
-"Offered when you choose Leaving now. Less Pull calls you back once, then the session is over." = "Wird angeboten, wenn du „Ich gehe jetzt“ wählst. Less Pull holt dich einmal zurück, dann ist die Sitzung vorbei.";
+"Offered when you choose “Leaving now…”. Less Pull calls you back once, then the session is over." = "Wird angeboten, wenn du „Ich gehe jetzt“ wählst. Less Pull holt dich einmal zurück, dann ist die Sitzung vorbei.";
 "OK" = "OK";
 "On" = "Ein";
 "on" = "ein";
@@ -339,7 +339,7 @@
 "Press a shortcut to turn Grayscale on or off from anywhere." = "Drück einen Kurzbefehl, um die Graustufen von überall ein- oder auszuschalten.";
 "Press keys…" = "Tasten drücken …";
 "Press the keys you want, with ⌘, ⌃ or ⌥. Esc cancels; ⌫ removes the shortcut." = "Drück die gewünschten Tasten, mit ⌘, ⌃ oder ⌥. Esc bricht ab; ⌫ entfernt den Kurzbefehl.";
-"Press the shortcut to turn Grayscale on or off from anywhere. Click here to record a different shortcut." = "Drück den Kurzbefehl, um die Graustufen von überall ein- oder auszuschalten. Klick hier, um einen anderen Kurzbefehl aufzunehmen.";
+"Press the shortcut to turn Grayscale on or off from anywhere. Click the shortcut on the right to record a new one." = "Drück den Kurzbefehl, um die Graustufen von überall ein- oder auszuschalten. Klick rechts auf den Kurzbefehl, um einen neuen aufzunehmen.";
 "Preview the call-back sound" = "Ton fürs Zurückholen anhören";
 "Preview the end sound" = "Endton anhören";
 "Preview:" = "Probe:";
@@ -382,7 +382,7 @@
 "Set up %@" = "%@ einrichten";
 "Set up…" = "Einrichten …";
 "Settings…" = "Einstellungen …";
-"Shades of gray, day and night. Exceptions bring color back where you need it, and Off for a while returns by itself." = "Grautöne, Tag und Nacht. Ausnahmen bringen die Farbe zurück, wo du sie brauchst, und „Graustufen aus für …“ endet von selbst.";
+"Shades of gray, day and night. Exceptions bring color back where you need it, and “Turn Grayscale off for…” returns by itself." = "Grautöne, Tag und Nacht. Ausnahmen bringen die Farbe zurück, wo du sie brauchst, und „Graustufen aus für …“ endet von selbst.";
 "Show a gentle glow" = "Sanftes Leuchten zeigen";
 "Show advanced options" = "Erweiterte Optionen anzeigen";
 "Show multi-display options with one display" = "Multi-Display-Optionen auch mit einem Display zeigen";
@@ -399,7 +399,7 @@
 "The plain display for a while: color and no added warmth. Night Shift is left alone, and all your settings stay." = "Eine Weile der Bildschirm ohne Filter: in Farbe und ohne zusätzliche Wärme. Night Shift bleibt unberührt, und alle deine Einstellungen bleiben.";
 "Shows the supported browsers that are not installed on this Mac." = "Zeigt die unterstützten Browser, die auf diesem Mac nicht installiert sind.";
 "Shows the thank-you card with ways to support Less Pull, the one that appears after two weeks." = "Zeigt die Dankeskarte mit Möglichkeiten, Less Pull zu unterstützen, dieselbe, die nach zwei Wochen erscheint.";
-"Some things need color: a photo app, a video site, a chart. Choose Exception for the app you are in, right from the menu, and change only what should differ. Websites work the same way once the browser extension is connected." = "Manches braucht Farbe: eine Foto-App, eine Videoseite, ein Diagramm. Wähle direkt im Menü „Ausnahme für“ die App, in der du bist, und ändere nur, was anders sein soll. Websites gehen genauso, sobald die Browser-Erweiterung verbunden ist.";
+"Some things need color: a photo app, a video site, a chart. Choose “Exception for …” for the app you are in, right from the menu, and change only what should differ. Websites work the same way once the browser extension is connected." = "Manches braucht Farbe: eine Foto-App, eine Videoseite, ein Diagramm. Wähle direkt im Menü „Ausnahme für“ die App, in der du bist, und ändere nur, was anders sein soll. Websites gehen genauso, sobald die Browser-Erweiterung verbunden ist.";
 "Something not working?" = "Etwas geht nicht?";
 "Sound" = "Ton";
 "Start %ld min" = "%ld Min. starten";
@@ -494,7 +494,7 @@
 "Follows what is on it: the app you are using, the app on top of this display, or your defaults. Always your defaults: exceptions do not apply here. Always plain: never gray or warmth here." = "„Folgt dem, was darauf liegt“: der App, mit der du arbeitest, der obersten App auf diesem Display oder deinen Standards. „Immer deine Standards“: Ausnahmen gelten hier nicht. „Immer ohne Filter“: hier nie Graustufen oder Wärme.";
 "Which displays a peek reaches while you use this app: the one under the pointer, all of them, or the ones you tick. This works even while the exception is off." = "Welche Displays der Farbblick erreicht, solange du mit dieser App arbeitest: das unter dem Zeiger, alle oder die, die du ankreuzt. Das wirkt auch, wenn die Ausnahme aus ist.";
 "Which displays a peek reaches while this site is in front." = "Welche Displays der Farbblick erreicht, solange diese Website vorn ist.";
-"While a session runs, a click on the icon opens the session panel and the other button opens the menu. When it ends, they swap, so a click brings Keep going and Leave quietly. The shortcuts keep working." = "Während einer Sitzung öffnet ein Klick auf das Symbol das Sitzungsfenster und die andere Taste das Menü. Endet sie, tauschen die beiden, sodass ein Klick „Weitermachen“ und „Leise gehen“ bringt. Die Kurzbefehle wirken weiter.";
+"While a session runs, a click on the icon opens the session panel and the other button opens the menu. When it ends, they swap, so a click brings “Keep going” and “Leave quietly”. The shortcuts keep working." = "Während einer Sitzung öffnet ein Klick auf das Symbol das Sitzungsfenster und die andere Taste das Menü. Endet sie, tauschen die beiden, sodass ein Klick „Weitermachen“ und „Leise gehen“ bringt. Die Kurzbefehle wirken weiter.";
 "While peeking, turn off %@" = "Farbblick ohne %@";
 "While peeking, turn off:" = "Farbblick ohne:";
 "While this site is in front, its settings cover all displays, not only the one with the browser." = "Solange diese Website vorn ist, gelten ihre Einstellungen auf allen Displays, nicht nur auf dem mit dem Browser.";
@@ -539,7 +539,7 @@
 "Less Pull, a quieter screen for the Mac: grayscale, warmth, and color where it matters. Free. %@" = "Less Pull, ein ruhigerer Bildschirm für den Mac: Graustufen, Wärme und Farbe, wo sie zählt. Kostenlos. %@";
 "Opens the menu, left toggles Grayscale" = "Öffnet das Menü, links schaltet Graustufen";
 "Opens the session panel" = "Öffnet das Sitzungsfenster";
-"English and German are read line by line. A language marked experimental is written with care but not yet checked by a native speaker. If something sounds off, Report a Problem on the About tab reaches me." = "Englisch und Deutsch sind Zeile für Zeile gelesen. Eine Sprache mit dem Zusatz „experimental“ ist sorgfältig geschrieben, aber noch nicht von Muttersprachlern geprüft. Wenn dir etwas seltsam vorkommt, schreib mir über „Problem melden …“ unter „Über“.";
+"English and German are read line by line. A language marked experimental is written with care but not yet checked by a native speaker. If something sounds off, “Report a Problem…” under “About” reaches me." = "Englisch und Deutsch sind Zeile für Zeile gelesen. Eine Sprache mit dem Zusatz „experimental“ ist sorgfältig geschrieben, aber noch nicht von Muttersprachlern geprüft. Wenn dir etwas seltsam vorkommt, schreib mir über „Problem melden …“ unter „Über“.";
 "Grayscale [rule row]" = "Graustufen";
 "Night Shift [rule row]" = "Night Shift";
 "Default [segment]" = "Standard";

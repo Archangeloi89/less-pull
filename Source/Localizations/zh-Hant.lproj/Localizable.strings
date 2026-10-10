@@ -144,7 +144,7 @@
 "Don’t show again" = "不再顯示";
 "Don’t show explanations" = "隱藏說明";
 "Don’t show this again" = "不再顯示";
-"Each display can follow what is on it: the app you are using sets its own display, and every other display follows the app on top there. Peek has its own choice under Shortcuts." = "每台顯示器都可以跟隨其上內容：你正在用的 App 決定自己的顯示器，其他顯示器跟隨那裡最上層的 App。「一瞥」的範圍在「快速鍵」中另外選擇。";
+"Each display can follow what is on it: the app you are using sets its own display, and every other display follows the app on top there. Peek has its own choice under “Shortcuts”." = "每台顯示器都可以跟隨其上內容：你正在用的 App 決定自己的顯示器，其他顯示器跟隨那裡最上層的 App。「一瞥」的範圍在「快速鍵」中另外選擇。";
 "End" = "結束";
 "End session" = "結束專注";
 "End the session without a call back." = "結束專注時段，不喚回。";
@@ -154,7 +154,7 @@
 "Night Shift comes back on now." = "夜覽現在重新開啟。";
 "Night Shift comes back now if your schedule wants it on. The app you are using keeps its own Night Shift setting." = "若排程需要開啟，夜覽現在就會回來。你正在用的 App 保留自己的夜覽設定。";
 "Night Shift stays off for now, because your schedule has it off at this hour." = "夜覽暫時保持關閉，因為排程在這個時段關閉它。";
-"English and German are read line by line. A language marked experimental is written with care but not yet checked by a native speaker. If something sounds off, Report a Problem on the About tab reaches me." = "英文和德文已逐行校對。標為「實驗性」的語言用心寫成，但尚未經母語者閱讀。若有不妥之處，「關於」標籤頁的「回報…」會送到我這裡。";
+"English and German are read line by line. A language marked experimental is written with care but not yet checked by a native speaker. If something sounds off, “Report a Problem…” under “About” reaches me." = "英文和德文已逐行校對。標為「實驗性」的語言用心寫成，但尚未經母語者閱讀。若有不妥之處，「關於」標籤頁的「回報…」會送到我這裡。";
 "Everything else stays on this Mac: no account, no analytics, no servers. The browser extension talks only to the app." = "其他一切都留在這台 Mac 上：沒有帳號，沒有分析，沒有伺服器。瀏覽器延伸功能只與 App 通訊。";
 "Exact page" = "僅此頁面";
 "Exception for %@" = "%@ 的個別設定";
@@ -207,9 +207,9 @@
 "Hide uninstalled browsers" = "隱藏未安裝的瀏覽器";
 "Hides the gray explanations under the settings, like this one. The ? next to each setting still explains it." = "隱藏設定下方的灰色說明，例如這一條。每項設定旁的 ? 仍會說明它。";
 "Hides this card for now. Tick the box below to hide it for good." = "暫時隱藏此卡片。勾選下方的方框則永久隱藏。";
-"Hold %@ and the screen shows color for as long as you hold it. Press it twice quickly to keep it, once more to return. %@ turns Grayscale on or off. You can change both under Shortcuts." = "按住 %@，螢幕就在你按住時顯示彩色。快速按兩下可保持，再按一下即恢復。%@ 開關灰階。兩者都可在「快速鍵」中更改。";
+"Hold %@ and the screen shows color for as long as you hold it. Press it twice quickly to keep it, once more to return. %@ turns Grayscale on or off. You can change both under “Shortcuts”." = "按住 %@，螢幕就在你按住時顯示彩色。快速按兩下可保持，再按一下即恢復。%@ 開關灰階。兩者都可在「快速鍵」中更改。";
 "Hold the shortcut to see the plain display; let go to return. Press it twice quickly to keep the plain display until you press it again. Your settings stay as they are." = "按住快速鍵查看無濾鏡畫面；放開即恢復。快速按兩下可保持無濾鏡畫面，直到再次按下。你的設定不會改變。";
-"Hold the shortcut to see the plain display; let go to return. Press it twice quickly to keep it, once more to return. Click here to record a different shortcut." = "按住快速鍵查看無濾鏡畫面；放開即恢復。快速按兩下可保持，再按一下即恢復。按一下這裡錄製其他快速鍵。";
+"Hold the shortcut to see the plain display; let go to return. Press it twice quickly to keep it, once more to return. Click the shortcut on the right to record a new one." = "按住快速鍵查看無濾鏡畫面；放開即恢復。快速按兩下可保持，再按一下即恢復。按一下右側的快速鍵即可錄製新的快速鍵。";
 "hold ⌥ A: color while held" = "按住 ⌥ A：期間彩色";
 "How loud the session sounds are. Let go to hear it." = "專注提示音的音量。放開即可試聽。";
 "Night Shift turned off for a while stays off, even for an app that turns it on. Grayscale, warmth and Night Shift all off show the plain display." = "如果暫時關閉了夜覽，即使 App 會開啟它，它也保持關閉。灰階、暖色和夜覽都關時，就是無濾鏡畫面。";
@@ -255,7 +255,7 @@
 "Login setting needs attention" = "登入設定需要注意";
 "Looks again for installed browsers. The list also checks by itself every few seconds while this window is open." = "重新尋找已安裝的瀏覽器。此視窗開啟時，列表每隔幾秒也會自動檢查。";
 "Minutes, separated by commas. Offered when you leave a session; Less Pull calls you back once." = "分鐘數，用逗號分隔。離開專注時提供；Less Pull 會喚回你一次。";
-"Minutes, separated by commas. They appear under Start a session in the menu." = "分鐘數，用逗號分隔。顯示在選單的「開始專注」之下。";
+"Minutes, separated by commas. They appear under “Start a session…” in the menu." = "分鐘數，用逗號分隔。顯示在選單的「開始專注」之下。";
 "More" = "更多";
 "More in Settings…" = "設定中還有更多…";
 "Natural Colors" = "自然色";
@@ -296,7 +296,7 @@
 "Off until Night Shift changes" = "關閉至夜覽切換";
 "Off: when the session ends, the panel offers only Keep going and Leave quietly." = "關：專注結束時，面板只提供「繼續」和「就這樣」。";
 "Offer a call back when I leave" = "我離開時提供喚回";
-"Offered when you choose Leaving now. Less Pull calls you back once, then the session is over." = "選擇「離開一下」時提供。Less Pull 會喚回你一次，之後專注時段結束。";
+"Offered when you choose “Leaving now…”. Less Pull calls you back once, then the session is over." = "選擇「離開一下」時提供。Less Pull 會喚回你一次，之後專注時段結束。";
 "OK" = "好";
 "On" = "開";
 "on" = "開";
@@ -350,7 +350,7 @@
 "Press a shortcut to turn Grayscale on or off from anywhere." = "按下一個快速鍵，隨時隨地開關灰階。";
 "Press keys…" = "按下按鍵…";
 "Press the keys you want, with ⌘, ⌃ or ⌥. Esc cancels; ⌫ removes the shortcut." = "按下想用的按鍵，需搭配 ⌘、⌃ 或 ⌥。Esc 取消；⌫ 移除快速鍵。";
-"Press the shortcut to turn Grayscale on or off from anywhere. Click here to record a different shortcut." = "按下快速鍵可隨時隨地開關灰階。按一下這裡錄製其他快速鍵。";
+"Press the shortcut to turn Grayscale on or off from anywhere. Click the shortcut on the right to record a new one." = "按下快速鍵可隨時隨地開關灰階。按一下右側的快速鍵即可錄製新的快速鍵。";
 "Preview the call-back sound" = "試聽喚回提示音";
 "Preview the end sound" = "試聽結束提示音";
 "Preview:" = "試聽：";
@@ -397,7 +397,7 @@
 "Set up %@" = "設定 %@";
 "Set up…" = "設定…";
 "Settings…" = "設定…";
-"Shades of gray, day and night. Exceptions bring color back where you need it, and Off for a while returns by itself." = "日夜皆為灰階。個別設定可在需要的地方還原顏色，「暫時恢復彩色…」會自動結束。";
+"Shades of gray, day and night. Exceptions bring color back where you need it, and “Turn Grayscale off for…” returns by itself." = "日夜皆為灰階。個別設定可在需要的地方還原顏色，「暫時恢復彩色…」會自動結束。";
 "Share" = "分享";
 "Share Less Pull" = "分享 Less Pull";
 "Shortcuts" = "快速鍵";
@@ -417,7 +417,7 @@
 "The plain display for a while: color and no added warmth. Night Shift is left alone, and all your settings stay." = "暫時顯示無濾鏡畫面：彩色且不疊加暖色。夜覽不受影響，你的所有設定都保留。";
 "Shows the supported browsers that are not installed on this Mac." = "顯示這台 Mac 上未安裝的受支援瀏覽器。";
 "Shows the thank-you card with ways to support Less Pull, the one that appears after two weeks." = "顯示感謝卡片，其中列出支持 Less Pull 的方式，與兩週後出現的那張相同。";
-"Some things need color: a photo app, a video site, a chart. Choose Exception for the app you are in, right from the menu, and change only what should differ. Websites work the same way once the browser extension is connected." = "有些東西需要顏色：照片 App、影片網站、圖表。直接在選單中為目前的 App 選擇「個別設定」，只改需要不同的部分。瀏覽器延伸功能連接後，網站也一樣。";
+"Some things need color: a photo app, a video site, a chart. Choose “Exception for …” for the app you are in, right from the menu, and change only what should differ. Websites work the same way once the browser extension is connected." = "有些東西需要顏色：照片 App、影片網站、圖表。直接在選單中為目前的 App 選擇「個別設定」，只改需要不同的部分。瀏覽器延伸功能連接後，網站也一樣。";
 "Something not working?" = "有什麼不正常？";
 "Sound" = "提示音";
 "Start %ld min" = "開始 %ld 分鐘";
@@ -516,11 +516,11 @@
 "What the browser extension can see" = "瀏覽器延伸功能能看到什麼";
 "What the left mouse button does on the menu-bar icon." = "滑鼠左鍵在選單列圖像上做什麼。";
 "What a right-click on the menu-bar icon does. A Control-click or a two-finger tap counts as a right-click." = "按右鍵點選選單列圖像時會做什麼。按住 Control 鍵並按一下或兩指輕點都算作按右鍵。";
-"A Control-click or a two-finger tap counts as a right-click. One of the two buttons always opens the menu. The session panel starts a session, or shows the one running. When a session ends, the two buttons swap, so a click reaches the session panel." = "按住 Control 鍵並按一下或兩指輕點算作按右鍵。兩個按鍵中總有一個打開選單。專注面板可以開始專注，或顯示正在進行的專注。專注結束時兩個按鍵互換，按一下即可到達專注面板。";
+"A Control-click or a two-finger tap counts as a right-click. One of the two buttons always opens the menu. “Opens the session panel” starts a session, or shows the one running. When a session ends, the two buttons swap, so a click reaches the session panel." = "按住 Control 鍵並按一下或兩指輕點算作按右鍵。兩個按鍵中總有一個打開選單。「打開專注面板」可以開始專注，或顯示正在進行的專注。專注結束時兩個按鍵互換，按一下即可到達專注面板。";
 "Follows what is on it: the app you are using, the app on top of this display, or your defaults. Always your defaults: exceptions do not apply here. Always plain: never gray or warmth here." = "「跟隨其上內容」：你正在用的 App、這台顯示器最上層的 App，或你的預設設定。「一律用預設設定」：個別設定在這裡不生效。「一律無濾鏡」：這裡從不使用灰色或暖色。";
 "Which displays a peek reaches while you use this app: the one under the pointer, all of them, or the ones you tick. This works even while the exception is off." = "你使用此 App 時，一瞥作用於哪些顯示器：指標所在的那台、全部，或你勾選的那些。即使個別設定關閉也有效。";
 "Which displays a peek reaches while this site is in front." = "此網站在最前方時，一瞥作用於哪些顯示器。";
-"While a session runs, a click on the icon opens the session panel and the other button opens the menu. When it ends, they swap, so a click brings Keep going and Leave quietly. The shortcuts keep working." = "專注進行時，按一下圖像會打開專注面板，另一個按鍵打開選單。結束後兩者互換，按一下就會出現「繼續」和「就這樣」。快速鍵繼續有效。";
+"While a session runs, a click on the icon opens the session panel and the other button opens the menu. When it ends, they swap, so a click brings “Keep going” and “Leave quietly”. The shortcuts keep working." = "專注進行時，按一下圖像會打開專注面板，另一個按鍵打開選單。結束後兩者互換，按一下就會出現「繼續」和「就這樣」。快速鍵繼續有效。";
 "While peeking, turn off %@" = "一瞥時關閉：%@";
 "While peeking, turn off:" = "一瞥時關閉：";
 "While this site is in front, its settings cover all displays, not only the one with the browser." = "此網站在最前方時，其設定作用於所有顯示器，而不只是瀏覽器所在的那台。";

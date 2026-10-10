@@ -144,7 +144,7 @@
 "Don’t show again" = "Niet meer tonen";
 "Don’t show explanations" = "Uitleg verbergen";
 "Don’t show this again" = "Niet meer tonen";
-"Each display can follow what is on it: the app you are using sets its own display, and every other display follows the app on top there. Peek has its own choice under Shortcuts." = "Elk scherm kan volgen wat erop staat: de app die je gebruikt bepaalt zijn eigen scherm, en elk ander scherm volgt de app die daar bovenop ligt. De kleurblik heeft een eigen keuze onder ‘Sneltoetsen’.";
+"Each display can follow what is on it: the app you are using sets its own display, and every other display follows the app on top there. Peek has its own choice under “Shortcuts”." = "Elk scherm kan volgen wat erop staat: de app die je gebruikt bepaalt zijn eigen scherm, en elk ander scherm volgt de app die daar bovenop ligt. De kleurblik heeft een eigen keuze onder ‘Sneltoetsen’.";
 "End" = "Einde";
 "End session" = "Sessie beëindigen";
 "End the session without a call back." = "Beëindigt de sessie zonder terugroepen.";
@@ -154,7 +154,7 @@
 "Night Shift comes back on now." = "Night Shift gaat nu weer aan.";
 "Night Shift comes back now if your schedule wants it on. The app you are using keeps its own Night Shift setting." = "Night Shift komt nu terug als je schema het aan wil. De app die je gebruikt houdt zijn eigen Night Shift-instelling.";
 "Night Shift stays off for now, because your schedule has it off at this hour." = "Night Shift blijft voorlopig uit, omdat je schema het op dit uur uit heeft.";
-"English and German are read line by line. A language marked experimental is written with care but not yet checked by a native speaker. If something sounds off, Report a Problem on the About tab reaches me." = "Engels en Duits zijn regel voor regel nagelezen. Een taal met de toevoeging ‘experimenteel’ is met zorg geschreven, maar nog niet nagelezen door iemand die de taal spreekt. Klinkt er iets vreemd, dan bereikt ‘Meld een bug’ onder ‘Info’ mij.";
+"English and German are read line by line. A language marked experimental is written with care but not yet checked by a native speaker. If something sounds off, “Report a Problem…” under “About” reaches me." = "Engels en Duits zijn regel voor regel nagelezen. Een taal met de toevoeging ‘experimenteel’ is met zorg geschreven, maar nog niet nagelezen door iemand die de taal spreekt. Klinkt er iets vreemd, dan bereikt ‘Meld een bug’ onder ‘Info’ mij.";
 "Everything else stays on this Mac: no account, no analytics, no servers. The browser extension talks only to the app." = "Al het andere blijft op deze Mac: geen account, geen statistieken, geen servers. De browserextensie praat alleen met de app.";
 "Exact page" = "Precies deze pagina";
 "Exception for %@" = "Uitzondering voor %@";
@@ -207,9 +207,9 @@
 "Hide uninstalled browsers" = "Niet-geïnstalleerde browsers verbergen";
 "Hides the gray explanations under the settings, like this one. The ? next to each setting still explains it." = "Verbergt de grijze uitleg onder de instellingen, zoals deze. Het ? naast elke instelling legt hem nog steeds uit.";
 "Hides this card for now. Tick the box below to hide it for good." = "Verbergt deze kaart voor nu. Vink het vakje hieronder aan om hem voorgoed te verbergen.";
-"Hold %@ and the screen shows color for as long as you hold it. Press it twice quickly to keep it, once more to return. %@ turns Grayscale on or off. You can change both under Shortcuts." = "Houd %@ ingedrukt en het scherm toont kleur zolang je vasthoudt. Twee keer snel drukken houdt het zo, nog een keer en het komt terug. %@ zet grijstinten aan of uit. Je kunt ze allebei veranderen onder ‘Sneltoetsen’.";
+"Hold %@ and the screen shows color for as long as you hold it. Press it twice quickly to keep it, once more to return. %@ turns Grayscale on or off. You can change both under “Shortcuts”." = "Houd %@ ingedrukt en het scherm toont kleur zolang je vasthoudt. Twee keer snel drukken houdt het zo, nog een keer en het komt terug. %@ zet grijstinten aan of uit. Je kunt ze allebei veranderen onder ‘Sneltoetsen’.";
 "Hold the shortcut to see the plain display; let go to return. Press it twice quickly to keep the plain display until you press it again. Your settings stay as they are." = "Houd de sneltoets ingedrukt om het scherm zonder filter te zien; laat los en het komt terug. Twee keer snel drukken houdt het zonder filter tot je opnieuw drukt. Je instellingen blijven zoals ze zijn.";
-"Hold the shortcut to see the plain display; let go to return. Press it twice quickly to keep it, once more to return. Click here to record a different shortcut." = "Houd de sneltoets ingedrukt om het scherm zonder filter te zien; laat los en het komt terug. Twee keer snel drukken houdt het zo, nog een keer en het komt terug. Klik hier om een andere sneltoets op te nemen.";
+"Hold the shortcut to see the plain display; let go to return. Press it twice quickly to keep it, once more to return. Click the shortcut on the right to record a new one." = "Houd de sneltoets ingedrukt om het scherm zonder filter te zien; laat los en het komt terug. Twee keer snel drukken houdt het zo, nog een keer en het komt terug. Klik rechts op de sneltoets om een nieuwe op te nemen.";
 "hold ⌥ A: color while held" = "⌥ A vasthouden: in kleur";
 "How loud the session sounds are. Let go to hear it." = "Hoe hard de sessiegeluiden klinken. Laat los om het te horen.";
 "Night Shift turned off for a while stays off, even for an app that turns it on. Grayscale, warmth and Night Shift all off show the plain display." = "Zet je Night Shift een tijdje uit, dan blijft het uit, ook bij een app die het aanzet. Grijstinten, warmte en Night Shift allemaal uit tonen het scherm zonder filter.";
@@ -255,7 +255,7 @@
 "Login setting needs attention" = "De inloginstelling verdient een blik";
 "Looks again for installed browsers. The list also checks by itself every few seconds while this window is open." = "Zoekt opnieuw naar geïnstalleerde browsers. De lijst controleert ook zelf om de paar seconden zolang dit venster open is.";
 "Minutes, separated by commas. Offered when you leave a session; Less Pull calls you back once." = "Minuten, gescheiden door komma’s. Worden aangeboden als je een sessie verlaat; Less Pull roept je één keer terug.";
-"Minutes, separated by commas. They appear under Start a session in the menu." = "Minuten, gescheiden door komma’s. Ze verschijnen in het menu onder ‘Start een sessie’.";
+"Minutes, separated by commas. They appear under “Start a session…” in the menu." = "Minuten, gescheiden door komma’s. Ze verschijnen in het menu onder ‘Start een sessie’.";
 "More" = "Meer";
 "More in Settings…" = "Meer in Instellingen…";
 "Natural Colors" = "Natuurlijke kleuren";
@@ -296,7 +296,7 @@
 "Off until Night Shift changes" = "Uit tot Night Shift wisselt";
 "Off: when the session ends, the panel offers only Keep going and Leave quietly." = "Uit: als de sessie eindigt, biedt het paneel alleen ‘Doorgaan’ en ‘Hier laten’.";
 "Offer a call back when I leave" = "Terugroepen aanbieden als ik wegga";
-"Offered when you choose Leaving now. Less Pull calls you back once, then the session is over." = "Verschijnt als je ‘Ik ga nu weg’ kiest. Less Pull roept je één keer terug, daarna is de sessie voorbij.";
+"Offered when you choose “Leaving now…”. Less Pull calls you back once, then the session is over." = "Verschijnt als je ‘Ik ga nu weg’ kiest. Less Pull roept je één keer terug, daarna is de sessie voorbij.";
 "OK" = "OK";
 "On" = "Aan";
 "on" = "aan";
@@ -350,7 +350,7 @@
 "Press a shortcut to turn Grayscale on or off from anywhere." = "Druk op een sneltoets om grijstinten overal aan of uit te zetten.";
 "Press keys…" = "Druk op toetsen…";
 "Press the keys you want, with ⌘, ⌃ or ⌥. Esc cancels; ⌫ removes the shortcut." = "Druk op de toetsen die je wilt, met ⌘, ⌃ of ⌥. Esc annuleert; ⌫ verwijdert de sneltoets.";
-"Press the shortcut to turn Grayscale on or off from anywhere. Click here to record a different shortcut." = "Druk op de sneltoets om grijstinten overal aan of uit te zetten. Klik hier om een andere sneltoets op te nemen.";
+"Press the shortcut to turn Grayscale on or off from anywhere. Click the shortcut on the right to record a new one." = "Druk op de sneltoets om grijstinten overal aan of uit te zetten. Klik rechts op de sneltoets om een nieuwe op te nemen.";
 "Preview the call-back sound" = "Beluister het terugroepgeluid";
 "Preview the end sound" = "Beluister het eindgeluid";
 "Preview:" = "Beluister:";
@@ -397,7 +397,7 @@
 "Set up %@" = "%@ instellen";
 "Set up…" = "Stel in…";
 "Settings…" = "Instellingen…";
-"Shades of gray, day and night. Exceptions bring color back where you need it, and Off for a while returns by itself." = "Grijstinten, dag en nacht. Uitzonderingen geven de kleur terug waar je haar nodig hebt, en ‘Terug naar kleur voor…’ stopt vanzelf.";
+"Shades of gray, day and night. Exceptions bring color back where you need it, and “Turn Grayscale off for…” returns by itself." = "Grijstinten, dag en nacht. Uitzonderingen geven de kleur terug waar je haar nodig hebt, en ‘Terug naar kleur voor…’ stopt vanzelf.";
 "Share" = "Deel";
 "Share Less Pull" = "Less Pull delen";
 "Shortcuts" = "Sneltoetsen";
@@ -417,7 +417,7 @@
 "The plain display for a while: color and no added warmth. Night Shift is left alone, and all your settings stay." = "Het scherm een tijdje zonder filter: in kleur en zonder extra warmte. Night Shift blijft ongemoeid, en al je instellingen blijven.";
 "Shows the supported browsers that are not installed on this Mac." = "Toont de ondersteunde browsers die niet op deze Mac zijn geïnstalleerd.";
 "Shows the thank-you card with ways to support Less Pull, the one that appears after two weeks." = "Toont de bedankkaart met manieren om Less Pull te steunen, dezelfde die na twee weken verschijnt.";
-"Some things need color: a photo app, a video site, a chart. Choose Exception for the app you are in, right from the menu, and change only what should differ. Websites work the same way once the browser extension is connected." = "Sommige dingen hebben kleur nodig: een foto-app, een videosite, een grafiek. Kies ‘Uitzondering voor’ de app waar je in zit, direct in het menu, en verander alleen wat anders moet. Websites werken hetzelfde zodra de browserextensie verbonden is.";
+"Some things need color: a photo app, a video site, a chart. Choose “Exception for …” for the app you are in, right from the menu, and change only what should differ. Websites work the same way once the browser extension is connected." = "Sommige dingen hebben kleur nodig: een foto-app, een videosite, een grafiek. Kies ‘Uitzondering voor’ de app waar je in zit, direct in het menu, en verander alleen wat anders moet. Websites werken hetzelfde zodra de browserextensie verbonden is.";
 "Something not working?" = "Werkt er iets niet?";
 "Sound" = "Geluid";
 "Start %ld min" = "Start %ld min";
@@ -516,11 +516,11 @@
 "What the browser extension can see" = "Wat de browserextensie kan zien";
 "What the left mouse button does on the menu-bar icon." = "Wat de linkermuisknop doet op het menubalksymbool.";
 "What a right-click on the menu-bar icon does. A Control-click or a two-finger tap counts as a right-click." = "Wat een rechtsklik op het menubalksymbool doet. Een Control-klik of een tik met twee vingers telt als rechtsklik.";
-"A Control-click or a two-finger tap counts as a right-click. One of the two buttons always opens the menu. The session panel starts a session, or shows the one running. When a session ends, the two buttons swap, so a click reaches the session panel." = "Een Control-klik of een tik met twee vingers telt als rechtsklik. Een van de twee knoppen opent altijd het menu. Het sessiepaneel start een sessie of toont de lopende. Eindigt een sessie, dan wisselen de twee knoppen, zodat een klik bij het sessiepaneel komt.";
+"A Control-click or a two-finger tap counts as a right-click. One of the two buttons always opens the menu. “Opens the session panel” starts a session, or shows the one running. When a session ends, the two buttons swap, so a click reaches the session panel." = "Een Control-klik of een tik met twee vingers telt als rechtsklik. Een van de twee knoppen opent altijd het menu. ‘Opent het sessiepaneel’ start een sessie of toont de lopende. Eindigt een sessie, dan wisselen de twee knoppen, zodat een klik bij het sessiepaneel komt.";
 "Follows what is on it: the app you are using, the app on top of this display, or your defaults. Always your defaults: exceptions do not apply here. Always plain: never gray or warmth here." = "‘Volgt wat erop staat’: de app die je gebruikt, de bovenste app op dit scherm of je standaardinstellingen. ‘Altijd je standaardinstellingen’: uitzonderingen gelden hier niet. ‘Altijd zonder filter’: hier nooit grijs of warmte.";
 "Which displays a peek reaches while you use this app: the one under the pointer, all of them, or the ones you tick. This works even while the exception is off." = "Welke schermen de kleurblik bereikt terwijl je deze app gebruikt: het scherm onder de aanwijzer, alle schermen of de schermen die je aanvinkt. Dit werkt ook als de uitzondering uit staat.";
 "Which displays a peek reaches while this site is in front." = "Welke schermen de kleurblik bereikt zolang deze site vooraan staat.";
-"While a session runs, a click on the icon opens the session panel and the other button opens the menu. When it ends, they swap, so a click brings Keep going and Leave quietly. The shortcuts keep working." = "Tijdens een sessie opent een klik op het symbool het sessiepaneel en de andere knop het menu. Eindigt ze, dan wisselen ze, zodat een klik ‘Doorgaan’ en ‘Hier laten’ brengt. De sneltoetsen blijven werken.";
+"While a session runs, a click on the icon opens the session panel and the other button opens the menu. When it ends, they swap, so a click brings “Keep going” and “Leave quietly”. The shortcuts keep working." = "Tijdens een sessie opent een klik op het symbool het sessiepaneel en de andere knop het menu. Eindigt ze, dan wisselen ze, zodat een klik ‘Doorgaan’ en ‘Hier laten’ brengt. De sneltoetsen blijven werken.";
 "While peeking, turn off %@" = "Kleurblik zonder %@";
 "While peeking, turn off:" = "Kleurblik zonder:";
 "While this site is in front, its settings cover all displays, not only the one with the browser." = "Zolang deze site vooraan staat, gelden zijn instellingen op alle schermen, niet alleen op dat met de browser.";

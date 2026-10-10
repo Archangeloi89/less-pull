@@ -144,7 +144,7 @@
 "Don’t show again" = "Больше не показывать";
 "Don’t show explanations" = "Скрыть пояснения";
 "Don’t show this again" = "Больше не показывать";
-"Each display can follow what is on it: the app you are using sets its own display, and every other display follows the app on top there. Peek has its own choice under Shortcuts." = "Каждый экран может следовать за тем, что на нём: приложение, которым вы пользуетесь, определяет свой экран, а каждый другой экран следует за приложением, которое там сверху. У взгляда в цвете своя настройка в «Сочетаниях».";
+"Each display can follow what is on it: the app you are using sets its own display, and every other display follows the app on top there. Peek has its own choice under “Shortcuts”." = "Каждый экран может следовать за тем, что на нём: приложение, которым вы пользуетесь, определяет свой экран, а каждый другой экран следует за приложением, которое там сверху. У взгляда в цвете своя настройка в «Сочетаниях».";
 "End" = "Конец";
 "End session" = "Завершить сессию";
 "End the session without a call back." = "Завершить сессию, не звать обратно.";
@@ -154,7 +154,7 @@
 "Night Shift comes back on now." = "Night Shift снова включается сейчас.";
 "Night Shift comes back now if your schedule wants it on. The app you are using keeps its own Night Shift setting." = "Night Shift вернётся сейчас, если расписание хочет его включить. У приложения, которым вы пользуетесь, остаётся своя настройка Night Shift.";
 "Night Shift stays off for now, because your schedule has it off at this hour." = "Night Shift пока остаётся выключенным: в это время расписание держит его выключенным.";
-"English and German are read line by line. A language marked experimental is written with care but not yet checked by a native speaker. If something sounds off, Report a Problem on the About tab reaches me." = "Английский и немецкий вычитаны строка за строкой. Язык с пометкой «экспериментальный» написан внимательно, но носитель его ещё не читал. Если что-то звучит не так, «Отчёт…» на вкладке «О программе» дойдёт до меня.";
+"English and German are read line by line. A language marked experimental is written with care but not yet checked by a native speaker. If something sounds off, “Report a Problem…” under “About” reaches me." = "Английский и немецкий вычитаны строка за строкой. Язык с пометкой «экспериментальный» написан внимательно, но носитель его ещё не читал. Если что-то звучит не так, «Отчёт…» на вкладке «О программе» дойдёт до меня.";
 "Everything else stays on this Mac: no account, no analytics, no servers. The browser extension talks only to the app." = "Всё остальное остаётся на этом Mac: ни учётной записи, ни статистики, ни серверов. Расширение браузера общается только с приложением.";
 "Exact page" = "Только эта страница";
 "Exception for %@" = "Исключение для %@";
@@ -207,9 +207,9 @@
 "Hide uninstalled browsers" = "Скрыть неустановленные браузеры";
 "Hides the gray explanations under the settings, like this one. The ? next to each setting still explains it." = "Скрывает серые пояснения под настройками — вроде этого. «?» рядом с каждой настройкой по-прежнему её объясняет.";
 "Hides this card for now. Tick the box below to hide it for good." = "Скрывает эту карточку на время. Отметьте поле ниже, чтобы скрыть её насовсем.";
-"Hold %@ and the screen shows color for as long as you hold it. Press it twice quickly to keep it, once more to return. %@ turns Grayscale on or off. You can change both under Shortcuts." = "Удерживайте %@ — и экран в цвете, пока вы держите. Нажмите дважды быстро, чтобы цвет остался, ещё раз — чтобы вернуться. %@ включает и выключает оттенки серого. Оба можно изменить в «Сочетаниях».";
+"Hold %@ and the screen shows color for as long as you hold it. Press it twice quickly to keep it, once more to return. %@ turns Grayscale on or off. You can change both under “Shortcuts”." = "Удерживайте %@ — и экран в цвете, пока вы держите. Нажмите дважды быстро, чтобы цвет остался, ещё раз — чтобы вернуться. %@ включает и выключает оттенки серого. Оба можно изменить в «Сочетаниях».";
 "Hold the shortcut to see the plain display; let go to return. Press it twice quickly to keep the plain display until you press it again. Your settings stay as they are." = "Удерживайте сочетание, чтобы увидеть экран без фильтра; отпустите — и всё вернётся. Нажмите дважды быстро, чтобы экран остался без фильтра до следующего нажатия. Ваши настройки не меняются.";
-"Hold the shortcut to see the plain display; let go to return. Press it twice quickly to keep it, once more to return. Click here to record a different shortcut." = "Удерживайте сочетание, чтобы увидеть экран без фильтра; отпустите — и всё вернётся. Нажмите дважды быстро, чтобы оставить так, ещё раз — чтобы вернуться. Нажмите здесь, чтобы записать другое сочетание.";
+"Hold the shortcut to see the plain display; let go to return. Press it twice quickly to keep it, once more to return. Click the shortcut on the right to record a new one." = "Удерживайте сочетание, чтобы увидеть экран без фильтра; отпустите — и всё вернётся. Нажмите дважды быстро, чтобы оставить так, ещё раз — чтобы вернуться. Нажмите на сочетание справа, чтобы записать новое.";
 "hold ⌥ A: color while held" = "держите ⌥ A: в цвете";
 "How loud the session sounds are. Let go to hear it." = "Громкость звуков сессии. Отпустите, чтобы услышать.";
 "Night Shift turned off for a while stays off, even for an app that turns it on. Grayscale, warmth and Night Shift all off show the plain display." = "Если выключить Night Shift на время, он останется выключенным даже для приложения, которое его включает. Оттенки серого, тепло и Night Shift, выключенные вместе, дают экран без фильтра.";
@@ -255,7 +255,7 @@
 "Login setting needs attention" = "Настройка входа требует внимания";
 "Looks again for installed browsers. The list also checks by itself every few seconds while this window is open." = "Снова ищет установленные браузеры. Пока окно открыто, список и сам проверяет это каждые несколько секунд.";
 "Minutes, separated by commas. Offered when you leave a session; Less Pull calls you back once." = "Минуты через запятую. Предлагаются, когда вы уходите из сессии; Less Pull позовёт вас один раз.";
-"Minutes, separated by commas. They appear under Start a session in the menu." = "Минуты через запятую. Они появляются в меню под «Начать сессию».";
+"Minutes, separated by commas. They appear under “Start a session…” in the menu." = "Минуты через запятую. Они появляются в меню под «Начать сессию».";
 "More" = "Больше";
 "More in Settings…" = "Ещё в Настройках…";
 "Natural Colors" = "Естественные цвета";
@@ -296,7 +296,7 @@
 "Off until Night Shift changes" = "Выкл, пока Night Shift не переключится";
 "Off: when the session ends, the panel offers only Keep going and Leave quietly." = "Выкл: когда сессия заканчивается, панель предлагает только «Продолжить» и «Оставить».";
 "Offer a call back when I leave" = "Предлагать позвать, когда ухожу";
-"Offered when you choose Leaving now. Less Pull calls you back once, then the session is over." = "Предлагается, когда вы выбираете «Я ухожу». Less Pull позовёт вас один раз, после этого сессия закончена.";
+"Offered when you choose “Leaving now…”. Less Pull calls you back once, then the session is over." = "Предлагается, когда вы выбираете «Я ухожу». Less Pull позовёт вас один раз, после этого сессия закончена.";
 "OK" = "OK";
 "On" = "Вкл";
 "on" = "вкл";
@@ -350,7 +350,7 @@
 "Press a shortcut to turn Grayscale on or off from anywhere." = "Нажмите сочетание, чтобы включать и выключать оттенки серого откуда угодно.";
 "Press keys…" = "Нажмите клавиши…";
 "Press the keys you want, with ⌘, ⌃ or ⌥. Esc cancels; ⌫ removes the shortcut." = "Нажмите нужные клавиши с ⌘, ⌃ или ⌥. Esc отменяет; ⌫ убирает сочетание.";
-"Press the shortcut to turn Grayscale on or off from anywhere. Click here to record a different shortcut." = "Нажмите сочетание, чтобы включать и выключать оттенки серого откуда угодно. Нажмите здесь, чтобы записать другое сочетание.";
+"Press the shortcut to turn Grayscale on or off from anywhere. Click the shortcut on the right to record a new one." = "Нажмите сочетание, чтобы включать и выключать оттенки серого откуда угодно. Нажмите на сочетание справа, чтобы записать новое.";
 "Preview the call-back sound" = "Послушать звук зова";
 "Preview the end sound" = "Послушать звук конца";
 "Preview:" = "Звук:";
@@ -397,7 +397,7 @@
 "Set up %@" = "Настроить %@";
 "Set up…" = "Настроить…";
 "Settings…" = "Настройки…";
-"Shades of gray, day and night. Exceptions bring color back where you need it, and Off for a while returns by itself." = "Оттенки серого, днём и ночью. Исключения возвращают цвет там, где он нужен, а «Вернуть цвет на…» заканчивается само.";
+"Shades of gray, day and night. Exceptions bring color back where you need it, and “Turn Grayscale off for…” returns by itself." = "Оттенки серого, днём и ночью. Исключения возвращают цвет там, где он нужен, а «Вернуть цвет на…» заканчивается само.";
 "Share" = "Поделиться";
 "Share Less Pull" = "Поделиться Less Pull";
 "Shortcuts" = "Сочетания";
@@ -417,7 +417,7 @@
 "The plain display for a while: color and no added warmth. Night Shift is left alone, and all your settings stay." = "Экран без фильтра на время: в цвете и без добавленного тепла. Night Shift не трогается, и все ваши настройки остаются.";
 "Shows the supported browsers that are not installed on this Mac." = "Показывает поддерживаемые браузеры, не установленные на этом Mac.";
 "Shows the thank-you card with ways to support Less Pull, the one that appears after two weeks." = "Показывает карточку благодарности со способами поддержать Less Pull — ту же, что появляется через две недели.";
-"Some things need color: a photo app, a video site, a chart. Choose Exception for the app you are in, right from the menu, and change only what should differ. Websites work the same way once the browser extension is connected." = "Кое-чему цвет нужен: приложению для фото, видеосайту, диаграмме. Выберите «Исключение для» приложения, в котором находитесь, прямо в меню, и меняйте только то, что должно отличаться. Сайты работают так же, как только подключится расширение браузера.";
+"Some things need color: a photo app, a video site, a chart. Choose “Exception for …” for the app you are in, right from the menu, and change only what should differ. Websites work the same way once the browser extension is connected." = "Кое-чему цвет нужен: приложению для фото, видеосайту, диаграмме. Выберите «Исключение для» приложения, в котором находитесь, прямо в меню, и меняйте только то, что должно отличаться. Сайты работают так же, как только подключится расширение браузера.";
 "Something not working?" = "Что-то не работает?";
 "Sound" = "Звук";
 "Start %ld min" = "Начать %ld мин";
@@ -516,11 +516,11 @@
 "What the browser extension can see" = "Что видит расширение браузера";
 "What the left mouse button does on the menu-bar icon." = "Что делает левая кнопка мыши на значке в строке меню.";
 "What a right-click on the menu-bar icon does. A Control-click or a two-finger tap counts as a right-click." = "Что делает правый щелчок по значку в строке меню. Щелчок с Control или касание двумя пальцами считается правым щелчком.";
-"A Control-click or a two-finger tap counts as a right-click. One of the two buttons always opens the menu. The session panel starts a session, or shows the one running. When a session ends, the two buttons swap, so a click reaches the session panel." = "Щелчок с Control или касание двумя пальцами считается правым щелчком. Одна из двух кнопок всегда открывает меню. Панель сессии начинает сессию или показывает текущую. Когда сессия заканчивается, кнопки меняются местами, и щелчок ведёт к панели сессии.";
+"A Control-click or a two-finger tap counts as a right-click. One of the two buttons always opens the menu. “Opens the session panel” starts a session, or shows the one running. When a session ends, the two buttons swap, so a click reaches the session panel." = "Щелчок с Control или касание двумя пальцами считается правым щелчком. Одна из двух кнопок всегда открывает меню. «Открывает панель сессии» начинает сессию или показывает текущую. Когда сессия заканчивается, кнопки меняются местами, и щелчок ведёт к панели сессии.";
 "Follows what is on it: the app you are using, the app on top of this display, or your defaults. Always your defaults: exceptions do not apply here. Always plain: never gray or warmth here." = "«Следует за тем, что на нём»: приложение, которым вы пользуетесь, приложение сверху на этом экране или ваши настройки по умолчанию. «Всегда ваши настройки по умолчанию»: исключения здесь не действуют. «Всегда без фильтра»: здесь никогда нет ни серого, ни тепла.";
 "Which displays a peek reaches while you use this app: the one under the pointer, all of them, or the ones you tick. This works even while the exception is off." = "На какие экраны действует взгляд в цвете, пока вы пользуетесь этим приложением: экран под указателем, все или отмеченные вами. Это работает, даже когда исключение выключено.";
 "Which displays a peek reaches while this site is in front." = "На какие экраны действует взгляд в цвете, пока этот сайт на переднем плане.";
-"While a session runs, a click on the icon opens the session panel and the other button opens the menu. When it ends, they swap, so a click brings Keep going and Leave quietly. The shortcuts keep working." = "Пока идёт сессия, щелчок по значку открывает панель сессии, а другая кнопка — меню. Когда сессия заканчивается, они меняются местами, и щелчок приносит «Продолжить» и «Оставить». Сочетания клавиш работают по-прежнему.";
+"While a session runs, a click on the icon opens the session panel and the other button opens the menu. When it ends, they swap, so a click brings “Keep going” and “Leave quietly”. The shortcuts keep working." = "Пока идёт сессия, щелчок по значку открывает панель сессии, а другая кнопка — меню. Когда сессия заканчивается, они меняются местами, и щелчок приносит «Продолжить» и «Оставить». Сочетания клавиш работают по-прежнему.";
 "While peeking, turn off %@" = "Взгляд без %@";
 "While peeking, turn off:" = "Взгляд без:";
 "While this site is in front, its settings cover all displays, not only the one with the browser." = "Пока этот сайт на переднем плане, его настройки действуют на всех экранах, а не только там, где браузер.";

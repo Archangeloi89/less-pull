@@ -144,7 +144,7 @@
 "Don’t show again" = "다시 표시 안 함";
 "Don’t show explanations" = "설명 숨기기";
 "Don’t show this again" = "다시 표시 안 함";
-"Each display can follow what is on it: the app you are using sets its own display, and every other display follows the app on top there. Peek has its own choice under Shortcuts." = "디스플레이마다 표시된 것을 따를 수 있습니다. 쓰고 있는 앱이 자기 디스플레이를 정하고, 다른 디스플레이는 거기서 맨 위에 있는 앱을 따릅니다. ‘잠깐 보기’ 대상은 ‘단축키’에서 따로 고릅니다.";
+"Each display can follow what is on it: the app you are using sets its own display, and every other display follows the app on top there. Peek has its own choice under “Shortcuts”." = "디스플레이마다 표시된 것을 따를 수 있습니다. 쓰고 있는 앱이 자기 디스플레이를 정하고, 다른 디스플레이는 거기서 맨 위에 있는 앱을 따릅니다. ‘잠깐 보기’ 대상은 ‘단축키’에서 따로 고릅니다.";
 "End" = "종료";
 "End session" = "세션 끝내기";
 "End the session without a call back." = "다시 부르기 없이 세션을 끝냅니다.";
@@ -154,7 +154,7 @@
 "Night Shift comes back on now." = "Night Shift를 지금 다시 켭니다.";
 "Night Shift comes back now if your schedule wants it on. The app you are using keeps its own Night Shift setting." = "일정이 켜지기를 원하면 Night Shift가 지금 돌아옵니다. 쓰고 있는 앱의 Night Shift 설정은 그대로 유지됩니다.";
 "Night Shift stays off for now, because your schedule has it off at this hour." = "이 시간에는 일정상 꺼져 있으므로 Night Shift는 당분간 꺼진 채로 둡니다.";
-"English and German are read line by line. A language marked experimental is written with care but not yet checked by a native speaker. If something sounds off, Report a Problem on the About tab reaches me." = "영어와 독일어는 한 줄씩 검토했습니다. ‘실험적’으로 표시된 언어는 정성껏 썼지만 아직 원어민이 읽지 않았습니다. 어색한 곳이 있으면 ‘정보’ 탭의 ‘신고…’가 저에게 닿습니다.";
+"English and German are read line by line. A language marked experimental is written with care but not yet checked by a native speaker. If something sounds off, “Report a Problem…” under “About” reaches me." = "영어와 독일어는 한 줄씩 검토했습니다. ‘실험적’으로 표시된 언어는 정성껏 썼지만 아직 원어민이 읽지 않았습니다. 어색한 곳이 있으면 ‘정보’ 탭의 ‘신고…’가 저에게 닿습니다.";
 "Everything else stays on this Mac: no account, no analytics, no servers. The browser extension talks only to the app." = "나머지는 모두 이 Mac 안에 머뭅니다. 계정도, 분석도, 서버도 없습니다. 브라우저 확장 프로그램은 앱과만 통신합니다.";
 "Exact page" = "이 페이지만";
 "Exception for %@" = "%@ 개별 설정";
@@ -207,9 +207,9 @@
 "Hide uninstalled browsers" = "설치 안 된 브라우저 숨기기";
 "Hides the gray explanations under the settings, like this one. The ? next to each setting still explains it." = "설정 아래의 회색 설명을 이 문장처럼 숨깁니다. 각 설정 옆의 ?는 계속 설명해 줍니다.";
 "Hides this card for now. Tick the box below to hide it for good." = "이 카드를 일단 숨깁니다. 아래 상자에 체크하면 다시 표시하지 않습니다.";
-"Hold %@ and the screen shows color for as long as you hold it. Press it twice quickly to keep it, once more to return. %@ turns Grayscale on or off. You can change both under Shortcuts." = "%@을(를) 누르고 있는 동안만 화면이 컬러가 됩니다. 빠르게 두 번 누르면 그대로, 한 번 더 누르면 돌아옵니다. %@은(는) 회색조를 켜고 끕니다. 둘 다 ‘단축키’에서 바꿀 수 있습니다.";
+"Hold %@ and the screen shows color for as long as you hold it. Press it twice quickly to keep it, once more to return. %@ turns Grayscale on or off. You can change both under “Shortcuts”." = "%@을(를) 누르고 있는 동안만 화면이 컬러가 됩니다. 빠르게 두 번 누르면 그대로, 한 번 더 누르면 돌아옵니다. %@은(는) 회색조를 켜고 끕니다. 둘 다 ‘단축키’에서 바꿀 수 있습니다.";
 "Hold the shortcut to see the plain display; let go to return. Press it twice quickly to keep the plain display until you press it again. Your settings stay as they are." = "단축키를 누르고 있는 동안 필터 없는 화면이 보이고, 놓으면 돌아옵니다. 빠르게 두 번 누르면 다시 누를 때까지 필터 없는 화면이 유지됩니다. 설정은 바뀌지 않습니다.";
-"Hold the shortcut to see the plain display; let go to return. Press it twice quickly to keep it, once more to return. Click here to record a different shortcut." = "단축키를 누르고 있는 동안 필터 없는 화면이 보이고, 놓으면 돌아옵니다. 빠르게 두 번 누르면 그대로, 한 번 더 누르면 돌아옵니다. 여기를 클릭하면 다른 단축키를 등록할 수 있습니다.";
+"Hold the shortcut to see the plain display; let go to return. Press it twice quickly to keep it, once more to return. Click the shortcut on the right to record a new one." = "단축키를 누르고 있는 동안 필터 없는 화면이 보이고, 놓으면 돌아옵니다. 빠르게 두 번 누르면 그대로, 한 번 더 누르면 돌아옵니다. 오른쪽의 단축키를 클릭하면 새 단축키를 등록할 수 있습니다.";
 "hold ⌥ A: color while held" = "⌥ A 누른 동안: 컬러";
 "How loud the session sounds are. Let go to hear it." = "세션 소리의 크기. 놓으면 들어볼 수 있습니다.";
 "Night Shift turned off for a while stays off, even for an app that turns it on. Grayscale, warmth and Night Shift all off show the plain display." = "Night Shift를 잠시 꺼 두면, 켜는 앱이 있어도 꺼진 채로 있습니다. 회색조, 따뜻함, Night Shift가 모두 꺼지면 필터 없는 화면이 됩니다.";
@@ -255,7 +255,7 @@
 "Login setting needs attention" = "로그인 설정을 확인해 주세요";
 "Looks again for installed browsers. The list also checks by itself every few seconds while this window is open." = "설치된 브라우저를 다시 찾습니다. 이 창이 열려 있는 동안 목록이 몇 초마다 스스로 확인하기도 합니다.";
 "Minutes, separated by commas. Offered when you leave a session; Less Pull calls you back once." = "분 단위, 쉼표로 구분. 세션을 떠날 때 제안되며, Less Pull이 한 번 다시 불러 줍니다.";
-"Minutes, separated by commas. They appear under Start a session in the menu." = "분 단위, 쉼표로 구분. 메뉴의 ‘세션 시작’ 아래에 표시됩니다.";
+"Minutes, separated by commas. They appear under “Start a session…” in the menu." = "분 단위, 쉼표로 구분. 메뉴의 ‘세션 시작’ 아래에 표시됩니다.";
 "More" = "더 보기";
 "More in Settings…" = "설정에서 더 보기…";
 "Natural Colors" = "자연스러운 색상";
@@ -296,7 +296,7 @@
 "Off until Night Shift changes" = "Night Shift가 바뀔 때까지 끔";
 "Off: when the session ends, the panel offers only Keep going and Leave quietly." = "끔: 세션이 끝나면 패널에 ‘계속’과 ‘이대로’만 표시됩니다.";
 "Offer a call back when I leave" = "자리 비울 때 다시 부르기 제안";
-"Offered when you choose Leaving now. Less Pull calls you back once, then the session is over." = "‘자리 비움’을 선택할 때 제안됩니다. Less Pull이 한 번 다시 불러 주고, 그 뒤에는 세션이 끝납니다.";
+"Offered when you choose “Leaving now…”. Less Pull calls you back once, then the session is over." = "‘자리 비움’을 선택할 때 제안됩니다. Less Pull이 한 번 다시 불러 주고, 그 뒤에는 세션이 끝납니다.";
 "OK" = "확인";
 "On" = "켬";
 "on" = "켬";
@@ -350,7 +350,7 @@
 "Press a shortcut to turn Grayscale on or off from anywhere." = "어디서든 회색조를 켜고 끌 단축키를 누르세요.";
 "Press keys…" = "키 누르기…";
 "Press the keys you want, with ⌘, ⌃ or ⌥. Esc cancels; ⌫ removes the shortcut." = "⌘, ⌃, ⌥ 중 하나와 함께 원하는 키를 누르세요. Esc는 취소, ⌫는 단축키 제거.";
-"Press the shortcut to turn Grayscale on or off from anywhere. Click here to record a different shortcut." = "어디서든 이 단축키로 회색조를 켜고 끕니다. 여기를 클릭하면 다른 단축키를 등록할 수 있습니다.";
+"Press the shortcut to turn Grayscale on or off from anywhere. Click the shortcut on the right to record a new one." = "어디서든 이 단축키로 회색조를 켜고 끕니다. 오른쪽의 단축키를 클릭하면 새 단축키를 등록할 수 있습니다.";
 "Preview the call-back sound" = "다시 부르기 소리 들어보기";
 "Preview the end sound" = "종료 소리 들어보기";
 "Preview:" = "소리:";
@@ -397,7 +397,7 @@
 "Set up %@" = "%@ 설정";
 "Set up…" = "설정…";
 "Settings…" = "설정…";
-"Shades of gray, day and night. Exceptions bring color back where you need it, and Off for a while returns by itself." = "낮에도 밤에도 회색 톤으로. 개별 설정으로 필요한 곳에 컬러를 돌려줄 수 있고, ‘잠시 컬러로…’는 저절로 끝납니다.";
+"Shades of gray, day and night. Exceptions bring color back where you need it, and “Turn Grayscale off for…” returns by itself." = "낮에도 밤에도 회색 톤으로. 개별 설정으로 필요한 곳에 컬러를 돌려줄 수 있고, ‘잠시 컬러로…’는 저절로 끝납니다.";
 "Share" = "공유";
 "Share Less Pull" = "Less Pull 공유";
 "Shortcuts" = "단축키";
@@ -417,7 +417,7 @@
 "The plain display for a while: color and no added warmth. Night Shift is left alone, and all your settings stay." = "잠시 필터 없는 화면으로. 컬러이고 따뜻함도 더하지 않습니다. Night Shift는 건드리지 않고, 설정도 모두 그대로입니다.";
 "Shows the supported browsers that are not installed on this Mac." = "이 Mac에 설치되지 않은 지원 브라우저를 표시합니다.";
 "Shows the thank-you card with ways to support Less Pull, the one that appears after two weeks." = "Less Pull을 후원하는 방법을 담은 감사 카드를 표시합니다. 2주 뒤에 나타나는 것과 같습니다.";
-"Some things need color: a photo app, a video site, a chart. Choose Exception for the app you are in, right from the menu, and change only what should differ. Websites work the same way once the browser extension is connected." = "색이 필요한 것도 있습니다. 사진 앱, 동영상 사이트, 차트. 지금 쓰는 앱의 ‘개별 설정’을 메뉴에서 바로 고르고, 달라야 할 것만 바꾸세요. 웹사이트도 브라우저 확장 프로그램이 연결되면 같은 방식으로 됩니다.";
+"Some things need color: a photo app, a video site, a chart. Choose “Exception for …” for the app you are in, right from the menu, and change only what should differ. Websites work the same way once the browser extension is connected." = "색이 필요한 것도 있습니다. 사진 앱, 동영상 사이트, 차트. 지금 쓰는 앱의 ‘개별 설정’을 메뉴에서 바로 고르고, 달라야 할 것만 바꾸세요. 웹사이트도 브라우저 확장 프로그램이 연결되면 같은 방식으로 됩니다.";
 "Something not working?" = "뭔가 안 되나요?";
 "Sound" = "소리";
 "Start %ld min" = "%ld분 시작";
@@ -516,11 +516,11 @@
 "What the browser extension can see" = "브라우저 확장 프로그램이 볼 수 있는 것";
 "What the left mouse button does on the menu-bar icon." = "메뉴 막대 아이콘에서 왼쪽 마우스 버튼이 하는 일.";
 "What a right-click on the menu-bar icon does. A Control-click or a two-finger tap counts as a right-click." = "메뉴 막대 아이콘을 오른쪽 클릭했을 때 하는 일. Control-클릭이나 두 손가락 탭도 오른쪽 클릭으로 칩니다.";
-"A Control-click or a two-finger tap counts as a right-click. One of the two buttons always opens the menu. The session panel starts a session, or shows the one running. When a session ends, the two buttons swap, so a click reaches the session panel." = "Control-클릭이나 두 손가락 탭은 오른쪽 클릭으로 칩니다. 두 버튼 중 하나는 항상 메뉴를 엽니다. 세션 패널은 세션을 시작하거나 진행 중인 세션을 보여 줍니다. 세션이 끝나면 두 버튼이 자리를 바꿔, 클릭으로 세션 패널에 닿습니다.";
+"A Control-click or a two-finger tap counts as a right-click. One of the two buttons always opens the menu. “Opens the session panel” starts a session, or shows the one running. When a session ends, the two buttons swap, so a click reaches the session panel." = "Control-클릭이나 두 손가락 탭은 오른쪽 클릭으로 칩니다. 두 버튼 중 하나는 항상 메뉴를 엽니다. ‘세션 패널 열기’는 세션을 시작하거나 진행 중인 세션을 보여 줍니다. 세션이 끝나면 두 버튼이 자리를 바꿔, 클릭으로 세션 패널에 닿습니다.";
 "Follows what is on it: the app you are using, the app on top of this display, or your defaults. Always your defaults: exceptions do not apply here. Always plain: never gray or warmth here." = "‘표시된 것을 따름’: 쓰고 있는 앱, 이 디스플레이에서 맨 위에 있는 앱, 또는 기본 설정. ‘항상 기본 설정’: 여기서는 개별 설정이 적용되지 않습니다. ‘항상 필터 없이’: 여기서는 회색도 따뜻함도 쓰지 않습니다.";
 "Which displays a peek reaches while you use this app: the one under the pointer, all of them, or the ones you tick. This works even while the exception is off." = "이 앱을 쓰는 동안 잠깐 보기가 닿는 디스플레이. 포인터가 있는 디스플레이, 모두, 또는 체크한 것. 개별 설정이 꺼져 있어도 작동합니다.";
 "Which displays a peek reaches while this site is in front." = "이 사이트가 앞에 있는 동안 잠깐 보기가 닿는 디스플레이.";
-"While a session runs, a click on the icon opens the session panel and the other button opens the menu. When it ends, they swap, so a click brings Keep going and Leave quietly. The shortcuts keep working." = "세션 중에는 아이콘을 클릭하면 세션 패널이, 다른 버튼으로 메뉴가 열립니다. 끝나면 자리를 바꿔, 클릭으로 ‘계속’과 ‘이대로’가 나옵니다. 단축키는 계속 작동합니다.";
+"While a session runs, a click on the icon opens the session panel and the other button opens the menu. When it ends, they swap, so a click brings “Keep going” and “Leave quietly”. The shortcuts keep working." = "세션 중에는 아이콘을 클릭하면 세션 패널이, 다른 버튼으로 메뉴가 열립니다. 끝나면 자리를 바꿔, 클릭으로 ‘계속’과 ‘이대로’가 나옵니다. 단축키는 계속 작동합니다.";
 "While peeking, turn off %@" = "잠깐 볼 때 끄기: %@";
 "While peeking, turn off:" = "잠깐 볼 때 끄기:";
 "While this site is in front, its settings cover all displays, not only the one with the browser." = "이 사이트가 앞에 있는 동안 그 설정이 브라우저가 있는 디스플레이뿐 아니라 모든 디스플레이에 적용됩니다.";

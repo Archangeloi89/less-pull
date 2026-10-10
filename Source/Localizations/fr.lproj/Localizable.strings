@@ -144,7 +144,7 @@
 "Don’t show again" = "Ne plus afficher";
 "Don’t show explanations" = "Masquer les explications";
 "Don’t show this again" = "Ne plus afficher";
-"Each display can follow what is on it: the app you are using sets its own display, and every other display follows the app on top there. Peek has its own choice under Shortcuts." = "Chaque écran peut suivre ce qu'il affiche : l'app que tu utilises décide de son propre écran, et chaque autre écran suit l'app placée au-dessus. Le coup d'œil a son propre choix dans Raccourcis.";
+"Each display can follow what is on it: the app you are using sets its own display, and every other display follows the app on top there. Peek has its own choice under “Shortcuts”." = "Chaque écran peut suivre ce qu'il affiche : l'app que tu utilises décide de son propre écran, et chaque autre écran suit l'app placée au-dessus. Le coup d'œil a son propre choix dans « Raccourcis ».";
 "End" = "Fin";
 "End session" = "Terminer la session";
 "End the session without a call back." = "Termine la session sans rappel.";
@@ -154,7 +154,7 @@
 "Night Shift comes back on now." = "Night Shift se rallume maintenant.";
 "Night Shift comes back now if your schedule wants it on. The app you are using keeps its own Night Shift setting." = "Night Shift revient maintenant si ton horaire le veut allumé. L'app que tu utilises garde son propre réglage de Night Shift.";
 "Night Shift stays off for now, because your schedule has it off at this hour." = "Night Shift reste éteint pour l'instant, car ton horaire l'éteint à cette heure-ci.";
-"English and German are read line by line. A language marked experimental is written with care but not yet checked by a native speaker. If something sounds off, Report a Problem on the About tab reaches me." = "L'anglais et l'allemand sont relus ligne par ligne. Une langue marquée expérimentale est écrite avec soin, mais pas encore relue par une personne dont c'est la langue. Si quelque chose sonne faux, « Signaler un bug… » dans À propos me parvient.";
+"English and German are read line by line. A language marked experimental is written with care but not yet checked by a native speaker. If something sounds off, “Report a Problem…” under “About” reaches me." = "L'anglais et l'allemand sont relus ligne par ligne. Une langue marquée expérimentale est écrite avec soin, mais pas encore relue par une personne dont c'est la langue. Si quelque chose sonne faux, « Signaler un bug… » dans « À propos » me parvient.";
 "Everything else stays on this Mac: no account, no analytics, no servers. The browser extension talks only to the app." = "Tout le reste reste sur ce Mac : pas de compte, pas de statistiques, pas de serveur. L'extension du navigateur ne parle qu'à l'app.";
 "Exact page" = "Cette page précise";
 "Exception for %@" = "Exception pour %@";
@@ -207,9 +207,9 @@
 "Hide uninstalled browsers" = "Masquer les navigateurs non installés";
 "Hides the gray explanations under the settings, like this one. The ? next to each setting still explains it." = "Masque les explications grises sous les réglages, comme celle-ci. Le ? à côté de chaque réglage l'explique toujours.";
 "Hides this card for now. Tick the box below to hide it for good." = "Masque cette carte pour l'instant. Coche la case ci-dessous pour la masquer pour de bon.";
-"Hold %@ and the screen shows color for as long as you hold it. Press it twice quickly to keep it, once more to return. %@ turns Grayscale on or off. You can change both under Shortcuts." = "Maintiens %@ et l'écran montre la couleur tant que tu maintiens. Appuie deux fois vite pour la garder, une fois de plus pour revenir. %@ active ou désactive les niveaux de gris. Tu peux changer les deux dans Raccourcis.";
+"Hold %@ and the screen shows color for as long as you hold it. Press it twice quickly to keep it, once more to return. %@ turns Grayscale on or off. You can change both under “Shortcuts”." = "Maintiens %@ et l'écran montre la couleur tant que tu maintiens. Appuie deux fois vite pour la garder, une fois de plus pour revenir. %@ active ou désactive les niveaux de gris. Tu peux changer les deux dans « Raccourcis ».";
 "Hold the shortcut to see the plain display; let go to return. Press it twice quickly to keep the plain display until you press it again. Your settings stay as they are." = "Maintiens le raccourci pour voir l'écran sans filtre ; relâche pour revenir. Appuie deux fois vite pour le garder sans filtre jusqu'au prochain appui. Tes réglages ne changent pas.";
-"Hold the shortcut to see the plain display; let go to return. Press it twice quickly to keep it, once more to return. Click here to record a different shortcut." = "Maintiens le raccourci pour voir l'écran sans filtre ; relâche pour revenir. Appuie deux fois vite pour le garder ainsi, une fois de plus pour revenir. Clique ici pour enregistrer un autre raccourci.";
+"Hold the shortcut to see the plain display; let go to return. Press it twice quickly to keep it, once more to return. Click the shortcut on the right to record a new one." = "Maintiens le raccourci pour voir l'écran sans filtre ; relâche pour revenir. Appuie deux fois vite pour le garder ainsi, une fois de plus pour revenir. Clique sur le raccourci à droite pour en enregistrer un nouveau.";
 "hold ⌥ A: color while held" = "⌥ A maintenu : couleur";
 "How loud the session sounds are. Let go to hear it." = "Le volume des sons de session. Relâche pour l'entendre.";
 "Night Shift turned off for a while stays off, even for an app that turns it on. Grayscale, warmth and Night Shift all off show the plain display." = "Si tu éteins Night Shift un moment, il reste éteint, même pour une app qui l'allume. Niveaux de gris, chaleur et Night Shift tous désactivés affichent l'écran sans filtre.";
@@ -255,7 +255,7 @@
 "Login setting needs attention" = "Le réglage d'ouverture de session mérite un coup d'œil";
 "Looks again for installed browsers. The list also checks by itself every few seconds while this window is open." = "Recherche à nouveau les navigateurs installés. La liste vérifie aussi d'elle-même toutes les quelques secondes tant que cette fenêtre est ouverte.";
 "Minutes, separated by commas. Offered when you leave a session; Less Pull calls you back once." = "Des minutes, séparées par des virgules. Proposées quand tu quittes une session ; Less Pull te rappelle une fois.";
-"Minutes, separated by commas. They appear under Start a session in the menu." = "Des minutes, séparées par des virgules. Elles apparaissent sous « Lancer une session » dans le menu.";
+"Minutes, separated by commas. They appear under “Start a session…” in the menu." = "Des minutes, séparées par des virgules. Elles apparaissent sous « Lancer une session » dans le menu.";
 "More" = "Plus";
 "More in Settings…" = "Plus dans les Réglages…";
 "Natural Colors" = "Couleurs naturelles";
@@ -296,7 +296,7 @@
 "Off until Night Shift changes" = "Éteint jusqu'au changement de Night Shift";
 "Off: when the session ends, the panel offers only Keep going and Leave quietly." = "Non : à la fin de la session, le panneau propose seulement « Continuer » et « En rester là ».";
 "Offer a call back when I leave" = "Proposer un rappel quand je pars";
-"Offered when you choose Leaving now. Less Pull calls you back once, then the session is over." = "Proposé quand tu choisis « Je pars maintenant ». Less Pull te rappelle une fois, puis la session est terminée.";
+"Offered when you choose “Leaving now…”. Less Pull calls you back once, then the session is over." = "Proposé quand tu choisis « Je pars maintenant ». Less Pull te rappelle une fois, puis la session est terminée.";
 "OK" = "OK";
 "On" = "Oui";
 "on" = "oui";
@@ -350,7 +350,7 @@
 "Press a shortcut to turn Grayscale on or off from anywhere." = "Appuie sur un raccourci pour activer ou désactiver les niveaux de gris, d'où que tu sois.";
 "Press keys…" = "Appuie sur les touches…";
 "Press the keys you want, with ⌘, ⌃ or ⌥. Esc cancels; ⌫ removes the shortcut." = "Appuie sur les touches voulues, avec ⌘, ⌃ ou ⌥. Échap annule ; ⌫ supprime le raccourci.";
-"Press the shortcut to turn Grayscale on or off from anywhere. Click here to record a different shortcut." = "Appuie sur le raccourci pour activer ou désactiver les niveaux de gris, d'où que tu sois. Clique ici pour enregistrer un autre raccourci.";
+"Press the shortcut to turn Grayscale on or off from anywhere. Click the shortcut on the right to record a new one." = "Appuie sur le raccourci pour activer ou désactiver les niveaux de gris, d'où que tu sois. Clique sur le raccourci à droite pour en enregistrer un nouveau.";
 "Preview the call-back sound" = "Écouter le son de rappel";
 "Preview the end sound" = "Écouter le son de fin";
 "Preview:" = "Écouter :";
@@ -397,7 +397,7 @@
 "Set up %@" = "Configurer %@";
 "Set up…" = "Configurer…";
 "Settings…" = "Réglages…";
-"Shades of gray, day and night. Exceptions bring color back where you need it, and Off for a while returns by itself." = "Des nuances de gris, jour et nuit. Les exceptions rendent la couleur là où tu en as besoin, et « Revenir à la couleur pendant… » se termine tout seul.";
+"Shades of gray, day and night. Exceptions bring color back where you need it, and “Turn Grayscale off for…” returns by itself." = "Des nuances de gris, jour et nuit. Les exceptions rendent la couleur là où tu en as besoin, et « Revenir à la couleur pendant… » se termine tout seul.";
 "Share" = "Partager";
 "Share Less Pull" = "Partager Less Pull";
 "Shortcuts" = "Raccourcis";
@@ -417,7 +417,7 @@
 "The plain display for a while: color and no added warmth. Night Shift is left alone, and all your settings stay." = "L'écran sans filtre un moment : en couleur et sans chaleur ajoutée. Night Shift est laissé tranquille, et tous tes réglages restent.";
 "Shows the supported browsers that are not installed on this Mac." = "Affiche les navigateurs pris en charge qui ne sont pas installés sur ce Mac.";
 "Shows the thank-you card with ways to support Less Pull, the one that appears after two weeks." = "Affiche la carte de remerciement avec les façons de soutenir Less Pull, celle qui apparaît après deux semaines.";
-"Some things need color: a photo app, a video site, a chart. Choose Exception for the app you are in, right from the menu, and change only what should differ. Websites work the same way once the browser extension is connected." = "Certaines choses ont besoin de couleur : une app photo, un site vidéo, un graphique. Choisis « Exception pour » l'app où tu es, directement dans le menu, et change seulement ce qui doit différer. Les sites web marchent pareil dès que l'extension du navigateur est connectée.";
+"Some things need color: a photo app, a video site, a chart. Choose “Exception for …” for the app you are in, right from the menu, and change only what should differ. Websites work the same way once the browser extension is connected." = "Certaines choses ont besoin de couleur : une app photo, un site vidéo, un graphique. Choisis « Exception pour » l'app où tu es, directement dans le menu, et change seulement ce qui doit différer. Les sites web marchent pareil dès que l'extension du navigateur est connectée.";
 "Something not working?" = "Quelque chose ne marche pas ?";
 "Sound" = "Son";
 "Start %ld min" = "Lancer %ld min";
@@ -516,11 +516,11 @@
 "What the browser extension can see" = "Ce que l'extension de navigateur peut voir";
 "What the left mouse button does on the menu-bar icon." = "Ce que fait le bouton gauche de la souris sur l'icône de la barre des menus.";
 "What a right-click on the menu-bar icon does. A Control-click or a two-finger tap counts as a right-click." = "Ce que fait un clic secondaire sur l'icône de la barre des menus. Un Contrôle-clic ou un toucher à deux doigts compte comme clic secondaire.";
-"A Control-click or a two-finger tap counts as a right-click. One of the two buttons always opens the menu. The session panel starts a session, or shows the one running. When a session ends, the two buttons swap, so a click reaches the session panel." = "Un Contrôle-clic ou un toucher à deux doigts compte comme clic secondaire. L'un des deux boutons ouvre toujours le menu. Le panneau de session lance une session ou montre celle en cours. Quand une session se termine, les deux boutons s'échangent, et un clic mène au panneau de session.";
+"A Control-click or a two-finger tap counts as a right-click. One of the two buttons always opens the menu. “Opens the session panel” starts a session, or shows the one running. When a session ends, the two buttons swap, so a click reaches the session panel." = "Un Contrôle-clic ou un toucher à deux doigts compte comme clic secondaire. L'un des deux boutons ouvre toujours le menu. « Ouvre le panneau de session » lance une session ou montre celle en cours. Quand une session se termine, les deux boutons s'échangent, et un clic mène au panneau de session.";
 "Follows what is on it: the app you are using, the app on top of this display, or your defaults. Always your defaults: exceptions do not apply here. Always plain: never gray or warmth here." = "« Suit ce qu'il affiche » : l'app que tu utilises, l'app au-dessus sur cet écran, ou tes réglages par défaut. « Toujours tes réglages par défaut » : les exceptions ne s'appliquent pas ici. « Toujours sans filtre » : jamais de gris ni de chaleur ici.";
 "Which displays a peek reaches while you use this app: the one under the pointer, all of them, or the ones you tick. This works even while the exception is off." = "Les écrans que le coup d'œil touche pendant que tu utilises cette app : celui sous le pointeur, tous, ou ceux que tu coches. Ça marche même quand l'exception est désactivée.";
 "Which displays a peek reaches while this site is in front." = "Les écrans que le coup d'œil touche tant que ce site est au premier plan.";
-"While a session runs, a click on the icon opens the session panel and the other button opens the menu. When it ends, they swap, so a click brings Keep going and Leave quietly. The shortcuts keep working." = "Pendant une session, un clic sur l'icône ouvre le panneau de session et l'autre bouton ouvre le menu. À la fin, ils s'échangent, et un clic amène « Continuer » et « En rester là ». Les raccourcis fonctionnent toujours.";
+"While a session runs, a click on the icon opens the session panel and the other button opens the menu. When it ends, they swap, so a click brings “Keep going” and “Leave quietly”. The shortcuts keep working." = "Pendant une session, un clic sur l'icône ouvre le panneau de session et l'autre bouton ouvre le menu. À la fin, ils s'échangent, et un clic amène « Continuer » et « En rester là ». Les raccourcis fonctionnent toujours.";
 "While peeking, turn off %@" = "Coup d'œil sans %@";
 "While peeking, turn off:" = "Coup d'œil sans :";
 "While this site is in front, its settings cover all displays, not only the one with the browser." = "Tant que ce site est au premier plan, ses réglages couvrent tous les écrans, pas seulement celui du navigateur.";
