@@ -224,7 +224,7 @@ The app changes the display; nothing is injected into pages, and the Mac app has
 
 ## Install
 
-1. Download **Less-Pull-1.4.4-39.dmg** from the [build 39 release](https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-39), open it and drag **Less Pull** onto **Applications**, unzip it, and move **Less Pull.app** to **Applications**.
+1. Download **Less-Pull-1.4.4-39.dmg** from the [build 39 release](https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-39), open it and drag **Less Pull** onto **Applications**.
 2. Open it. The Settings window greets you once; the circle in the menu bar is where you choose Grayscale and Extra Warmth from then on. On the first launch the welcome opens right under it, the icon fades in and out for a moment, and a small animated drawing shows what to do when the menu bar is full: hold ⌘ and drag the circle toward the clock. (macOS decides where new icons start, and apps cannot choose a spot.)
 3. For website rules, open **Settings… → Websites**, choose **Install Browser Extension…**, pick a browser from the list, and follow the steps for [your browser](docs/INSTALL.md#safari-brave-chrome-firefox-opera-or-edge).
 
