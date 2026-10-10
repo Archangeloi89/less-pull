@@ -17,6 +17,7 @@ typedef struct { BOOL active, enabled, sunSchedulePermitted; int mode; struct { 
 // Night Shift color temperature, 0…1 (1 = warmest), the slider in System Settings.
 - (BOOL)nightShiftStrength:(float *)strength;
 - (BOOL)setNightShiftStrength:(float)strength;
+- (BOOL)setNightShiftStrength:(float)strength period:(float)seconds;  // a short transition instead of the system ramp, where macOS offers it
 - (BOOL)applyMode:(NSInteger)mode; // 0 Natural, 1 Grayscale, 16 saved tint
 - (NSInteger)currentMode;
 // macOS’s own Color Filter (System Settings → Accessibility): read and set it as is, for the lock screen.

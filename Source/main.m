@@ -1189,22 +1189,33 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
 - (void)refreshLockProfile {
  NSUserDefaults *d=NSUserDefaults.standardUserDefaults;
  if(!self.screenLocked){if(!self.lockActive)return;
-  if(self.lockStrength&&self.lockStrength.floatValue>=0)[self.engine setNightShiftStrength:self.lockStrength.floatValue];
+  if(self.lockStrength&&self.lockStrength.floatValue>=0)[self.engine setNightShiftStrength:self.lockStrength.floatValue period:.25];
   if(self.lockFilter)[self.engine setSystemFilterEnabled:[self.lockFilter[0] boolValue] type:[self.lockFilter[1] intValue]];
   self.lockStrength=nil;self.lockFilter=nil;self.lockActive=NO;self.lockQuieting=NO;self.lockGrayWanted=NO;self.lockNightWanted=NO;self.fade=0.2;self.animateAppearance=YES;[self pipelineChanged:nil];return;}
  if(!self.lockActive){BOOL gray=self.effectiveMode==100||self.effectiveMode==1;self.lockGrayAtEngage=gray&&!self.pausedUntil;self.lockQuieting=!self.pausedUntil&&(gray||self.targetStrength>0);self.lockActive=YES;}
  BOOL lock=self.screenLockedFlag;
  BOOL wantNight=self.lockQuieting&&[d boolForKey:lock?@"lockNight":@"saverNight"],wantGray=self.lockGrayAtEngage&&[d boolForKey:lock?@"lockGray":@"saverGray"];
- if(wantNight&&!self.lockStrength){float s=0;self.lockStrength=@(-1);if([self.engine nightShiftStrength:&s]&&[self.engine setNightShiftStrength:1])self.lockStrength=@(s);}
- else if(!wantNight&&self.lockStrength){if(self.lockStrength.floatValue>=0)[self.engine setNightShiftStrength:self.lockStrength.floatValue];self.lockStrength=nil;}
+ if(wantNight&&!self.lockStrength){float s=0;self.lockStrength=@(-1);if([self.engine nightShiftStrength:&s]&&[self.engine setNightShiftStrength:1 period:.25])self.lockStrength=@(s);}
+ else if(!wantNight&&self.lockStrength){if(self.lockStrength.floatValue>=0)[self.engine setNightShiftStrength:self.lockStrength.floatValue period:.25];self.lockStrength=nil;}
  if(wantGray&&!self.lockFilter){BOOL en=NO;int ty=0;if([self.engine systemFilterEnabled:&en type:&ty]){self.lockFilter=@[@(en),@(ty)];if(!(en&&ty==1))[self.engine setSystemFilterEnabled:YES type:1];}}
  else if(!wantGray&&self.lockFilter){[self.engine setSystemFilterEnabled:[self.lockFilter[0] boolValue] type:[self.lockFilter[1] intValue]];self.lockFilter=nil;}
  self.lockNightWanted=wantNight;self.lockGrayWanted=wantGray;self.fade=0.2;self.animateAppearance=YES;[self sync];
 }
-- (void)screenLocked:(id)note {self.screenLockedFlag=YES;[self refreshLockProfile];}
-- (void)screenUnlocked:(id)note {self.screenLockedFlag=NO;[self refreshLockProfile];}
-- (void)saverStarted:(id)note {self.saverFlag=YES;[self refreshLockProfile];}
-- (void)saverStopped:(id)note {self.saverFlag=NO;[self refreshLockProfile];}
+// A short record of every lock and screensaver in ~/Library/Logs/Less Pull/lock.log: what Less Pull
+// decided and what Night Shift really did a moment later, so a failure on one Mac can be read back.
+- (void)lockLog:(NSString *)event {
+ BOOL on=NO;BOOL known=[self.engine nightShift:&on];float st=-1;[self.engine nightShiftStrength:&st];
+ NSString *line=[NSString stringWithFormat:@"%@ %@ quieting=%d wantNight=%d wantGray=%d gray=%d warmth=%.2f follow=%d pausedAll=%d nightPause=%d nightShift=%@ strength=%.2f\n",[NSISO8601DateFormatter stringFromDate:NSDate.date timeZone:NSTimeZone.localTimeZone formatOptions:NSISO8601DateFormatWithInternetDateTime|NSISO8601DateFormatWithFractionalSeconds],event,self.lockQuieting,self.lockNightWanted,self.lockGrayWanted,self.effectiveMode==100||self.effectiveMode==1,self.targetStrength,self.automatic,self.pausedUntil!=nil,self.pause!=nil,known?(on?@"on":@"off"):@"unknown",st];
+ NSString *dir=[NSHomeDirectory() stringByAppendingPathComponent:@"Library/Logs/Less Pull"];[NSFileManager.defaultManager createDirectoryAtPath:dir withIntermediateDirectories:YES attributes:nil error:nil];
+ NSString *path=[dir stringByAppendingPathComponent:@"lock.log"];NSFileHandle *h=[NSFileHandle fileHandleForWritingAtPath:path];
+ if(!h){[line writeToFile:path atomically:YES encoding:NSUTF8StringEncoding error:nil];return;}
+ if(h.seekToEndOfFile>200000){[h truncateFileAtOffset:0];}[h writeData:[line dataUsingEncoding:NSUTF8StringEncoding]];[h closeFile];
+}
+- (void)lockEvent:(NSString *)name {[self lockLog:name];for(NSNumber *after in @[@0.5,@2.5])dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)(after.doubleValue*NSEC_PER_SEC)),dispatch_get_main_queue(),^{[self lockLog:[NSString stringWithFormat:@"%@+%.1fs",name,after.doubleValue]];});}
+- (void)screenLocked:(id)note {self.screenLockedFlag=YES;[self refreshLockProfile];[self lockEvent:@"locked"];}
+- (void)screenUnlocked:(id)note {self.screenLockedFlag=NO;[self refreshLockProfile];[self lockEvent:@"unlocked"];}
+- (void)saverStarted:(id)note {self.saverFlag=YES;[self refreshLockProfile];[self lockEvent:@"saver-started"];}
+- (void)saverStopped:(id)note {self.saverFlag=NO;[self refreshLockProfile];[self lockEvent:@"saver-stopped"];}
 - (void)toggleLockOption:(NSButton *)sender {[NSUserDefaults.standardUserDefaults setBool:sender.state==NSControlStateValueOn forKey:sender.identifier];if(self.lockActive)[self refreshLockProfile];}
 - (NSButton *)lockOption:(NSString *)key title:(NSString *)title help:(NSString *)help {NSButton *b=[NSButton checkboxWithTitle:title target:self action:@selector(toggleLockOption:)];b.identifier=key;b.state=[NSUserDefaults.standardUserDefaults boolForKey:key];[self helpView:b text:help label:title];return b;}
 - (void)pipelineChanged:(id)sender {

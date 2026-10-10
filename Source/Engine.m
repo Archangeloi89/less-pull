@@ -65,6 +65,13 @@ __attribute__((weak)) BOOL LessPullHandsOff=NO;
  if(!self.client||self.error||![self.client respondsToSelector:@selector(setStrength:commit:)])return NO;
  BOOL (*set)(id,SEL,float,BOOL)=(void *)[self.client methodForSelector:@selector(setStrength:commit:)];return set(self.client,@selector(setStrength:commit:),fmaxf(0,fminf(strength,1)),YES);
 }
+- (BOOL)setNightShiftStrength:(float)strength period:(float)seconds {
+ if(LessPullHandsOff)return YES;
+ if(!self.client||self.error)return NO;
+ Method method=class_getInstanceMethod([self.client class],@selector(setStrength:withPeriod:commit:));
+ if(!method||strcmp(method_getTypeEncoding(method),"B28@0:8f16f20B24")!=0)return [self setNightShiftStrength:strength];
+ BOOL (*set)(id,SEL,float,float,BOOL)=(void *)[self.client methodForSelector:@selector(setStrength:withPeriod:commit:)];return set(self.client,@selector(setStrength:withPeriod:commit:),fmaxf(0,fminf(strength,1)),fmaxf(0,seconds),YES);
+}
 - (BOOL)systemFilterEnabled:(BOOL *)enabled type:(int *)type {if(!getType||!getEnabled)return NO;*enabled=getEnabled(1);*type=getType(1);return YES;}
 - (BOOL)setSystemFilterEnabled:(BOOL)enabled type:(int)type {
  if(LessPullHandsOff)return YES;if(!getType||!getEnabled||!setType||!setEnabled)return NO;
