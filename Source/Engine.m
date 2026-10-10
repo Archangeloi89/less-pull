@@ -65,6 +65,12 @@ __attribute__((weak)) BOOL LessPullHandsOff=NO;
  if(!self.client||self.error||![self.client respondsToSelector:@selector(setStrength:commit:)])return NO;
  BOOL (*set)(id,SEL,float,BOOL)=(void *)[self.client methodForSelector:@selector(setStrength:commit:)];return set(self.client,@selector(setStrength:commit:),fmaxf(0,fminf(strength,1)),YES);
 }
+- (BOOL)systemFilterEnabled:(BOOL *)enabled type:(int *)type {if(!getType||!getEnabled)return NO;*enabled=getEnabled(1);*type=getType(1);return YES;}
+- (BOOL)setSystemFilterEnabled:(BOOL)enabled type:(int)type {
+ if(LessPullHandsOff)return YES;if(!getType||!getEnabled||!setType||!setEnabled)return NO;
+ if(enabled){if(getType(1)!=type)setType(1,type);if(!getEnabled(1))setEnabled(1,YES);}else if(getEnabled(1))setEnabled(1,NO);
+ return YES;
+}
 - (NSInteger)currentMode { if(!getType||!getEnabled)return -1;return getEnabled(1)?getType(1):0; }
 - (BOOL)applyMode:(NSInteger)mode {
  if(LessPullHandsOff)return YES;

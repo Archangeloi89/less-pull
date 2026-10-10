@@ -37,3 +37,4 @@ Store identity: the Chrome Web Store assigns its own extension ID when the packa
 - The privacy page states what the extension can see and cannot do; the manifest is the proof.
 - Browsers show the permissions before installation, and show them again if an update asks for more.
 - The app's update check sends nothing about the user; installing stays a deliberate step until signed releases exist.
+- Since build 35 the release carries a disk image (`Less Pull.dmg` from build.sh: the app plus an Applications shortcut, signed and notarized on its own) for people, and the zip for the in-app updater, which downloads, verifies and unpacks it in the background.
