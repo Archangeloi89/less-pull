@@ -602,3 +602,8 @@
 "Default Night Shift" = "Night Shift predeterminado";
 "Night Shift off for" = "Night Shift apagado durante";
 "Night Shift off for  ›" = "Night Shift apagado durante  ›";
+"Pausing" = "Pausar";
+"Quitting" = "Salir";
+"Updates" = "Actualizaciones";
+"Pointer still in color" = "El puntero sigue en color";
+"On some displays, macOS draws the arrow pointer on top of the picture, so Grayscale and warmth miss it. Make the pointer one notch larger in System Settings → Accessibility → Display → Pointer size, and it turns quiet too. “Pointer Size…” in the Displays section of the General tab opens this setting." = "En algunas pantallas, macOS dibuja el puntero por encima de la imagen, así que la escala de grises y la calidez no lo alcanzan. Agranda el puntero un punto en Ajustes del Sistema → Accesibilidad → Pantalla → Tamaño del puntero, y también se calma. «Tamaño del puntero…», en la sección Pantallas de la pestaña General, abre este ajuste.";

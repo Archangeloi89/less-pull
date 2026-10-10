@@ -602,3 +602,8 @@
 "Default Night Shift" = "기본 Night Shift";
 "Night Shift off for" = "Night Shift 끄기";
 "Night Shift off for  ›" = "Night Shift 끄기  ›";
+"Pausing" = "일시 정지";
+"Quitting" = "종료";
+"Updates" = "업데이트";
+"Pointer still in color" = "포인터가 컬러로 남을 때";
+"On some displays, macOS draws the arrow pointer on top of the picture, so Grayscale and warmth miss it. Make the pointer one notch larger in System Settings → Accessibility → Display → Pointer size, and it turns quiet too. “Pointer Size…” in the Displays section of the General tab opens this setting." = "일부 디스플레이에서는 macOS가 포인터를 화면 위에 따로 그려서 회색조와 따뜻함이 닿지 않습니다. 시스템 설정 → 손쉬운 사용 → 디스플레이 → 포인터 크기에서 한 단계 키우면 포인터도 차분해집니다. ‘일반’ 탭의 디스플레이 영역에 있는 ‘포인터 크기…’로 이 설정을 열 수 있습니다.";

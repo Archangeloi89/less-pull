@@ -602,3 +602,8 @@
 "Default Night Shift" = "Night Shift padrão";
 "Night Shift off for" = "Night Shift desligado por";
 "Night Shift off for  ›" = "Night Shift desligado por  ›";
+"Pausing" = "Pausar";
+"Quitting" = "Encerrar";
+"Updates" = "Atualizações";
+"Pointer still in color" = "O ponteiro continua colorido";
+"On some displays, macOS draws the arrow pointer on top of the picture, so Grayscale and warmth miss it. Make the pointer one notch larger in System Settings → Accessibility → Display → Pointer size, and it turns quiet too. “Pointer Size…” in the Displays section of the General tab opens this setting." = "Em algumas telas, o macOS desenha o ponteiro por cima da imagem, então a escala de cinza e o calor não o alcançam. Aumente o ponteiro um ponto em Ajustes do Sistema → Acessibilidade → Tela → Tamanho do ponteiro, e ele se acalma também. «Tamanho do ponteiro…», na seção Telas da aba Geral, abre esse ajuste.";

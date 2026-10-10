@@ -602,3 +602,8 @@
 "Default Night Shift" = "預設夜覽";
 "Night Shift off for" = "暫時關閉夜覽";
 "Night Shift off for  ›" = "暫時關閉夜覽  ›";
+"Pausing" = "暫停";
+"Quitting" = "結束";
+"Updates" = "更新";
+"Pointer still in color" = "指標仍是彩色";
+"On some displays, macOS draws the arrow pointer on top of the picture, so Grayscale and warmth miss it. Make the pointer one notch larger in System Settings → Accessibility → Display → Pointer size, and it turns quiet too. “Pointer Size…” in the Displays section of the General tab opens this setting." = "在某些顯示器上，macOS 把指標畫在畫面之上，灰階和暖色因此碰不到它。在 系統設定 → 輔助使用 → 顯示器 → 指標大小 中把指標調大一級，它也會安靜下來。「一般」標籤頁顯示器部分的「指標大小…」可打開這項設定。";

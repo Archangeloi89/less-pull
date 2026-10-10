@@ -602,3 +602,8 @@
 "Default Night Shift" = "Standaard Night Shift";
 "Night Shift off for" = "Night Shift uit voor";
 "Night Shift off for  ›" = "Night Shift uit voor  ›";
+"Pausing" = "Pauzeren";
+"Quitting" = "Stoppen";
+"Updates" = "Updates";
+"Pointer still in color" = "Aanwijzer blijft in kleur";
+"On some displays, macOS draws the arrow pointer on top of the picture, so Grayscale and warmth miss it. Make the pointer one notch larger in System Settings → Accessibility → Display → Pointer size, and it turns quiet too. “Pointer Size…” in the Displays section of the General tab opens this setting." = "Op sommige schermen tekent macOS de aanwijzer bovenop het beeld, zodat grijstinten en warmte hem niet bereiken. Zet de aanwijzer één stap groter in Systeeminstellingen → Toegankelijkheid → Beeldscherm → Aanwijzergrootte, en ook hij wordt rustig. ‘Aanwijzergrootte…’ in het gedeelte Schermen van het tabblad Algemeen opent deze instelling.";

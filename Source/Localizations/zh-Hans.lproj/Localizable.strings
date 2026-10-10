@@ -602,3 +602,8 @@
 "Default Night Shift" = "默认夜览";
 "Night Shift off for" = "暂时关闭夜览";
 "Night Shift off for  ›" = "暂时关闭夜览  ›";
+"Pausing" = "暂停";
+"Quitting" = "退出";
+"Updates" = "更新";
+"Pointer still in color" = "指针仍是彩色";
+"On some displays, macOS draws the arrow pointer on top of the picture, so Grayscale and warmth miss it. Make the pointer one notch larger in System Settings → Accessibility → Display → Pointer size, and it turns quiet too. “Pointer Size…” in the Displays section of the General tab opens this setting." = "在某些显示器上，macOS 把指针画在画面之上，灰度和暖色因此碰不到它。在 系统设置 → 辅助功能 → 显示 → 指针大小 中把指针调大一档，它也会安静下来。“通用”标签页显示器部分的“指针大小…”可打开这项设置。";

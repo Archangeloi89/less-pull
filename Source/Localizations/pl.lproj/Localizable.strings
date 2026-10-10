@@ -602,3 +602,8 @@
 "Default Night Shift" = "Domyślny Night Shift";
 "Night Shift off for" = "Night Shift wyłączony przez";
 "Night Shift off for  ›" = "Night Shift wyłączony przez  ›";
+"Pausing" = "Wstrzymywanie";
+"Quitting" = "Zamykanie";
+"Updates" = "Aktualizacje";
+"Pointer still in color" = "Wskaźnik wciąż w kolorze";
+"On some displays, macOS draws the arrow pointer on top of the picture, so Grayscale and warmth miss it. Make the pointer one notch larger in System Settings → Accessibility → Display → Pointer size, and it turns quiet too. “Pointer Size…” in the Displays section of the General tab opens this setting." = "Na niektórych ekranach macOS rysuje wskaźnik nad obrazem, więc skala szarości i ciepło go nie obejmują. Powiększ wskaźnik o jeden stopień w Ustawieniach systemowych → Dostępność → Monitor → Rozmiar wskaźnika, a też się uspokoi. „Rozmiar wskaźnika…” w sekcji Ekrany na karcie Ogólne otwiera to ustawienie.";

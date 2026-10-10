@@ -605,3 +605,8 @@
 "Default Night Shift" = "Standard Night Shift";
 "Night Shift off for" = "Night Shift aus für";
 "Night Shift off for  ›" = "Night Shift aus für  ›";
+"Pausing" = "Pausieren";
+"Quitting" = "Beenden";
+"Updates" = "Updates";
+"Pointer still in color" = "Mauszeiger bleibt farbig";
+"On some displays, macOS draws the arrow pointer on top of the picture, so Grayscale and warmth miss it. Make the pointer one notch larger in System Settings → Accessibility → Display → Pointer size, and it turns quiet too. “Pointer Size…” in the Displays section of the General tab opens this setting." = "Auf manchen Displays zeichnet macOS den Mauszeiger obenauf, sodass Graustufen und Wärme ihn nicht erreichen. Stell den Zeiger unter Systemeinstellungen → Bedienungshilfen → Anzeige → Zeigergröße eine Stufe größer, dann wird auch er ruhig. „Zeigergröße …“ im Bereich Displays auf dem Tab „Allgemein“ öffnet diese Einstellung.";

@@ -602,3 +602,8 @@
 "Default Night Shift" = "Типовий Night Shift";
 "Night Shift off for" = "Night Shift вимкнено на";
 "Night Shift off for  ›" = "Night Shift вимкнено на  ›";
+"Pausing" = "Пауза";
+"Quitting" = "Вихід";
+"Updates" = "Оновлення";
+"Pointer still in color" = "Вказівник лишається кольоровим";
+"On some displays, macOS draws the arrow pointer on top of the picture, so Grayscale and warmth miss it. Make the pointer one notch larger in System Settings → Accessibility → Display → Pointer size, and it turns quiet too. “Pointer Size…” in the Displays section of the General tab opens this setting." = "На деяких екранах macOS малює вказівник поверх картинки, тож відтінки сірого й тепло його не зачіпають. Зробіть вказівник на одну поділку більшим у Системних параметрах → Доступність → Монітор → Розмір вказівника — і він теж заспокоїться. «Розмір вказівника…» у розділі «Екрани» на вкладці «Основні» відкриває це налаштування.";
