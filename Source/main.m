@@ -184,6 +184,23 @@ static NSString *const LessPullOldBundleIdentifier=@"local.nightshiftfilters.app
 - (BOOL)isFlipped {return YES;}
 @end
 // The settings tabs always use the overlay scroller, whatever "Show scroll bars" says, so the 500 pt layout never loses width to a bar.
+// The Settings window never hangs below the screen: every frame Less Pull or a tab change
+// asks for is lifted until the bottom clears the Dock, and a size change returns to the
+// place the person chose when the screen allows it.
+@interface SettingsWindow : NSWindow
+@property CGFloat preferredTop;
+@property BOOL adjusting;
+@property CGFloat lastSetTop;
+@end
+@implementation SettingsWindow
+- (NSRect)fitted:(NSRect)f {
+ NSScreen *screen=self.screen?:NSScreen.mainScreen;if(!screen)return f;NSRect v=screen.visibleFrame;
+ CGFloat top=NSMaxY(f);if(self.preferredTop>0&&!NSEqualSizes(f.size,self.frame.size))top=self.preferredTop;
+ top=MIN(NSMaxY(v),MAX(top,NSMinY(v)+8+f.size.height));f.origin.y=top-f.size.height;return f;
+}
+- (void)setFrame:(NSRect)f display:(BOOL)d {NSRect g=[self fitted:f];self.adjusting=!NSEqualRects(f,g);self.lastSetTop=NSMaxY(g);[super setFrame:g display:d];self.adjusting=NO;}
+- (void)setFrame:(NSRect)f display:(BOOL)d animate:(BOOL)a {NSRect g=[self fitted:f];self.adjusting=!NSEqualRects(f,g);self.lastSetTop=NSMaxY(g);[super setFrame:g display:d animate:a];self.adjusting=NO;}
+@end
 @interface SettingsClipView : NSClipView
 @end
 @implementation SettingsClipView
@@ -538,7 +555,8 @@ static void drawKey(NSRect f,NSString *label,double pressed){NSRect r=NSOffsetRe
 }
 // Hidden views leave the stacks; the tabs then take their new height.
 // The settings window never grows taller than the screen it is on: the toolbar and title take about 80 pt, and a margin keeps the window off the Dock.
-- (CGFloat)settingsHeightFor:(CGFloat)contentHeight {NSScreen *screen=self.settings.screen?:NSScreen.mainScreen;CGFloat cap=screen?screen.visibleFrame.size.height-80-24:100000;NSArray *args=NSProcessInfo.processInfo.arguments;NSUInteger ti=[args indexOfObject:@"--screen-height"];if(ti!=NSNotFound&&ti+1<args.count)cap=[args[ti+1] doubleValue]-80-24;return MIN(ceil(contentHeight)+2,MAX(cap,240));}
+// The tallest a Settings tab may make the window: 85% of the usable screen height, title bar and toolbar included, so the window always has air above and below; the rest scrolls.
+- (CGFloat)settingsHeightFor:(CGFloat)contentHeight {NSScreen *screen=self.settings.screen?:NSScreen.mainScreen;CGFloat usable=screen?screen.visibleFrame.size.height:100000;NSArray *args=NSProcessInfo.processInfo.arguments;NSUInteger ti=[args indexOfObject:@"--screen-height"];if(ti!=NSNotFound&&ti+1<args.count)usable=[args[ti+1] doubleValue];CGFloat chrome=self.settings?NSHeight(self.settings.frame)-NSHeight(self.settings.contentLayoutRect):100;if(chrome<40||chrome>200)chrome=100;CGFloat cap=floor(usable*0.85)-chrome;return MIN(ceil(contentHeight)+2,MAX(cap,240));}
 - (NSView *)settingsContentOf:(NSTabViewItem *)item {NSScrollView *scroll=(NSScrollView *)item.viewController.view.subviews.firstObject;return [scroll isKindOfClass:NSScrollView.class]?scroll.documentView.subviews.firstObject:scroll;}
 // Wrapped text can end a few points taller than measured; the window then grows by exactly that, within the screen, so no hairline scroll bar appears.
 - (void)fixSettingsOverflow {
@@ -920,6 +938,7 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  if([NSProcessInfo.processInfo.arguments containsObject:@"--settings"])[self showSettings:nil];
  // First launch: Settings opens with a one-time welcome card above the real controls.
  self.welcomeWanted=firstLaunch||[NSProcessInfo.processInfo.arguments containsObject:@"--welcome"];if(self.welcomeWanted)[self showSettings:nil];
+ if([NSProcessInfo.processInfo.arguments containsObject:@"--about-tour"]){[self showSettings:nil];self.settingsTabs.selectedTabViewItemIndex=self.settingsTabs.tabViewItems.count-1;dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)(1.5*NSEC_PER_SEC)),dispatch_get_main_queue(),^{[self showTour:nil];});}
  if([NSProcessInfo.processInfo.arguments containsObject:@"--menu-test"]){[self showSettings:nil];main.itemArray.firstObject.submenu=self.statusMenu;}
 
 }
@@ -1963,7 +1982,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
 // Where the icon is: the welcome opens under it, and the icon fades in and out a few times.
 - (void)placeSettingsUnderIcon {
  NSWindow *bar=self.item.button.window;if(!bar||!self.settings)return;NSRect icon=bar.frame;NSScreen *screen=bar.screen?:NSScreen.mainScreen;NSRect f=self.settings.frame;
- f.origin.x=MIN(NSMaxX(screen.visibleFrame)-f.size.width-8,MAX(screen.visibleFrame.origin.x+8,NSMidX(icon)-f.size.width+60));f.origin.y=icon.origin.y-f.size.height-10;[self.settings setFrame:f display:YES];
+ f.origin.x=MIN(NSMaxX(screen.visibleFrame)-f.size.width-8,MAX(screen.visibleFrame.origin.x+8,NSMidX(icon)-f.size.width+60));f.origin.y=icon.origin.y-f.size.height-10;((SettingsWindow *)self.settings).preferredTop=NSMaxY(f);[self.settings setFrame:f display:YES];
  NSView *button=self.item.button;if(NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceMotion)return;
  for(int k=0;k<4;k++){dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)((0.6+k*1.2)*NSEC_PER_SEC)),dispatch_get_main_queue(),^{[NSAnimationContext runAnimationGroup:^(NSAnimationContext *c){c.duration=.5;button.animator.alphaValue=.25;} completionHandler:^{[NSAnimationContext runAnimationGroup:^(NSAnimationContext *c){c.duration=.6;button.animator.alphaValue=1;} completionHandler:nil];}];});}
 }
@@ -2004,13 +2023,13 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
   [self.settingsTabs addTabViewItem:[self tab:L(@"Apps") symbol:@"macwindow" content:[self appsTab]]];
   [self.settingsTabs addTabViewItem:[self tab:L(@"Websites") symbol:@"globe" content:[self websitesTab]]];
   [self.settingsTabs addTabViewItem:[self tab:L(@"About") symbol:@"info.circle" content:[self aboutTab]]];
-  self.settings=[NSWindow windowWithContentViewController:self.settingsTabs];
+  self.settings=[SettingsWindow windowWithContentViewController:self.settingsTabs];
   // Closed means gone: the window and every view in it are let go, so the app weighs what a menu-bar app should while you are not looking at it. Opening again builds it in a moment.
   [NSNotificationCenter.defaultCenter addObserverForName:NSWindowWillCloseNotification object:self.settings queue:nil usingBlock:^(NSNotification *n){[self releaseSettings];}];
-  self.settings.initialFirstResponder=self.grayscaleButton;[self.settings center];{NSString *at=[NSUserDefaults.standardUserDefaults stringForKey:@"settingsTopLeft"];if(at.length&&!self.keepSettingsFrame){NSPoint p=NSPointFromString(at);NSRect f=self.settings.frame;f.origin.x=p.x;f.origin.y=p.y-f.size.height;[self.settings setFrame:[self.settings constrainFrameRect:f toScreen:self.settings.screen?:NSScreen.mainScreen] display:NO];}}
+  self.settings.initialFirstResponder=self.grayscaleButton;[self.settings center];{NSString *at=[NSUserDefaults.standardUserDefaults stringForKey:@"settingsTopLeft"];if(at.length&&!self.keepSettingsFrame){NSPoint p=NSPointFromString(at);NSRect f=self.settings.frame;f.origin.x=p.x;f.origin.y=p.y-f.size.height;((SettingsWindow *)self.settings).preferredTop=p.y;[self.settings setFrame:[self.settings constrainFrameRect:f toScreen:self.settings.screen?:NSScreen.mainScreen] display:NO];}}
   [NSNotificationCenter.defaultCenter addObserverForName:NSWindowDidChangeScreenNotification object:self.settings queue:NSOperationQueue.mainQueue usingBlock:^(NSNotification *n){[self relayoutSettings];}];
-  [NSNotificationCenter.defaultCenter addObserverForName:NSWindowDidMoveNotification object:self.settings queue:nil usingBlock:^(NSNotification *n){if(self.settings.visible&&!self.welcomeWanted)[NSUserDefaults.standardUserDefaults setObject:NSStringFromPoint(NSMakePoint(self.settings.frame.origin.x,NSMaxY(self.settings.frame))) forKey:@"settingsTopLeft"];}];
-  if(self.keepSettingsFrame){NSRect f=self.settings.frame;f.origin.x=self.keptSettingsFrame.origin.x;f.origin.y=NSMaxY(self.keptSettingsFrame)-f.size.height;[self.settings setFrame:[self.settings constrainFrameRect:f toScreen:self.settings.screen?:NSScreen.mainScreen] display:NO];self.keepSettingsFrame=NO;};
+  [NSNotificationCenter.defaultCenter addObserverForName:NSWindowDidMoveNotification object:self.settings queue:nil usingBlock:^(NSNotification *n){SettingsWindow *w=(SettingsWindow *)self.settings;if(w.adjusting||!w.visible||fabs(NSMaxY(w.frame)-w.lastSetTop)<0.5)return;w.preferredTop=NSMaxY(w.frame);if(!self.welcomeWanted)[NSUserDefaults.standardUserDefaults setObject:NSStringFromPoint(NSMakePoint(w.frame.origin.x,NSMaxY(w.frame))) forKey:@"settingsTopLeft"];}];
+  if(self.keepSettingsFrame){NSRect f=self.settings.frame;f.origin.x=self.keptSettingsFrame.origin.x;f.origin.y=NSMaxY(self.keptSettingsFrame)-f.size.height;((SettingsWindow *)self.settings).preferredTop=NSMaxY(self.keptSettingsFrame);[self.settings setFrame:[self.settings constrainFrameRect:f toScreen:self.settings.screen?:NSScreen.mainScreen] display:NO];self.keepSettingsFrame=NO;};
  }
  self.loginButton.state=SMAppService.mainAppService.status==SMAppServiceStatusEnabled;[self rebuildExclusionsList];[self sync];dispatch_async(dispatch_get_main_queue(),^{[self fixSettingsOverflow];});[NSApp activateIgnoringOtherApps:YES];[self.settings makeKeyAndOrderFront:nil];if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.welcomePlaced=YES;if(first){dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)(0.45*NSEC_PER_SEC)),dispatch_get_main_queue(),^{[self placeSettingsUnderIcon];});}}
 }
