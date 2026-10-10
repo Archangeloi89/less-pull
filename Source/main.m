@@ -228,7 +228,7 @@ static NSAttributedString *Emphasized(NSString *text,NSFont *font,NSColor *color
 @end
 @implementation QuietScroller
 + (BOOL)isCompatibleWithOverlayScrollers {return YES;}
-- (BOOL)quiet {return self.scrollerStyle==NSScrollerStyleLegacy;}
+- (BOOL)quiet {return YES;}  // in every scroller style, so a style change by macOS never brings the thick bar back
 - (void)drawRect:(NSRect)dirty {if(!self.quiet){[super drawRect:dirty];return;}if(self.knobProportion<1&&self.enabled)[self drawKnob];}
 - (void)drawKnobSlotInRect:(NSRect)slot highlight:(BOOL)flag {if(!self.quiet)[super drawKnobSlotInRect:slot highlight:flag];}
 - (void)drawKnob {
@@ -242,6 +242,12 @@ static NSAttributedString *Emphasized(NSString *text,NSFont *font,NSColor *color
 - (void)mouseExited:(NSEvent *)e {self.hot=NO;self.needsDisplay=YES;}
 - (void)mouseDown:(NSEvent *)e {self.hot=YES;self.needsDisplay=YES;[super mouseDown:e];NSPoint p=[self convertPoint:self.window.mouseLocationOutsideOfEventStream fromView:nil];self.hot=NSPointInRect(p,self.bounds);self.needsDisplay=YES;}
 @end
+// Every list and text area in Less Pull scrolls with the same quiet knob: visible whenever there
+// is more to see, gone when everything fits, and kept that way if macOS changes its scroll-bar style.
+static void QuietScrolling(NSScrollView *s){
+ s.verticalScroller=[QuietScroller new];s.hasVerticalScroller=YES;s.autohidesScrollers=YES;s.scrollerStyle=NSScrollerStyleLegacy;
+ __weak NSScrollView *weak=s;[NSNotificationCenter.defaultCenter addObserverForName:NSPreferredScrollerStyleDidChangeNotification object:nil queue:NSOperationQueue.mainQueue usingBlock:^(NSNotification *n){NSScrollView *v=weak;if(!v)return;v.scrollerStyle=NSScrollerStyleLegacy;if(![v.verticalScroller isKindOfClass:QuietScroller.class])v.verticalScroller=[QuietScroller new];[v tile];}];
+}
 @interface SettingsScrollView : NSScrollView
 @end
 @implementation SettingsScrollView
@@ -1815,7 +1821,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
 - (NSStackView *)appsTab {
  NSTextField *intro=[self explain:L(@"Give an app its own look. It applies while you use that app; your defaults stay as they are.")];
  self.exclusionText=[self note:L(@"Using your default settings")];
- NSScrollView *scroll=[NSScrollView new];scroll.hasVerticalScroller=YES;scroll.borderType=NSBezelBorder;[scroll.heightAnchor constraintEqualToConstant:300].active=YES;
+ NSScrollView *scroll=[NSScrollView new];QuietScrolling(scroll);scroll.borderType=NSBezelBorder;[scroll.heightAnchor constraintEqualToConstant:300].active=YES;
  self.exclusionsList=[ExceptionStack new];self.exclusionsList.orientation=NSUserInterfaceLayoutOrientationVertical;self.exclusionsList.alignment=NSLayoutAttributeLeading;self.exclusionsList.spacing=0;self.exclusionsList.translatesAutoresizingMaskIntoConstraints=NO;scroll.documentView=self.exclusionsList;scroll.hasHorizontalScroller=NO;scroll.autohidesScrollers=YES;[self.exclusionsList.widthAnchor constraintEqualToAnchor:scroll.contentView.widthAnchor].active=YES;[self.exclusionsList.heightAnchor constraintGreaterThanOrEqualToAnchor:scroll.contentView.heightAnchor].active=YES;
  NSPopUpButton *add=[[NSPopUpButton alloc]initWithFrame:NSZeroRect pullsDown:YES];self.addAppMenu=add.menu;add.menu.delegate=self;[add.menu addItemWithTitle:L(@"Add app…") action:nil keyEquivalent:@""];[add.widthAnchor constraintEqualToConstant:150].active=YES;[self helpView:add text:L(@"Pick one of the apps running now, or choose another app.") label:L(@"Add an app exception")];
  NSStackView *column=[self column:@[intro,self.exclusionText,scroll,[self row:@[add,[self spacer]]],[self note:L(@"Night Shift turned off for a while stays off, even for an app that turns it on. Grayscale, warmth and Night Shift all off show the plain display.")]]];
@@ -1827,7 +1833,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  self.websiteStatus=[self note:@""];
  NSButton *install=[NSButton buttonWithTitle:L(@"Install Browser Extension…") target:self action:@selector(installBrowserExtension:)];[self helpView:install text:L(@"Add the Less Pull extension to your browser so websites can have their own settings. Less Pull needs to be running.") label:L(@"Install Browser Extension")];
  NSTextField *savedTitle=[NSTextField labelWithString:L(@"Saved website exceptions")];savedTitle.font=[NSFont systemFontOfSize:13 weight:NSFontWeightMedium];
- NSScrollView *scroll=[NSScrollView new];scroll.hasVerticalScroller=YES;scroll.borderType=NSBezelBorder;[scroll.heightAnchor constraintEqualToConstant:300].active=YES;
+ NSScrollView *scroll=[NSScrollView new];QuietScrolling(scroll);scroll.borderType=NSBezelBorder;[scroll.heightAnchor constraintEqualToConstant:300].active=YES;
  self.websiteRulesList=[ExceptionStack new];self.websiteRulesList.orientation=NSUserInterfaceLayoutOrientationVertical;self.websiteRulesList.alignment=NSLayoutAttributeLeading;self.websiteRulesList.spacing=0;self.websiteRulesList.translatesAutoresizingMaskIntoConstraints=NO;scroll.documentView=self.websiteRulesList;scroll.hasHorizontalScroller=NO;scroll.autohidesScrollers=YES;[self.websiteRulesList.widthAnchor constraintEqualToAnchor:scroll.contentView.widthAnchor].active=YES;[self.websiteRulesList.heightAnchor constraintGreaterThanOrEqualToAnchor:scroll.contentView.heightAnchor].active=YES;
  NSStackView *column=[self column:@[intro,[self row:@[install,[self spacer]]],self.websiteStatus,[self separator],savedTitle,scroll,[self note:L(@"Change a site here, or from the menu while you are on it. Less Pull needs to be running; private tabs are left alone.")]]];
  [column setCustomSpacing:4 afterView:column.arrangedSubviews[1]];[column setCustomSpacing:6 afterView:savedTitle];[self rebuildWebsiteRulesList];
@@ -2187,7 +2193,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
   self.helpWindow=[[NSWindow alloc]initWithContentRect:NSMakeRect(0,0,440,520) styleMask:NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskResizable backing:NSBackingStoreBuffered defer:NO];self.helpWindow.title=L(@"Less Pull Help");self.helpWindow.releasedWhenClosed=NO;self.helpWindow.minSize=NSMakeSize(360,320);
   NSMutableAttributedString *text=[NSMutableAttributedString new];NSMutableParagraphStyle *body=[NSMutableParagraphStyle new];body.paragraphSpacing=14;body.lineHeightMultiple=1.15;NSMutableParagraphStyle *head=[NSMutableParagraphStyle new];head.paragraphSpacing=4;
   for(NSArray *section in [self helpSections]){[text appendAttributedString:[[NSAttributedString alloc]initWithString:[section[0] stringByAppendingString:@"\n"] attributes:@{NSFontAttributeName:[NSFont systemFontOfSize:13 weight:NSFontWeightSemibold],NSForegroundColorAttributeName:NSColor.labelColor,NSParagraphStyleAttributeName:head}]];{NSMutableAttributedString *b=[Emphasized([section[1] stringByAppendingString:@"\n"],[NSFont systemFontOfSize:13],NSColor.labelColor,NSColor.labelColor,NO) mutableCopy];[b addAttribute:NSParagraphStyleAttributeName value:body range:NSMakeRange(0,b.length)];[text appendAttributedString:b];}}
-  NSScrollView *scroll=[NSTextView scrollableTextView];NSTextView *view=scroll.documentView;view.editable=NO;view.selectable=YES;view.textContainerInset=NSMakeSize(16,16);view.drawsBackground=NO;[view.textStorage setAttributedString:text];view.accessibilityLabel=L(@"Less Pull Help");scroll.drawsBackground=NO;scroll.translatesAutoresizingMaskIntoConstraints=NO;
+  NSScrollView *scroll=[NSTextView scrollableTextView];QuietScrolling(scroll);NSTextView *view=scroll.documentView;view.editable=NO;view.selectable=YES;view.textContainerInset=NSMakeSize(16,16);view.drawsBackground=NO;[view.textStorage setAttributedString:text];view.accessibilityLabel=L(@"Less Pull Help");scroll.drawsBackground=NO;scroll.translatesAutoresizingMaskIntoConstraints=NO;
   NSButton *diagnostics=[NSButton buttonWithTitle:L(@"Diagnostics…") target:self action:@selector(diagnostics:)];diagnostics.translatesAutoresizingMaskIntoConstraints=NO;[self helpView:diagnostics text:L(@"Technical details for troubleshooting.") label:L(@"Diagnostics")];
   NSView *content=self.helpWindow.contentView;[content addSubview:scroll];[content addSubview:diagnostics];
   [NSLayoutConstraint activateConstraints:@[[scroll.topAnchor constraintEqualToAnchor:content.topAnchor],[scroll.leadingAnchor constraintEqualToAnchor:content.leadingAnchor],[scroll.trailingAnchor constraintEqualToAnchor:content.trailingAnchor],[scroll.bottomAnchor constraintEqualToAnchor:diagnostics.topAnchor constant:-12],[diagnostics.trailingAnchor constraintEqualToAnchor:content.trailingAnchor constant:-20],[diagnostics.bottomAnchor constraintEqualToAnchor:content.bottomAnchor constant:-16]]];
