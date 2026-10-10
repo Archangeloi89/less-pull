@@ -207,6 +207,28 @@ static NSString *const LessPullOldBundleIdentifier=@"local.nightshiftfilters.app
 @implementation SettingsClipView
 - (NSRect)constrainBoundsRect:(NSRect)proposed {NSRect r=[super constrainBoundsRect:proposed];r.origin.x=0;return r;}
 @end
+// The Settings scroll bar when a tab is longer than the window: always there, so the rest is
+// clearly reachable, but only a thin soft knob without the classic track. It grows a little
+// and darkens under the pointer or while dragged, like the system one.
+@interface QuietScroller : NSScroller
+@property BOOL hot;
+@end
+@implementation QuietScroller
++ (BOOL)isCompatibleWithOverlayScrollers {return YES;}
+- (BOOL)quiet {return self.scrollerStyle==NSScrollerStyleLegacy;}
+- (void)drawRect:(NSRect)dirty {if(!self.quiet){[super drawRect:dirty];return;}if(self.knobProportion<1&&self.enabled)[self drawKnob];}
+- (void)drawKnobSlotInRect:(NSRect)slot highlight:(BOOL)flag {if(!self.quiet)[super drawKnobSlotInRect:slot highlight:flag];}
+- (void)drawKnob {
+ if(!self.quiet){[super drawKnob];return;}
+ NSRect k=[self rectForPart:NSScrollerKnob];if(NSIsEmptyRect(k))return;CGFloat w=self.hot?8:6;
+ NSRect r=NSMakeRect(NSMidX(self.bounds)-w/2,NSMinY(k)+2,w,MAX(NSHeight(k)-4,w));
+ [[NSColor.labelColor colorWithAlphaComponent:self.hot?0.42:0.22] setFill];[[NSBezierPath bezierPathWithRoundedRect:r xRadius:w/2 yRadius:w/2] fill];
+}
+- (void)updateTrackingAreas {[super updateTrackingAreas];for(NSTrackingArea *a in self.trackingAreas)if(a.owner==self)[self removeTrackingArea:a];[self addTrackingArea:[[NSTrackingArea alloc]initWithRect:NSZeroRect options:NSTrackingMouseEnteredAndExited|NSTrackingActiveInKeyWindow|NSTrackingInVisibleRect owner:self userInfo:nil]];}
+- (void)mouseEntered:(NSEvent *)e {self.hot=YES;self.needsDisplay=YES;}
+- (void)mouseExited:(NSEvent *)e {self.hot=NO;self.needsDisplay=YES;}
+- (void)mouseDown:(NSEvent *)e {self.hot=YES;self.needsDisplay=YES;[super mouseDown:e];NSPoint p=[self convertPoint:self.window.mouseLocationOutsideOfEventStream fromView:nil];self.hot=NSPointInRect(p,self.bounds);self.needsDisplay=YES;}
+@end
 @interface SettingsScrollView : NSScrollView
 @end
 @implementation SettingsScrollView
@@ -566,7 +588,7 @@ static void drawKey(NSRect f,NSString *label,double pressed){NSRect r=NSOffsetRe
  [s layoutSubtreeIfNeeded];CGFloat over=NSHeight(s.documentView.frame)-NSHeight(s.contentView.bounds);
  if(over>0&&over<=24){CGFloat want=[self settingsHeightFor:NSHeight(s.frame)+over],grow=want-NSHeight(s.frame);if(grow>0.5){item.viewController.preferredContentSize=NSMakeSize(500,want);NSRect f=self.settings.frame;f.size.height+=grow;f.origin.y-=grow;[self.settings setFrame:f display:YES];[s layoutSubtreeIfNeeded];over=NSHeight(s.documentView.frame)-NSHeight(s.contentView.bounds);}}
  // A tab that really overflows shows the classic bar all the time, so the rest is visibly there; a tab that fits keeps the quiet overlay.
- NSScrollerStyle want=over>1?NSScrollerStyleLegacy:NSScrollerStyleOverlay;if(s.scrollerStyle!=want){s.scrollerStyle=want;[s tile];}
+ NSScrollerStyle want=over>1?NSScrollerStyleLegacy:NSScrollerStyleOverlay;if(s.scrollerStyle!=want){s.scrollerStyle=want;[s tile];}if(![s.verticalScroller isKindOfClass:QuietScroller.class]){s.verticalScroller=[QuietScroller new];s.verticalScroller.scrollerStyle=want;[s tile];}
 }
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
  if(object==self.settingsTabs)dispatch_async(dispatch_get_main_queue(),^{[self fixSettingsOverflow];});
@@ -1659,7 +1681,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  NSViewController *controller=[NSViewController new];NSVisualEffectView *root=[NSVisualEffectView new];root.material=NSVisualEffectMaterialWindowBackground;root.blendingMode=NSVisualEffectBlendingModeBehindWindow;root.state=NSVisualEffectStateFollowsWindowActiveState;
  // The tab scrolls when the screen is shorter than its content (a 13-inch Mac with larger text); otherwise the scroller stays hidden and the window takes the content's height.
  SettingsDocument *doc=[SettingsDocument new];doc.translatesAutoresizingMaskIntoConstraints=NO;[doc addSubview:content];
- SettingsScrollView *scroll=[SettingsScrollView new];scroll.contentView=[SettingsClipView new];scroll.translatesAutoresizingMaskIntoConstraints=NO;scroll.drawsBackground=NO;scroll.hasVerticalScroller=YES;scroll.hasHorizontalScroller=NO;scroll.autohidesScrollers=YES;scroll.scrollerStyle=NSScrollerStyleOverlay;scroll.verticalScrollElasticity=NSScrollElasticityAllowed;scroll.horizontalScrollElasticity=NSScrollElasticityNone;scroll.documentView=doc;[root addSubview:scroll];
+ SettingsScrollView *scroll=[SettingsScrollView new];scroll.contentView=[SettingsClipView new];scroll.translatesAutoresizingMaskIntoConstraints=NO;scroll.drawsBackground=NO;scroll.verticalScroller=[QuietScroller new];scroll.hasVerticalScroller=YES;scroll.hasHorizontalScroller=NO;scroll.autohidesScrollers=YES;scroll.scrollerStyle=NSScrollerStyleOverlay;scroll.verticalScrollElasticity=NSScrollElasticityAllowed;scroll.horizontalScrollElasticity=NSScrollElasticityNone;scroll.documentView=doc;[root addSubview:scroll];
  [NSLayoutConstraint activateConstraints:@[[scroll.topAnchor constraintEqualToAnchor:root.topAnchor],[scroll.leadingAnchor constraintEqualToAnchor:root.leadingAnchor],[scroll.trailingAnchor constraintEqualToAnchor:root.trailingAnchor],[scroll.bottomAnchor constraintEqualToAnchor:root.bottomAnchor],
   [doc.topAnchor constraintEqualToAnchor:scroll.contentView.topAnchor],[doc.leadingAnchor constraintEqualToAnchor:scroll.contentView.leadingAnchor],[doc.widthAnchor constraintEqualToAnchor:scroll.widthAnchor],  // the full 500 pt, even when an old-style bar is drawn over the right margin
   [content.topAnchor constraintEqualToAnchor:doc.topAnchor],[content.leadingAnchor constraintEqualToAnchor:doc.leadingAnchor],[content.trailingAnchor constraintEqualToAnchor:doc.trailingAnchor],[content.bottomAnchor constraintEqualToAnchor:doc.bottomAnchor]]];[root.widthAnchor constraintEqualToConstant:500].active=YES;  // every language fits 500 pt; a line that does not is shortened in its table
