@@ -19,5 +19,8 @@ typedef struct { BOOL active, enabled, sunSchedulePermitted; int mode; struct { 
 - (BOOL)setNightShiftStrength:(float)strength;
 - (BOOL)applyMode:(NSInteger)mode; // 0 Natural, 1 Grayscale, 16 saved tint
 - (NSInteger)currentMode;
+// macOS’s own Color Filter (System Settings → Accessibility): read and set it as is, for the lock screen.
+- (BOOL)systemFilterEnabled:(BOOL *)enabled type:(int *)type;
+- (BOOL)setSystemFilterEnabled:(BOOL)enabled type:(int)type;
 - (NSString *)diagnostics;
 @end
