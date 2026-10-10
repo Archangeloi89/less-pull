@@ -61,3 +61,10 @@ rm -rf "../Less Pull.app"
 ditto --norsrc "$APP" "../Less Pull.app"
 xattr -cr "../Less Pull.app"  # Finder attributes on the copy would count as detritus for Gatekeeper
 ditto -c -k --keepParent --norsrc "$APP" "../Less Pull.zip"
+# The disk image for the release page: the app and an Applications shortcut. The zip stays for the in-app updater.
+DMG_ROOT="$BUILD_ROOT/dmg"; mkdir -p "$DMG_ROOT"; ditto --norsrc "$APP" "$DMG_ROOT/Less Pull.app"; ln -s /Applications "$DMG_ROOT/Applications"
+rm -f "../Less Pull.dmg"; hdiutil create -quiet -volname "Less Pull" -srcfolder "$DMG_ROOT" -ov -format UDZO -fs HFS+ "../Less Pull.dmg"
+if [[ "$SIGN" != "-" ]]; then
+ codesign --force --sign "$SIGN" --timestamp "../Less Pull.dmg"
+ if [[ -n "${LESS_PULL_NOTARY_PROFILE:-}" ]]; then xcrun notarytool submit "../Less Pull.dmg" --keychain-profile "$LESS_PULL_NOTARY_PROFILE" --wait; xcrun stapler staple "../Less Pull.dmg"; spctl --assess --type open --context context:primary-signature --verbose=2 "../Less Pull.dmg"; fi
+fi
