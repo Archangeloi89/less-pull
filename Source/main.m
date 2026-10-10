@@ -1261,6 +1261,7 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  [self add:L(@"Settings…") action:@selector(showSettings:) to:menu];
  [menu addItem:NSMenuItem.separatorItem];
  [self add:L(@"Quit") action:@selector(quit:) to:menu];
+ {NSMenuItem *v=[[NSMenuItem alloc]initWithTitle:@"" action:nil keyEquivalent:@""];v.attributedTitle=[[NSAttributedString alloc]initWithString:[NSString stringWithFormat:@"Less Pull %@",[self runningVersionLabel]] attributes:@{NSFontAttributeName:[NSFont systemFontOfSize:11],NSForegroundColorAttributeName:NSColor.secondaryLabelColor}];v.enabled=NO;[menu addItem:v];}  // the version, small and gray, at the very end
 }
 // One line for the menu: what the display shows now, plus a timed off or an active exception.
 - (NSString *)menuStatusLine {
