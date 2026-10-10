@@ -184,7 +184,7 @@ static NSString *const LessPullOldBundleIdentifier=@"local.nightshiftfilters.app
 - (BOOL)isFlipped {return YES;}
 @end
 // The settings tabs always use the overlay scroller, whatever "Show scroll bars" says, so the 500 pt layout never loses width to a bar.
-// The Settings window never hangs below the screen: every frame Less Pull or a tab change
+// The Settings window never hangs below the screen or past its sides: every frame Less Pull or a tab change
 // asks for is lifted until the bottom clears the Dock, and a size change returns to the
 // place the person chose when the screen allows it.
 @interface SettingsWindow : NSWindow
@@ -196,7 +196,8 @@ static NSString *const LessPullOldBundleIdentifier=@"local.nightshiftfilters.app
 - (NSRect)fitted:(NSRect)f {
  NSScreen *screen=self.screen?:NSScreen.mainScreen;if(!screen)return f;NSRect v=screen.visibleFrame;
  CGFloat top=NSMaxY(f);if(self.preferredTop>0&&!NSEqualSizes(f.size,self.frame.size))top=self.preferredTop;
- top=MIN(NSMaxY(v),MAX(top,NSMinY(v)+8+f.size.height));f.origin.y=top-f.size.height;return f;
+ top=MIN(NSMaxY(v),MAX(top,NSMinY(v)+8+f.size.height));f.origin.y=top-f.size.height;
+ f.origin.x=MAX(NSMinX(v)+8,MIN(f.origin.x,NSMaxX(v)-f.size.width-8));return f;  // and never past the left or right edge
 }
 - (void)setFrame:(NSRect)f display:(BOOL)d {NSRect g=[self fitted:f];self.adjusting=!NSEqualRects(f,g);self.lastSetTop=NSMaxY(g);[super setFrame:g display:d];self.adjusting=NO;}
 - (void)setFrame:(NSRect)f display:(BOOL)d animate:(BOOL)a {NSRect g=[self fitted:f];self.adjusting=!NSEqualRects(f,g);self.lastSetTop=NSMaxY(g);[super setFrame:g display:d animate:a];self.adjusting=NO;}
@@ -331,6 +332,7 @@ static NSString *const LessPullOldBundleIdentifier=@"local.nightshiftfilters.app
 @property BOOL welcomeWanted;
 @property NSStackView *tourCard;
 @property NSInteger tourPage;
+@property CGFloat testScreenHeight;
 @property CGFloat tourHeight;
 @end
 // The warm bloom drawn behind the glow text: a radial gradient from a soft amber center to nothing.
@@ -556,7 +558,7 @@ static void drawKey(NSRect f,NSString *label,double pressed){NSRect r=NSOffsetRe
 // Hidden views leave the stacks; the tabs then take their new height.
 // The settings window never grows taller than the screen it is on: the toolbar and title take about 80 pt, and a margin keeps the window off the Dock.
 // The tallest a Settings tab may make the window: 85% of the usable screen height, title bar and toolbar included, so the window always has air above and below; the rest scrolls.
-- (CGFloat)settingsHeightFor:(CGFloat)contentHeight {NSScreen *screen=self.settings.screen?:NSScreen.mainScreen;CGFloat usable=screen?screen.visibleFrame.size.height:100000;NSArray *args=NSProcessInfo.processInfo.arguments;NSUInteger ti=[args indexOfObject:@"--screen-height"];if(ti!=NSNotFound&&ti+1<args.count)usable=[args[ti+1] doubleValue];CGFloat chrome=self.settings?NSHeight(self.settings.frame)-NSHeight(self.settings.contentLayoutRect):100;if(chrome<40||chrome>200)chrome=100;CGFloat cap=floor(usable*0.85)-chrome;return MIN(ceil(contentHeight)+2,MAX(cap,240));}
+- (CGFloat)settingsHeightFor:(CGFloat)contentHeight {NSScreen *screen=self.settings.screen?:NSScreen.mainScreen;CGFloat usable=screen?screen.visibleFrame.size.height:100000;NSArray *args=NSProcessInfo.processInfo.arguments;NSUInteger ti=[args indexOfObject:@"--screen-height"];if(ti!=NSNotFound&&ti+1<args.count)usable=[args[ti+1] doubleValue];if(self.testScreenHeight>0)usable=self.testScreenHeight;CGFloat chrome=self.settings?NSHeight(self.settings.frame)-NSHeight(self.settings.contentLayoutRect):100;if(chrome<40||chrome>200)chrome=100;CGFloat cap=floor(usable*0.85)-chrome;return MIN(ceil(contentHeight)+2,MAX(cap,240));}
 - (NSView *)settingsContentOf:(NSTabViewItem *)item {NSScrollView *scroll=(NSScrollView *)item.viewController.view.subviews.firstObject;return [scroll isKindOfClass:NSScrollView.class]?scroll.documentView.subviews.firstObject:scroll;}
 // Wrapped text can end a few points taller than measured; the window then grows by exactly that, within the screen, so no hairline scroll bar appears.
 - (void)fixSettingsOverflow {
@@ -938,6 +940,7 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  if([NSProcessInfo.processInfo.arguments containsObject:@"--settings"])[self showSettings:nil];
  // First launch: Settings opens with a one-time welcome card above the real controls.
  self.welcomeWanted=firstLaunch||[NSProcessInfo.processInfo.arguments containsObject:@"--welcome"];if(self.welcomeWanted)[self showSettings:nil];
+ if([NSProcessInfo.processInfo.arguments containsObject:@"--refit-test"]){[self showSettings:nil];dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)(2*NSEC_PER_SEC)),dispatch_get_main_queue(),^{NSUInteger ri=[NSProcessInfo.processInfo.arguments indexOfObject:@"--refit-test"];if(ri+1<NSProcessInfo.processInfo.arguments.count)self.testScreenHeight=[NSProcessInfo.processInfo.arguments[ri+1] doubleValue];[NSNotificationCenter.defaultCenter postNotificationName:NSApplicationDidChangeScreenParametersNotification object:NSApp];});}
  if([NSProcessInfo.processInfo.arguments containsObject:@"--about-tour"]){[self showSettings:nil];self.settingsTabs.selectedTabViewItemIndex=self.settingsTabs.tabViewItems.count-1;dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)(1.5*NSEC_PER_SEC)),dispatch_get_main_queue(),^{[self showTour:nil];});}
  if([NSProcessInfo.processInfo.arguments containsObject:@"--menu-test"]){[self showSettings:nil];main.itemArray.firstObject.submenu=self.statusMenu;}
 
@@ -2209,7 +2212,9 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  [self.policy selectManual:self.selectedMode];[self savePolicy];
  NSMenuItem *item=[NSMenuItem new];item.tag=(self.selectedMode==1||self.selectedMode==100)?100:101;[self manual:item];
 }
-- (void)displaysChanged:(id)sender {[self pipelineChanged:sender];[self refreshDisplayRows];[self applyVisibility];}
+- (void)displaysChanged:(id)sender {[self pipelineChanged:sender];[self refreshDisplayRows];[self applyVisibility];[self refitSettings];}
+// A display, its scaling or the Dock changed while Settings is open: measure the tabs for the new screen, then place the window inside it again.
+- (void)refitSettings {if(!self.settings.visible)return;dispatch_async(dispatch_get_main_queue(),^{[self relayoutSettings];dispatch_async(dispatch_get_main_queue(),^{[self.settings setFrame:self.settings.frame display:YES];});});}
 - (void)applicationWillTerminate:(NSNotification *)note {self.quitting=YES;if(self.peekHotKey)UnregisterEventHotKey(self.peekHotKey);if(self.grayscaleHotKey)UnregisterEventHotKey(self.grayscaleHotKey);[self.grayOffTimer invalidate];[self.pauseAllTimer invalidate];[self.eventTimer invalidate];[self.pipelineRecoveryTimer invalidate];[self.menuDismissal end];[self.browserBridge stop];[self.warmth cancelTransition];if(self.relaunching)return;[self endPauseNow:nil];self.excludeNight=NO;[self reconcileExclusion];if(self.grayOverride||self.customWarmth){self.grayOverride=0;self.customWarmth=NO;self.excludeGray=NO;self.excludeWarmth=NO;self.animateAppearance=NO;[self.warmth cancelTransition];[self applyMode:self.selectedMode];}[self.warmth restore];}
 - (void)quit:(id)sender {[NSApp terminate:nil];}
 @end
