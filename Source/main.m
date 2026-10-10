@@ -1429,8 +1429,8 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  recorder.accessibilityLabel=[NSString stringWithFormat:L(@"%@ shortcut: %@"),name,s?recorder.title:@"none"];
 }
 - (void)refreshPeekRecorder:(id)sender {
- [self refreshRecorder:self.peekRecorder key:@"peekShortcut" registered:self.peekHotKey!=NULL note:self.peekNote idle:L(@"Hold the shortcut to see the plain display; let go to return. Press it twice quickly to keep the plain display until you press it again. Your settings stay as they are.") active:L(@"Hold the shortcut to see the plain display; let go to return. Press it twice quickly to keep it, once more to return. Click to change it.") name:L(@"Peek in color")];
- [self refreshRecorder:self.grayscaleRecorder key:@"grayscaleShortcut" registered:self.grayscaleHotKey!=NULL note:self.grayscaleShortcutNote idle:L(@"Press a shortcut to turn Grayscale on or off from anywhere.") active:L(@"Press the shortcut to turn Grayscale on or off from anywhere. Click to change it.") name:L(@"Toggle Grayscale")];
+ [self refreshRecorder:self.peekRecorder key:@"peekShortcut" registered:self.peekHotKey!=NULL note:self.peekNote idle:L(@"Hold the shortcut to see the plain display; let go to return. Press it twice quickly to keep the plain display until you press it again. Your settings stay as they are.") active:L(@"Hold the shortcut to see the plain display; let go to return. Press it twice quickly to keep it, once more to return. Click here to record a different shortcut.") name:L(@"Peek in color")];
+ [self refreshRecorder:self.grayscaleRecorder key:@"grayscaleShortcut" registered:self.grayscaleHotKey!=NULL note:self.grayscaleShortcutNote idle:L(@"Press a shortcut to turn Grayscale on or off from anywhere.") active:L(@"Press the shortcut to turn Grayscale on or off from anywhere. Click here to record a different shortcut.") name:L(@"Toggle Grayscale")];
  NSDictionary *effects=[self peekEffects];self.peekGrayButton.state=[effects[@"grayscale"] boolValue];self.peekWarmthButton.state=[effects[@"warmth"] boolValue];self.peekNightButton.state=[effects[@"nightShift"] boolValue];
 }
 - (void)startRecording:(ShortcutRecorder *)sender {if(sender.recording){sender.recording=NO;[self refreshPeekRecorder:nil];return;}sender.recording=YES;[sender.window makeFirstResponder:sender];[self refreshPeekRecorder:nil];}
@@ -1810,7 +1810,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  return column;
 }
 - (NSStackView *)websitesTab {
- NSTextField *intro=[self explain:L(@"Websites can have their own settings too, with the Less Pull extension for Safari, Brave, Chrome, Firefox, Opera and Edge. With a website in front, choose “Exception for …” in the menu, just like for apps. The extension itself has no buttons.")];
+ NSTextField *intro=[self explain:L(@"Websites can have their own settings too, with the Less Pull extension for Safari, Brave, Chrome, Firefox, Opera and Edge. With a website in front, choose “Exception for …” in the menu, just like for apps. The extension has no controls in the browser; everything happens in Less Pull.")];
  self.websiteStatus=[self note:@""];
  NSButton *install=[NSButton buttonWithTitle:L(@"Install Browser Extension…") target:self action:@selector(installBrowserExtension:)];[self helpView:install text:L(@"Add the Less Pull extension to your browser so websites can have their own settings. Less Pull needs to be running.") label:L(@"Install Browser Extension")];
  NSTextField *savedTitle=[NSTextField labelWithString:L(@"Saved website exceptions")];savedTitle.font=[NSFont systemFontOfSize:13 weight:NSFontWeightMedium];

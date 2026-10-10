@@ -209,7 +209,7 @@
 "Hides this card for now. Tick the box below to hide it for good." = "Скрывает эту карточку на время. Отметьте поле ниже, чтобы скрыть её насовсем.";
 "Hold %@ and the screen shows color for as long as you hold it. Press it twice quickly to keep it, once more to return. %@ turns Grayscale on or off. You can change both under Shortcuts." = "Удерживайте %@ — и экран в цвете, пока вы держите. Нажмите дважды быстро, чтобы цвет остался, ещё раз — чтобы вернуться. %@ включает и выключает оттенки серого. Оба можно изменить в «Сочетаниях».";
 "Hold the shortcut to see the plain display; let go to return. Press it twice quickly to keep the plain display until you press it again. Your settings stay as they are." = "Удерживайте сочетание, чтобы увидеть экран без фильтра; отпустите — и всё вернётся. Нажмите дважды быстро, чтобы экран остался без фильтра до следующего нажатия. Ваши настройки не меняются.";
-"Hold the shortcut to see the plain display; let go to return. Press it twice quickly to keep it, once more to return. Click to change it." = "Удерживайте сочетание, чтобы увидеть экран без фильтра; отпустите — и всё вернётся. Нажмите дважды быстро, чтобы оставить так, ещё раз — чтобы вернуться. Нажмите, чтобы изменить.";
+"Hold the shortcut to see the plain display; let go to return. Press it twice quickly to keep it, once more to return. Click here to record a different shortcut." = "Удерживайте сочетание, чтобы увидеть экран без фильтра; отпустите — и всё вернётся. Нажмите дважды быстро, чтобы оставить так, ещё раз — чтобы вернуться. Нажмите здесь, чтобы записать другое сочетание.";
 "hold ⌥ A: color while held" = "держите ⌥ A: в цвете";
 "How loud the session sounds are. Let go to hear it." = "Громкость звуков сессии. Отпустите, чтобы услышать.";
 "Night Shift turned off for a while stays off, even for an app that turns it on. Grayscale, warmth and Night Shift all off show the plain display." = "Если выключить Night Shift на время, он останется выключенным даже для приложения, которое его включает. Оттенки серого, тепло и Night Shift, выключенные вместе, дают экран без фильтра.";
@@ -350,7 +350,7 @@
 "Press a shortcut to turn Grayscale on or off from anywhere." = "Нажмите сочетание, чтобы включать и выключать оттенки серого откуда угодно.";
 "Press keys…" = "Нажмите клавиши…";
 "Press the keys you want, with ⌘, ⌃ or ⌥. Esc cancels; ⌫ removes the shortcut." = "Нажмите нужные клавиши с ⌘, ⌃ или ⌥. Esc отменяет; ⌫ убирает сочетание.";
-"Press the shortcut to turn Grayscale on or off from anywhere. Click to change it." = "Нажмите сочетание, чтобы включать и выключать оттенки серого откуда угодно. Нажмите здесь, чтобы изменить.";
+"Press the shortcut to turn Grayscale on or off from anywhere. Click here to record a different shortcut." = "Нажмите сочетание, чтобы включать и выключать оттенки серого откуда угодно. Нажмите здесь, чтобы записать другое сочетание.";
 "Preview the call-back sound" = "Послушать звук зова";
 "Preview the end sound" = "Послушать звук конца";
 "Preview:" = "Звук:";
@@ -509,7 +509,7 @@
 "Warmth set by hand" = "Тепло задано вручную";
 "Warmth set by hand until Night Shift next changes" = "Тепло задано вручную до переключения Night Shift";
 "Websites" = "Сайты";
-"Websites can have their own settings too, with the Less Pull extension for Safari, Brave, Chrome, Firefox, Opera and Edge. With a website in front, choose “Exception for …” in the menu, just like for apps. The extension itself has no buttons." = "У сайтов тоже могут быть свои настройки — через расширение Less Pull для Safari, Brave, Chrome, Firefox, Opera и Edge. Когда сайт на переднем плане, выберите в меню «Исключение для …», как и для приложений. У самого расширения кнопок нет.";
+"Websites can have their own settings too, with the Less Pull extension for Safari, Brave, Chrome, Firefox, Opera and Edge. With a website in front, choose “Exception for …” in the menu, just like for apps. The extension has no controls in the browser; everything happens in Less Pull." = "У сайтов тоже могут быть свои настройки — через расширение Less Pull для Safari, Brave, Chrome, Firefox, Opera и Edge. Когда сайт на переднем плане, выберите в меню «Исключение для …», как и для приложений. У расширения нет элементов управления в браузере; всё происходит в Less Pull.";
 "Welcome back." = "С возвращением.";
 "Welcome to Less Pull" = "Добро пожаловать в Less Pull";
 "What Less Pull does" = "Что делает Less Pull";

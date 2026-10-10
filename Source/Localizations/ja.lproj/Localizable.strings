@@ -209,7 +209,7 @@
 "Hides this card for now. Tick the box below to hide it for good." = "このカードをいったん隠します。下にチェックすると、今後は表示しません。";
 "Hold %@ and the screen shows color for as long as you hold it. Press it twice quickly to keep it, once more to return. %@ turns Grayscale on or off. You can change both under Shortcuts." = "%@ を押している間だけ、画面がカラーになります。すばやく 2 回押すとそのまま、もう一度で戻ります。%@ はグレイスケールをオン / オフします。どちらも「ショートカット」で変えられます。";
 "Hold the shortcut to see the plain display; let go to return. Press it twice quickly to keep the plain display until you press it again. Your settings stay as they are." = "ショートカットを押している間はフィルターなしの画面になり、離すと戻ります。すばやく 2 回押すと、次に押すまでフィルターなしのままです。設定は変わりません。";
-"Hold the shortcut to see the plain display; let go to return. Press it twice quickly to keep it, once more to return. Click to change it." = "ショートカットを押している間はフィルターなしの画面になり、離すと戻ります。すばやく 2 回押すとそのまま、もう一度で戻ります。クリックで変更。";
+"Hold the shortcut to see the plain display; let go to return. Press it twice quickly to keep it, once more to return. Click here to record a different shortcut." = "ショートカットを押している間はフィルターなしの画面になり、離すと戻ります。すばやく 2 回押すとそのまま、もう一度で戻ります。ここをクリックすると、別のショートカットを登録できます。";
 "hold ⌥ A: color while held" = "⌥ A を押している間: カラー";
 "How loud the session sounds are. Let go to hear it." = "セッションの音の大きさ。離すと試聴できます。";
 "Night Shift turned off for a while stays off, even for an app that turns it on. Grayscale, warmth and Night Shift all off show the plain display." = "Night Shift をしばらくオフにしている間は、オンにするアプリでもオフのままです。グレイスケール、暖かさ、Night Shift がすべてオフなら、フィルターなしの画面になります。";
@@ -350,7 +350,7 @@
 "Press a shortcut to turn Grayscale on or off from anywhere." = "どこからでもグレイスケールをオン / オフできるショートカットを押します。";
 "Press keys…" = "キーを押す…";
 "Press the keys you want, with ⌘, ⌃ or ⌥. Esc cancels; ⌫ removes the shortcut." = "⌘、⌃、⌥ のいずれかと組み合わせて、使いたいキーを押します。Esc でキャンセル、⌫ でショートカットを削除。";
-"Press the shortcut to turn Grayscale on or off from anywhere. Click to change it." = "どこからでも、このショートカットでグレイスケールをオン / オフできます。クリックで変更。";
+"Press the shortcut to turn Grayscale on or off from anywhere. Click here to record a different shortcut." = "どこからでも、このショートカットでグレイスケールをオン / オフできます。ここをクリックすると、別のショートカットを登録できます。";
 "Preview the call-back sound" = "呼び戻しの音を試聴";
 "Preview the end sound" = "終了の音を試聴";
 "Preview:" = "試聴:";
@@ -509,7 +509,7 @@
 "Warmth set by hand" = "暖かさを手動で設定";
 "Warmth set by hand until Night Shift next changes" = "Night Shift が次に切り替わるまで、暖かさは手動";
 "Websites" = "ウェブサイト";
-"Websites can have their own settings too, with the Less Pull extension for Safari, Brave, Chrome, Firefox, Opera and Edge. With a website in front, choose “Exception for …” in the menu, just like for apps. The extension itself has no buttons." = "Safari、Brave、Chrome、Firefox、Opera、Edge 用の Less Pull 拡張機能を使うと、ウェブサイトにも独自の設定を持たせられます。ウェブサイトを手前にして、アプリと同じようにメニューから「〜の個別設定」を選びます。拡張機能そのものにボタンはありません。";
+"Websites can have their own settings too, with the Less Pull extension for Safari, Brave, Chrome, Firefox, Opera and Edge. With a website in front, choose “Exception for …” in the menu, just like for apps. The extension has no controls in the browser; everything happens in Less Pull." = "Safari、Brave、Chrome、Firefox、Opera、Edge 用の Less Pull 拡張機能を使うと、ウェブサイトにも独自の設定を持たせられます。ウェブサイトを手前にして、アプリと同じようにメニューから「〜の個別設定」を選びます。拡張機能はブラウザ側に操作するところがなく、すべて Less Pull で行います。";
 "Welcome back." = "おかえりなさい。";
 "Welcome to Less Pull" = "Less Pull へようこそ";
 "What Less Pull does" = "Less Pull がすること";

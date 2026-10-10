@@ -209,7 +209,7 @@
 "Hides this card for now. Tick the box below to hide it for good." = "Esconde este cartão por enquanto. Marque a caixa abaixo para ele não voltar.";
 "Hold %@ and the screen shows color for as long as you hold it. Press it twice quickly to keep it, once more to return. %@ turns Grayscale on or off. You can change both under Shortcuts." = "Segure %@ e a tela fica em cores enquanto você segura. Aperte duas vezes rápido para manter, mais uma vez para voltar. %@ liga ou desliga a escala de cinza. Você pode mudar os dois em «Atalhos».";
 "Hold the shortcut to see the plain display; let go to return. Press it twice quickly to keep the plain display until you press it again. Your settings stay as they are." = "Segure o atalho para ver a tela sem filtro; solte e ela volta. Aperte duas vezes rápido para ficar sem filtro até apertar de novo. Os seus ajustes ficam como estão.";
-"Hold the shortcut to see the plain display; let go to return. Press it twice quickly to keep it, once more to return. Click to change it." = "Segure o atalho para ver a tela sem filtro; solte e ela volta. Aperte duas vezes rápido para manter, mais uma vez para voltar. Clique para mudar.";
+"Hold the shortcut to see the plain display; let go to return. Press it twice quickly to keep it, once more to return. Click here to record a different shortcut." = "Segure o atalho para ver a tela sem filtro; solte e ela volta. Aperte duas vezes rápido para manter, mais uma vez para voltar. Clique aqui para gravar outro atalho.";
 "hold ⌥ A: color while held" = "segure ⌥ A: em cores";
 "How loud the session sounds are. Let go to hear it." = "O volume dos sons da sessão. Solte para ouvir.";
 "Night Shift turned off for a while stays off, even for an app that turns it on. Grayscale, warmth and Night Shift all off show the plain display." = "Se você desligar o Night Shift por um tempo, ele fica desligado, mesmo para um app que o liga. Escala de cinza, calor e Night Shift todos desligados mostram a tela sem filtro.";
@@ -350,7 +350,7 @@
 "Press a shortcut to turn Grayscale on or off from anywhere." = "Aperte um atalho para ligar ou desligar a escala de cinza de qualquer lugar.";
 "Press keys…" = "Aperte as teclas…";
 "Press the keys you want, with ⌘, ⌃ or ⌥. Esc cancels; ⌫ removes the shortcut." = "Aperte as teclas que quiser, com ⌘, ⌃ ou ⌥. Esc cancela; ⌫ remove o atalho.";
-"Press the shortcut to turn Grayscale on or off from anywhere. Click to change it." = "Aperte o atalho para ligar ou desligar a escala de cinza de qualquer lugar. Clique para mudar.";
+"Press the shortcut to turn Grayscale on or off from anywhere. Click here to record a different shortcut." = "Aperte o atalho para ligar ou desligar a escala de cinza de qualquer lugar. Clique aqui para gravar outro atalho.";
 "Preview the call-back sound" = "Ouvir o som da chamada";
 "Preview the end sound" = "Ouvir o som do fim";
 "Preview:" = "Ouvir:";
@@ -509,7 +509,7 @@
 "Warmth set by hand" = "Calor ajustado à mão";
 "Warmth set by hand until Night Shift next changes" = "Calor ajustado à mão até o Night Shift mudar";
 "Websites" = "Sites";
-"Websites can have their own settings too, with the Less Pull extension for Safari, Brave, Chrome, Firefox, Opera and Edge. With a website in front, choose “Exception for …” in the menu, just like for apps. The extension itself has no buttons." = "Sites também podem ter ajustes próprios, com a extensão do Less Pull para Safari, Brave, Chrome, Firefox, Opera e Edge. Com um site na frente, escolha «Exceção para …» no menu, igual aos apps. A extensão em si não tem botões.";
+"Websites can have their own settings too, with the Less Pull extension for Safari, Brave, Chrome, Firefox, Opera and Edge. With a website in front, choose “Exception for …” in the menu, just like for apps. The extension has no controls in the browser; everything happens in Less Pull." = "Sites também podem ter ajustes próprios, com a extensão do Less Pull para Safari, Brave, Chrome, Firefox, Opera e Edge. Com um site na frente, escolha «Exceção para …» no menu, igual aos apps. A extensão não tem controles no navegador; tudo acontece no Less Pull.";
 "Welcome back." = "Bem-vindo de volta.";
 "Welcome to Less Pull" = "Bem-vindo ao Less Pull";
 "What Less Pull does" = "O que o Less Pull faz";

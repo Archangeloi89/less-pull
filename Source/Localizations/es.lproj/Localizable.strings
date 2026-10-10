@@ -209,7 +209,7 @@
 "Hides this card for now. Tick the box below to hide it for good." = "Oculta esta tarjeta por ahora. Marca la casilla de abajo para ocultarla del todo.";
 "Hold %@ and the screen shows color for as long as you hold it. Press it twice quickly to keep it, once more to return. %@ turns Grayscale on or off. You can change both under Shortcuts." = "Mantén %@ pulsado y la pantalla muestra color mientras lo sostengas. Púlsalo dos veces rápido para mantenerlo; una vez más, y vuelves. %@ activa o desactiva la escala de grises. Puedes cambiar ambos en Atajos.";
 "Hold the shortcut to see the plain display; let go to return. Press it twice quickly to keep the plain display until you press it again. Your settings stay as they are." = "Mantén pulsado el atajo y verás la pantalla sin filtro; suéltalo para volver. Púlsalo dos veces rápido y se queda sin filtro hasta que lo pulses otra vez. Tus ajustes no cambian.";
-"Hold the shortcut to see the plain display; let go to return. Press it twice quickly to keep it, once more to return. Click to change it." = "Mantén pulsado el atajo y verás la pantalla sin filtro; suéltalo para volver. Púlsalo dos veces rápido y se queda así; una vez más, y vuelve. Haz clic para cambiarlo.";
+"Hold the shortcut to see the plain display; let go to return. Press it twice quickly to keep it, once more to return. Click here to record a different shortcut." = "Mantén pulsado el atajo y verás la pantalla sin filtro; suéltalo para volver. Púlsalo dos veces rápido y se queda así; una vez más, y vuelve. Haz clic aquí para grabar otro atajo.";
 "hold ⌥ A: color while held" = "mantén ⌥ A: color mientras";
 "How loud the session sounds are. Let go to hear it." = "El volumen de los sonidos de la sesión. Suelta para oírlo.";
 "Night Shift turned off for a while stays off, even for an app that turns it on. Grayscale, warmth and Night Shift all off show the plain display." = "Si apagas Night Shift un rato, sigue apagado, aunque una app lo encienda. Escala de grises, calidez y Night Shift apagados a la vez muestran la pantalla sin filtro.";
@@ -350,7 +350,7 @@
 "Press a shortcut to turn Grayscale on or off from anywhere." = "Pulsa un atajo para activar o desactivar la escala de grises desde cualquier sitio.";
 "Press keys…" = "Pulsa las teclas…";
 "Press the keys you want, with ⌘, ⌃ or ⌥. Esc cancels; ⌫ removes the shortcut." = "Pulsa las teclas que quieras, con ⌘, ⌃ o ⌥. Esc cancela; ⌫ quita el atajo.";
-"Press the shortcut to turn Grayscale on or off from anywhere. Click to change it." = "Pulsa el atajo para activar o desactivar la escala de grises desde cualquier sitio. Haz clic para cambiarlo.";
+"Press the shortcut to turn Grayscale on or off from anywhere. Click here to record a different shortcut." = "Pulsa el atajo para activar o desactivar la escala de grises desde cualquier sitio. Haz clic aquí para grabar otro atajo.";
 "Preview the call-back sound" = "Escuchar el sonido del aviso";
 "Preview the end sound" = "Escuchar el sonido del final";
 "Preview:" = "Escuchar:";
@@ -509,7 +509,7 @@
 "Warmth set by hand" = "Calidez ajustada a mano";
 "Warmth set by hand until Night Shift next changes" = "Calidez ajustada a mano hasta que Night Shift cambie";
 "Websites" = "Sitios web";
-"Websites can have their own settings too, with the Less Pull extension for Safari, Brave, Chrome, Firefox, Opera and Edge. With a website in front, choose “Exception for …” in the menu, just like for apps. The extension itself has no buttons." = "Los sitios web también pueden tener sus propios ajustes, con la extensión de Less Pull para Safari, Brave, Chrome, Firefox, Opera y Edge. Con un sitio web delante, elige «Excepción para …» en el menú, igual que con las apps. La extensión en sí no tiene botones.";
+"Websites can have their own settings too, with the Less Pull extension for Safari, Brave, Chrome, Firefox, Opera and Edge. With a website in front, choose “Exception for …” in the menu, just like for apps. The extension has no controls in the browser; everything happens in Less Pull." = "Los sitios web también pueden tener sus propios ajustes, con la extensión de Less Pull para Safari, Brave, Chrome, Firefox, Opera y Edge. Con un sitio web delante, elige «Excepción para …» en el menú, igual que con las apps. La extensión no tiene controles en el navegador; todo ocurre en Less Pull.";
 "Welcome back." = "Bienvenido de vuelta.";
 "Welcome to Less Pull" = "Bienvenido a Less Pull";
 "What Less Pull does" = "Qué hace Less Pull";

@@ -209,7 +209,7 @@
 "Hides this card for now. Tick the box below to hide it for good." = "暫時隱藏此卡片。勾選下方的方框則永久隱藏。";
 "Hold %@ and the screen shows color for as long as you hold it. Press it twice quickly to keep it, once more to return. %@ turns Grayscale on or off. You can change both under Shortcuts." = "按住 %@，螢幕就在你按住時顯示彩色。快速按兩下可保持，再按一下即恢復。%@ 開關灰階。兩者都可在「快速鍵」中更改。";
 "Hold the shortcut to see the plain display; let go to return. Press it twice quickly to keep the plain display until you press it again. Your settings stay as they are." = "按住快速鍵查看無濾鏡畫面；放開即恢復。快速按兩下可保持無濾鏡畫面，直到再次按下。你的設定不會改變。";
-"Hold the shortcut to see the plain display; let go to return. Press it twice quickly to keep it, once more to return. Click to change it." = "按住快速鍵查看無濾鏡畫面；放開即恢復。快速按兩下可保持，再按一下即恢復。按一下可更改。";
+"Hold the shortcut to see the plain display; let go to return. Press it twice quickly to keep it, once more to return. Click here to record a different shortcut." = "按住快速鍵查看無濾鏡畫面；放開即恢復。快速按兩下可保持，再按一下即恢復。按一下這裡錄製其他快速鍵。";
 "hold ⌥ A: color while held" = "按住 ⌥ A：期間彩色";
 "How loud the session sounds are. Let go to hear it." = "專注提示音的音量。放開即可試聽。";
 "Night Shift turned off for a while stays off, even for an app that turns it on. Grayscale, warmth and Night Shift all off show the plain display." = "如果暫時關閉了夜覽，即使 App 會開啟它，它也保持關閉。灰階、暖色和夜覽都關時，就是無濾鏡畫面。";
@@ -350,7 +350,7 @@
 "Press a shortcut to turn Grayscale on or off from anywhere." = "按下一個快速鍵，隨時隨地開關灰階。";
 "Press keys…" = "按下按鍵…";
 "Press the keys you want, with ⌘, ⌃ or ⌥. Esc cancels; ⌫ removes the shortcut." = "按下想用的按鍵，需搭配 ⌘、⌃ 或 ⌥。Esc 取消；⌫ 移除快速鍵。";
-"Press the shortcut to turn Grayscale on or off from anywhere. Click to change it." = "按下快速鍵可隨時隨地開關灰階。按一下可更改。";
+"Press the shortcut to turn Grayscale on or off from anywhere. Click here to record a different shortcut." = "按下快速鍵可隨時隨地開關灰階。按一下這裡錄製其他快速鍵。";
 "Preview the call-back sound" = "試聽喚回提示音";
 "Preview the end sound" = "試聽結束提示音";
 "Preview:" = "試聽：";
@@ -509,7 +509,7 @@
 "Warmth set by hand" = "暖色已手動設定";
 "Warmth set by hand until Night Shift next changes" = "暖色手動設定，直到夜覽下次切換";
 "Websites" = "網站";
-"Websites can have their own settings too, with the Less Pull extension for Safari, Brave, Chrome, Firefox, Opera and Edge. With a website in front, choose “Exception for …” in the menu, just like for apps. The extension itself has no buttons." = "網站也可以有自己的設定，透過 Less Pull 延伸功能（支援 Safari、Brave、Chrome、Firefox、Opera 和 Edge）。網站在最前方時，像對 App 那樣在選單中選擇「… 的個別設定」。延伸功能本身沒有按鈕。";
+"Websites can have their own settings too, with the Less Pull extension for Safari, Brave, Chrome, Firefox, Opera and Edge. With a website in front, choose “Exception for …” in the menu, just like for apps. The extension has no controls in the browser; everything happens in Less Pull." = "網站也可以有自己的設定，透過 Less Pull 延伸功能（支援 Safari、Brave、Chrome、Firefox、Opera 和 Edge）。網站在最前方時，像對 App 那樣在選單中選擇「… 的個別設定」。延伸功能在瀏覽器中沒有任何控制項；一切都在 Less Pull 中完成。";
 "Welcome back." = "歡迎回來。";
 "Welcome to Less Pull" = "歡迎使用 Less Pull";
 "What Less Pull does" = "Less Pull 做什麼";

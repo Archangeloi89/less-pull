@@ -209,7 +209,7 @@
 "Hides this card for now. Tick the box below to hide it for good." = "Ukrywa tę kartę na razie. Zaznacz pole poniżej, by ukryć ją na dobre.";
 "Hold %@ and the screen shows color for as long as you hold it. Press it twice quickly to keep it, once more to return. %@ turns Grayscale on or off. You can change both under Shortcuts." = "Przytrzymaj %@, a ekran jest w kolorze tak długo, jak trzymasz. Wciśnij dwa razy szybko, by kolor został, jeszcze raz, by wrócić. %@ włącza lub wyłącza skalę szarości. Oba zmienisz w „Skrótach”.";
 "Hold the shortcut to see the plain display; let go to return. Press it twice quickly to keep the plain display until you press it again. Your settings stay as they are." = "Przytrzymaj skrót, by zobaczyć ekran bez filtra; puść, a wróci. Wciśnij dwa razy szybko, by ekran został bez filtra do następnego wciśnięcia. Twoje ustawienia się nie zmieniają.";
-"Hold the shortcut to see the plain display; let go to return. Press it twice quickly to keep it, once more to return. Click to change it." = "Przytrzymaj skrót, by zobaczyć ekran bez filtra; puść, a wróci. Wciśnij dwa razy szybko, by tak zostało, jeszcze raz, by wrócić. Kliknij, by zmienić.";
+"Hold the shortcut to see the plain display; let go to return. Press it twice quickly to keep it, once more to return. Click here to record a different shortcut." = "Przytrzymaj skrót, by zobaczyć ekran bez filtra; puść, a wróci. Wciśnij dwa razy szybko, by tak zostało, jeszcze raz, by wrócić. Kliknij tutaj, by nagrać inny skrót.";
 "hold ⌥ A: color while held" = "trzymaj ⌥ A: w kolorze";
 "How loud the session sounds are. Let go to hear it." = "Jak głośno grają dźwięki sesji. Puść, by posłuchać.";
 "Night Shift turned off for a while stays off, even for an app that turns it on. Grayscale, warmth and Night Shift all off show the plain display." = "Jeśli wyłączysz Night Shift na jakiś czas, zostaje wyłączony, nawet dla aplikacji, która go włącza. Skala szarości, ciepło i Night Shift wyłączone razem dają ekran bez filtra.";
@@ -350,7 +350,7 @@
 "Press a shortcut to turn Grayscale on or off from anywhere." = "Wciśnij skrót, by włączać i wyłączać skalę szarości z dowolnego miejsca.";
 "Press keys…" = "Wciśnij klawisze…";
 "Press the keys you want, with ⌘, ⌃ or ⌥. Esc cancels; ⌫ removes the shortcut." = "Wciśnij wybrane klawisze, z ⌘, ⌃ lub ⌥. Esc anuluje; ⌫ usuwa skrót.";
-"Press the shortcut to turn Grayscale on or off from anywhere. Click to change it." = "Wciśnij skrót, by włączać i wyłączać skalę szarości z dowolnego miejsca. Kliknij, by zmienić.";
+"Press the shortcut to turn Grayscale on or off from anywhere. Click here to record a different shortcut." = "Wciśnij skrót, by włączać i wyłączać skalę szarości z dowolnego miejsca. Kliknij tutaj, by nagrać inny skrót.";
 "Preview the call-back sound" = "Posłuchaj dźwięku zawołania";
 "Preview the end sound" = "Posłuchaj dźwięku końca";
 "Preview:" = "Dźwięk:";
@@ -509,7 +509,7 @@
 "Warmth set by hand" = "Ciepło ustawione ręcznie";
 "Warmth set by hand until Night Shift next changes" = "Ciepło ustawione ręcznie do zmiany Night Shift";
 "Websites" = "Strony";
-"Websites can have their own settings too, with the Less Pull extension for Safari, Brave, Chrome, Firefox, Opera and Edge. With a website in front, choose “Exception for …” in the menu, just like for apps. The extension itself has no buttons." = "Strony też mogą mieć własne ustawienia, przez rozszerzenie Less Pull dla Safari, Brave, Chrome, Firefox, Opery i Edge. Gdy strona jest na wierzchu, wybierz w menu „Wyjątek dla …”, tak jak dla aplikacji. Samo rozszerzenie nie ma przycisków.";
+"Websites can have their own settings too, with the Less Pull extension for Safari, Brave, Chrome, Firefox, Opera and Edge. With a website in front, choose “Exception for …” in the menu, just like for apps. The extension has no controls in the browser; everything happens in Less Pull." = "Strony też mogą mieć własne ustawienia, przez rozszerzenie Less Pull dla Safari, Brave, Chrome, Firefox, Opery i Edge. Gdy strona jest na wierzchu, wybierz w menu „Wyjątek dla …”, tak jak dla aplikacji. Rozszerzenie nie ma w przeglądarce żadnych przycisków; wszystko dzieje się w Less Pull.";
 "Welcome back." = "Witaj z powrotem.";
 "Welcome to Less Pull" = "Witaj w Less Pull";
 "What Less Pull does" = "Co robi Less Pull";

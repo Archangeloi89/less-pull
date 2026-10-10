@@ -209,7 +209,7 @@
 "Hides this card for now. Tick the box below to hide it for good." = "Ховає цю картку на час. Позначте поле нижче, щоб сховати її назовсім.";
 "Hold %@ and the screen shows color for as long as you hold it. Press it twice quickly to keep it, once more to return. %@ turns Grayscale on or off. You can change both under Shortcuts." = "Утримуйте %@ — і екран у кольорі, поки ви тримаєте. Натисніть двічі швидко, щоб колір лишився, ще раз — щоб повернутися. %@ вмикає й вимикає відтінки сірого. Обидва можна змінити в «Сполученнях».";
 "Hold the shortcut to see the plain display; let go to return. Press it twice quickly to keep the plain display until you press it again. Your settings stay as they are." = "Утримуйте сполучення, щоб побачити екран без фільтра; відпустіть — і все повернеться. Натисніть двічі швидко, щоб екран лишився без фільтра до наступного натискання. Ваші налаштування не змінюються.";
-"Hold the shortcut to see the plain display; let go to return. Press it twice quickly to keep it, once more to return. Click to change it." = "Утримуйте сполучення, щоб побачити екран без фільтра; відпустіть — і все повернеться. Натисніть двічі швидко, щоб лишити так, ще раз — щоб повернутися. Натисніть, щоб змінити.";
+"Hold the shortcut to see the plain display; let go to return. Press it twice quickly to keep it, once more to return. Click here to record a different shortcut." = "Утримуйте сполучення, щоб побачити екран без фільтра; відпустіть — і все повернеться. Натисніть двічі швидко, щоб лишити так, ще раз — щоб повернутися. Натисніть тут, щоб записати інше сполучення.";
 "hold ⌥ A: color while held" = "тримайте ⌥ A: у кольорі";
 "How loud the session sounds are. Let go to hear it." = "Гучність звуків сесії. Відпустіть, щоб почути.";
 "Night Shift turned off for a while stays off, even for an app that turns it on. Grayscale, warmth and Night Shift all off show the plain display." = "Якщо вимкнути Night Shift на час, він лишиться вимкненим навіть для програми, яка його вмикає. Відтінки сірого, тепло і Night Shift, вимкнені разом, дають екран без фільтра.";
@@ -350,7 +350,7 @@
 "Press a shortcut to turn Grayscale on or off from anywhere." = "Натисніть сполучення, щоб вмикати й вимикати відтінки сірого звідусіль.";
 "Press keys…" = "Натисніть клавіші…";
 "Press the keys you want, with ⌘, ⌃ or ⌥. Esc cancels; ⌫ removes the shortcut." = "Натисніть потрібні клавіші з ⌘, ⌃ або ⌥. Esc скасовує; ⌫ прибирає сполучення.";
-"Press the shortcut to turn Grayscale on or off from anywhere. Click to change it." = "Натисніть сполучення, щоб вмикати й вимикати відтінки сірого звідусіль. Натисніть тут, щоб змінити.";
+"Press the shortcut to turn Grayscale on or off from anywhere. Click here to record a different shortcut." = "Натисніть сполучення, щоб вмикати й вимикати відтінки сірого звідусіль. Натисніть тут, щоб записати інше сполучення.";
 "Preview the call-back sound" = "Послухати звук кличу";
 "Preview the end sound" = "Послухати звук кінця";
 "Preview:" = "Звук:";
@@ -509,7 +509,7 @@
 "Warmth set by hand" = "Тепло задано вручну";
 "Warmth set by hand until Night Shift next changes" = "Тепло задано вручну до перемикання Night Shift";
 "Websites" = "Сайти";
-"Websites can have their own settings too, with the Less Pull extension for Safari, Brave, Chrome, Firefox, Opera and Edge. With a website in front, choose “Exception for …” in the menu, just like for apps. The extension itself has no buttons." = "У сайтів теж можуть бути свої налаштування — через розширення Less Pull для Safari, Brave, Chrome, Firefox, Opera та Edge. Коли сайт на передньому плані, виберіть у меню «Виняток для …», як і для програм. У самого розширення кнопок немає.";
+"Websites can have their own settings too, with the Less Pull extension for Safari, Brave, Chrome, Firefox, Opera and Edge. With a website in front, choose “Exception for …” in the menu, just like for apps. The extension has no controls in the browser; everything happens in Less Pull." = "У сайтів теж можуть бути свої налаштування — через розширення Less Pull для Safari, Brave, Chrome, Firefox, Opera та Edge. Коли сайт на передньому плані, виберіть у меню «Виняток для …», як і для програм. У розширення немає елементів керування в браузері; усе відбувається в Less Pull.";
 "Welcome back." = "З поверненням.";
 "Welcome to Less Pull" = "Вітаємо в Less Pull";
 "What Less Pull does" = "Що робить Less Pull";

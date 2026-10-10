@@ -209,7 +209,7 @@
 "Hides this card for now. Tick the box below to hide it for good." = "Verbergt deze kaart voor nu. Vink het vakje hieronder aan om hem voorgoed te verbergen.";
 "Hold %@ and the screen shows color for as long as you hold it. Press it twice quickly to keep it, once more to return. %@ turns Grayscale on or off. You can change both under Shortcuts." = "Houd %@ ingedrukt en het scherm toont kleur zolang je vasthoudt. Twee keer snel drukken houdt het zo, nog een keer en het komt terug. %@ zet grijstinten aan of uit. Je kunt ze allebei veranderen onder ‘Sneltoetsen’.";
 "Hold the shortcut to see the plain display; let go to return. Press it twice quickly to keep the plain display until you press it again. Your settings stay as they are." = "Houd de sneltoets ingedrukt om het scherm zonder filter te zien; laat los en het komt terug. Twee keer snel drukken houdt het zonder filter tot je opnieuw drukt. Je instellingen blijven zoals ze zijn.";
-"Hold the shortcut to see the plain display; let go to return. Press it twice quickly to keep it, once more to return. Click to change it." = "Houd de sneltoets ingedrukt om het scherm zonder filter te zien; laat los en het komt terug. Twee keer snel drukken houdt het zo, nog een keer en het komt terug. Klik om te veranderen.";
+"Hold the shortcut to see the plain display; let go to return. Press it twice quickly to keep it, once more to return. Click here to record a different shortcut." = "Houd de sneltoets ingedrukt om het scherm zonder filter te zien; laat los en het komt terug. Twee keer snel drukken houdt het zo, nog een keer en het komt terug. Klik hier om een andere sneltoets op te nemen.";
 "hold ⌥ A: color while held" = "⌥ A vasthouden: in kleur";
 "How loud the session sounds are. Let go to hear it." = "Hoe hard de sessiegeluiden klinken. Laat los om het te horen.";
 "Night Shift turned off for a while stays off, even for an app that turns it on. Grayscale, warmth and Night Shift all off show the plain display." = "Zet je Night Shift een tijdje uit, dan blijft het uit, ook bij een app die het aanzet. Grijstinten, warmte en Night Shift allemaal uit tonen het scherm zonder filter.";
@@ -350,7 +350,7 @@
 "Press a shortcut to turn Grayscale on or off from anywhere." = "Druk op een sneltoets om grijstinten overal aan of uit te zetten.";
 "Press keys…" = "Druk op toetsen…";
 "Press the keys you want, with ⌘, ⌃ or ⌥. Esc cancels; ⌫ removes the shortcut." = "Druk op de toetsen die je wilt, met ⌘, ⌃ of ⌥. Esc annuleert; ⌫ verwijdert de sneltoets.";
-"Press the shortcut to turn Grayscale on or off from anywhere. Click to change it." = "Druk op de sneltoets om grijstinten overal aan of uit te zetten. Klik om te veranderen.";
+"Press the shortcut to turn Grayscale on or off from anywhere. Click here to record a different shortcut." = "Druk op de sneltoets om grijstinten overal aan of uit te zetten. Klik hier om een andere sneltoets op te nemen.";
 "Preview the call-back sound" = "Beluister het terugroepgeluid";
 "Preview the end sound" = "Beluister het eindgeluid";
 "Preview:" = "Beluister:";
@@ -509,7 +509,7 @@
 "Warmth set by hand" = "Warmte met de hand ingesteld";
 "Warmth set by hand until Night Shift next changes" = "Warmte met de hand ingesteld tot Night Shift wisselt";
 "Websites" = "Websites";
-"Websites can have their own settings too, with the Less Pull extension for Safari, Brave, Chrome, Firefox, Opera and Edge. With a website in front, choose “Exception for …” in the menu, just like for apps. The extension itself has no buttons." = "Ook websites kunnen eigen instellingen krijgen, met de Less Pull-extensie voor Safari, Brave, Chrome, Firefox, Opera en Edge. Met een website vooraan kies je ‘Uitzondering voor …’ in het menu, net als bij apps. De extensie zelf heeft geen knoppen.";
+"Websites can have their own settings too, with the Less Pull extension for Safari, Brave, Chrome, Firefox, Opera and Edge. With a website in front, choose “Exception for …” in the menu, just like for apps. The extension has no controls in the browser; everything happens in Less Pull." = "Ook websites kunnen eigen instellingen krijgen, met de Less Pull-extensie voor Safari, Brave, Chrome, Firefox, Opera en Edge. Met een website vooraan kies je ‘Uitzondering voor …’ in het menu, net als bij apps. De extensie heeft geen bediening in de browser; alles gebeurt in Less Pull.";
 "Welcome back." = "Welkom terug.";
 "Welcome to Less Pull" = "Welkom bij Less Pull";
 "What Less Pull does" = "Wat Less Pull doet";

@@ -209,7 +209,7 @@
 "Hides this card for now. Tick the box below to hide it for good." = "이 카드를 일단 숨깁니다. 아래 상자에 체크하면 다시 표시하지 않습니다.";
 "Hold %@ and the screen shows color for as long as you hold it. Press it twice quickly to keep it, once more to return. %@ turns Grayscale on or off. You can change both under Shortcuts." = "%@을(를) 누르고 있는 동안만 화면이 컬러가 됩니다. 빠르게 두 번 누르면 그대로, 한 번 더 누르면 돌아옵니다. %@은(는) 회색조를 켜고 끕니다. 둘 다 ‘단축키’에서 바꿀 수 있습니다.";
 "Hold the shortcut to see the plain display; let go to return. Press it twice quickly to keep the plain display until you press it again. Your settings stay as they are." = "단축키를 누르고 있는 동안 필터 없는 화면이 보이고, 놓으면 돌아옵니다. 빠르게 두 번 누르면 다시 누를 때까지 필터 없는 화면이 유지됩니다. 설정은 바뀌지 않습니다.";
-"Hold the shortcut to see the plain display; let go to return. Press it twice quickly to keep it, once more to return. Click to change it." = "단축키를 누르고 있는 동안 필터 없는 화면이 보이고, 놓으면 돌아옵니다. 빠르게 두 번 누르면 그대로, 한 번 더 누르면 돌아옵니다. 클릭하여 변경.";
+"Hold the shortcut to see the plain display; let go to return. Press it twice quickly to keep it, once more to return. Click here to record a different shortcut." = "단축키를 누르고 있는 동안 필터 없는 화면이 보이고, 놓으면 돌아옵니다. 빠르게 두 번 누르면 그대로, 한 번 더 누르면 돌아옵니다. 여기를 클릭하면 다른 단축키를 등록할 수 있습니다.";
 "hold ⌥ A: color while held" = "⌥ A 누른 동안: 컬러";
 "How loud the session sounds are. Let go to hear it." = "세션 소리의 크기. 놓으면 들어볼 수 있습니다.";
 "Night Shift turned off for a while stays off, even for an app that turns it on. Grayscale, warmth and Night Shift all off show the plain display." = "Night Shift를 잠시 꺼 두면, 켜는 앱이 있어도 꺼진 채로 있습니다. 회색조, 따뜻함, Night Shift가 모두 꺼지면 필터 없는 화면이 됩니다.";
@@ -350,7 +350,7 @@
 "Press a shortcut to turn Grayscale on or off from anywhere." = "어디서든 회색조를 켜고 끌 단축키를 누르세요.";
 "Press keys…" = "키 누르기…";
 "Press the keys you want, with ⌘, ⌃ or ⌥. Esc cancels; ⌫ removes the shortcut." = "⌘, ⌃, ⌥ 중 하나와 함께 원하는 키를 누르세요. Esc는 취소, ⌫는 단축키 제거.";
-"Press the shortcut to turn Grayscale on or off from anywhere. Click to change it." = "어디서든 이 단축키로 회색조를 켜고 끕니다. 클릭하여 변경.";
+"Press the shortcut to turn Grayscale on or off from anywhere. Click here to record a different shortcut." = "어디서든 이 단축키로 회색조를 켜고 끕니다. 여기를 클릭하면 다른 단축키를 등록할 수 있습니다.";
 "Preview the call-back sound" = "다시 부르기 소리 들어보기";
 "Preview the end sound" = "종료 소리 들어보기";
 "Preview:" = "소리:";
@@ -509,7 +509,7 @@
 "Warmth set by hand" = "따뜻함 직접 설정";
 "Warmth set by hand until Night Shift next changes" = "Night Shift가 다음에 바뀔 때까지 따뜻함 직접 설정";
 "Websites" = "웹사이트";
-"Websites can have their own settings too, with the Less Pull extension for Safari, Brave, Chrome, Firefox, Opera and Edge. With a website in front, choose “Exception for …” in the menu, just like for apps. The extension itself has no buttons." = "Safari, Brave, Chrome, Firefox, Opera, Edge용 Less Pull 확장 프로그램을 쓰면 웹사이트에도 고유한 설정을 둘 수 있습니다. 웹사이트를 앞에 두고, 앱과 마찬가지로 메뉴에서 ‘… 개별 설정’을 고르세요. 확장 프로그램 자체에는 버튼이 없습니다.";
+"Websites can have their own settings too, with the Less Pull extension for Safari, Brave, Chrome, Firefox, Opera and Edge. With a website in front, choose “Exception for …” in the menu, just like for apps. The extension has no controls in the browser; everything happens in Less Pull." = "Safari, Brave, Chrome, Firefox, Opera, Edge용 Less Pull 확장 프로그램을 쓰면 웹사이트에도 고유한 설정을 둘 수 있습니다. 웹사이트를 앞에 두고, 앱과 마찬가지로 메뉴에서 ‘… 개별 설정’을 고르세요. 확장 프로그램은 브라우저에 조작 요소가 없으며, 모든 것은 Less Pull에서 이루어집니다.";
 "Welcome back." = "다시 오셨군요.";
 "Welcome to Less Pull" = "Less Pull에 오신 것을 환영합니다";
 "What Less Pull does" = "Less Pull이 하는 일";
