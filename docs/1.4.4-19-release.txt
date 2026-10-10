@@ -115,3 +115,5 @@ Lock screen grayscale (build 35, unreleased): build 16 applied grayscale through
 Disk image (build 35, unreleased): build.sh creates Less Pull.dmg (app + Applications link, UDZO), signs it with the Developer ID and notarizes and staples it when the notary profile is set. The zip stays for the updater.
 
 Build 36: the lock-screen finding on the MacBook Air: a built-in display DOES show the session display adjustments on the lock screen (build 16 stayed gray because it never touched them at lock); the plain hand-over at lock (build 33) was what turned it color. Now plain only for displays where !CGDisplayIsBuiltin; built-in displays keep their matrix. The system Color Filter switch from 35 is removed again (no effect anywhere); option wording back to Night Shift only.
+
+Build 37: Jiri verified on the MacBook that the built-in lock screen shows the system Color Filter, not the matrix (filter off → color even with 36). So: 36 handling (no plain hand-over on built-in) + the system grayscale filter switched on at lock and restored on unlock (lockFilter). Safari setup: guide sheet first, companion app activated on OK (NSWorkspaceOpenConfiguration activates).

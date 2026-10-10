@@ -227,7 +227,7 @@ static NSString *const LessPullOldBundleIdentifier=@"local.nightshiftfilters.app
 @property ExclusionPolicy *exclusion;
 @property BOOL excludeGray,excludeNight,excludeWarmth,quitting,animateAppearance;
 // Lock screen and screensaver: macOS draws them outside the display adjustments, so the session is handed over plain and faded back in on return; Night Shift, which the system does honor there, is raised to full warmth meanwhile.
-@property BOOL screenLockedFlag,saverFlag,lockQuieting,installingUpdate,pendingUpdateInstall,relaunching;@property NSView *updateBanner;@property NSTextField *updateBannerLabel;@property NSButton *updateBannerButton;@property NSNumber *lockStrength;@property(nonatomic) double fade;@property NSButton *lockNightButton;
+@property BOOL screenLockedFlag,saverFlag,lockQuieting,installingUpdate,pendingUpdateInstall,relaunching;@property NSView *updateBanner;@property NSTextField *updateBannerLabel;@property NSButton *updateBannerButton;@property NSNumber *lockStrength;@property NSArray *lockFilter;@property(nonatomic) double fade;@property NSButton *lockNightButton;
 @property NSTimer *visibilityTimer;
 // Per display: where the frontmost app's windows are, and for the other displays the exception of the app on top there (or the defaults).
 @property NSSet<NSNumber *> *frontDisplays;
@@ -1073,12 +1073,14 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  BOOL gray=self.effectiveMode==100||self.effectiveMode==1;self.lockQuieting=!self.pausedUntil&&(gray||self.targetStrength>0);
  self.lockStrength=@(-1);
  if(self.lockQuieting&&[NSUserDefaults.standardUserDefaults boolForKey:@"lockNightShift"]){float s=0;if([self.engine nightShiftStrength:&s]&&[self.engine setNightShiftStrength:1])self.lockStrength=@(s);
-  }
+  // The lock screen of a built-in display shows macOS’s own Color Filter (not the app’s matrix, which build 35 learned the hard way): switch its grayscale on for the lock, put it back as it was on return.
+  if(gray){BOOL en=NO;int ty=0;if([self.engine systemFilterEnabled:&en type:&ty]){self.lockFilter=@[@(en),@(ty)];if(!(en&&ty==1))[self.engine setSystemFilterEnabled:YES type:1];}}}
  self.fade=0.2;self.animateAppearance=YES;[self sync];
 }
 - (void)lockEnded {
  if(self.screenLocked||!self.lockStrength)return;
  if(self.lockStrength.floatValue>=0)[self.engine setNightShiftStrength:self.lockStrength.floatValue];
+ if(self.lockFilter){[self.engine setSystemFilterEnabled:[self.lockFilter[0] boolValue] type:[self.lockFilter[1] intValue]];self.lockFilter=nil;}
  self.lockStrength=nil;self.lockQuieting=NO;self.fade=0.2;self.animateAppearance=YES;[self pipelineChanged:nil];
 }
 - (void)screenLocked:(id)note {self.screenLockedFlag=YES;[self lockBegan];}
@@ -2026,8 +2028,9 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
 - (void)installSafariExtension {
  NSURL *companion=[NSBundle.mainBundle.resourceURL URLByAppendingPathComponent:@"Less Pull for Safari.app"];
  if(![NSFileManager.defaultManager fileExistsAtPath:companion.path]){NSAlert *missing=[NSAlert new];missing.messageText=L(@"The Safari extension is not in this build");missing.informativeText=L(@"This copy of Less Pull was built without Xcode, so the Safari companion app is missing. A build with Xcode includes it.");if(self.browserWindow)[missing beginSheetModalForWindow:self.browserWindow completionHandler:nil];else [missing runModal];return;}
- [NSWorkspace.sharedWorkspace openURL:companion];
- NSAlert *guide=[NSAlert new];guide.messageText=L(@"Finish installation in Safari");guide.informativeText=L(@"1. The Less Pull for Safari app opens; click its Open Safari Settings button.\n2. Turn on Less Pull in Settings → Extensions and allow it on all websites.\n\nThe extension has no buttons: with a website in front, use “Exception for …” in the Less Pull menu. Keep Less Pull where it is installed.");[guide addButtonWithTitle:L(@"OK")];[NSApp activateIgnoringOtherApps:YES];if(self.browserWindow)[guide beginSheetModalForWindow:self.browserWindow completionHandler:^(NSModalResponse r){[self refreshBrowserRows];}];else [guide runModal];
+ NSAlert *guide=[NSAlert new];guide.messageText=L(@"Finish installation in Safari");guide.informativeText=L(@"1. The Less Pull for Safari app opens; click its Open Safari Settings button.\n2. Turn on Less Pull in Settings → Extensions and allow it on all websites.\n\nThe extension has no buttons: with a website in front, use “Exception for …” in the Less Pull menu. Keep Less Pull where it is installed.");[guide addButtonWithTitle:L(@"OK")];[NSApp activateIgnoringOtherApps:YES];
+ void (^openCompanion)(void)=^{NSWorkspaceOpenConfiguration *c=NSWorkspaceOpenConfiguration.configuration;c.activates=YES;[NSWorkspace.sharedWorkspace openApplicationAtURL:companion configuration:c completionHandler:nil];[self refreshBrowserRows];};
+ if(self.browserWindow)[guide beginSheetModalForWindow:self.browserWindow completionHandler:^(NSModalResponse r){openCompanion();}];else {[guide runModal];openCompanion();}
 }
 - (void)shareLessPull:(NSButton *)sender {
  NSSharingServicePicker *picker=[[NSSharingServicePicker alloc]initWithItems:@[[NSString stringWithFormat:L(@"Less Pull, a quieter screen for the Mac: grayscale, warmth, and color where it matters. Free. %@"),LessPullProjectPage]]];
