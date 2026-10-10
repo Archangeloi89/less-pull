@@ -599,3 +599,7 @@
 "What the lock screen and the screensaver keep of Less Pull. Grayscale there needs a built-in display; an external display shows only the Night Shift choice. Everything goes back as it was when you return." = "Что экран блокировки и заставка сохраняют от Less Pull. Серому там нужен встроенный экран; внешний показывает только выбор Night Shift. Когда вы вернётесь, всё снова как было.";
 "Exception for %@…" = "Исключение для %@…";
 "Changes apply right away. Click elsewhere or press Escape to close." = "Изменения действуют сразу. Щёлкните в стороне или нажмите Esc, чтобы закрыть.";
+
+"Default Night Shift" = "Night Shift по умолчанию";
+"Night Shift off for" = "Night Shift выключен на";
+"Night Shift off for  ›" = "Night Shift выключен на  ›";

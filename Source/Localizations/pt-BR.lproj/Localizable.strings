@@ -599,3 +599,7 @@
 "What the lock screen and the screensaver keep of Less Pull. Grayscale there needs a built-in display; an external display shows only the Night Shift choice. Everything goes back as it was when you return." = "O que a tela de bloqueio e o protetor de tela mantêm do Less Pull. O cinza ali precisa de uma tela integrada; uma tela externa mostra só a escolha do Night Shift. Tudo volta como estava quando você retorna.";
 "Exception for %@…" = "Exceção para %@…";
 "Changes apply right away. Click elsewhere or press Escape to close." = "As mudanças valem na hora. Clique fora ou pressione Esc para fechar.";
+
+"Default Night Shift" = "Night Shift padrão";
+"Night Shift off for" = "Night Shift desligado por";
+"Night Shift off for  ›" = "Night Shift desligado por  ›";

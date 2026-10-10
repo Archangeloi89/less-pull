@@ -384,7 +384,7 @@ static void drawKey(NSRect f,NSString *label,double pressed){NSRect r=NSOffsetRe
   NSRect bar=NSMakeRect(0,b.size.height-24,b.size.width,20);[Ink(.08) setFill];[[NSBezierPath bezierPathWithRoundedRect:bar xRadius:6 yRadius:6] fill];NSPoint c=NSMakePoint(NSMaxX(bar)-150,NSMidY(bar));
   double gray=seg(t,.42,.56),warm=seg(t,.7,.86)*.5;NSRect screen=NSMakeRect(20,16,170,92);drawScreen(screen,gray,warm,1);
   drawCircle(c,7,gray>.5,warm,-1,NO);
-  double open=seg(t,.24,.32);NSRect menu=NSMakeRect(c.x-40,c.y-14-106*open-6,150,106*open);if(open>0)drawMenu(menu,@[L(@"Grayscale"),L(@"Grayscale off for  ›"),L(@"Extra Warmth"),@"",L(@"Night Shift  ›"),L(@"Start a session…")],t>.36&&t<.6?0:-1,open,gray>.5?0:-1);
+  double open=seg(t,.24,.32);NSRect menu=NSMakeRect(c.x-40,c.y-14-106*open-6,150,106*open);if(open>0)drawMenu(menu,@[L(@"Grayscale"),L(@"Grayscale off for  ›"),L(@"Extra Warmth"),@"",L(@"Night Shift"),L(@"Night Shift off for  ›")],t>.36&&t<.6?0:-1,open,gray>.5?0:-1);
   if(open>.9){CGFloat sx=menu.origin.x+22,sy=NSMaxY(menu)-16-3*15+5;[Ink(.25) setFill];[[NSBezierPath bezierPathWithRoundedRect:NSMakeRect(sx,sy,100,3) xRadius:1.5 yRadius:1.5] fill];[Orange(1) setFill];[[NSBezierPath bezierPathWithRoundedRect:NSMakeRect(sx,sy,100*warm*2,3) xRadius:1.5 yRadius:1.5] fill];[[NSBezierPath bezierPathWithOvalInRect:NSMakeRect(sx+100*warm*2-4,sy-3,9,9)] fill];}
   double m1=seg(t,0,.2);NSPoint p0=NSMakePoint(120,60),p1=NSMakePoint(c.x+1,c.y-3);NSPoint pp=NSMakePoint(p0.x+(p1.x-p0.x)*m1,p0.y+(p1.y-p0.y)*m1);
   if(t>.34){double m2=seg(t,.34,.4);NSPoint q=NSMakePoint(menu.origin.x+40,NSMaxY(menu)-10);pp=NSMakePoint(p1.x+(q.x-p1.x)*m2,p1.y+(q.y-p1.y)*m2);}
@@ -419,7 +419,7 @@ static void drawKey(NSRect f,NSString *label,double pressed){NSRect r=NSOffsetRe
   double run=seg(t,.34,.6);BOOL started=t>.3,over=t>.62;NSString *label=!started?@"":over?[NSString stringWithFormat:@"−%ld",(long)floor((t-.62)*10)]:[NSString stringWithFormat:@"%ld",(long)ceil(25*(1-run))];
   drawCircle(c,6,YES,0,started?run:-1,over);if(label.length){NSDictionary *la=@{NSFontAttributeName:[NSFont monospacedDigitSystemFontOfSize:11 weight:NSFontWeightMedium],NSForegroundColorAttributeName:over?Orange(.6+.4*fabs(sin(t*60))):Ink(1)};[label drawAtPoint:NSMakePoint(c.x+14,c.y-7) withAttributes:la];}
   NSRect screen=NSMakeRect(20,16,170,92);drawScreen(screen,1,.3,1);
-  double open=seg(t,.1,.14)*(1-seg(t,.2,.22));if(open>0){NSRect menu=NSMakeRect(c.x-40,c.y-14-76*open-6,150,76*open);drawMenu(menu,@[L(@"Grayscale"),L(@"Extra Warmth"),L(@"Night Shift  ›"),L(@"Start a session…")],t>.16?3:-1,open,0);}
+  double open=seg(t,.1,.14)*(1-seg(t,.2,.22));if(open>0){NSRect menu=NSMakeRect(c.x-40,c.y-14-76*open-6,150,76*open);drawMenu(menu,@[L(@"Grayscale"),L(@"Extra Warmth"),L(@"Night Shift"),L(@"Start a session…")],t>.16?3:-1,open,0);}
   double panel=seg(t,.22,.26)*(1-seg(t,.3,.32));if(panel>0){NSRect pr=NSMakeRect(c.x-80,c.y-14-60*panel-6,170,60*panel);[[NSColor.windowBackgroundColor colorWithAlphaComponent:.96*panel] setFill];[[NSBezierPath bezierPathWithRoundedRect:pr xRadius:8 yRadius:8] fill];[Ink(.15*panel) setStroke];[[NSBezierPath bezierPathWithRoundedRect:pr xRadius:8 yRadius:8] stroke];if(panel>.9){NSDictionary *pa=@{NSFontAttributeName:[NSFont systemFontOfSize:9.5],NSForegroundColorAttributeName:Ink(.8)};[L(@"A session. How long?") drawAtPoint:NSMakePoint(pr.origin.x+12,NSMaxY(pr)-18) withAttributes:pa];for(int i=0;i<4;i++){[Ink(i==0&&t>.27?.3:.12) setFill];[[NSBezierPath bezierPathWithRoundedRect:NSMakeRect(pr.origin.x+12+i*38,NSMaxY(pr)-44,32,16) xRadius:5 yRadius:5] fill];[@[@"25",@"45",@"60",@"90"][i] drawAtPoint:NSMakePoint(pr.origin.x+20+i*38,NSMaxY(pr)-42) withAttributes:pa];}}}
   double glow=seg(t,.62,.67)*(1-seg(t,.76,.84));if(glow>0){NSRect g=NSInsetRect(screen,-6,-6);[[NSColor colorWithSRGBRed:1 green:.78 blue:.52 alpha:.45*glow] setFill];[[NSBezierPath bezierPathWithRoundedRect:g xRadius:10 yRadius:10] fill];NSDictionary *gt=@{NSFontAttributeName:[NSFont systemFontOfSize:12 weight:NSFontWeightLight],NSForegroundColorAttributeName:[NSColor colorWithWhite:1 alpha:glow]};NSSize gs=[L(@"That was 25 minutes.") sizeWithAttributes:gt];[L(@"That was 25 minutes.") drawAtPoint:NSMakePoint(NSMidX(screen)-gs.width/2,NSMidY(screen)-gs.height/2) withAttributes:gt];}
   double back=seg(t,.8,.84);if(back>0){NSRect pr=NSMakeRect(c.x-80,c.y-14-70*back-6,170,70*back);[[NSColor.windowBackgroundColor colorWithAlphaComponent:.96*back] setFill];[[NSBezierPath bezierPathWithRoundedRect:pr xRadius:8 yRadius:8] fill];[Ink(.15*back) setStroke];[[NSBezierPath bezierPathWithRoundedRect:pr xRadius:8 yRadius:8] stroke];if(back>.9){NSDictionary *pa=@{NSFontAttributeName:[NSFont systemFontOfSize:9.5],NSForegroundColorAttributeName:Ink(.8)};[L(@"Leaving? Call me back in") drawAtPoint:NSMakePoint(pr.origin.x+12,NSMaxY(pr)-18) withAttributes:pa];for(int i=0;i<4;i++){[Ink(.12) setFill];[[NSBezierPath bezierPathWithRoundedRect:NSMakeRect(pr.origin.x+12+i*38,NSMaxY(pr)-42,32,16) xRadius:5 yRadius:5] fill];[@[@"5",@"9",@"13",@"33"][i] drawAtPoint:NSMakePoint(pr.origin.x+22+i*38,NSMaxY(pr)-40) withAttributes:pa];}[L(@"Keep going        Leave quietly") drawAtPoint:NSMakePoint(pr.origin.x+12,pr.origin.y+8) withAttributes:pa];}}
@@ -1276,7 +1276,11 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
   [self add:session.state==SessionAway?L(@"I’m back"):L(@"End session") action:@selector(endSession:) to:menu];}
  [menu addItem:NSMenuItem.separatorItem];
  [self add:[self menuStatusLine] action:nil to:menu];
+ // Right under the status line, the one action that stops all of it for a while.
+ if(self.pausedUntil){[self add:L(@"Resume Less Pull") action:@selector(resumeLessPull:) to:menu];}
+ else {NSMenuItem *pauseAll=[self add:L(@"Pause Less Pull") action:nil to:menu];pauseAll.submenu=[NSMenu new];for(NSArray *pair in @[@[L(@"For 15 minutes"),@15],@[L(@"For 1 hour"),@60],@[L(@"Until I resume"),@0]]){NSMenuItem *i=[self add:pair[0] action:@selector(pauseLessPull:) to:pauseAll.submenu];i.tag=[pair[1] integerValue];}}
  [menu addItem:NSMenuItem.separatorItem];
+ // The effects, each the same shape: a row with a check mark that toggles, and when it is on, a row with the timed choices.
  NSMenuItem *gray=[self add:self.grayOverride?L(@"Default Grayscale"):L(@"Grayscale") action:@selector(toggleGrayscale:) to:menu];gray.state=self.selectedMode==1||self.selectedMode==100;
  if(self.grayOffUntil){[self add:L(@"Grayscale back on now") action:@selector(grayscaleBackOn:) to:menu];}
  else if(gray.state){NSMenuItem *off=[self add:L(@"Grayscale off for") action:nil to:menu];off.submenu=[NSMenu new];[self populateGrayscaleOff:off.submenu];}
@@ -1286,25 +1290,17 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  NSSlider *slider=[self warmthSliderWithValue:[self currentWarmth]/3*100 action:@selector(warmthChanged:)];slider.frame=NSMakeRect(18,26,260,26);[self helpView:slider text:self.warmthHelp label:L(@"Extra Warmth, percent")];[view addSubview:slider];
  for(int i=0;i<5;i++){NSTextField *r=[NSTextField labelWithString:@[L(@"Off"),@"25",@"50",@"75",L(@"Red")][i]];r.font=[NSFont systemFontOfSize:10];r.alignment=NSTextAlignmentCenter;r.frame=NSMakeRect(28+60*i-20,4,40,16);[view addSubview:r];}
  [self helpView:view text:self.warmthHelp label:nil];sliderItem.view=view;[menu addItem:sliderItem];
- [menu addItem:NSMenuItem.separatorItem];
- // Everything about Night Shift lives in one submenu: on/off now, off for a while,
- // and whether Extra Warmth follows it.
- NSString *nightTitle=known?(self.exclusion.active?(on?L(@"Default Night Shift: On"):L(@"Default Night Shift: Off")):(on?L(@"Night Shift: On"):L(@"Night Shift: Off"))):L(@"Night Shift unavailable");
- // Night Shift, like Grayscale: one row that toggles with a click, and a row with the timed choices beside it.
+ NSString *nightTitle=known?(self.exclusion.active?L(@"Default Night Shift"):L(@"Night Shift")):L(@"Night Shift unavailable");
  NSMenuItem *nightToggle=[self add:nightTitle action:known?@selector(toggleNightShift:):nil to:menu];nightToggle.state=known&&on;nightToggle.enabled=known;
- NSMenuItem *night=known?[self add:L(@"Night Shift  ›") action:nil to:menu]:nil;
- if(known){night.submenu=[NSMenu new];
-  if(self.pause)[self add:[self canResumePause]?L(@"Turn Night Shift back on"):L(@"End timed off") action:@selector(endPauseNow:) to:night.submenu];
-  else if(on||actualOn){[self populatePauses:night.submenu];}
-  if(night.submenu.itemArray.count)[night.submenu addItem:NSMenuItem.separatorItem];
-  NSMenuItem *automatic=[self add:L(@"Extra Warmth follows Night Shift") action:@selector(toggleAuto:) to:night.submenu];automatic.state=self.automatic;automatic.enabled=actualKnown;
-  if(self.automatic&&self.policy.overrideMode>=0)[self add:L(@"Resume Following") action:@selector(resume:) to:night.submenu];}
- if(self.pausedUntil){[self add:L(@"Resume Less Pull") action:@selector(resumeLessPull:) to:menu];}
- else {NSMenuItem *pauseAll=[self add:L(@"Pause Less Pull") action:nil to:menu];pauseAll.submenu=[NSMenu new];for(NSArray *pair in @[@[L(@"For 15 minutes"),@15],@[L(@"For 1 hour"),@60],@[L(@"Until I resume"),@0]]){NSMenuItem *i=[self add:pair[0] action:@selector(pauseLessPull:) to:pauseAll.submenu];i.tag=[pair[1] integerValue];}}
+ if(known&&self.pause){[self add:[self canResumePause]?L(@"Turn Night Shift back on"):L(@"End timed off") action:@selector(endPauseNow:) to:menu];}
+ else if(known&&(on||actualOn)){NSMenuItem *night=[self add:L(@"Night Shift off for") action:nil to:menu];night.submenu=[NSMenu new];[self populatePauses:night.submenu];}
+ // Whether Extra Warmth follows Night Shift is set under Advanced; the menu only offers the way back once a hand change has interrupted it.
+ if(self.automatic&&self.policy.overrideMode>=0)[self add:L(@"Resume Following") action:@selector(resume:) to:menu];
  [menu addItem:NSMenuItem.separatorItem];
  if(self.lastExternalApp.bundleIdentifier){NSDictionary *appRule=self.exclusionRules[self.lastExternalApp.bundleIdentifier];NSMenuItem *current=[self add:[NSString stringWithFormat:L(@"Exception for %@…"),self.lastExternalApp.localizedName?:L(@"current app")] action:@selector(openAppExceptionPanel:) to:menu];current.image=[self menuIconForBundle:self.lastExternalApp.bundleIdentifier];current.state=RuleEnabled(appRule)&&RuleDiffers(appRule);}
  NSDictionary *tab=[self.browserBridge activeContextForBrowser:self.lastExternalApp.bundleIdentifier];
  if(tab){NSMenuItem *site=[self add:[NSString stringWithFormat:L(@"Exception for %@…"),tab[@"site"]] action:@selector(openSiteExceptionPanel:) to:menu];site.image=[NSImage imageWithSystemSymbolName:@"globe" accessibilityDescription:nil];NSDictionary *siteRule=[self websiteRuleForTab:tab];site.state=RuleEnabled(siteRule)&&RuleDiffers(siteRule);}
+ if(self.lastExternalApp.bundleIdentifier||tab)[menu addItem:NSMenuItem.separatorItem];
  [self add:L(@"Settings…") action:@selector(showSettings:) to:menu];
  [menu addItem:NSMenuItem.separatorItem];
  [self add:L(@"Quit") action:@selector(quit:) to:menu];

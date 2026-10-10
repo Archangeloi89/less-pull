@@ -599,3 +599,7 @@
 "What the lock screen and the screensaver keep of Less Pull. Grayscale there needs a built-in display; an external display shows only the Night Shift choice. Everything goes back as it was when you return." = "ロック画面とスクリーンセーバが Less Pull から引き継ぐもの。そこでのグレイスケールには内蔵ディスプレイが必要で、外付けディスプレイでは Night Shift の選択だけが効きます。戻ってきたときにすべて元に戻ります。";
 "Exception for %@…" = "%@ の個別設定…";
 "Changes apply right away. Click elsewhere or press Escape to close." = "変更はすぐに反映されます。ほかの場所をクリックするか Esc で閉じます。";
+
+"Default Night Shift" = "標準の Night Shift";
+"Night Shift off for" = "Night Shift をオフにする";
+"Night Shift off for  ›" = "Night Shift をオフにする  ›";
