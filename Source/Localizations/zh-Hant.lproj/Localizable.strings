@@ -588,8 +588,8 @@
 "The signature check could not be prepared." = "無法準備簽署檢查。";
 "The download is not signed by Less Pull’s author." = "下載內容未經 Less Pull 作者簽署。";
 "Apple’s notarization check did not pass." = "未通過 Apple 的公證檢查。";
-"Install build %ld" = "安裝組建 %ld";
 "Installs when the session ends" = "專注結束後安裝";
-"Build %ld is ready." = "組建 %ld 已就緒。";
 "Install" = "安裝";
 "Downloads the update, checks it, replaces the app and reopens it." = "下載更新並檢查，然後取代 App 並重新打開。";
+"Install update" = "安裝更新";
+"An update is ready." = "有更新可以安裝。";

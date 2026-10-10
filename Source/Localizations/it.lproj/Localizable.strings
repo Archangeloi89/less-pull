@@ -588,8 +588,8 @@
 "The signature check could not be prepared." = "La verifica della firma non è stata preparata.";
 "The download is not signed by Less Pull’s author." = "Il download non è firmato dall’autore di Less Pull.";
 "Apple’s notarization check did not pass." = "La verifica di notarizzazione di Apple non è passata.";
-"Install build %ld" = "Installa build %ld";
 "Installs when the session ends" = "Si installa alla fine della sessione";
-"Build %ld is ready." = "Il build %ld è pronto.";
 "Install" = "Installa";
 "Downloads the update, checks it, replaces the app and reopens it." = "Scarica l’aggiornamento, lo verifica, sostituisce l’app e la riapre.";
+"Install update" = "Installa aggiornamento";
+"An update is ready." = "Un aggiornamento è pronto.";

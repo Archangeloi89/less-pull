@@ -588,8 +588,8 @@
 "The signature check could not be prepared." = "署名の確認を準備できませんでした。";
 "The download is not signed by Less Pull’s author." = "ダウンロードしたものは Less Pull の作者によって署名されていません。";
 "Apple’s notarization check did not pass." = "Apple の公証の確認に通りませんでした。";
-"Install build %ld" = "ビルド %ld をインストール";
 "Installs when the session ends" = "セッションが終わるとインストールされます";
-"Build %ld is ready." = "ビルド %ld の準備ができました。";
 "Install" = "インストール";
 "Downloads the update, checks it, replaces the app and reopens it." = "アップデートをダウンロードして確認し、アプリを置き換えて開き直します。";
+"Install update" = "アップデートをインストール";
+"An update is ready." = "アップデートの準備ができました。";

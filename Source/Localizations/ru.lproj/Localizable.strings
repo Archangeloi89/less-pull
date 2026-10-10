@@ -588,8 +588,8 @@
 "The signature check could not be prepared." = "Не удалось подготовить проверку подписи.";
 "The download is not signed by Less Pull’s author." = "Скачанный файл не подписан автором Less Pull.";
 "Apple’s notarization check did not pass." = "Проверка нотаризации Apple не пройдена.";
-"Install build %ld" = "Установить сборку %ld";
 "Installs when the session ends" = "Установится после сессии";
-"Build %ld is ready." = "Сборка %ld готова.";
 "Install" = "Установить";
 "Downloads the update, checks it, replaces the app and reopens it." = "Скачивает обновление, проверяет его, заменяет приложение и открывает заново.";
+"Install update" = "Установить обновление";
+"An update is ready." = "Обновление готово.";

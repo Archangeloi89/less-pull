@@ -588,8 +588,8 @@
 "The signature check could not be prepared." = "서명 확인을 준비하지 못했습니다.";
 "The download is not signed by Less Pull’s author." = "다운로드한 파일은 Less Pull 작성자가 서명하지 않았습니다.";
 "Apple’s notarization check did not pass." = "Apple 공증 확인을 통과하지 못했습니다.";
-"Install build %ld" = "빌드 %ld 설치";
 "Installs when the session ends" = "세션이 끝나면 설치됩니다";
-"Build %ld is ready." = "빌드 %ld이(가) 준비되었습니다.";
 "Install" = "설치";
 "Downloads the update, checks it, replaces the app and reopens it." = "업데이트를 다운로드하고 확인한 뒤 앱을 교체하고 다시 엽니다.";
+"Install update" = "업데이트 설치";
+"An update is ready." = "업데이트가 준비되었습니다.";
