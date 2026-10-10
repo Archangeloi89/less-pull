@@ -1290,12 +1290,13 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  // Everything about Night Shift lives in one submenu: on/off now, off for a while,
  // and whether Extra Warmth follows it.
  NSString *nightTitle=known?(self.exclusion.active?(on?L(@"Default Night Shift: On"):L(@"Default Night Shift: Off")):(on?L(@"Night Shift: On"):L(@"Night Shift: Off"))):L(@"Night Shift unavailable");
- NSMenuItem *night=[self add:nightTitle action:nil to:menu];night.state=known&&on;night.enabled=known;
+ // Night Shift, like Grayscale: one row that toggles with a click, and a row with the timed choices beside it.
+ NSMenuItem *nightToggle=[self add:nightTitle action:known?@selector(toggleNightShift:):nil to:menu];nightToggle.state=known&&on;nightToggle.enabled=known;
+ NSMenuItem *night=known?[self add:L(@"Night Shift  ›") action:nil to:menu]:nil;
  if(known){night.submenu=[NSMenu new];
-  [self add:on?L(@"Turn Off"):L(@"Turn On") action:@selector(toggleNightShift:) to:night.submenu];
   if(self.pause)[self add:[self canResumePause]?L(@"Turn Night Shift back on"):L(@"End timed off") action:@selector(endPauseNow:) to:night.submenu];
-  else if(on||actualOn){[night.submenu addItem:NSMenuItem.separatorItem];[self populatePauses:night.submenu];}
-  [night.submenu addItem:NSMenuItem.separatorItem];
+  else if(on||actualOn){[self populatePauses:night.submenu];}
+  if(night.submenu.itemArray.count)[night.submenu addItem:NSMenuItem.separatorItem];
   NSMenuItem *automatic=[self add:L(@"Extra Warmth follows Night Shift") action:@selector(toggleAuto:) to:night.submenu];automatic.state=self.automatic;automatic.enabled=actualKnown;
   if(self.automatic&&self.policy.overrideMode>=0)[self add:L(@"Resume Following") action:@selector(resume:) to:night.submenu];}
  if(self.pausedUntil){[self add:L(@"Resume Less Pull") action:@selector(resumeLessPull:) to:menu];}
