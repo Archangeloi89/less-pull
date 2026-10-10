@@ -597,3 +597,5 @@
 "Grayscale while the screensaver runs and Less Pull has it on. It needs a built-in display." = "Grijstinten terwijl de schermbeveiliging loopt en Less Pull ze aan heeft. Vereist een ingebouwd scherm.";
 "Night Shift at full warmth while the screensaver runs and Less Pull is quieting your screen. Your schedule stays as it is." = "Night Shift op volle warmte terwijl de schermbeveiliging loopt en Less Pull je scherm rustig houdt. Je schema blijft zoals het is.";
 "What the lock screen and the screensaver keep of Less Pull. Grayscale there needs a built-in display; an external display shows only the Night Shift choice. Everything goes back as it was when you return." = "Wat vergrendelscherm en schermbeveiliging van Less Pull houden. Grijstinten daar vereisen een ingebouwd scherm; een extern scherm toont alleen de Night Shift-keuze. Alles is weer zoals het was wanneer je terugkomt.";
+"Exception for %@…" = "Uitzondering voor %@…";
+"Changes apply right away. Click elsewhere or press Escape to close." = "Wijzigingen gelden meteen. Klik ergens anders of druk op Esc om te sluiten.";

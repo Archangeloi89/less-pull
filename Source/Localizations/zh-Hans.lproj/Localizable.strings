@@ -597,3 +597,5 @@
 "Grayscale while the screensaver runs and Less Pull has it on. It needs a built-in display." = "Less Pull 开着灰度时，屏幕保护程序也灰度。需要内建显示器。";
 "Night Shift at full warmth while the screensaver runs and Less Pull is quieting your screen. Your schedule stays as it is." = "Less Pull 正在让屏幕安静时，屏幕保护程序上的夜览调到最暖。时间表保持不变。";
 "What the lock screen and the screensaver keep of Less Pull. Grayscale there needs a built-in display; an external display shows only the Night Shift choice. Everything goes back as it was when you return." = "锁定屏幕和屏幕保护程序从 Less Pull 保留什么。那里的灰度需要内建显示器；外接显示器只有夜览的选择生效。你回来时一切恢复原样。";
+"Exception for %@…" = "%@ 的单独设置…";
+"Changes apply right away. Click elsewhere or press Escape to close." = "更改立即生效。点按别处或按 Esc 关闭。";

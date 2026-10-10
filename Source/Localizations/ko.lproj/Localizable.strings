@@ -597,3 +597,5 @@
 "Grayscale while the screensaver runs and Less Pull has it on. It needs a built-in display." = "Less Pull에서 회색조가 켜져 있는 동안 화면 보호기도 회색조로. 내장 디스플레이가 필요합니다.";
 "Night Shift at full warmth while the screensaver runs and Less Pull is quieting your screen. Your schedule stays as it is." = "Less Pull이 화면을 고요하게 하는 동안 화면 보호기에서 Night Shift를 최대 따뜻함으로. 일정은 그대로입니다.";
 "What the lock screen and the screensaver keep of Less Pull. Grayscale there needs a built-in display; an external display shows only the Night Shift choice. Everything goes back as it was when you return." = "잠금 화면과 화면 보호기가 Less Pull에서 이어받는 것. 그곳의 회색조에는 내장 디스플레이가 필요하고, 외장 디스플레이에서는 Night Shift 선택만 적용됩니다. 돌아오면 모두 원래대로 돌아갑니다.";
+"Exception for %@…" = "%@ 개별 설정…";
+"Changes apply right away. Click elsewhere or press Escape to close." = "변경은 바로 적용됩니다. 다른 곳을 클릭하거나 Esc를 눌러 닫습니다.";

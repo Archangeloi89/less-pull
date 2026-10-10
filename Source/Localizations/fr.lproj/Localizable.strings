@@ -597,3 +597,5 @@
 "Grayscale while the screensaver runs and Less Pull has it on. It needs a built-in display." = "Niveaux de gris pendant l’économiseur tant que Less Pull les a activés. Il faut un écran intégré.";
 "Night Shift at full warmth while the screensaver runs and Less Pull is quieting your screen. Your schedule stays as it is." = "Night Shift à la chaleur maximale pendant l’économiseur tant que Less Pull apaise ton écran. Ton horaire ne change pas.";
 "What the lock screen and the screensaver keep of Less Pull. Grayscale there needs a built-in display; an external display shows only the Night Shift choice. Everything goes back as it was when you return." = "Ce que l’écran verrouillé et l’économiseur gardent de Less Pull. Les gris y demandent un écran intégré ; un écran externe ne montre que le choix Night Shift. Tout revient comme avant à ton retour.";
+"Exception for %@…" = "Exception pour %@…";
+"Changes apply right away. Click elsewhere or press Escape to close." = "Les changements s’appliquent aussitôt. Clique ailleurs ou appuie sur Échap pour fermer.";

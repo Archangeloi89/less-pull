@@ -597,3 +597,5 @@
 "Grayscale while the screensaver runs and Less Pull has it on. It needs a built-in display." = "Відтінки сірого, поки йде заставка і вони ввімкнені в Less Pull. Потрібен вбудований екран.";
 "Night Shift at full warmth while the screensaver runs and Less Pull is quieting your screen. Your schedule stays as it is." = "Night Shift на повному теплі, поки йде заставка і Less Pull заспокоює ваш екран. Розклад не змінюється.";
 "What the lock screen and the screensaver keep of Less Pull. Grayscale there needs a built-in display; an external display shows only the Night Shift choice. Everything goes back as it was when you return." = "Що екран блокування і заставка зберігають від Less Pull. Сірому там потрібен вбудований екран; зовнішній показує лише вибір Night Shift. Коли ви повертаєтеся, все знову як було.";
+"Exception for %@…" = "Виняток для %@…";
+"Changes apply right away. Click elsewhere or press Escape to close." = "Зміни діють одразу. Клацніть деінде або натисніть Esc, щоб закрити.";

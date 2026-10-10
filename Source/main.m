@@ -173,6 +173,11 @@ static NSString *const LessPullOldBundleIdentifier=@"local.nightshiftfilters.app
 @implementation ExceptionStack
 - (BOOL)isFlipped {return YES;}
 @end
+@interface KeyPanel : NSPanel
+@end
+@implementation KeyPanel
+- (BOOL)canBecomeKeyWindow {return YES;}
+@end
 @interface SettingsDocument : NSView
 @end
 @implementation SettingsDocument
@@ -247,7 +252,7 @@ static NSString *const LessPullOldBundleIdentifier=@"local.nightshiftfilters.app
 // Sessions: the model, its one-second clock while active, the panel under the icon, the glow windows, the sound playing.
 @property Session *session;
 @property NSTimer *sessionTimer;
-@property NSPanel *sessionPanel;
+@property NSPanel *sessionPanel;@property NSPanel *exceptionPanel;@property id exceptionClickMonitor,exceptionKeyMonitor;@property NSDictionary *panelTab;@property NSString *panelBundle;
 @property id sessionClickMonitor,sessionKeyMonitor;
 @property NSMutableArray<NSWindow *> *glowWindows;
 @property NSSound *sessionSound;
@@ -723,6 +728,44 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  [self add:L(@"All website exceptions…") action:@selector(showWebsites:) to:sub];
  return sub;
 }
+// Exceptions from the menu: a small panel under the icon with the same row as the Apps or Websites tab. It stays until you click elsewhere or press Escape; every change applies right away.
+- (void)openAppExceptionPanel:(id)sender {NSString *bundle=self.lastExternalApp.bundleIdentifier;if(!bundle)return;[self currentAppRuleCreating:YES];self.panelBundle=bundle;self.panelTab=nil;[self showExceptionPanel];}
+- (void)openSiteExceptionPanel:(id)sender {NSDictionary *tab=[self menuTab];if(!tab)return;self.panelTab=tab;self.panelBundle=nil;if(!self.websiteScopeExact&&!self.browserBridge.rules[tab[@"site"]]&&self.browserBridge.rules[tab[@"url"]?:@""])self.websiteScopeExact=YES;[self ensurePanelWebsiteRule];[self showExceptionPanel];}
+- (void)ensurePanelWebsiteRule {NSDictionary *tab=self.panelTab;if(!tab||[self websiteRuleForTab:tab])return;NSMutableDictionary *rule=[NSMutableDictionary new];rule[@"enabled"]=@YES;[self storeWebsiteRule:rule forTab:tab];}
+- (void)panelScopeChanged:(NSSegmentedControl *)sender {self.websiteScopeExact=sender.selectedSegment==1;[self ensurePanelWebsiteRule];[self refreshExceptionPanel];}
+- (NSView *)exceptionPanelContent {
+ NSMutableArray *parts=[NSMutableArray new];NSView *row=nil;
+ if(self.panelBundle){NSDictionary *rule=self.exclusionRules[self.panelBundle];if(!rule)return nil;
+  row=[self exceptionRowForBundle:self.panelBundle rule:rule];}
+ else {NSDictionary *tab=self.panelTab;NSString *key=[self websiteKeyForTab:tab];NSDictionary *rule=self.browserBridge.rules[key];if(!rule)return nil;
+  NSSegmentedControl *scope=[NSSegmentedControl segmentedControlWithLabels:@[L(@"Whole domain"),L(@"This exact page")] trackingMode:NSSegmentSwitchTrackingSelectOne target:self action:@selector(panelScopeChanged:)];scope.selectedSegment=self.websiteScopeExact?1:0;[scope setEnabled:[tab[@"url"] length]>0 forSegment:1];[self helpView:scope text:L(@"Whole domain, including subdomains") label:L(@"Apply to")];
+  [parts addObject:[self row:@[scope,[self spacer]]]];row=[self websiteRowForKey:key rule:rule];}
+ [parts addObject:row];
+ NSTextField *hint=[NSTextField wrappingLabelWithString:L(@"Changes apply right away. Click elsewhere or press Escape to close.")];hint.font=[NSFont systemFontOfSize:11];hint.textColor=NSColor.secondaryLabelColor;hint.preferredMaxLayoutWidth=432;[parts addObject:hint];
+ NSStackView *column=[self column:parts];column.spacing=10;column.edgeInsets=NSEdgeInsetsMake(14,14,12,14);
+ for(NSView *v in column.arrangedSubviews)if([v isKindOfClass:NSStackView.class]||[v isKindOfClass:NSBox.class])[v.widthAnchor constraintEqualToAnchor:column.widthAnchor constant:-28].active=YES;
+ return column;
+}
+- (void)showExceptionPanel {
+ [self closeSessionPanel];NSView *content=[self exceptionPanelContent];if(!content)return;
+ if(!self.exceptionPanel){KeyPanel *p=[[KeyPanel alloc]initWithContentRect:NSMakeRect(0,0,460,200) styleMask:NSWindowStyleMaskBorderless|NSWindowStyleMaskNonactivatingPanel backing:NSBackingStoreBuffered defer:NO];p.opaque=NO;p.backgroundColor=NSColor.clearColor;p.level=NSPopUpMenuWindowLevel;p.hasShadow=YES;p.releasedWhenClosed=NO;p.collectionBehavior=NSWindowCollectionBehaviorCanJoinAllSpaces|NSWindowCollectionBehaviorTransient;
+  NSVisualEffectView *back=[NSVisualEffectView new];back.material=NSVisualEffectMaterialPopover;back.blendingMode=NSVisualEffectBlendingModeBehindWindow;back.state=NSVisualEffectStateActive;back.wantsLayer=YES;back.layer.cornerRadius=14;back.layer.masksToBounds=YES;p.contentView=back;self.exceptionPanel=p;}
+ NSView *back=self.exceptionPanel.contentView;for(NSView *v in back.subviews.copy)[v removeFromSuperview];content.translatesAutoresizingMaskIntoConstraints=NO;[back addSubview:content];
+ [NSLayoutConstraint activateConstraints:@[[content.leadingAnchor constraintEqualToAnchor:back.leadingAnchor],[content.trailingAnchor constraintEqualToAnchor:back.trailingAnchor],[content.topAnchor constraintEqualToAnchor:back.topAnchor],[content.widthAnchor constraintEqualToConstant:460]]];
+ [content layoutSubtreeIfNeeded];NSSize size=NSMakeSize(460,content.fittingSize.height);
+ NSRect anchor=self.item.button.window.frame;NSRect frame=NSMakeRect(NSMidX(anchor)-size.width/2,anchor.origin.y-size.height-6,size.width,size.height);NSScreen *screen=self.item.button.window.screen?:NSScreen.mainScreen;if(NSMaxX(frame)>NSMaxX(screen.visibleFrame)-8)frame.origin.x=NSMaxX(screen.visibleFrame)-8-size.width;if(frame.origin.x<screen.visibleFrame.origin.x+8)frame.origin.x=screen.visibleFrame.origin.x+8;
+ BOOL reduce=NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceMotion;BOOL wasVisible=self.exceptionPanel.visible;
+ [self.exceptionPanel setFrame:frame display:YES];
+ if(!wasVisible){self.exceptionPanel.alphaValue=reduce?1:0;[self.exceptionPanel makeKeyAndOrderFront:nil];if(!reduce)[NSAnimationContext runAnimationGroup:^(NSAnimationContext *c){c.duration=.2;self.exceptionPanel.animator.alphaValue=1;} completionHandler:nil];
+  __weak AppDelegate *weak=self;self.exceptionClickMonitor=[NSEvent addGlobalMonitorForEventsMatchingMask:NSEventMaskLeftMouseDown|NSEventMaskRightMouseDown handler:^(NSEvent *e){[weak closeExceptionPanel];}];
+  self.exceptionKeyMonitor=[NSEvent addLocalMonitorForEventsMatchingMask:NSEventMaskKeyDown handler:^NSEvent *(NSEvent *e){if(e.keyCode==53){[weak closeExceptionPanel];return nil;}return e;}];}
+}
+- (void)refreshExceptionPanel {if(!self.exceptionPanel.visible)return;if(![self exceptionPanelContent]){[self closeExceptionPanel];return;}[self showExceptionPanel];}
+- (void)closeExceptionPanel {
+ if(self.exceptionClickMonitor){[NSEvent removeMonitor:self.exceptionClickMonitor];self.exceptionClickMonitor=nil;}if(self.exceptionKeyMonitor){[NSEvent removeMonitor:self.exceptionKeyMonitor];self.exceptionKeyMonitor=nil;}
+ NSPanel *p=self.exceptionPanel;if(!p.visible)return;BOOL reduce=NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceMotion;
+ [NSAnimationContext runAnimationGroup:^(NSAnimationContext *c){c.duration=reduce?0:.18;p.animator.alphaValue=0;} completionHandler:^{[p orderOut:nil];for(NSView *v in p.contentView.subviews.copy)[v removeFromSuperview];}];
+}
 - (NSMenu *)currentAppMenu {
  NSMenu *sub=[NSMenu new];NSDictionary *rule=[self currentAppRuleCreating:NO];NSString *name=self.lastExternalApp.localizedName?:L(@"this app");
  NSMenuItem *enabled=[self add:L(@"Use this exception") action:@selector(currentAppEnabled:) to:sub];enabled.state=RuleEnabled(rule);[sub addItem:NSMenuItem.separatorItem];
@@ -809,6 +852,7 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
 }
 - (void)addRunningApp:(NSMenuItem *)sender {if(sender.representedObject)[self addAppURL:sender.representedObject];}
 - (void)rebuildExclusionsList {
+ if(self.panelBundle)[self refreshExceptionPanel];
  if(!self.exclusionsList)return;for(NSView *v in self.exclusionsList.arrangedSubviews.copy){[self.exclusionsList removeArrangedSubview:v];[v removeFromSuperview];}
  NSArray *keys=[self.exclusionRules.allKeys sortedArrayUsingComparator:^NSComparisonResult(NSString *a,NSString *b){return [self.exclusionRules[a][@"name"] localizedCaseInsensitiveCompare:self.exclusionRules[b][@"name"]];}];
  if(!keys.count){NSTextField *empty=[NSTextField labelWithString:L(@"No exceptions yet. Add an app, then choose its display settings.")];empty.textColor=NSColor.secondaryLabelColor;NSStackView *pad=[self column:@[empty]];pad.edgeInsets=NSEdgeInsetsMake(10,10,10,10);[self.exclusionsList addArrangedSubview:pad];}
@@ -1039,7 +1083,7 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  return column;
 }
 - (void)showSessionPanelMode:(NSString *)mode {
- if(self.session.state==SessionIdle&&![mode isEqual:@"start"])return;NSView *content=[self sessionPanelContentMode:mode];
+ if(self.session.state==SessionIdle&&![mode isEqual:@"start"])return;[self closeExceptionPanel];NSView *content=[self sessionPanelContentMode:mode];
  if(!self.sessionPanel){NSPanel *p=[[NSPanel alloc]initWithContentRect:NSMakeRect(0,0,320,150) styleMask:NSWindowStyleMaskBorderless|NSWindowStyleMaskNonactivatingPanel backing:NSBackingStoreBuffered defer:NO];p.opaque=NO;p.backgroundColor=NSColor.clearColor;p.level=NSPopUpMenuWindowLevel;p.hasShadow=YES;p.releasedWhenClosed=NO;p.collectionBehavior=NSWindowCollectionBehaviorCanJoinAllSpaces|NSWindowCollectionBehaviorTransient;p.becomesKeyOnlyIfNeeded=YES;
   NSVisualEffectView *back=[NSVisualEffectView new];back.material=NSVisualEffectMaterialPopover;back.blendingMode=NSVisualEffectBlendingModeBehindWindow;back.state=NSVisualEffectStateActive;back.wantsLayer=YES;back.layer.cornerRadius=14;back.layer.masksToBounds=YES;p.contentView=back;self.sessionPanel=p;}
  NSView *back=self.sessionPanel.contentView;NSView *old=back.subviews.firstObject;content.translatesAutoresizingMaskIntoConstraints=NO;[back addSubview:content];
@@ -1255,9 +1299,9 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  if(self.pausedUntil){[self add:L(@"Resume Less Pull") action:@selector(resumeLessPull:) to:menu];}
  else {NSMenuItem *pauseAll=[self add:L(@"Pause Less Pull") action:nil to:menu];pauseAll.submenu=[NSMenu new];for(NSArray *pair in @[@[L(@"For 15 minutes"),@15],@[L(@"For 1 hour"),@60],@[L(@"Until I resume"),@0]]){NSMenuItem *i=[self add:pair[0] action:@selector(pauseLessPull:) to:pauseAll.submenu];i.tag=[pair[1] integerValue];}}
  [menu addItem:NSMenuItem.separatorItem];
- if(self.lastExternalApp.bundleIdentifier){NSDictionary *appRule=self.exclusionRules[self.lastExternalApp.bundleIdentifier];NSMenuItem *current=[self add:[NSString stringWithFormat:L(@"Exception for %@"),self.lastExternalApp.localizedName?:L(@"current app")] action:nil to:menu];current.submenu=[self currentAppMenu];current.image=[self menuIconForBundle:self.lastExternalApp.bundleIdentifier];current.state=RuleEnabled(appRule)&&RuleDiffers(appRule);}
+ if(self.lastExternalApp.bundleIdentifier){NSDictionary *appRule=self.exclusionRules[self.lastExternalApp.bundleIdentifier];NSMenuItem *current=[self add:[NSString stringWithFormat:L(@"Exception for %@…"),self.lastExternalApp.localizedName?:L(@"current app")] action:@selector(openAppExceptionPanel:) to:menu];current.image=[self menuIconForBundle:self.lastExternalApp.bundleIdentifier];current.state=RuleEnabled(appRule)&&RuleDiffers(appRule);}
  NSDictionary *tab=[self.browserBridge activeContextForBrowser:self.lastExternalApp.bundleIdentifier];
- if(tab){NSMenuItem *site=[self add:[NSString stringWithFormat:L(@"Exception for %@"),tab[@"site"]] action:nil to:menu];site.submenu=[self websiteMenuForTab:tab];site.image=[NSImage imageWithSystemSymbolName:@"globe" accessibilityDescription:nil];NSDictionary *siteRule=[self websiteRuleForTab:tab];site.state=RuleEnabled(siteRule)&&RuleDiffers(siteRule);}
+ if(tab){NSMenuItem *site=[self add:[NSString stringWithFormat:L(@"Exception for %@…"),tab[@"site"]] action:@selector(openSiteExceptionPanel:) to:menu];site.image=[NSImage imageWithSystemSymbolName:@"globe" accessibilityDescription:nil];NSDictionary *siteRule=[self websiteRuleForTab:tab];site.state=RuleEnabled(siteRule)&&RuleDiffers(siteRule);}
  [self add:L(@"Settings…") action:@selector(showSettings:) to:menu];
  [menu addItem:NSMenuItem.separatorItem];
  [self add:L(@"Quit") action:@selector(quit:) to:menu];
@@ -1777,6 +1821,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  return row;
 }
 - (void)rebuildWebsiteRulesList {
+ if(self.panelTab)[self refreshExceptionPanel];
  if(!self.websiteRulesList)return;for(NSView *v in self.websiteRulesList.arrangedSubviews.copy){[self.websiteRulesList removeArrangedSubview:v];[v removeFromSuperview];}
  NSArray *keys=[self.browserBridge.rules.allKeys sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
  if(!keys.count){NSTextField *empty=[NSTextField labelWithString:L(@"No website exceptions yet. With a website in front, use “Exception for …” in the menu.")];empty.textColor=NSColor.secondaryLabelColor;NSStackView *pad=[self column:@[empty]];pad.edgeInsets=NSEdgeInsetsMake(10,10,10,10);[self.websiteRulesList addArrangedSubview:pad];}

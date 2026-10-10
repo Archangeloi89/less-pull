@@ -597,3 +597,5 @@
 "Grayscale while the screensaver runs and Less Pull has it on. It needs a built-in display." = "Less Pull でグレイスケールがオンの間、スクリーンセーバもグレイスケールに。内蔵ディスプレイが必要です。";
 "Night Shift at full warmth while the screensaver runs and Less Pull is quieting your screen. Your schedule stays as it is." = "Less Pull が画面を落ち着かせている間、スクリーンセーバで Night Shift を最大の暖かさに。スケジュールはそのままです。";
 "What the lock screen and the screensaver keep of Less Pull. Grayscale there needs a built-in display; an external display shows only the Night Shift choice. Everything goes back as it was when you return." = "ロック画面とスクリーンセーバが Less Pull から引き継ぐもの。そこでのグレイスケールには内蔵ディスプレイが必要で、外付けディスプレイでは Night Shift の選択だけが効きます。戻ってきたときにすべて元に戻ります。";
+"Exception for %@…" = "%@ の個別設定…";
+"Changes apply right away. Click elsewhere or press Escape to close." = "変更はすぐに反映されます。ほかの場所をクリックするか Esc で閉じます。";

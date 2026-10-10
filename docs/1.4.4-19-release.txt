@@ -127,3 +127,5 @@ Build 39 (hotfix): in 38 the equal-width constraint between the "Lock screen:" a
 Version line at the bottom of the menu (11 pt, secondary color, disabled): "Less Pull 1.4.4 (build N)".
 
 "Extra Warmth follows Night Shift" and its note are advanced views now.
+
+Exception panel (build 39): "Exception for X…" in the menu opens a KeyPanel under the icon (460 pt) holding the same row as the Apps or Websites tab (plus a Whole domain / This exact page segment for sites), with a hint line; closes on outside click or Escape; list rebuilds refresh it; the session panel and it close each other. The old submenus (currentAppMenu, websiteMenuForTab) are no longer referenced from the menu.
