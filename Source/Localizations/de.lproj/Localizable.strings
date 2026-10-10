@@ -476,7 +476,7 @@
 "Using your default settings" = "Deine Standards gelten";
 "Version " = "Version ";
 "Version %@" = "Version %@";
-"Version %@ (build %ld)" = "Version %@ (Build %ld)";
+"Version %@ (build %@)" = "Version %@ (Build %@)";
 "Visit Jiri Arion Rose’s website" = "Die Website von Jiri Arion Rose besuchen";
 "Volume" = "Lautstärke";
 "Warmth %.0f%%" = "Wärme %.0f %%";

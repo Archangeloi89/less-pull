@@ -498,7 +498,7 @@
 "Using your default settings" = "Obowiązują ustawienia domyślne";
 "Version " = "Wersja ";
 "Version %@" = "Wersja %@";
-"Version %@ (build %ld)" = "Wersja %@ (kompilacja %ld)";
+"Version %@ (build %@)" = "Wersja %@ (kompilacja %@)";
 "Visit Jiri Arion Rose’s website" = "Odwiedź stronę Jiri Arion Rose";
 "Volume" = "Głośność";
 "Warmth %.0f%%" = "Ciepło %.0f %%";

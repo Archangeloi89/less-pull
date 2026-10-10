@@ -498,7 +498,7 @@
 "Using your default settings" = "正在使用默认设置";
 "Version " = "版本 ";
 "Version %@" = "版本 %@";
-"Version %@ (build %ld)" = "版本 %@（构建 %ld）";
+"Version %@ (build %@)" = "版本 %@（构建 %@）";
 "Visit Jiri Arion Rose’s website" = "访问 Jiri Arion Rose 的网站";
 "Volume" = "音量";
 "Warmth %.0f%%" = "暖色 %.0f%%";

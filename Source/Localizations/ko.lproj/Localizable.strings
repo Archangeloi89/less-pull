@@ -498,7 +498,7 @@
 "Using your default settings" = "기본 설정 사용 중";
 "Version " = "버전 ";
 "Version %@" = "버전 %@";
-"Version %@ (build %ld)" = "버전 %@ (빌드 %ld)";
+"Version %@ (build %@)" = "버전 %@ (빌드 %@)";
 "Visit Jiri Arion Rose’s website" = "Jiri Arion Rose 웹사이트 열기";
 "Volume" = "음량";
 "Warmth %.0f%%" = "따뜻함 %.0f%%";

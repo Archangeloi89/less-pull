@@ -498,7 +498,7 @@
 "Using your default settings" = "Com os seus padrões";
 "Version " = "Versão ";
 "Version %@" = "Versão %@";
-"Version %@ (build %ld)" = "Versão %@ (build %ld)";
+"Version %@ (build %@)" = "Versão %@ (build %@)";
 "Visit Jiri Arion Rose’s website" = "Visitar o site de Jiri Arion Rose";
 "Volume" = "Volume";
 "Warmth %.0f%%" = "Calor %.0f %%";

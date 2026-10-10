@@ -97,6 +97,9 @@ static NSString *const LessPullX=@"https://x.com/JiriArion";
 + (NSComparisonResult)compareVersion:(NSString *)a to:(NSString *)b;
 + (NSDictionary *)updateFromRelease:(id)release currentVersion:(NSString *)current;
 + (NSInteger)buildFromTag:(NSString *)tag;
++ (NSString *)buildStringFromTag:(NSString *)tag;
++ (NSComparisonResult)compareBuild:(NSString *)a to:(NSString *)b;
++ (NSDictionary *)updateFromRelease:(id)release currentVersion:(NSString *)current currentBuildString:(NSString *)currentBuild;
 + (NSDictionary *)updateFromRelease:(id)release currentVersion:(NSString *)current currentBuild:(NSInteger)build;
 + (BOOL)metadata:(id)metadata allowsSystem:(NSOperatingSystemVersion)system;
 + (NSString *)metadataURLInRelease:(id)release;
@@ -110,9 +113,17 @@ static NSString *const LessPullX=@"https://x.com/JiriArion";
 }
 // Releases are tagged v<version>-<build>, e.g. v1.4.4-17. The version stays 1.4.4
 // for good (the author's joke); the build number is what moves.
-+ (NSInteger)buildFromTag:(NSString *)tag {
- if(![tag isKindOfClass:NSString.class])return 0;NSRange dash=[tag rangeOfString:@"-" options:NSBackwardsSearch];if(dash.location==NSNotFound)return 0;
- NSString *digits=[tag substringFromIndex:dash.location+1];if(!digits.length||[digits rangeOfCharacterFromSet:NSCharacterSet.decimalDigitCharacterSet.invertedSet].location!=NSNotFound)return 0;return digits.integerValue;
++ (NSString *)buildStringFromTag:(NSString *)tag {
+ if(![tag isKindOfClass:NSString.class])return nil;NSRange dash=[tag rangeOfString:@"-" options:NSBackwardsSearch];if(dash.location==NSNotFound)return nil;
+ NSString *s=[tag substringFromIndex:dash.location+1];NSArray *parts=[s componentsSeparatedByString:@"."];if(parts.count>2)return nil;
+ for(NSString *part in parts)if(!part.length||[part rangeOfCharacterFromSet:NSCharacterSet.decimalDigitCharacterSet.invertedSet].location!=NSNotFound)return nil;return s;
+}
++ (NSInteger)buildFromTag:(NSString *)tag {NSString *s=[self buildStringFromTag:tag];return s?[[s componentsSeparatedByString:@"."].firstObject integerValue]:0;}
++ (NSInteger)buildMinorFromTag:(NSString *)tag {NSString *s=[self buildStringFromTag:tag];NSArray *parts=s?[s componentsSeparatedByString:@"."]:nil;return parts.count>1?[parts[1] integerValue]:0;}
+// Build strings compare as whole.minor: "33" < "33.1" < "34".
++ (NSComparisonResult)compareBuild:(NSString *)a to:(NSString *)b {
+ NSArray *pa=[a?:@"0" componentsSeparatedByString:@"."],*pb=[b?:@"0" componentsSeparatedByString:@"."];
+ for(NSUInteger i=0;i<2;i++){NSInteger x=i<pa.count?[pa[i] integerValue]:0,y=i<pb.count?[pb[i] integerValue]:0;if(x!=y)return x<y?NSOrderedAscending:NSOrderedDescending;}return NSOrderedSame;
 }
 + (NSString *)metadataURLInRelease:(id)release {
  for(id asset in [release[@"assets"] isKindOfClass:NSArray.class]?release[@"assets"]:@[]){if([asset isKindOfClass:NSDictionary.class]&&[asset[@"name"] isEqual:@"lesspull-update.json"]&&[asset[@"browser_download_url"] isKindOfClass:NSString.class]&&[asset[@"browser_download_url"] hasPrefix:@"https://github.com/"])return asset[@"browser_download_url"];}
@@ -128,14 +139,15 @@ static NSString *const LessPullX=@"https://x.com/JiriArion";
  return YES;
 }
 + (NSDictionary *)updateFromRelease:(id)release currentVersion:(NSString *)current {return [self updateFromRelease:release currentVersion:current currentBuild:0];}
-+ (NSDictionary *)updateFromRelease:(id)release currentVersion:(NSString *)current currentBuild:(NSInteger)currentBuild {
++ (NSDictionary *)updateFromRelease:(id)release currentVersion:(NSString *)current currentBuild:(NSInteger)currentBuild {return [self updateFromRelease:release currentVersion:current currentBuildString:[NSString stringWithFormat:@"%ld",(long)currentBuild]];}
++ (NSDictionary *)updateFromRelease:(id)release currentVersion:(NSString *)current currentBuildString:(NSString *)currentBuild {
  if(![release isKindOfClass:NSDictionary.class]||[release[@"draft"] boolValue]||[release[@"prerelease"] boolValue])return nil;
- NSString *version=[self versionFromTag:release[@"tag_name"]];NSInteger build=[self buildFromTag:release[@"tag_name"]];
- if(build){if(build<=currentBuild&&![NSProcessInfo.processInfo.arguments containsObject:@"--test-update"])return nil;version=[version substringToIndex:[version rangeOfString:@"-" options:NSBackwardsSearch].location];}
+ NSString *version=[self versionFromTag:release[@"tag_name"]];NSInteger build=[self buildFromTag:release[@"tag_name"]];NSString *buildString=[self buildStringFromTag:release[@"tag_name"]];
+ if(build){if([self compareBuild:buildString to:currentBuild]!=NSOrderedDescending&&![NSProcessInfo.processInfo.arguments containsObject:@"--test-update"])return nil;version=[version substringToIndex:[version rangeOfString:@"-" options:NSBackwardsSearch].location];}
  else if(!version||!current||[self compareVersion:version to:current]!=NSOrderedDescending)return nil;
  NSString *url=[release[@"html_url"] isKindOfClass:NSString.class]&&[release[@"html_url"] hasPrefix:@"https://github.com/"]?release[@"html_url"]:LessPullReleasesPage;
  NSString *notes=[release[@"body"] isKindOfClass:NSString.class]?release[@"body"]:@"";if(notes.length>2000)notes=[[notes substringToIndex:2000] stringByAppendingString:@"…"];
- NSMutableDictionary *update=[@{@"version":version,@"url":url,@"notes":notes,@"build":@(build)} mutableCopy];NSString *metadata=[self metadataURLInRelease:release];if(metadata)update[@"metadata"]=metadata;
+ NSMutableDictionary *update=[@{@"version":version,@"url":url,@"notes":notes,@"build":@(build),@"buildLabel":buildString?:@""} mutableCopy];NSString *metadata=[self metadataURLInRelease:release];if(metadata)update[@"metadata"]=metadata;
  for(id asset in [release[@"assets"] isKindOfClass:NSArray.class]?release[@"assets"]:@[]){if(![asset isKindOfClass:NSDictionary.class])continue;NSString *name=asset[@"name"],*link=asset[@"browser_download_url"];if(![name isKindOfClass:NSString.class]||![link isKindOfClass:NSString.class]||![link hasPrefix:@"https://github.com/"])continue;
   if([name hasPrefix:@"Less-Pull-"]&&[name hasSuffix:@".zip"]&&name.length>10&&isdigit([name characterAtIndex:10])){update[@"zip"]=link;update[@"zipName"]=name;}else if([name isEqual:@"SHA256SUMS.txt"])update[@"sums"]=link;}  // the app zip is Less-Pull-<version>-<build>.zip; the agent pack is not it
  return update;
@@ -1344,7 +1356,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  self.checkingUpdates=NO;NSUserDefaults *d=NSUserDefaults.standardUserDefaults;NSInteger status=[response isKindOfClass:NSHTTPURLResponse.class]?[(NSHTTPURLResponse *)response statusCode]:0;
  if(error||status!=200){self.updateStatus=status==404?L(@"Could not find the release list; it is not public yet."):L(@"Could not reach GitHub. Try again later.");[self refreshUpdateControls];if(manual)[self showUpdateStatusAlert];return;}
 [d setObject:NSDate.date forKey:@"lastUpdateCheck"];id release=[NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
- NSDictionary *update=[UpdateCheck updateFromRelease:release currentVersion:[NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"] currentBuild:[[NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleVersion"] integerValue]];
+ NSDictionary *update=[UpdateCheck updateFromRelease:release currentVersion:[NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"] currentBuildString:[NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleVersion"]];
  if(update[@"metadata"]){ // a newer build: one more request tells whether it is made for this macOS
   self.checkingUpdates=YES;NSURLSessionConfiguration *configuration=NSURLSessionConfiguration.ephemeralSessionConfiguration;configuration.timeoutIntervalForRequest=15;NSURLSession *session=[NSURLSession sessionWithConfiguration:configuration];__weak AppDelegate *weak=self;
   [[session dataTaskWithURL:[NSURL URLWithString:update[@"metadata"]] completionHandler:^(NSData *meta,NSURLResponse *metaResponse,NSError *metaError){id parsed=meta?[NSJSONSerialization JSONObjectWithData:meta options:0 error:nil]:nil;dispatch_async(dispatch_get_main_queue(),^{[weak finishUpdate:update metadata:parsed manual:manual];});[session finishTasksAndInvalidate];}] resume];return;}
@@ -1357,7 +1369,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  self.updateStatus=update?[NSString stringWithFormat:L(@"%@ is available."),label]:candidate?[NSString stringWithFormat:L(@"%@ exists but is made for another macOS version, so it is not offered."),label]:L(@"Less Pull is up to date.");[self refreshUpdateControls];[self refreshControlsKnown:NO nightOn:NO];[self sync];
  if(manual){if(update)[self showUpdate:nil];else [self showUpdateStatusAlert];}
 }
-- (NSString *)updateLabel:(NSDictionary *)update {return [update[@"build"] integerValue]?[NSString stringWithFormat:L(@"Version %@ (build %ld)"),update[@"version"],(long)[update[@"build"] integerValue]]:[NSString stringWithFormat:L(@"Version %@"),update[@"version"]];}
+- (NSString *)updateLabel:(NSDictionary *)update {return [update[@"build"] integerValue]?[NSString stringWithFormat:L(@"Version %@ (build %@)"),update[@"version"],[update[@"buildLabel"] length]?update[@"buildLabel"]:[NSString stringWithFormat:@"%ld",(long)[update[@"build"] integerValue]]]:[NSString stringWithFormat:L(@"Version %@"),update[@"version"]];}
 - (NSString *)runningVersionLabel {return [NSString stringWithFormat:L(@"%@ (build %@)"),[NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"],[NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleVersion"]];}
 - (void)showUpdateStatusAlert {NSAlert *a=[NSAlert new];a.messageText=self.updateStatus?:@"";a.informativeText=[NSString stringWithFormat:L(@"This is Less Pull %@."),[self runningVersionLabel]];[NSApp activateIgnoringOtherApps:YES];[a runModal];}
 // One click from the menu or the banner: install now, or once the running session is over. No question asked; a failure is the only dialog.
@@ -1392,7 +1404,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
   if(!failure){NSTask *unzip=[NSTask new];unzip.executableURL=[NSURL fileURLWithPath:@"/usr/bin/ditto"];unzip.arguments=@[@"-x",@"-k",zipPath,work];unzip.standardOutput=NSFileHandle.fileHandleWithNullDevice;unzip.standardError=NSFileHandle.fileHandleWithNullDevice;[unzip launchAndReturnError:nil];[unzip waitUntilExit];
    for(NSString *name in [NSFileManager.defaultManager contentsOfDirectoryAtPath:work error:nil])if([name hasSuffix:@".app"])newApp=[work stringByAppendingPathComponent:name];if(!newApp)failure=L(@"The download does not contain the app.");}
   if(!failure){NSString *why=[AppDelegate verifyApp:newApp];if(why)failure=why;}
-  if(!failure){NSInteger newBuild=[[[NSBundle bundleWithPath:newApp] objectForInfoDictionaryKey:@"CFBundleVersion"] integerValue];if(newBuild<[[NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleVersion"] integerValue])failure=L(@"The download is older than this copy.");}
+  if(!failure){if([UpdateCheck compareBuild:[[NSBundle bundleWithPath:newApp] objectForInfoDictionaryKey:@"CFBundleVersion"] to:[NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleVersion"]]==NSOrderedAscending)failure=L(@"The download is older than this copy.");}
   if(!failure){say(L(@"Installing…"));NSString *old=[work stringByAppendingPathComponent:@"previous.app"];NSString *parent=dest.URLByDeletingLastPathComponent.path;NSError *e=nil;
    if([NSFileManager.defaultManager isWritableFileAtPath:parent]){if(![NSFileManager.defaultManager moveItemAtPath:dest.path toPath:old error:&e]||![NSFileManager.defaultManager moveItemAtPath:newApp toPath:dest.path error:&e]){if(![NSFileManager.defaultManager fileExistsAtPath:dest.path])[NSFileManager.defaultManager moveItemAtPath:old toPath:dest.path error:nil];failure=e.localizedDescription?:L(@"The app could not be replaced.");}}
    else {NSString *script=[NSString stringWithFormat:@"do shell script \"mv %@ %@ && mv %@ %@\" with administrator privileges",[AppDelegate shellQuote:dest.path],[AppDelegate shellQuote:old],[AppDelegate shellQuote:newApp],[AppDelegate shellQuote:dest.path]];NSTask *osa=[NSTask new];osa.executableURL=[NSURL fileURLWithPath:@"/usr/bin/osascript"];osa.arguments=@[@"-e",script];osa.standardOutput=NSFileHandle.fileHandleWithNullDevice;osa.standardError=NSFileHandle.fileHandleWithNullDevice;[osa launchAndReturnError:nil];[osa waitUntilExit];if(osa.terminationStatus!=0)failure=L(@"The app could not be replaced.");}}

@@ -498,7 +498,7 @@
 "Using your default settings" = "Действуют настройки по умолчанию";
 "Version " = "Версия ";
 "Version %@" = "Версия %@";
-"Version %@ (build %ld)" = "Версия %@ (сборка %ld)";
+"Version %@ (build %@)" = "Версия %@ (сборка %@)";
 "Visit Jiri Arion Rose’s website" = "Открыть сайт Jiri Arion Rose";
 "Volume" = "Громкость";
 "Warmth %.0f%%" = "Тепло %.0f %%";
