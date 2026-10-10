@@ -1,4 +1,6 @@
 #import <Cocoa/Cocoa.h>
+#import <Security/Security.h>
+#import <CommonCrypto/CommonDigest.h>
 #import "Localize.h"
 #import <malloc/malloc.h>
 #import <ServiceManagement/ServiceManagement.h>
@@ -129,11 +131,14 @@ static NSString *const LessPullX=@"https://x.com/JiriArion";
 + (NSDictionary *)updateFromRelease:(id)release currentVersion:(NSString *)current currentBuild:(NSInteger)currentBuild {
  if(![release isKindOfClass:NSDictionary.class]||[release[@"draft"] boolValue]||[release[@"prerelease"] boolValue])return nil;
  NSString *version=[self versionFromTag:release[@"tag_name"]];NSInteger build=[self buildFromTag:release[@"tag_name"]];
- if(build){if(build<=currentBuild)return nil;version=[version substringToIndex:[version rangeOfString:@"-" options:NSBackwardsSearch].location];}
+ if(build){if(build<=currentBuild&&![NSProcessInfo.processInfo.arguments containsObject:@"--test-update"])return nil;version=[version substringToIndex:[version rangeOfString:@"-" options:NSBackwardsSearch].location];}
  else if(!version||!current||[self compareVersion:version to:current]!=NSOrderedDescending)return nil;
  NSString *url=[release[@"html_url"] isKindOfClass:NSString.class]&&[release[@"html_url"] hasPrefix:@"https://github.com/"]?release[@"html_url"]:LessPullReleasesPage;
  NSString *notes=[release[@"body"] isKindOfClass:NSString.class]?release[@"body"]:@"";if(notes.length>2000)notes=[[notes substringToIndex:2000] stringByAppendingString:@"…"];
- NSMutableDictionary *update=[@{@"version":version,@"url":url,@"notes":notes,@"build":@(build)} mutableCopy];NSString *metadata=[self metadataURLInRelease:release];if(metadata)update[@"metadata"]=metadata;return update;
+ NSMutableDictionary *update=[@{@"version":version,@"url":url,@"notes":notes,@"build":@(build)} mutableCopy];NSString *metadata=[self metadataURLInRelease:release];if(metadata)update[@"metadata"]=metadata;
+ for(id asset in [release[@"assets"] isKindOfClass:NSArray.class]?release[@"assets"]:@[]){if(![asset isKindOfClass:NSDictionary.class])continue;NSString *name=asset[@"name"],*link=asset[@"browser_download_url"];if(![name isKindOfClass:NSString.class]||![link isKindOfClass:NSString.class]||![link hasPrefix:@"https://github.com/"])continue;
+  if([name hasPrefix:@"Less-Pull-"]&&[name hasSuffix:@".zip"]&&name.length>10&&isdigit([name characterAtIndex:10])){update[@"zip"]=link;update[@"zipName"]=name;}else if([name isEqual:@"SHA256SUMS.txt"])update[@"sums"]=link;}  // the app zip is Less-Pull-<version>-<build>.zip; the agent pack is not it
+ return update;
 }
 @end
 // The bundle identifier moved from local.nightshiftfilters.app to
@@ -210,7 +215,7 @@ static NSString *const LessPullOldBundleIdentifier=@"local.nightshiftfilters.app
 @property ExclusionPolicy *exclusion;
 @property BOOL excludeGray,excludeNight,excludeWarmth,quitting,animateAppearance;
 // Lock screen and screensaver: macOS draws them outside the display adjustments, so the session is handed over plain and faded back in on return; Night Shift, which the system does honor there, is raised to full warmth meanwhile.
-@property BOOL screenLockedFlag,saverFlag,lockQuieting;@property NSNumber *lockStrength;@property(nonatomic) double fade;@property NSButton *lockNightButton;
+@property BOOL screenLockedFlag,saverFlag,lockQuieting,installingUpdate,pendingUpdateInstall,relaunching;@property NSView *updateBanner;@property NSTextField *updateBannerLabel;@property NSButton *updateBannerButton;@property NSNumber *lockStrength;@property(nonatomic) double fade;@property NSButton *lockNightButton;
 @property NSTimer *visibilityTimer;
 // Per display: where the frontmost app's windows are, and for the other displays the exception of the app on top there (or the defaults).
 @property NSSet<NSNumber *> *frontDisplays;
@@ -1092,6 +1097,7 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  if([d boolForKey:@"lastNightShiftOn"]!=self.policy.nightShiftOn)[d setBool:self.policy.nightShiftOn forKey:@"lastNightShiftOn"];
 }
 - (void)sync {
+ if(self.pendingUpdateInstall&&self.session.state==SessionIdle&&!self.installingUpdate)[self performUpdateInstall];
  [self checkPause];
  [self updateForeground];[self checkLessPullPause];[self checkGrayscaleOff];
  if(self.peeking&&[[self peekEffects][@"nightShift"] boolValue]){self.nightOverride=2;self.excludeNight=YES;}
@@ -1223,7 +1229,7 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  else {NSMenuItem *pauseAll=[self add:L(@"Pause Less Pull") action:nil to:menu];pauseAll.submenu=[NSMenu new];for(NSArray *pair in @[@[L(@"For 15 minutes"),@15],@[L(@"For 1 hour"),@60],@[L(@"Until I resume"),@0]]){NSMenuItem *i=[self add:pair[0] action:@selector(pauseLessPull:) to:pauseAll.submenu];i.tag=[pair[1] integerValue];}}
  [menu addItem:NSMenuItem.separatorItem];
  if(self.lastExternalApp.bundleIdentifier){NSDictionary *appRule=self.exclusionRules[self.lastExternalApp.bundleIdentifier];NSMenuItem *current=[self add:[NSString stringWithFormat:L(@"Exception for %@"),self.lastExternalApp.localizedName?:L(@"current app")] action:nil to:menu];current.submenu=[self currentAppMenu];current.image=[self menuIconForBundle:self.lastExternalApp.bundleIdentifier];current.state=RuleEnabled(appRule)&&RuleDiffers(appRule);}
- if(self.availableUpdate){[self add:[NSString stringWithFormat:L(@"Update available: %@…"),[[self updateLabel:self.availableUpdate] stringByReplacingOccurrencesOfString:L(@"Version ") withString:@""]] action:@selector(showUpdate:) to:menu];}
+ if(self.availableUpdate){NSString *title=self.installingUpdate?(self.updateStatus?:L(@"Installing…")):self.pendingUpdateInstall?L(@"Installs when the session ends"):[NSString stringWithFormat:L(@"Install build %ld"),(long)[self.availableUpdate[@"build"] integerValue]];NSMenuItem *i=[self add:title action:@selector(installUpdate:) to:menu];i.enabled=!self.installingUpdate&&!self.pendingUpdateInstall;}
  NSDictionary *tab=[self.browserBridge activeContextForBrowser:self.lastExternalApp.bundleIdentifier];
  if(tab){NSMenuItem *site=[self add:[NSString stringWithFormat:L(@"Exception for %@"),tab[@"site"]] action:nil to:menu];site.submenu=[self websiteMenuForTab:tab];site.image=[NSImage imageWithSystemSymbolName:@"globe" accessibilityDescription:nil];NSDictionary *siteRule=[self websiteRuleForTab:tab];site.state=RuleEnabled(siteRule)&&RuleDiffers(siteRule);}
  [self add:L(@"Settings…") action:@selector(showSettings:) to:menu];
@@ -1352,16 +1358,81 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
 - (NSString *)updateLabel:(NSDictionary *)update {return [update[@"build"] integerValue]?[NSString stringWithFormat:L(@"Version %@ (build %ld)"),update[@"version"],(long)[update[@"build"] integerValue]]:[NSString stringWithFormat:L(@"Version %@"),update[@"version"]];}
 - (NSString *)runningVersionLabel {return [NSString stringWithFormat:L(@"%@ (build %@)"),[NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"],[NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleVersion"]];}
 - (void)showUpdateStatusAlert {NSAlert *a=[NSAlert new];a.messageText=self.updateStatus?:@"";a.informativeText=[NSString stringWithFormat:L(@"This is Less Pull %@."),[self runningVersionLabel]];[NSApp activateIgnoringOtherApps:YES];[a runModal];}
+// One click from the menu or the banner: install now, or once the running session is over. No question asked; a failure is the only dialog.
+- (void)installUpdate:(id)sender {
+ NSDictionary *update=self.availableUpdate;if(!update||self.installingUpdate||self.pendingUpdateInstall)return;
+ if(!(update[@"zip"]&&update[@"sums"])){[NSWorkspace.sharedWorkspace openURL:[NSURL URLWithString:update[@"url"]]];return;}
+ if(self.session.state!=SessionIdle){self.pendingUpdateInstall=YES;self.updateStatus=L(@"The update installs when the session ends.");[self refreshUpdateControls];[self updateStatusIcon];return;}
+ [self performUpdateInstall];
+}
 - (void)showUpdate:(id)sender {
- NSDictionary *update=self.availableUpdate;if(!update)return;NSAlert *a=[NSAlert new];a.messageText=[NSString stringWithFormat:L(@"Less Pull %@ is available"),[[self updateLabel:update] stringByReplacingOccurrencesOfString:L(@"Version ") withString:@""]];
- a.informativeText=[NSString stringWithFormat:L(@"You have %@.\n\n%@\n\nInstalling is still by hand: download the new version, quit Less Pull, and replace it in Applications. Your settings and exceptions are kept."),[self runningVersionLabel],[update[@"notes"] length]?update[@"notes"]:L(@"No release notes were provided.")];
- [a addButtonWithTitle:L(@"Open Download Page")];[a addButtonWithTitle:L(@"Later")];[NSApp activateIgnoringOtherApps:YES];if([a runModal]==NSAlertFirstButtonReturn)[NSWorkspace.sharedWorkspace openURL:[NSURL URLWithString:update[@"url"]]];
+ NSDictionary *update=self.availableUpdate;if(!update||self.installingUpdate)return;BOOL canInstall=update[@"zip"]&&update[@"sums"];BOOL inSession=self.session.state!=SessionIdle;
+ NSAlert *a=[NSAlert new];a.messageText=[NSString stringWithFormat:L(@"Less Pull %@ is ready to install"),[[self updateLabel:update] stringByReplacingOccurrencesOfString:L(@"Version ") withString:@""]];
+ a.informativeText=L(@"Downloads, checks the signature, replaces the app and reopens it. Settings and exceptions stay as they are.");
+ if(!canInstall){a.informativeText=[NSString stringWithFormat:L(@"You have %@.\n\n%@\n\nInstalling is still by hand: download the new version, quit Less Pull, and replace it in Applications. Your settings and exceptions are kept."),[self runningVersionLabel],[update[@"notes"] length]?update[@"notes"]:L(@"No release notes were provided.")];[a addButtonWithTitle:L(@"Open Download Page")];}
+ else [a addButtonWithTitle:inSession?L(@"Install when the session ends"):L(@"Install and reopen")];
+ [a addButtonWithTitle:L(@"Later")];[a addButtonWithTitle:L(@"What’s new")];[NSApp activateIgnoringOtherApps:YES];
+ void (^chosen)(NSModalResponse)=^(NSModalResponse r){if(r==NSAlertThirdButtonReturn){[NSWorkspace.sharedWorkspace openURL:[NSURL URLWithString:update[@"url"]]];return;}if(r!=NSAlertFirstButtonReturn)return;if(!canInstall){[NSWorkspace.sharedWorkspace openURL:[NSURL URLWithString:update[@"url"]]];return;}if(inSession){self.pendingUpdateInstall=YES;self.updateStatus=L(@"The update installs when the session ends.");[self refreshUpdateControls];}else [self performUpdateInstall];};
+ if(self.settings.visible)[a beginSheetModalForWindow:self.settings completionHandler:chosen];else chosen([a runModal]);
+}
+// The update itself: download, check the checksum, the Developer ID signature and the notarization, swap the app, reopen. Nothing is replaced unless every check passes.
+- (void)performUpdateInstall {
+ NSDictionary *update=self.availableUpdate;if(!update||self.installingUpdate)return;self.installingUpdate=YES;self.pendingUpdateInstall=NO;
+ void (^say)(NSString *)=^(NSString *s){dispatch_async(dispatch_get_main_queue(),^{self.updateStatus=s;[self refreshUpdateControls];});};say(L(@"Downloading…"));
+ __weak AppDelegate *weak=self;
+ dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED,0),^{NSString *failure=nil;NSURL *dest=NSBundle.mainBundle.bundleURL;NSString *work=[NSTemporaryDirectory() stringByAppendingPathComponent:[@"lesspull-update-" stringByAppendingString:NSUUID.UUID.UUIDString]];[NSFileManager.defaultManager createDirectoryAtPath:work withIntermediateDirectories:YES attributes:nil error:nil];
+  NSString *zipPath=[work stringByAppendingPathComponent:update[@"zipName"]?:@"update.zip"];NSData *sums=nil;
+  if(![AppDelegate download:update[@"zip"] to:zipPath])failure=L(@"The download did not complete.");
+  else if(!(sums=[AppDelegate fetch:update[@"sums"]]))failure=L(@"The checksum list could not be fetched.");
+  if(!failure){say(L(@"Verifying…"));NSString *expected=nil;for(NSString *line in [[[NSString alloc]initWithData:sums encoding:NSUTF8StringEncoding] componentsSeparatedByString:@"\n"]){NSArray *parts=[line componentsSeparatedByString:@"  "];if(parts.count==2&&[parts[1] isEqual:update[@"zipName"]])expected=parts[0];}
+   NSString *actual=[AppDelegate sha256OfFile:zipPath];if(!expected||!actual||![expected isEqual:actual])failure=L(@"The download does not match its checksum.");}
+  NSString *newApp=nil;
+  if(!failure){NSTask *unzip=[NSTask new];unzip.executableURL=[NSURL fileURLWithPath:@"/usr/bin/ditto"];unzip.arguments=@[@"-x",@"-k",zipPath,work];unzip.standardOutput=NSFileHandle.fileHandleWithNullDevice;unzip.standardError=NSFileHandle.fileHandleWithNullDevice;[unzip launchAndReturnError:nil];[unzip waitUntilExit];
+   for(NSString *name in [NSFileManager.defaultManager contentsOfDirectoryAtPath:work error:nil])if([name hasSuffix:@".app"])newApp=[work stringByAppendingPathComponent:name];if(!newApp)failure=L(@"The download does not contain the app.");}
+  if(!failure){NSString *why=[AppDelegate verifyApp:newApp];if(why)failure=why;}
+  if(!failure){NSInteger newBuild=[[[NSBundle bundleWithPath:newApp] objectForInfoDictionaryKey:@"CFBundleVersion"] integerValue];if(newBuild<[[NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleVersion"] integerValue])failure=L(@"The download is older than this copy.");}
+  if(!failure){say(L(@"Installing…"));NSString *old=[work stringByAppendingPathComponent:@"previous.app"];NSString *parent=dest.URLByDeletingLastPathComponent.path;NSError *e=nil;
+   if([NSFileManager.defaultManager isWritableFileAtPath:parent]){if(![NSFileManager.defaultManager moveItemAtPath:dest.path toPath:old error:&e]||![NSFileManager.defaultManager moveItemAtPath:newApp toPath:dest.path error:&e]){if(![NSFileManager.defaultManager fileExistsAtPath:dest.path])[NSFileManager.defaultManager moveItemAtPath:old toPath:dest.path error:nil];failure=e.localizedDescription?:L(@"The app could not be replaced.");}}
+   else {NSString *script=[NSString stringWithFormat:@"do shell script \"mv %@ %@ && mv %@ %@\" with administrator privileges",[AppDelegate shellQuote:dest.path],[AppDelegate shellQuote:old],[AppDelegate shellQuote:newApp],[AppDelegate shellQuote:dest.path]];NSTask *osa=[NSTask new];osa.executableURL=[NSURL fileURLWithPath:@"/usr/bin/osascript"];osa.arguments=@[@"-e",script];osa.standardOutput=NSFileHandle.fileHandleWithNullDevice;osa.standardError=NSFileHandle.fileHandleWithNullDevice;[osa launchAndReturnError:nil];[osa waitUntilExit];if(osa.terminationStatus!=0)failure=L(@"The app could not be replaced.");}}
+  {NSString *line=[NSString stringWithFormat:@"%@ update: zip=%@ newApp=%@ failure=%@\n",NSDate.date,zipPath,newApp,failure?:@"none"];NSString *logDir=[NSHomeDirectory() stringByAppendingPathComponent:@"Library/Logs/Less Pull"];[NSFileManager.defaultManager createDirectoryAtPath:logDir withIntermediateDirectories:YES attributes:nil error:nil];FILE *f=fopen([logDir stringByAppendingPathComponent:@"update.log"].fileSystemRepresentation,"a");if(f){fputs(line.UTF8String,f);fclose(f);}}
+  dispatch_async(dispatch_get_main_queue(),^{AppDelegate *me=weak;if(!me)return;me.installingUpdate=NO;
+   if(failure){[NSFileManager.defaultManager removeItemAtPath:work error:nil];me.updateStatus=[NSString stringWithFormat:L(@"The update could not be installed: %@"),failure];[me refreshUpdateControls];NSAlert *a=[NSAlert new];a.messageText=L(@"The update could not be installed");a.informativeText=[NSString stringWithFormat:@"%@\n\n%@",failure,L(@"Nothing was changed. The download page offers the update by hand.")];[a addButtonWithTitle:L(@"OK")];[a addButtonWithTitle:L(@"Open Download Page")];[NSApp activateIgnoringOtherApps:YES];if([a runModal]==NSAlertSecondButtonReturn)[NSWorkspace.sharedWorkspace openURL:[NSURL URLWithString:update[@"url"]]];return;}
+   // Reopen: a detached shell waits for this process to end, opens the new copy with the same arguments, and removes the previous copy.
+   NSMutableArray *args=[NSMutableArray new];for(NSString *a in [NSProcessInfo.processInfo.arguments subarrayWithRange:NSMakeRange(1,NSProcessInfo.processInfo.arguments.count-1)])if(![a isEqual:@"--test-update"])[args addObject:[AppDelegate shellQuote:a]];
+   NSString *cmd=[NSString stringWithFormat:@"while kill -0 %d 2>/dev/null; do sleep 0.2; done; open -n %@%@%@; sleep 5; rm -rf %@",getpid(),[AppDelegate shellQuote:dest.path],args.count?@" --args ":@"",[args componentsJoinedByString:@" "],[AppDelegate shellQuote:work]];
+   NSTask *reopen=[NSTask new];reopen.executableURL=[NSURL fileURLWithPath:@"/bin/sh"];reopen.arguments=@[@"-c",cmd];reopen.standardOutput=NSFileHandle.fileHandleWithNullDevice;reopen.standardError=NSFileHandle.fileHandleWithNullDevice;[reopen launchAndReturnError:nil];
+   [NSUserDefaults.standardUserDefaults removeObjectForKey:@"availableUpdate"];me.relaunching=YES;[NSApp terminate:nil];});});
+}
++ (NSString *)shellQuote:(NSString *)s {return [NSString stringWithFormat:@"'%@'",[s stringByReplacingOccurrencesOfString:@"'" withString:@"'\\''"]];}
++ (BOOL)download:(NSString *)url to:(NSString *)path {
+ if(![url isKindOfClass:NSString.class])return NO;dispatch_semaphore_t done=dispatch_semaphore_create(0);__block BOOL ok=NO;NSURLSessionConfiguration *c=NSURLSessionConfiguration.ephemeralSessionConfiguration;c.timeoutIntervalForRequest=60;NSURLSession *s=[NSURLSession sessionWithConfiguration:c];
+ [[s downloadTaskWithURL:[NSURL URLWithString:url] completionHandler:^(NSURL *location,NSURLResponse *response,NSError *error){NSInteger status=[response isKindOfClass:NSHTTPURLResponse.class]?[(NSHTTPURLResponse *)response statusCode]:0;if(location&&!error&&status==200)ok=[NSFileManager.defaultManager moveItemAtURL:location toURL:[NSURL fileURLWithPath:path] error:nil];dispatch_semaphore_signal(done);}] resume];
+ dispatch_semaphore_wait(done,dispatch_time(DISPATCH_TIME_NOW,(int64_t)(300*NSEC_PER_SEC)));[s finishTasksAndInvalidate];return ok;
+}
++ (NSData *)fetch:(NSString *)url {
+ if(![url isKindOfClass:NSString.class])return nil;dispatch_semaphore_t done=dispatch_semaphore_create(0);__block NSData *out=nil;NSURLSessionConfiguration *c=NSURLSessionConfiguration.ephemeralSessionConfiguration;c.timeoutIntervalForRequest=30;NSURLSession *s=[NSURLSession sessionWithConfiguration:c];
+ [[s dataTaskWithURL:[NSURL URLWithString:url] completionHandler:^(NSData *data,NSURLResponse *response,NSError *error){NSInteger status=[response isKindOfClass:NSHTTPURLResponse.class]?[(NSHTTPURLResponse *)response statusCode]:0;if(data&&!error&&status==200)out=data;dispatch_semaphore_signal(done);}] resume];
+ dispatch_semaphore_wait(done,dispatch_time(DISPATCH_TIME_NOW,(int64_t)(60*NSEC_PER_SEC)));[s finishTasksAndInvalidate];return out;
+}
++ (NSString *)sha256OfFile:(NSString *)path {
+ NSData *d=[NSData dataWithContentsOfFile:path];if(!d)return nil;unsigned char digest[CC_SHA256_DIGEST_LENGTH];CC_SHA256(d.bytes,(CC_LONG)d.length,digest);NSMutableString *hex=[NSMutableString new];for(int i=0;i<CC_SHA256_DIGEST_LENGTH;i++)[hex appendFormat:@"%02x",digest[i]];return hex;
+}
+// The new copy must carry the author's Developer ID (team CT4CF9Z423), a valid seal, and Apple's notarization.
++ (NSString *)verifyApp:(NSString *)path {
+ SecStaticCodeRef code=NULL;SecRequirementRef req=NULL;NSString *why=nil;
+ if(SecStaticCodeCreateWithPath((__bridge CFURLRef)[NSURL fileURLWithPath:path],kSecCSDefaultFlags,&code)!=errSecSuccess)why=L(@"The download is not a signed app.");
+ else if(SecRequirementCreateWithString(CFSTR("anchor apple generic and certificate leaf[subject.OU] = \"CT4CF9Z423\""),kSecCSDefaultFlags,&req)!=errSecSuccess)why=L(@"The signature check could not be prepared.");
+ else if(SecStaticCodeCheckValidity(code,kSecCSCheckAllArchitectures|kSecCSStrictValidate|kSecCSCheckNestedCode,req)!=errSecSuccess)why=L(@"The download is not signed by Less Pull’s author.");
+ if(code)CFRelease(code);if(req)CFRelease(req);if(why)return why;
+ NSTask *spctl=[NSTask new];spctl.executableURL=[NSURL fileURLWithPath:@"/usr/sbin/spctl"];spctl.arguments=@[@"--assess",@"--type",@"execute",path];spctl.standardOutput=NSFileHandle.fileHandleWithNullDevice;spctl.standardError=NSFileHandle.fileHandleWithNullDevice;[spctl launchAndReturnError:nil];[spctl waitUntilExit];
+ return spctl.terminationStatus==0?nil:L(@"Apple’s notarization check did not pass.");
 }
 - (void)toggleUpdateChecks:(NSButton *)sender {[NSUserDefaults.standardUserDefaults setBool:sender.state==NSControlStateValueOn forKey:@"checkForUpdates"];[self refreshUpdateControls];}
 - (void)refreshUpdateControls {
  NSUserDefaults *d=NSUserDefaults.standardUserDefaults;self.updateCheckbox.state=[d boolForKey:@"checkForUpdates"];self.updateButton.enabled=!self.checkingUpdates;
  NSDate *last=[d objectForKey:@"lastUpdateCheck"];NSString *when=[last isKindOfClass:NSDate.class]?[NSDateFormatter localizedStringFromDate:last dateStyle:NSDateFormatterMediumStyle timeStyle:NSDateFormatterShortStyle]:nil;
  NSString *status=self.updateStatus?:(self.availableUpdate?[NSString stringWithFormat:L(@"%@ is available."),[self updateLabel:self.availableUpdate]]:(when?L(@"Less Pull was up to date at the last check."):L(@"Not checked yet.")));
+ if(self.updateBanner){BOOL show=self.availableUpdate!=nil;if(self.updateBanner.hidden!=!show){self.updateBanner.hidden=!show;[self relayoutSettings];}self.updateBannerLabel.stringValue=(self.installingUpdate||self.pendingUpdateInstall)?(self.updateStatus?:@""):[NSString stringWithFormat:L(@"Build %ld is ready."),(long)[self.availableUpdate[@"build"] integerValue]];self.updateBannerButton.enabled=!self.installingUpdate&&!self.pendingUpdateInstall;}
  self.updateStatusLabel.stringValue=when?[NSString stringWithFormat:L(@"%@ Last checked %@."),status,when]:status;
 }
 // Grayscale off for a while: 1 hour, 4 hours, or until Night Shift next changes.
@@ -1529,6 +1600,9 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  NSMutableArray *views=[NSMutableArray new];
  if(self.welcomeWanted){self.welcomeCard=[self welcomeCardView];[views addObject:self.welcomeCard];}
  if(self.thanksWanted){self.thanksCard=[self thanksCardView];[views addObject:self.thanksCard];}
+ {NSStackView *banner=[self row:@[]];banner.edgeInsets=NSEdgeInsetsMake(10,12,10,12);banner.wantsLayer=YES;banner.layer.cornerRadius=8;banner.layer.backgroundColor=[[NSColor colorWithSRGBRed:.93 green:.55 blue:.28 alpha:1] colorWithAlphaComponent:.14].CGColor;
+  self.updateBannerLabel=[NSTextField wrappingLabelWithString:@""];self.updateBannerLabel.font=[NSFont systemFontOfSize:13 weight:NSFontWeightMedium];self.updateBannerButton=[NSButton buttonWithTitle:L(@"Install") target:self action:@selector(installUpdate:)];self.updateBannerButton.bezelStyle=NSBezelStyleRounded;[self helpView:self.updateBannerButton text:L(@"Downloads the update, checks it, replaces the app and reopens it.") label:L(@"Install")];
+  [banner addArrangedSubview:self.updateBannerLabel];[banner addArrangedSubview:[self spacer]];[banner addArrangedSubview:self.updateBannerButton];self.updateBanner=banner;banner.hidden=YES;[views addObject:banner];}
  [views addObjectsFromArray:@[self.statusText,self.statusDetail,[self separator],
   [self row:@[self.grayscaleButton,[self spacer],self.grayOffPopup,self.grayOnButton]],[self note:L(@"Shades of gray, day and night. Exceptions for apps and websites can show color. Off for a while brings it back by itself.")],
   [self row:@[self.warmthTitle,[self spacer],self.resetButton]],[self row:@[self.warmthSlider,self.warmthLabel]],tickRow,[self note:L(@"Adds warmth on top of Night Shift, from Off to Red.")],[self separator],
@@ -1728,7 +1802,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  self.updateCheckbox=[NSButton checkboxWithTitle:L(@"Check for updates automatically") target:self action:@selector(toggleUpdateChecks:)];[self helpView:self.updateCheckbox text:L(@"Once a day, Less Pull asks GitHub whether a newer build exists. Nothing about you is sent.") label:L(@"Check for updates automatically")];
  self.updateButton=[NSButton buttonWithTitle:L(@"Check for Updates…") target:self action:@selector(checkForUpdatesNow:)];[self helpView:self.updateButton text:L(@"Ask GitHub now whether a newer version exists.") label:L(@"Check for Updates")];
  self.updateStatusLabel=[self note:@""];
- NSStackView *column=[self column:@[[self row:@[icon,identity]],[self row:[self authorLinkButtons]],[self separator],[self row:@[help,tour,diagnostics,report,licenses]],[self row:@[support,share,[self spacer]]],[self separator],self.updateCheckbox,[self note:L(@"Once a day, one request to GitHub asks whether a newer build exists; a second one reads which macOS versions it is made for, so only builds for your macOS are offered. Nothing about you is sent, and you can turn this off.")],[self row:@[self.updateButton,[self spacer]]],self.updateStatusLabel,[self note:L(@"Everything else stays on this Mac: no account, no analytics, no network service. The browser extension talks only to the app.")]]];
+ NSStackView *column=[self column:@[[self row:@[icon,identity]],[self row:[self authorLinkButtons]],[self separator],[self row:@[help,tour,diagnostics,report]],[self row:@[support,share,licenses,[self spacer]]],[self separator],self.updateCheckbox,[self note:L(@"Once a day, one request to GitHub asks whether a newer build exists; a second one reads which macOS versions it is made for, so only builds for your macOS are offered. Nothing about you is sent, and you can turn this off.")],[self row:@[self.updateButton,[self spacer]]],self.updateStatusLabel,[self note:L(@"Everything else stays on this Mac: no account, no analytics, no network service. The browser extension talks only to the app.")]]];
  [(NSStackView *)column.arrangedSubviews[0] setSpacing:16];[column setCustomSpacing:4 afterView:self.updateCheckbox];[column setCustomSpacing:4 afterView:column.arrangedSubviews[7]];[self refreshUpdateControls];
  return column;
 }
@@ -1818,7 +1892,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  for(int k=0;k<4;k++){dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)((0.6+k*1.2)*NSEC_PER_SEC)),dispatch_get_main_queue(),^{[NSAnimationContext runAnimationGroup:^(NSAnimationContext *c){c.duration=.5;button.animator.alphaValue=.25;} completionHandler:^{[NSAnimationContext runAnimationGroup:^(NSAnimationContext *c){c.duration=.6;button.animator.alphaValue=1;} completionHandler:nil];}];});}
 }
 - (void)releaseSettings {
- [self.settingsTabs removeObserver:self forKeyPath:@"selectedTabViewItemIndex"];self.settings=nil;self.settingsTabs=nil;self.statusText=nil;self.statusDetail=nil;self.autoButton=nil;self.lockNightButton=nil;self.loginButton=nil;self.grayscaleButton=nil;self.nightButton=nil;self.resumeButton=nil;self.endPauseButton=nil;self.resetButton=nil;self.pausePopup=nil;self.peekScopePopup=nil;self.websiteStatus=nil;self.exclusionsList=nil;self.displaysList=nil;self.sessionPresetsField=nil;self.callBackPresetsField=nil;self.exclusionText=nil;self.warmthSlider=nil;self.warmthLabel=nil;self.warmthTitle=nil;self.welcomeCard=nil;self.updateCheckbox=nil;self.updateButton=nil;self.updateStatusLabel=nil;self.thanksCard=nil;self.peekRecorder=nil;self.grayscaleRecorder=nil;self.peekNote=nil;self.loginNote=nil;self.grayscaleShortcutNote=nil;self.peekGrayButton=nil;self.peekWarmthButton=nil;self.peekNightButton=nil;self.clickPopup=nil;self.rightClickPopup=nil;self.grayOffPopup=nil;self.grayOnButton=nil;self.websiteRulesList=nil;self.tourCard=nil;self.noteViews=nil;self.advancedViews=nil;self.multiDisplayViews=nil;
+ [self.settingsTabs removeObserver:self forKeyPath:@"selectedTabViewItemIndex"];self.settings=nil;self.settingsTabs=nil;self.statusText=nil;self.statusDetail=nil;self.autoButton=nil;self.lockNightButton=nil;self.loginButton=nil;self.grayscaleButton=nil;self.nightButton=nil;self.resumeButton=nil;self.endPauseButton=nil;self.resetButton=nil;self.pausePopup=nil;self.peekScopePopup=nil;self.websiteStatus=nil;self.exclusionsList=nil;self.displaysList=nil;self.sessionPresetsField=nil;self.callBackPresetsField=nil;self.exclusionText=nil;self.warmthSlider=nil;self.warmthLabel=nil;self.warmthTitle=nil;self.welcomeCard=nil;self.updateCheckbox=nil;self.updateButton=nil;self.updateBanner=nil;self.updateBannerLabel=nil;self.updateBannerButton=nil;self.updateStatusLabel=nil;self.thanksCard=nil;self.peekRecorder=nil;self.grayscaleRecorder=nil;self.peekNote=nil;self.loginNote=nil;self.grayscaleShortcutNote=nil;self.peekGrayButton=nil;self.peekWarmthButton=nil;self.peekNightButton=nil;self.clickPopup=nil;self.rightClickPopup=nil;self.grayOffPopup=nil;self.grayOnButton=nil;self.websiteRulesList=nil;self.tourCard=nil;self.noteViews=nil;self.advancedViews=nil;self.multiDisplayViews=nil;
  for(NSNumber *after in @[@1.0,@6.0])dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)(after.doubleValue*NSEC_PER_SEC)),dispatch_get_main_queue(),^{if(!self.settings)malloc_zone_pressure_relief(NULL,0);});  // once the window is truly gone, hand the freed pages back
 }
 - (void)rememberSettingsFrame {if(self.settings){self.keptSettingsFrame=self.settings.frame;self.keepSettingsFrame=YES;}}
@@ -2037,7 +2111,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  NSMenuItem *item=[NSMenuItem new];item.tag=(self.selectedMode==1||self.selectedMode==100)?100:101;[self manual:item];
 }
 - (void)displaysChanged:(id)sender {[self pipelineChanged:sender];[self refreshDisplayRows];[self applyVisibility];}
-- (void)applicationWillTerminate:(NSNotification *)note {self.quitting=YES;if(self.peekHotKey)UnregisterEventHotKey(self.peekHotKey);if(self.grayscaleHotKey)UnregisterEventHotKey(self.grayscaleHotKey);[self.grayOffTimer invalidate];[self.pauseAllTimer invalidate];[self.eventTimer invalidate];[self.pipelineRecoveryTimer invalidate];[self.menuDismissal end];[self.browserBridge stop];[self.warmth cancelTransition];[self endPauseNow:nil];self.excludeNight=NO;[self reconcileExclusion];if(self.grayOverride||self.customWarmth){self.grayOverride=0;self.customWarmth=NO;self.excludeGray=NO;self.excludeWarmth=NO;self.animateAppearance=NO;[self.warmth cancelTransition];[self applyMode:self.selectedMode];}[self.warmth restore];}
+- (void)applicationWillTerminate:(NSNotification *)note {self.quitting=YES;if(self.peekHotKey)UnregisterEventHotKey(self.peekHotKey);if(self.grayscaleHotKey)UnregisterEventHotKey(self.grayscaleHotKey);[self.grayOffTimer invalidate];[self.pauseAllTimer invalidate];[self.eventTimer invalidate];[self.pipelineRecoveryTimer invalidate];[self.menuDismissal end];[self.browserBridge stop];[self.warmth cancelTransition];if(self.relaunching)return;[self endPauseNow:nil];self.excludeNight=NO;[self reconcileExclusion];if(self.grayOverride||self.customWarmth){self.grayOverride=0;self.customWarmth=NO;self.excludeGray=NO;self.excludeWarmth=NO;self.animateAppearance=NO;[self.warmth cancelTransition];[self applyMode:self.selectedMode];}[self.warmth restore];}
 - (void)quit:(id)sender {[NSApp terminate:nil];}
 @end
 extern BOOL LessPullHandsOff;

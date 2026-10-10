@@ -50,3 +50,5 @@ Simulates a display reset after a fade finishes. Checks persistent grayscale, tw
 --screen-height N: pretend the screen is N pt tall, to see the settings tabs scroll on a small display.
 
 --setup-page: show the browser setup page at the end of the tour even when a browser is already connected.
+
+--test-update: treat the current release as a newer build, to exercise the in-app update (download, verify, swap, reopen).
