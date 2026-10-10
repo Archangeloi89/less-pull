@@ -1637,7 +1637,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
   [self row:@[self.grayscaleButton,[self spacer],self.grayOffPopup,self.grayOnButton]],[self note:L(@"Shades of gray, day and night. Exceptions for apps and websites can show color. Off for a while brings it back by itself.")],
   [self row:@[self.warmthTitle,[self spacer],self.resetButton]],[self row:@[self.warmthSlider,self.warmthLabel]],tickRow,[self note:L(@"Adds warmth on top of Night Shift, from Off to Red.")],[self separator],
   [self row:@[self.nightButton,[self spacer],self.pausePopup,self.endPauseButton]],[self note:L(@"Turns Night Shift on or off now; your schedule in System Settings stays as it is.")],
-  [self row:@[self.autoButton,[self spacer],self.resumeButton]],[self note:L(@"On: Extra Warmth only while Night Shift is on, none in the daytime. Off: Extra Warmth stays on all day.")],[self separator],
+  [self adv:[self row:@[self.autoButton,[self spacer],self.resumeButton]]],[self adv:[self note:L(@"On: Extra Warmth only while Night Shift is on, none in the daytime. Off: Extra Warmth stays on all day.")]],[self separator],
   self.loginButton,self.loginNote,[self multi:[self separator]],[self multi:[self displaysSection]],[self separator],[self languageRow],[self separator],[self advancedBlock]]];
  NSStackView *column=[self column:views];
  tickRow.identifier=@"fixed";[tickRow.widthAnchor constraintEqualToAnchor:self.warmthSlider.widthAnchor].active=YES;
