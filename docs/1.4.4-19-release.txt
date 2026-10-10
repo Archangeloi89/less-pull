@@ -121,3 +121,20 @@ Build 37: Jiri verified on the MacBook that the built-in lock screen shows the s
 Unreleased after 37: exception rows open by default (ruleOpen adds every first-seen rule to expandedRules); a filler at the end of both exception lists keeps rows together (the >= box-height constraint had spread them); the settings scroll view switches to the classic always-visible scroller when a tab overflows and back to overlay when it fits (fixSettingsOverflow, also after relayout).
 
 Lock screen and screensaver settings (unreleased after 37): four switches in the advanced group (Lock screen: Grayscale, Night Shift; Screensaver: Grayscale, Night Shift; all on by default), prefs lockGray/lockNight/saverGray/saverNight (old lockNightShift migrated). refreshLockProfile replaces lockBegan/lockEnded: captures the state at engage, applies the profile of the active screen (lock wins over saver), re-applies when a switch changes while engaged, restores on return. Built-in displays get plain only when grayscale is not wanted there.
+
+Build 39 (hotfix): in 38 the equal-width constraint between the "Lock screen:" and "Screensaver:" labels was activated before the labels were in a view hierarchy; on the first-launch and welcome paths the NSGenericException ended showSettings before the window was shown (the normal path swallowed it). Now activated after the column is built; showSettings wraps its body in @try and logs an exception instead of dying silently.
+
+Version line at the bottom of the menu (11 pt, secondary color, disabled): "Less Pull 1.4.4 (build N)".
+
+"Extra Warmth follows Night Shift" and its note are advanced views now.
+
+Exception panel (build 39): "Exception for X…" in the menu opens a KeyPanel under the icon (460 pt) holding the same row as the Apps or Websites tab (plus a Whole domain / This exact page segment for sites), with a hint line; closes on outside click or Escape; list rebuilds refresh it; the session panel and it close each other. The old submenus (currentAppMenu, websiteMenuForTab) are no longer referenced from the menu.
+
+Menu: Night Shift gets a direct toggle row ("Night Shift: On/Off", click toggles) plus "Night Shift  ›" for the timed choices and the follow option, mirroring Grayscale.
+
+Build 39, released 10 Oct 2026 (everything since 38 in one notarized build):
+Menu order: status line, Pause Less Pull, then Grayscale / Extra Warmth / Night Shift (check-mark rows, "… off for" while on, Resume Following only when interrupted), exceptions group, Settings, Quit, version line. The Settings Night Shift checkbox drops ": On/Off".
+Settings window: SettingsWindow fits every frame inside visibleFrame (lifted above the Dock, clamped left and right, back to the chosen top when a shorter tab allows), capped at 85% of usable height including the toolbar, refits on NSApplicationDidChangeScreenParametersNotification. Checked live with BetterDisplay at 2304x1296, 1280x720 and 1024x576 HiDPI. Test flags --about-tour and --refit-test N.
+Scrolling: QuietScroller (thin knob, no track, hover/drag wider and darker) in every scroller style, in the Settings window, both exception lists and Help; legacy style kept across NSPreferredScrollerStyleDidChangeNotification.
+Explanations: 109 rewritten from the user's side in a warm, calm, minimal voice, all 13 languages (each from its existing line, voice words kept: the plain display, quiet, bloom, a stretch of focused work, call you back). Option names in the language's quotes and short lead-ins (On:, Off:) are semibold in notes, intros, tour and Help (Emphasized()). The early-tester login-move note is removed. German edits from Jiri's review. A separator sets off the lock screen and screensaver rows.
+Lock screen finding: on a Mac with only an external display (Mac mini + LG TV) the lock screen stays in color even with the system Color Filter on; Night Shift reaches it. Apple displays untested.
