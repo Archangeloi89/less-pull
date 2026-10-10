@@ -51,6 +51,8 @@ The addresses of the websites you visit. They stream from the browser to the app
 
 Diagnostics show your appearance choices and display recovery counters. The normal appearance log contains no app identifiers and no website addresses. A developer test output exists, and it is written only when the app is started with an explicit command-line flag.
 
+Two small log files stay on your Mac in `~/Library/Logs/Less Pull/`: `update.log` records each in-app update (the build installed and whether its checks passed), and `lock.log` records each lock screen and screensaver (whether Less Pull kept Grayscale or Night Shift there, and the Night Shift state a moment later). Neither names apps or websites, and neither leaves the Mac; `lock.log` empties itself at about 200 KB.
+
 ## Questions
 
 Contact the author through [jiriarion.com](https://jiriarion.com).
