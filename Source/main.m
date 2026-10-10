@@ -227,7 +227,7 @@ static NSString *const LessPullOldBundleIdentifier=@"local.nightshiftfilters.app
 @property ExclusionPolicy *exclusion;
 @property BOOL excludeGray,excludeNight,excludeWarmth,quitting,animateAppearance;
 // Lock screen and screensaver: macOS draws them outside the display adjustments, so the session is handed over plain and faded back in on return; Night Shift, which the system does honor there, is raised to full warmth meanwhile.
-@property BOOL screenLockedFlag,saverFlag,lockQuieting,installingUpdate,pendingUpdateInstall,relaunching;@property NSView *updateBanner;@property NSTextField *updateBannerLabel;@property NSButton *updateBannerButton;@property NSNumber *lockStrength;@property NSArray *lockFilter;@property(nonatomic) double fade;@property NSButton *lockNightButton;
+@property BOOL screenLockedFlag,saverFlag,lockQuieting,installingUpdate,pendingUpdateInstall,relaunching;@property NSView *updateBanner;@property NSTextField *updateBannerLabel;@property NSButton *updateBannerButton;@property NSNumber *lockStrength;@property(nonatomic) double fade;@property NSButton *lockNightButton;
 @property NSTimer *visibilityTimer;
 // Per display: where the frontmost app's windows are, and for the other displays the exception of the app on top there (or the defaults).
 @property NSSet<NSNumber *> *frontDisplays;
@@ -576,7 +576,7 @@ static void drawKey(NSRect f,NSString *label,double pressed){NSRect r=NSOffsetRe
  NSButton *show=[NSButton checkboxWithTitle:L(@"Show advanced options") target:self action:@selector(toggleAdvanced:)];show.state=[self advanced];[self helpView:show text:L(@"Shows the fine-tuning in every tab: what the mouse buttons do, the session sound and glow, Night Shift on the lock screen, and display options with one display. Everything keeps working as set when hidden.") label:L(@"Show advanced options")];
  NSButton *always=[NSButton checkboxWithTitle:L(@"Show display options with one display") target:self action:@selector(toggleAlwaysDisplays:)];always.state=[NSUserDefaults.standardUserDefaults boolForKey:@"alwaysShowDisplays"];[self helpView:always text:L(@"Display options appear by themselves when two or more displays are connected. Tick this to keep them visible with one display.") label:L(@"Show display options with one display")];
  NSButton *quiet=[NSButton checkboxWithTitle:L(@"Don’t show explanations") target:self action:@selector(toggleNotes:)];quiet.state=[self hideNotes];[self helpView:quiet text:L(@"Hides the gray lines of explanation under the settings. The ? help on each setting stays.") label:L(@"Don’t show explanations")];
- NSStackView *column=[self column:@[show,[self adv:always],[self adv:quiet],[self adv:[self note:L(@"Choices for apps, websites and displays stay saved while hidden, and a display keeps its choices when it is plugged in again.")]],[self adv:self.lockNightButton],[self adv:[self note:L(@"Drawn by macOS outside Less Pull’s reach, the lock screen and the screensaver get Night Shift at full warmth and, on a built-in display, macOS’s own grayscale while Less Pull is quieting your screen; both come back as they were when you return.")]]]];column.spacing=6;return column;
+ NSStackView *column=[self column:@[show,[self adv:always],[self adv:quiet],[self adv:[self note:L(@"Choices for apps, websites and displays stay saved while hidden, and a display keeps its choices when it is plugged in again.")]],[self adv:self.lockNightButton],[self adv:[self note:L(@"Drawn by macOS outside Less Pull’s reach, the lock screen and the screensaver show color. While Less Pull is quieting your screen, Night Shift goes to full warmth there and comes back as it was when you return.")]]]];column.spacing=6;return column;
 }
 - (NSView *)displaysSection {
  NSTextField *title=[NSTextField labelWithString:L(@"Displays")];title.font=[NSFont systemFontOfSize:13 weight:NSFontWeightMedium];
@@ -1073,14 +1073,12 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  BOOL gray=self.effectiveMode==100||self.effectiveMode==1;self.lockQuieting=!self.pausedUntil&&(gray||self.targetStrength>0);
  self.lockStrength=@(-1);
  if(self.lockQuieting&&[NSUserDefaults.standardUserDefaults boolForKey:@"lockNightShift"]){float s=0;if([self.engine nightShiftStrength:&s]&&[self.engine setNightShiftStrength:1])self.lockStrength=@(s);
-  // macOS’s own grayscale filter is honored on the lock screen of a built-in display (build 16 relied on it); set it for the lock, put it back as it was on return.
-  if(gray&&!self.pausedUntil){BOOL en=NO;int ty=0;if([self.engine systemFilterEnabled:&en type:&ty]){self.lockFilter=@[@(en),@(ty)];if(!(en&&ty==1))[self.engine setSystemFilterEnabled:YES type:1];}}}
+  }
  self.fade=0.2;self.animateAppearance=YES;[self sync];
 }
 - (void)lockEnded {
  if(self.screenLocked||!self.lockStrength)return;
  if(self.lockStrength.floatValue>=0)[self.engine setNightShiftStrength:self.lockStrength.floatValue];
- if(self.lockFilter){[self.engine setSystemFilterEnabled:[self.lockFilter[0] boolValue] type:[self.lockFilter[1] intValue]];self.lockFilter=nil;}
  self.lockStrength=nil;self.lockQuieting=NO;self.fade=0.2;self.animateAppearance=YES;[self pipelineChanged:nil];
 }
 - (void)screenLocked:(id)note {self.screenLockedFlag=YES;[self lockBegan];}
@@ -1608,7 +1606,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  self.nightButton=[NSButton checkboxWithTitle:L(@"Night Shift") target:self action:@selector(toggleNightShift:)];[self helpView:self.nightButton text:self.nightHelp label:L(@"Night Shift")];
  self.pausePopup=[[NSPopUpButton alloc]initWithFrame:NSZeroRect pullsDown:YES];[self.pausePopup.widthAnchor constraintEqualToConstant:220].active=YES;[self helpView:self.pausePopup text:self.pauseHelp label:L(@"Turn Night Shift off for…")];
  self.endPauseButton=[NSButton buttonWithTitle:L(@"End timed off") target:self action:@selector(endPauseNow:)];self.endPauseButton.hidden=YES;[self.endPauseButton.widthAnchor constraintEqualToConstant:220].active=YES;[self helpView:self.endPauseButton text:self.pauseHelp label:L(@"End timed off")];
- self.lockNightButton=[NSButton checkboxWithTitle:L(@"Night Shift and grayscale on the lock screen and screensaver") target:self action:@selector(toggleLockNight:)];self.lockNightButton.state=[NSUserDefaults.standardUserDefaults boolForKey:@"lockNightShift"];[self helpView:self.lockNightButton text:L(@"The lock screen and the screensaver are drawn by macOS outside Less Pull’s reach. With this on, whenever Less Pull is quieting your screen, Night Shift goes to full warmth there and macOS’s own grayscale filter is switched on, which a built-in display honors; both go back as they were when you return. Your Night Shift schedule stays as it is.") label:L(@"Night Shift and grayscale on the lock screen and screensaver")];
+ self.lockNightButton=[NSButton checkboxWithTitle:L(@"Night Shift on the lock screen and screensaver") target:self action:@selector(toggleLockNight:)];self.lockNightButton.state=[NSUserDefaults.standardUserDefaults boolForKey:@"lockNightShift"];[self helpView:self.lockNightButton text:L(@"The lock screen and the screensaver are drawn by macOS outside Less Pull’s reach, so they show color. With this on, Less Pull turns Night Shift to full warmth there whenever it is quieting your screen, and puts it back when you return. Your Night Shift schedule stays as it is.") label:L(@"Night Shift on the lock screen and screensaver")];
  self.autoButton=[NSButton checkboxWithTitle:L(@"Extra Warmth follows Night Shift") target:self action:@selector(toggleAuto:)];[self helpView:self.autoButton text:self.autoHelp label:L(@"Extra Warmth follows Night Shift")];
  self.resumeButton=[NSButton buttonWithTitle:L(@"Resume Following") target:self action:@selector(resume:)];[self helpView:self.resumeButton text:L(@"Go back to following Night Shift now.") label:L(@"Resume Following Now")];
  self.loginButton=[NSButton checkboxWithTitle:L(@"Launch at login") target:self action:@selector(login:)];[self helpView:self.loginButton text:L(@"Open Less Pull when you sign in to your Mac. Install it in Applications first.") label:L(@"Launch at login")];
@@ -2105,7 +2103,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
    NSInteger eff=g==1?100:g==2?101:(self.grayOffUntil?101:mode);double str=custom?w/100*3:((mode==100||mode==101)&&!warmthOff?[self currentWarmth]:0);
    if([o[@"plain"] boolValue]){eff=101;str=0;}
    BOOL peekHere=(self.peeking&&(self.frontPeekDisplays?[self.frontPeekDisplays containsObject:dn]:(self.frontPeekSpansAll||!peekActiveOnly||d==self.peekDisplay)))||[self.peekLockedDisplays containsObject:dn];
-   if(self.pausedUntil||self.screenLocked){eff=101;str=0;}else if(peekHere){NSDictionary *e=[self peekEffects];if([e[@"grayscale"] boolValue])eff=101;if([e[@"warmth"] boolValue])str=0;}
+   if(self.pausedUntil||(self.screenLocked&&!CGDisplayIsBuiltin(d))){eff=101;str=0;}else if(peekHere){NSDictionary *e=[self peekEffects];if([e[@"grayscale"] boolValue])eff=101;if([e[@"warmth"] boolValue])str=0;}
    BOOL grayHere=eff==100||eff==1;NSArray *last=[self.warmth stateForDisplay:d];
    if(last&&([last[0] doubleValue]!=str||[last[1] boolValue]!=grayHere)&&!self.quitting){__weak AppDelegate *weak=self;[self.warmth transitionStrength:str grayscale:grayHere display:d reduceMotion:reduce duration:self.fade completion:^{[weak.warmth applyStrength:str grayscale:grayHere display:d];}];}
    else if(!last||![self.warmth transitioning]){if(![self.warmth applyStrength:str grayscale:grayHere display:d])ok=NO;}
