@@ -547,9 +547,9 @@
 "Every 5 minutes" = "5분마다";
 "Every 10 minutes" = "10분마다";
 "Every 15 minutes" = "15분마다";
-"Night Shift and grayscale on the lock screen and screensaver" = "잠금 화면과 화면 보호기에서 Night Shift와 회색조";
-"The lock screen and the screensaver are drawn by macOS outside Less Pull’s reach. With this on, whenever Less Pull is quieting your screen, Night Shift goes to full warmth there and macOS’s own grayscale filter is switched on, which a built-in display honors; both go back as they were when you return. Your Night Shift schedule stays as it is." = "잠금 화면과 화면 보호기는 macOS가 Less Pull의 손이 닿지 않는 곳에서 그립니다. 이것을 켜면 Less Pull이 화면을 고요하게 하는 동안 그곳에서는 Night Shift가 최대 따뜻함이 되고, 내장 디스플레이가 따르는 macOS 자체 회색조 필터도 켜집니다. 돌아오면 둘 다 원래대로 돌아갑니다. Night Shift 일정은 그대로입니다.";
-"Drawn by macOS outside Less Pull’s reach, the lock screen and the screensaver get Night Shift at full warmth and, on a built-in display, macOS’s own grayscale while Less Pull is quieting your screen; both come back as they were when you return." = "잠금 화면과 화면 보호기는 macOS가 Less Pull의 손이 닿지 않는 곳에서 그립니다. Less Pull이 화면을 고요하게 하는 동안 그곳에서는 Night Shift가 최대 따뜻함이 되고, 내장 디스플레이에서는 macOS 자체 회색조도 적용됩니다. 돌아오면 둘 다 원래대로 돌아갑니다.";
+"Night Shift on the lock screen and screensaver" = "잠금 화면과 화면 보호기에서 Night Shift";
+"The lock screen and the screensaver are drawn by macOS outside Less Pull’s reach, so they show color. With this on, Less Pull turns Night Shift to full warmth there whenever it is quieting your screen, and puts it back when you return. Your Night Shift schedule stays as it is." = "잠금 화면과 화면 보호기는 macOS가 Less Pull의 손이 닿지 않는 곳에서 그리기 때문에 컬러로 보입니다. 이것을 켜면 Less Pull이 화면을 고요하게 하는 동안 그곳에서는 Night Shift를 최대 따뜻함으로 올리고, 돌아오면 원래대로 되돌립니다. Night Shift 일정은 그대로입니다.";
+"Drawn by macOS outside Less Pull’s reach, the lock screen and the screensaver show color. While Less Pull is quieting your screen, Night Shift goes to full warmth there and comes back as it was when you return." = "잠금 화면과 화면 보호기는 macOS가 Less Pull의 손이 닿지 않는 곳에서 그리므로 컬러로 보입니다. Less Pull이 화면을 고요하게 하는 동안 그곳에서는 Night Shift가 최대 따뜻함이 되고, 돌아오면 원래대로 돌아옵니다.";
 "The local bridge could not be registered." = "로컬 연결을 등록하지 못했습니다.";
 "Less Pull is running from a temporary copy that macOS makes when an app is opened where it was downloaded. Move Less Pull into the Applications folder, open it from there, and try again." = "Less Pull이 다운로드한 자리에서 앱을 열 때 macOS가 만드는 임시 복사본에서 실행되고 있습니다. Less Pull을 ‘응용 프로그램’ 폴더로 옮기고 거기서 연 다음 다시 시도하세요.";
 "Start tour and setup" = "둘러보기와 설정 시작";

@@ -547,9 +547,9 @@
 "Every 5 minutes" = "每 5 分鐘";
 "Every 10 minutes" = "每 10 分鐘";
 "Every 15 minutes" = "每 15 分鐘";
-"Night Shift and grayscale on the lock screen and screensaver" = "在鎖定畫面和螢幕保護程式上開啟夜覽和灰階";
-"The lock screen and the screensaver are drawn by macOS outside Less Pull’s reach. With this on, whenever Less Pull is quieting your screen, Night Shift goes to full warmth there and macOS’s own grayscale filter is switched on, which a built-in display honors; both go back as they were when you return. Your Night Shift schedule stays as it is." = "鎖定畫面和螢幕保護程式由 macOS 在 Less Pull 碰不到的地方繪製。開啟後，只要 Less Pull 正在讓螢幕安靜，就會在那裡把夜覽調到最暖，並打開 macOS 內建的灰階濾鏡（內建顯示器會遵循）；你回來時兩者都恢復原狀。夜覽的排程保持不變。";
-"Drawn by macOS outside Less Pull’s reach, the lock screen and the screensaver get Night Shift at full warmth and, on a built-in display, macOS’s own grayscale while Less Pull is quieting your screen; both come back as they were when you return." = "鎖定畫面和螢幕保護程式由 macOS 在 Less Pull 碰不到的地方繪製；只要 Less Pull 正在讓螢幕安靜，那裡就有最暖的夜覽，內建顯示器上還有 macOS 內建的灰階。你回來時兩者都恢復原狀。";
+"Night Shift on the lock screen and screensaver" = "在鎖定畫面和螢幕保護程式上開啟夜覽";
+"The lock screen and the screensaver are drawn by macOS outside Less Pull’s reach, so they show color. With this on, Less Pull turns Night Shift to full warmth there whenever it is quieting your screen, and puts it back when you return. Your Night Shift schedule stays as it is." = "鎖定畫面和螢幕保護程式由 macOS 在 Less Pull 碰不到的地方繪製，所以顯示彩色。開啟後，只要 Less Pull 正在讓螢幕安靜，就會在那裡把夜覽調到最暖，你回來時再恢復原狀。夜覽的排程保持不變。";
+"Drawn by macOS outside Less Pull’s reach, the lock screen and the screensaver show color. While Less Pull is quieting your screen, Night Shift goes to full warmth there and comes back as it was when you return." = "鎖定畫面和螢幕保護程式由 macOS 在 Less Pull 碰不到的地方繪製，顯示彩色。只要 Less Pull 正在讓螢幕安靜，那裡的夜覽就會調到最暖，你回來時恢復原狀。";
 "The local bridge could not be registered." = "無法註冊本機連線。";
 "Less Pull is running from a temporary copy that macOS makes when an app is opened where it was downloaded. Move Less Pull into the Applications folder, open it from there, and try again." = "Less Pull 正從 macOS 建立的暫時副本執行；在下載位置直接打開 App 時會這樣。請把 Less Pull 移到「應用程式」檔案夾，從那裡打開，再試一次。";
 "Start tour and setup" = "開始導覽和設定";
