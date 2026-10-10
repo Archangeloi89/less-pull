@@ -138,7 +138,7 @@
 "Diagnostics shows technical details you can include when asking for help. Nothing is sent anywhere." = "診断情報には、問い合わせに添えられる技術的な詳細が表示されます。どこにも送信されません。";
 "Diagnostics…" = "診断情報…";
 "Display %u" = "ディスプレイ %u";
-"Display options appear by themselves when two or more displays are connected. Tick this to keep them visible with one display." = "ディスプレイの項目は、2 台以上つなぐと自動で表示されます。1 台でも表示したいときにチェックします。";
+"The multi-display options appear by themselves when two or more displays are connected. Tick this to keep them visible with one display." = "マルチディスプレイの項目は、2 台以上つなぐと自動で表示されます。1 台でも表示したいときにチェックします。";
 "Displays" = "ディスプレイ";
 "Done" = "完了";
 "Don’t show again" = "今後は表示しない";
@@ -404,7 +404,7 @@
 "Shortcuts" = "ショートカット";
 "Show a gentle glow" = "やわらかな光を表示";
 "Show advanced options" = "詳細オプションを表示";
-"Show display options with one display" = "ディスプレイ 1 台でも項目を表示";
+"Show multi-display options with one display" = "ディスプレイ 1 台でもマルチディスプレイの項目を表示";
 "Show licenses" = "ライセンスを表示";
 "Show the app and source license files included with Less Pull." = "Less Pull に含まれるアプリとソースコードのライセンスファイルを表示します。";
 "Show the browsers not installed" = "未インストールのブラウザを表示";

@@ -138,7 +138,7 @@
 "Diagnostics shows technical details you can include when asking for help. Nothing is sent anywhere." = "진단 정보에는 도움을 요청할 때 함께 보낼 수 있는 기술적 세부 사항이 표시됩니다. 어디에도 전송되지 않습니다.";
 "Diagnostics…" = "진단…";
 "Display %u" = "디스플레이 %u";
-"Display options appear by themselves when two or more displays are connected. Tick this to keep them visible with one display." = "디스플레이 항목은 두 대 이상 연결하면 저절로 나타납니다. 한 대일 때도 보려면 체크하세요.";
+"The multi-display options appear by themselves when two or more displays are connected. Tick this to keep them visible with one display." = "다중 디스플레이 옵션은 두 대 이상 연결하면 저절로 나타납니다. 한 대일 때도 보려면 체크하세요.";
 "Displays" = "디스플레이";
 "Done" = "완료";
 "Don’t show again" = "다시 표시 안 함";
@@ -404,7 +404,7 @@
 "Shortcuts" = "단축키";
 "Show a gentle glow" = "은은한 빛 표시";
 "Show advanced options" = "고급 옵션 표시";
-"Show display options with one display" = "디스플레이 한 대일 때도 항목 표시";
+"Show multi-display options with one display" = "디스플레이 한 대일 때도 다중 디스플레이 옵션 표시";
 "Show licenses" = "라이선스 표시";
 "Show the app and source license files included with Less Pull." = "Less Pull에 포함된 앱과 소스 코드 라이선스 파일을 표시합니다.";
 "Show the browsers not installed" = "설치 안 된 브라우저 표시";

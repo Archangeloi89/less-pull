@@ -138,7 +138,7 @@
 "Diagnostics shows technical details you can include when asking for help. Nothing is sent anywhere." = "La diagnostica mostra dettagli tecnici da allegare quando chiedi aiuto. Non viene inviato nulla da nessuna parte.";
 "Diagnostics…" = "Diagnostica…";
 "Display %u" = "Schermo %u";
-"Display options appear by themselves when two or more displays are connected. Tick this to keep them visible with one display." = "Le opzioni per gli schermi compaiono da sole quando ci sono due o più schermi collegati. Spunta qui per vederle anche con uno solo.";
+"The multi-display options appear by themselves when two or more displays are connected. Tick this to keep them visible with one display." = "Le opzioni multi-schermo compaiono da sole quando sono collegati due o più schermi. Spunta qui per vederle anche con uno solo.";
 "Displays" = "Schermi";
 "Done" = "Fine";
 "Don’t show again" = "Non mostrare più";
@@ -404,7 +404,7 @@
 "Shortcuts" = "Abbreviazioni";
 "Show a gentle glow" = "Mostra un bagliore delicato";
 "Show advanced options" = "Mostra le opzioni avanzate";
-"Show display options with one display" = "Mostra le opzioni per gli schermi anche con uno solo";
+"Show multi-display options with one display" = "Mostra le opzioni multi-schermo con un solo schermo";
 "Show licenses" = "Mostra le licenze";
 "Show the app and source license files included with Less Pull." = "Mostra i file di licenza dell'app e del codice che accompagnano Less Pull.";
 "Show the browsers not installed" = "Mostra i browser non installati";

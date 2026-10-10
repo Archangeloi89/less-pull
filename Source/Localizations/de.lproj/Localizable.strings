@@ -135,7 +135,7 @@
 "Diagnostics shows technical details you can include when asking for help. Nothing is sent anywhere." = "Die Diagnose zeigt technische Details, die du einer Bitte um Hilfe beilegen kannst. Nichts wird irgendwohin gesendet.";
 "Diagnostics…" = "Diagnose …";
 "Display %u" = "Display %u";
-"Display options appear by themselves when two or more displays are connected. Tick this to keep them visible with one display." = "Display-Optionen erscheinen von selbst, sobald zwei oder mehr Displays angeschlossen sind. Mit diesem Häkchen bleiben sie auch bei einem Display sichtbar.";
+"The multi-display options appear by themselves when two or more displays are connected. Tick this to keep them visible with one display." = "Die Multi-Display-Optionen erscheinen von selbst, sobald zwei oder mehr Displays angeschlossen sind. Hier anhaken, damit sie auch mit einem Display sichtbar bleiben.";
 "Displays" = "Displays";
 "Done" = "Fertig";
 "Don’t show again" = "Nicht mehr anzeigen";
@@ -386,7 +386,7 @@
 "Shades of gray, day and night. Exceptions for apps and websites can show color. Off for a while brings it back by itself." = "Alles in Grautönen, Tag und Nacht. Ausnahmen für Apps und Websites dürfen Farbe zeigen. „Eine Weile aus“ bringt die Farbe zurück und schaltet sich von selbst wieder ein.";
 "Show a gentle glow" = "Sanftes Leuchten zeigen";
 "Show advanced options" = "Erweiterte Optionen anzeigen";
-"Show display options with one display" = "Display-Optionen auch bei einem Display anzeigen";
+"Show multi-display options with one display" = "Multi-Display-Optionen auch mit einem Display zeigen";
 "Show licenses" = "Lizenzen anzeigen";
 "Show the app and source license files included with Less Pull." = "Zeigt die Lizenzdateien für App und Quellcode, die Less Pull beiliegen.";
 "Show the browsers not installed" = "Die nicht installierten Browser zeigen";

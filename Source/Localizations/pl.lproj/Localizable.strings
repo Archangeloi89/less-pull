@@ -138,7 +138,7 @@
 "Diagnostics shows technical details you can include when asking for help. Nothing is sent anywhere." = "Diagnostyka pokazuje szczegóły techniczne, które możesz dołączyć, prosząc o pomoc. Nic nigdzie nie jest wysyłane.";
 "Diagnostics…" = "Diagnostyka…";
 "Display %u" = "Ekran %u";
-"Display options appear by themselves when two or more displays are connected. Tick this to keep them visible with one display." = "Opcje ekranów pojawiają się same, gdy podłączone są dwa ekrany lub więcej. Zaznacz, by widzieć je także z jednym ekranem.";
+"The multi-display options appear by themselves when two or more displays are connected. Tick this to keep them visible with one display." = "Opcje wielu ekranów pojawiają się same, gdy podłączone są co najmniej dwa ekrany. Zaznacz, aby widzieć je także przy jednym.";
 "Displays" = "Ekrany";
 "Done" = "Gotowe";
 "Don’t show again" = "Nie pokazuj więcej";
@@ -404,7 +404,7 @@
 "Shortcuts" = "Skróty";
 "Show a gentle glow" = "Łagodna poświata";
 "Show advanced options" = "Pokaż opcje zaawansowane";
-"Show display options with one display" = "Pokazuj opcje ekranów także z jednym ekranem";
+"Show multi-display options with one display" = "Pokazuj opcje wielu ekranów także przy jednym ekranie";
 "Show licenses" = "Pokaż licencje";
 "Show the app and source license files included with Less Pull." = "Pokazuje pliki licencji aplikacji i kodu źródłowego dołączone do Less Pull.";
 "Show the browsers not installed" = "Pokaż niezainstalowane przeglądarki";

@@ -138,7 +138,7 @@
 "Diagnostics shows technical details you can include when asking for help. Nothing is sent anywhere." = "De diagnose toont technische details die je kunt meesturen als je hulp vraagt. Er wordt niets verstuurd.";
 "Diagnostics…" = "Diagnose…";
 "Display %u" = "Scherm %u";
-"Display options appear by themselves when two or more displays are connected. Tick this to keep them visible with one display." = "Schermopties verschijnen vanzelf zodra twee of meer schermen zijn aangesloten. Vink dit aan om ze ook met één scherm te zien.";
+"The multi-display options appear by themselves when two or more displays are connected. Tick this to keep them visible with one display." = "De multi-schermopties verschijnen vanzelf zodra twee of meer schermen zijn aangesloten. Vink dit aan om ze ook met één scherm te zien.";
 "Displays" = "Schermen";
 "Done" = "Klaar";
 "Don’t show again" = "Niet meer tonen";
@@ -404,7 +404,7 @@
 "Shortcuts" = "Sneltoetsen";
 "Show a gentle glow" = "Toon een zachte gloed";
 "Show advanced options" = "Toon geavanceerde opties";
-"Show display options with one display" = "Toon schermopties ook met één scherm";
+"Show multi-display options with one display" = "Multi-schermopties ook met één scherm tonen";
 "Show licenses" = "Toon licenties";
 "Show the app and source license files included with Less Pull." = "Toont de licentiebestanden van de app en de broncode die bij Less Pull horen.";
 "Show the browsers not installed" = "Toon de niet-geïnstalleerde browsers";

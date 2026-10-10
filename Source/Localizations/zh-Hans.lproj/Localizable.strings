@@ -138,7 +138,7 @@
 "Diagnostics shows technical details you can include when asking for help. Nothing is sent anywhere." = "诊断信息显示求助时可附上的技术细节。不会发送到任何地方。";
 "Diagnostics…" = "诊断…";
 "Display %u" = "显示器 %u";
-"Display options appear by themselves when two or more displays are connected. Tick this to keep them visible with one display." = "接入两台或更多显示器时，显示器选项会自动出现。勾选后只有一台显示器时也显示。";
+"The multi-display options appear by themselves when two or more displays are connected. Tick this to keep them visible with one display." = "多显示器选项在接入两台或更多显示器时会自动出现。勾选后只有一台显示器时也显示。";
 "Displays" = "显示器";
 "Done" = "完成";
 "Don’t show again" = "不再显示";
@@ -404,7 +404,7 @@
 "Shortcuts" = "快捷键";
 "Show a gentle glow" = "显示柔和光晕";
 "Show advanced options" = "显示高级选项";
-"Show display options with one display" = "只有一台显示器时也显示显示器选项";
+"Show multi-display options with one display" = "只有一台显示器时也显示多显示器选项";
 "Show licenses" = "显示许可证";
 "Show the app and source license files included with Less Pull." = "显示 Less Pull 随附的应用和源代码许可证文件。";
 "Show the browsers not installed" = "显示未安装的浏览器";
