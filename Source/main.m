@@ -577,8 +577,9 @@ static void drawKey(NSRect f,NSString *label,double pressed){NSRect r=NSOffsetRe
  NSButton *show=[NSButton checkboxWithTitle:L(@"Show advanced options") target:self action:@selector(toggleAdvanced:)];show.state=[self advanced];[self helpView:show text:L(@"Shows the fine-tuning in every tab: what the mouse buttons do, the session sound and glow, Night Shift on the lock screen, and display options with one display. Everything keeps working as set when hidden.") label:L(@"Show advanced options")];
  NSButton *always=[NSButton checkboxWithTitle:L(@"Show display options with one display") target:self action:@selector(toggleAlwaysDisplays:)];always.state=[NSUserDefaults.standardUserDefaults boolForKey:@"alwaysShowDisplays"];[self helpView:always text:L(@"Display options appear by themselves when two or more displays are connected. Tick this to keep them visible with one display.") label:L(@"Show display options with one display")];
  NSButton *quiet=[NSButton checkboxWithTitle:L(@"Don’t show explanations") target:self action:@selector(toggleNotes:)];quiet.state=[self hideNotes];[self helpView:quiet text:L(@"Hides the gray lines of explanation under the settings. The ? help on each setting stays.") label:L(@"Don’t show explanations")];
- NSTextField *lockLabel=[NSTextField labelWithString:L(@"Lock screen:")],*saverLabel=[NSTextField labelWithString:L(@"Screensaver:")];[saverLabel.widthAnchor constraintEqualToAnchor:lockLabel.widthAnchor].active=YES;
- NSStackView *column=[self column:@[show,[self adv:always],[self adv:quiet],[self adv:[self note:L(@"Choices for apps, websites and displays stay saved while hidden, and a display keeps its choices when it is plugged in again.")]],[self adv:[self row:@[lockLabel,self.lockGrayButton,self.lockNightButton]]],[self adv:[self row:@[saverLabel,self.saverGrayButton,self.saverNightButton]]],[self adv:[self note:L(@"What the lock screen and the screensaver keep of Less Pull. Grayscale there needs a built-in display; an external display shows only the Night Shift choice. Everything goes back as it was when you return.")]]]];column.spacing=6;return column;
+ NSTextField *lockLabel=[NSTextField labelWithString:L(@"Lock screen:")],*saverLabel=[NSTextField labelWithString:L(@"Screensaver:")];
+ NSStackView *column=[self column:@[show,[self adv:always],[self adv:quiet],[self adv:[self note:L(@"Choices for apps, websites and displays stay saved while hidden, and a display keeps its choices when it is plugged in again.")]],[self adv:[self row:@[lockLabel,self.lockGrayButton,self.lockNightButton]]],[self adv:[self row:@[saverLabel,self.saverGrayButton,self.saverNightButton]]],[self adv:[self note:L(@"What the lock screen and the screensaver keep of Less Pull. Grayscale there needs a built-in display; an external display shows only the Night Shift choice. Everything goes back as it was when you return.")]]]];column.spacing=6;[saverLabel.widthAnchor constraintEqualToAnchor:lockLabel.widthAnchor].active=YES;  // only now, once both labels share the column
+ return column;
 }
 - (NSView *)displaysSection {
  NSTextField *title=[NSTextField labelWithString:L(@"Displays")];title.font=[NSFont systemFontOfSize:13 weight:NSFontWeightMedium];
@@ -1945,6 +1946,9 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
 }
 - (void)showLicenses:(id)sender {NSURL *folder=NSBundle.mainBundle.resourceURL;[NSWorkspace.sharedWorkspace activateFileViewerSelectingURLs:@[[folder URLByAppendingPathComponent:@"LICENSE-APP.txt"],[folder URLByAppendingPathComponent:@"LICENSE-SOURCE.txt"]]];}
 - (void)showSettings:(id)sender {
+ @try {[self showSettingsBody:sender];} @catch(NSException *e){NSLog(@"Less Pull: the settings window could not be built: %@ %@",e.name,e.reason);}
+}
+- (void)showSettingsBody:(id)sender {
  if(!self.settings){
   self.thanksWanted=self.forceThanks||(!self.welcomeWanted&&[self thanksDue]);self.forceThanks=NO;
   self.multiDisplayViews=[NSMutableArray new];self.advancedViews=[NSMutableArray new];if(!self.expandedRules)self.expandedRules=[NSMutableSet new];
