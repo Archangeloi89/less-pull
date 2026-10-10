@@ -187,7 +187,6 @@ static NSString *const LessPullOldBundleIdentifier=@"local.nightshiftfilters.app
 @interface SettingsScrollView : NSScrollView
 @end
 @implementation SettingsScrollView
-- (NSScrollerStyle)scrollerStyle {return NSScrollerStyleOverlay;}
 @end
 // The slider track shows what the slider does: the real neutral -> amber -> red
 // ramp of WarmthCurve.h, i.e. what white becomes at each strength.
@@ -539,9 +538,10 @@ static void drawKey(NSRect f,NSString *label,double pressed){NSRect r=NSOffsetRe
 // Wrapped text can end a few points taller than measured; the window then grows by exactly that, within the screen, so no hairline scroll bar appears.
 - (void)fixSettingsOverflow {
  NSTabViewItem *item=self.settingsTabs.tabView.selectedTabViewItem;NSScrollView *s=(NSScrollView *)item.viewController.view.subviews.firstObject;if(![s isKindOfClass:NSScrollView.class]||!s.window||s.window!=self.settings)return;
- [s layoutSubtreeIfNeeded];CGFloat over=NSHeight(s.documentView.frame)-NSHeight(s.contentView.bounds);if(over<=0||over>24)return;
- CGFloat want=[self settingsHeightFor:NSHeight(s.frame)+over],grow=want-NSHeight(s.frame);if(grow<=0.5)return;
- item.viewController.preferredContentSize=NSMakeSize(500,want);NSRect f=self.settings.frame;f.size.height+=grow;f.origin.y-=grow;[self.settings setFrame:f display:YES];
+ [s layoutSubtreeIfNeeded];CGFloat over=NSHeight(s.documentView.frame)-NSHeight(s.contentView.bounds);
+ if(over>0&&over<=24){CGFloat want=[self settingsHeightFor:NSHeight(s.frame)+over],grow=want-NSHeight(s.frame);if(grow>0.5){item.viewController.preferredContentSize=NSMakeSize(500,want);NSRect f=self.settings.frame;f.size.height+=grow;f.origin.y-=grow;[self.settings setFrame:f display:YES];[s layoutSubtreeIfNeeded];over=NSHeight(s.documentView.frame)-NSHeight(s.contentView.bounds);}}
+ // A tab that really overflows shows the classic bar all the time, so the rest is visibly there; a tab that fits keeps the quiet overlay.
+ NSScrollerStyle want=over>1?NSScrollerStyleLegacy:NSScrollerStyleOverlay;if(s.scrollerStyle!=want){s.scrollerStyle=want;[s tile];}
 }
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
  if(object==self.settingsTabs)dispatch_async(dispatch_get_main_queue(),^{[self fixSettingsOverflow];});
@@ -551,6 +551,7 @@ static void drawKey(NSRect f,NSString *label,double pressed){NSRect r=NSOffsetRe
  CGFloat width=500;
  for(NSTabViewItem *item in self.settingsTabs.tabViewItems){NSView *content=[self settingsContentOf:item];[content layoutSubtreeIfNeeded];item.viewController.preferredContentSize=NSMakeSize(width,[self settingsHeightFor:content.fittingSize.height]);}
  NSInteger i=self.settingsTabs.selectedTabViewItemIndex;self.settingsTabs.selectedTabViewItemIndex=i==0?1:0;self.settingsTabs.selectedTabViewItemIndex=i;
+ dispatch_async(dispatch_get_main_queue(),^{[self fixSettingsOverflow];});
 }
 - (void)toggleAdvanced:(NSButton *)sender {[NSUserDefaults.standardUserDefaults setBool:sender.state==NSControlStateValueOn forKey:@"showAdvanced"];[self applyVisibility];
  if(sender.state==NSControlStateValueOn)dispatch_async(dispatch_get_main_queue(),^{for(NSView *v in self.advancedViews)if(!v.hidden&&v.window&&[v isDescendantOf:self.settingsTabs.tabView.selectedTabViewItem.view]){[v scrollRectToVisible:v.bounds];break;}});}
@@ -652,7 +653,7 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
 // A row opens by itself the first time it is shown with something set in its details; after that the user decides.
 - (BOOL)ruleOpen:(NSString *)key rule:(NSDictionary *)rule {
  if(!self.seenRules)self.seenRules=[NSMutableSet new];if(!self.expandedRules)self.expandedRules=[NSMutableSet new];
- if(![self.seenRules containsObject:key]){[self.seenRules addObject:key];if([rule[@"customWarmth"] boolValue]||[rule[@"allDisplays"] boolValue]||[self peekTargetsOfRule:rule]!=nil)[self.expandedRules addObject:key];}
+ if(![self.seenRules containsObject:key]){[self.seenRules addObject:key];[self.expandedRules addObject:key];}  // rows open with their warmth row by default; Less folds one for this window
  return [self.expandedRules containsObject:key];
 }
 - (void)toggleRuleDetails:(NSButton *)sender {NSString *key=sender.identifier;if([self.expandedRules containsObject:key])[self.expandedRules removeObject:key];else [self.expandedRules addObject:key];[self rebuildExclusionsList];[self rebuildWebsiteRulesList];}
@@ -810,6 +811,8 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  NSArray *keys=[self.exclusionRules.allKeys sortedArrayUsingComparator:^NSComparisonResult(NSString *a,NSString *b){return [self.exclusionRules[a][@"name"] localizedCaseInsensitiveCompare:self.exclusionRules[b][@"name"]];}];
  if(!keys.count){NSTextField *empty=[NSTextField labelWithString:L(@"No exceptions yet. Add an app, then choose its display settings.")];empty.textColor=NSColor.secondaryLabelColor;NSStackView *pad=[self column:@[empty]];pad.edgeInsets=NSEdgeInsetsMake(10,10,10,10);[self.exclusionsList addArrangedSubview:pad];}
  BOOL first=YES;for(NSString *bundle in keys){if(!first){NSBox *line=[self separator];[self.exclusionsList addArrangedSubview:line];[line.widthAnchor constraintEqualToAnchor:self.exclusionsList.widthAnchor].active=YES;}first=NO;NSView *row=[self exceptionRowForBundle:bundle rule:self.exclusionRules[bundle]];[self.exclusionsList addArrangedSubview:row];[row.widthAnchor constraintEqualToAnchor:self.exclusionsList.widthAnchor].active=YES;}
+ // Extra height of the box goes to this filler, so the rows stay together at the top instead of spreading out.
+ NSView *fill=[NSView new];fill.identifier=@"ExceptionFill";[fill setContentHuggingPriority:1 forOrientation:NSLayoutConstraintOrientationVertical];[self.exclusionsList addArrangedSubview:fill];
 }
 - (void)showExclusions:(id)sender {[self showSettings:nil];self.settingsTabs.selectedTabViewItemIndex=2;}
 - (void)showWebsites:(id)sender {[self showSettings:nil];self.settingsTabs.selectedTabViewItemIndex=3;}
@@ -1770,6 +1773,8 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  BOOL first=YES;for(NSString *key in keys){if(!first){NSBox *line=[self separator];[self.websiteRulesList addArrangedSubview:line];[line.widthAnchor constraintEqualToAnchor:self.websiteRulesList.widthAnchor].active=YES;}first=NO;
   NSView *row=[self websiteRowForKey:key rule:self.browserBridge.rules[key]];
   [self.websiteRulesList addArrangedSubview:row];[row.widthAnchor constraintEqualToAnchor:self.websiteRulesList.widthAnchor].active=YES;}
+ // Extra height of the box goes to this filler, so the rows stay together at the top instead of spreading out.
+ NSView *fill=[NSView new];fill.identifier=@"ExceptionFill";[fill setContentHuggingPriority:1 forOrientation:NSLayoutConstraintOrientationVertical];[self.websiteRulesList addArrangedSubview:fill];
 }
 - (void)removeWebsiteRule:(NSButton *)sender {NSString *key=sender.identifier;if(!key)return;[self.browserBridge handle:@{@"type":@"remove",@"scope":[key containsString:@"://"]?@"url":@"domain",@"site":key}];[self rebuildWebsiteRulesList];}
 // A thank-you card in Settings → General: the first time Settings is opened after 14
