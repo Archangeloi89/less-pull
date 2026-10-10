@@ -550,9 +550,6 @@
 "Every 5 minutes" = "Alle 5 Minuten";
 "Every 10 minutes" = "Alle 10 Minuten";
 "Every 15 minutes" = "Alle 15 Minuten";
-"Night Shift on the lock screen and screensaver" = "Night Shift auf Sperrbildschirm und Bildschirmschoner";
-"The lock screen and the screensaver are drawn by macOS outside Less Pull’s reach, so they show color. With this on, Less Pull turns Night Shift to full warmth there whenever it is quieting your screen, and puts it back when you return. Your Night Shift schedule stays as it is." = "Sperrbildschirm und Bildschirmschoner zeichnet macOS außerhalb der Reichweite von Less Pull, deshalb erscheinen sie in Farbe. Ist dies eingeschaltet, dreht Less Pull dort Night Shift auf volle Wärme, solange es deinen Bildschirm beruhigt, und stellt es bei deiner Rückkehr wieder her. Dein Night-Shift-Zeitplan bleibt unberührt.";
-"Drawn by macOS outside Less Pull’s reach, the lock screen and the screensaver show color. While Less Pull is quieting your screen, Night Shift goes to full warmth there and comes back as it was when you return." = "Sperrbildschirm und Bildschirmschoner zeichnet macOS außerhalb der Reichweite von Less Pull; sie erscheinen in Farbe. Solange Less Pull deinen Bildschirm beruhigt, geht Night Shift dort auf volle Wärme und ist bei deiner Rückkehr wieder wie zuvor.";
 "The local bridge could not be registered." = "Die lokale Verbindung konnte nicht eingerichtet werden.";
 "Less Pull is running from a temporary copy that macOS makes when an app is opened where it was downloaded. Move Less Pull into the Applications folder, open it from there, and try again." = "Less Pull läuft gerade aus einer temporären Kopie, die macOS anlegt, wenn eine App dort geöffnet wird, wo sie heruntergeladen wurde. Verschiebe Less Pull in den Ordner „Programme“, öffne es von dort und versuche es noch einmal.";
 "Start tour and setup" = "Tour und Einrichtung starten";
@@ -596,3 +593,10 @@
 "Downloads the update, checks it, replaces the app and reopens it." = "Lädt das Update, prüft es, ersetzt die App und öffnet sie neu.";
 "Install update" = "Update installieren";
 "An update is ready." = "Ein Update ist bereit.";
+"Lock screen:" = "Sperrbildschirm:";
+"Screensaver:" = "Bildschirmschoner:";
+"Grayscale on the lock screen while Less Pull has it on. It needs a built-in display." = "Graustufen auf dem Sperrbildschirm, solange Less Pull sie eingeschaltet hat. Braucht ein eingebautes Display.";
+"Night Shift at full warmth on the lock screen while Less Pull is quieting your screen. Your schedule stays as it is." = "Night Shift mit voller Wärme auf dem Sperrbildschirm, solange Less Pull deinen Bildschirm beruhigt. Dein Zeitplan bleibt unberührt.";
+"Grayscale while the screensaver runs and Less Pull has it on. It needs a built-in display." = "Graustufen, während der Bildschirmschoner läuft und Less Pull sie eingeschaltet hat. Braucht ein eingebautes Display.";
+"Night Shift at full warmth while the screensaver runs and Less Pull is quieting your screen. Your schedule stays as it is." = "Night Shift mit voller Wärme, während der Bildschirmschoner läuft und Less Pull deinen Bildschirm beruhigt. Dein Zeitplan bleibt unberührt.";
+"What the lock screen and the screensaver keep of Less Pull. Grayscale there needs a built-in display; an external display shows only the Night Shift choice. Everything goes back as it was when you return." = "Was Sperrbildschirm und Bildschirmschoner von Less Pull behalten. Graustufen dort brauchen ein eingebautes Display; ein externes zeigt nur die Night-Shift-Wahl. Bei deiner Rückkehr ist alles wieder wie zuvor.";

@@ -547,9 +547,6 @@
 "Every 5 minutes" = "Каждые 5 минут";
 "Every 10 minutes" = "Каждые 10 минут";
 "Every 15 minutes" = "Каждые 15 минут";
-"Night Shift on the lock screen and screensaver" = "Night Shift на экране блокировки и заставке";
-"The lock screen and the screensaver are drawn by macOS outside Less Pull’s reach, so they show color. With this on, Less Pull turns Night Shift to full warmth there whenever it is quieting your screen, and puts it back when you return. Your Night Shift schedule stays as it is." = "Экран блокировки и заставку macOS рисует вне досягаемости Less Pull, поэтому они цветные. Если включено, Less Pull выводит там Night Shift на полную теплоту, пока успокаивает ваш экран, и возвращает всё как было, когда вы вернётесь. Расписание Night Shift не меняется.";
-"Drawn by macOS outside Less Pull’s reach, the lock screen and the screensaver show color. While Less Pull is quieting your screen, Night Shift goes to full warmth there and comes back as it was when you return." = "Экран блокировки и заставку macOS рисует вне досягаемости Less Pull; они цветные. Пока Less Pull успокаивает ваш экран, Night Shift там на полной теплоте, а когда вы вернётесь, всё снова как было.";
 "The local bridge could not be registered." = "Не удалось зарегистрировать локальное соединение.";
 "Less Pull is running from a temporary copy that macOS makes when an app is opened where it was downloaded. Move Less Pull into the Applications folder, open it from there, and try again." = "Less Pull запущен из временной копии, которую macOS создаёт, когда приложение открывают там, куда его скачали. Переместите Less Pull в папку «Программы», откройте оттуда и попробуйте снова.";
 "Start tour and setup" = "Начать тур и настройку";
@@ -593,3 +590,10 @@
 "Downloads the update, checks it, replaces the app and reopens it." = "Скачивает обновление, проверяет его, заменяет приложение и открывает заново.";
 "Install update" = "Установить обновление";
 "An update is ready." = "Обновление готово.";
+"Lock screen:" = "Экран блокировки:";
+"Screensaver:" = "Заставка:";
+"Grayscale on the lock screen while Less Pull has it on. It needs a built-in display." = "Оттенки серого на экране блокировки, пока они включены в Less Pull. Нужен встроенный экран.";
+"Night Shift at full warmth on the lock screen while Less Pull is quieting your screen. Your schedule stays as it is." = "Night Shift на полной теплоте на экране блокировки, пока Less Pull успокаивает ваш экран. Расписание не меняется.";
+"Grayscale while the screensaver runs and Less Pull has it on. It needs a built-in display." = "Оттенки серого, пока идёт заставка и они включены в Less Pull. Нужен встроенный экран.";
+"Night Shift at full warmth while the screensaver runs and Less Pull is quieting your screen. Your schedule stays as it is." = "Night Shift на полной теплоте, пока идёт заставка и Less Pull успокаивает ваш экран. Расписание не меняется.";
+"What the lock screen and the screensaver keep of Less Pull. Grayscale there needs a built-in display; an external display shows only the Night Shift choice. Everything goes back as it was when you return." = "Что экран блокировки и заставка сохраняют от Less Pull. Серому там нужен встроенный экран; внешний показывает только выбор Night Shift. Когда вы вернётесь, всё снова как было.";

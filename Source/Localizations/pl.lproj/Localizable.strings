@@ -547,9 +547,6 @@
 "Every 5 minutes" = "Co 5 minut";
 "Every 10 minutes" = "Co 10 minut";
 "Every 15 minutes" = "Co 15 minut";
-"Night Shift on the lock screen and screensaver" = "Night Shift na ekranie blokady i wygaszaczu";
-"The lock screen and the screensaver are drawn by macOS outside Less Pull’s reach, so they show color. With this on, Less Pull turns Night Shift to full warmth there whenever it is quieting your screen, and puts it back when you return. Your Night Shift schedule stays as it is." = "Ekran blokady i wygaszacz macOS rysuje poza zasięgiem Less Pull, dlatego są w kolorze. Gdy to włączysz, Less Pull ustawia tam Night Shift na pełne ciepło, dopóki wycisza Twój ekran, i przywraca stan sprzed, gdy wracasz. Harmonogram Night Shift się nie zmienia.";
-"Drawn by macOS outside Less Pull’s reach, the lock screen and the screensaver show color. While Less Pull is quieting your screen, Night Shift goes to full warmth there and comes back as it was when you return." = "Ekran blokady i wygaszacz macOS rysuje poza zasięgiem Less Pull; są w kolorze. Dopóki Less Pull wycisza Twój ekran, Night Shift jest tam na pełnym cieple, a gdy wracasz, wszystko jest jak przedtem.";
 "The local bridge could not be registered." = "Nie udało się zarejestrować lokalnego połączenia.";
 "Less Pull is running from a temporary copy that macOS makes when an app is opened where it was downloaded. Move Less Pull into the Applications folder, open it from there, and try again." = "Less Pull działa z tymczasowej kopii, którą macOS tworzy, gdy aplikację otwiera się tam, gdzie została pobrana. Przenieś Less Pull do folderu Aplikacje, otwórz go stamtąd i spróbuj ponownie.";
 "Start tour and setup" = "Rozpocznij tour i konfigurację";
@@ -593,3 +590,10 @@
 "Downloads the update, checks it, replaces the app and reopens it." = "Pobiera aktualizację, sprawdza ją, podmienia aplikację i otwiera ją ponownie.";
 "Install update" = "Zainstaluj aktualizację";
 "An update is ready." = "Aktualizacja jest gotowa.";
+"Lock screen:" = "Ekran blokady:";
+"Screensaver:" = "Wygaszacz:";
+"Grayscale on the lock screen while Less Pull has it on. It needs a built-in display." = "Skala szarości na ekranie blokady, dopóki Less Pull ma ją włączoną. Wymaga wbudowanego ekranu.";
+"Night Shift at full warmth on the lock screen while Less Pull is quieting your screen. Your schedule stays as it is." = "Night Shift na pełnym cieple na ekranie blokady, dopóki Less Pull wycisza Twój ekran. Harmonogram się nie zmienia.";
+"Grayscale while the screensaver runs and Less Pull has it on. It needs a built-in display." = "Skala szarości, gdy działa wygaszacz i Less Pull ma ją włączoną. Wymaga wbudowanego ekranu.";
+"Night Shift at full warmth while the screensaver runs and Less Pull is quieting your screen. Your schedule stays as it is." = "Night Shift na pełnym cieple, gdy działa wygaszacz i Less Pull wycisza Twój ekran. Harmonogram się nie zmienia.";
+"What the lock screen and the screensaver keep of Less Pull. Grayscale there needs a built-in display; an external display shows only the Night Shift choice. Everything goes back as it was when you return." = "Co ekran blokady i wygaszacz zachowują z Less Pull. Szarość tam wymaga wbudowanego ekranu; zewnętrzny pokazuje tylko wybór Night Shift. Gdy wracasz, wszystko jest jak przedtem.";
