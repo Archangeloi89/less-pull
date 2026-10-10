@@ -729,7 +729,9 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  return sub;
 }
 // Exceptions from the menu: a small panel under the icon with the same row as the Apps or Websites tab. It stays until you click elsewhere or press Escape; every change applies right away.
-- (void)openAppExceptionPanel:(id)sender {NSString *bundle=self.lastExternalApp.bundleIdentifier;if(!bundle)return;[self currentAppRuleCreating:YES];self.panelBundle=bundle;self.panelTab=nil;[self showExceptionPanel];}
+- (void)openAppExceptionPanel:(id)sender {NSString *bundle=self.lastExternalApp.bundleIdentifier;if(!bundle)return;BOOL existed=self.exclusionRules[bundle]!=nil;[self currentAppRuleCreating:YES];
+ if(!existed&&self.exclusionRules[bundle]){NSMutableDictionary *r=[self.exclusionRules[bundle] mutableCopy];r[@"enabled"]=@YES;self.exclusionRules[bundle]=r;[self saveExclusionRules];}  // opened from the menu, the new exception starts switched on
+ self.panelBundle=bundle;self.panelTab=nil;[self showExceptionPanel];}
 - (void)openSiteExceptionPanel:(id)sender {NSDictionary *tab=[self menuTab];if(!tab)return;self.panelTab=tab;self.panelBundle=nil;if(!self.websiteScopeExact&&!self.browserBridge.rules[tab[@"site"]]&&self.browserBridge.rules[tab[@"url"]?:@""])self.websiteScopeExact=YES;[self ensurePanelWebsiteRule];[self showExceptionPanel];}
 - (void)ensurePanelWebsiteRule {NSDictionary *tab=self.panelTab;if(!tab||[self websiteRuleForTab:tab])return;NSMutableDictionary *rule=[NSMutableDictionary new];rule[@"enabled"]=@YES;[self storeWebsiteRule:rule forTab:tab];}
 - (void)panelScopeChanged:(NSSegmentedControl *)sender {self.websiteScopeExact=sender.selectedSegment==1;[self ensurePanelWebsiteRule];[self refreshExceptionPanel];}
