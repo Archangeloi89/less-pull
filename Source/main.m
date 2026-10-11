@@ -2013,29 +2013,39 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  return [NSDate.date compare:due]!=NSOrderedAscending;
 }
 - (NSView *)thanksCardView {
+ if([NSUserDefaults.standardUserDefaults boolForKey:@"thanksGiven"])return [self thanksGreetingView];
  NSTextField *title=[NSTextField labelWithString:L(@"Are you enjoying Less Pull?")];title.font=[NSFont systemFontOfSize:15 weight:NSFontWeightSemibold];
- NSTextField *body=[NSTextField wrappingLabelWithString:L(@"This app is a gift from the universe to you. It has been fully funded by life.\n\nMy future projects and my work are still being developed, and they benefit from any kind of support: a contribution, telling a friend, or whatever you choose. Thanks for being part of life and making it more beautiful for everyone.\n\n— Jiri Arion Rose")];body.preferredMaxLayoutWidth=404;
+ NSTextField *body=[NSTextField wrappingLabelWithString:L(@"This app is a gift from the universe to you. It has been fully funded by life.\n\nMy future projects and my work are still growing. Support comes in many forms: a contribution, a word to someone Less Pull might help, feedback that makes the app better, or whatever suits you. Thanks for being part of life and making it more beautiful for everyone.\n\n— Jiri Arion Rose")];body.preferredMaxLayoutWidth=404;
  NSColor *ember=[NSColor colorWithSRGBRed:.93 green:.55 blue:.28 alpha:1];
  NSButton *support=[NSButton buttonWithTitle:L(@"Support my work") target:self action:@selector(thanksSupport:)];support.keyEquivalent=@"\r";support.bezelColor=ember;support.attributedTitle=[[NSAttributedString alloc]initWithString:[@"🧡 " stringByAppendingString:L(@"Support my work")] attributes:@{NSForegroundColorAttributeName:NSColor.whiteColor,NSFontAttributeName:[NSFont systemFontOfSize:13 weight:NSFontWeightSemibold]}];[self helpView:support text:L(@"Open buymeacoffee.com/HsERf62fiZ in your default browser.") label:L(@"Support my work — Buy me a coffee")];
- NSButton *later=[NSButton buttonWithTitle:L(@"Remind me in a month") target:self action:@selector(thanksLater:)];[self helpView:later text:L(@"Hide this and show it again in about a month.") label:L(@"Remind me in a month")];
- NSButton *hide=[NSButton buttonWithTitle:L(@"Hide") target:self action:@selector(thanksHide:)];[self helpView:hide text:L(@"Hides this card for now. Tick the box below to hide it for good.") label:L(@"Hide")];
- NSButton *never=[NSButton checkboxWithTitle:L(@"Don’t show this again") target:nil action:nil];never.font=[NSFont systemFontOfSize:11];never.identifier=@"thanksNever";[self helpView:never text:L(@"Hide this for good.") label:L(@"Don’t show this again")];
+ NSButton *later=[NSButton buttonWithTitle:L(@"Remind me later") target:self action:@selector(thanksLater:)];[self helpView:later text:L(@"Hide this for now. It comes back later, each time after a longer while.") label:L(@"Remind me later")];
  NSMutableArray *links=[NSMutableArray new];for(NSButton *b in [self authorLinkButtons])if(![b.identifier isEqual:LessPullCoffee]){b.font=[NSFont systemFontOfSize:11];[links addObject:b];}
  NSButton *tell=[NSButton buttonWithTitle:L(@"Tell a friend") target:self action:@selector(shareLessPull:)];tell.bezelStyle=NSBezelStyleInline;tell.font=[NSFont systemFontOfSize:11];tell.image=[NSImage imageWithSystemSymbolName:@"square.and.arrow.up" accessibilityDescription:nil];tell.imagePosition=NSImageLeading;[self helpView:tell text:L(@"Share Less Pull: the project page and one line about it, through Messages, Mail, AirDrop or anywhere else.") label:L(@"Share Less Pull")];
  // For those who already did: a warm thank-you instead of the card, and it stays away for good.
  NSButton *given=[NSButton buttonWithTitle:L(@"I’ve already given back") target:self action:@selector(thanksGiven:)];given.bezelStyle=NSBezelStyleInline;[self helpView:given text:L(@"Hide this card for good, with thanks.") label:L(@"I’ve already given back")];
- NSStackView *buttons=[self row:@[support,later,[self spacer]]];buttons.spacing=8;NSStackView *linkRow=[self row:[links arrayByAddingObjectsFromArray:@[tell,[self spacer],hide]]];linkRow.spacing=4;NSStackView *neverRow=[self row:@[given,[self spacer],never]];given.font=[NSFont systemFontOfSize:11];
+ NSStackView *buttons=[self row:@[support,later,[self spacer]]];buttons.spacing=8;NSStackView *linkRow=[self row:[links arrayByAddingObjectsFromArray:@[tell,[self spacer]]]];linkRow.spacing=4;NSStackView *neverRow=[self row:@[given,[self spacer]]];given.font=[NSFont systemFontOfSize:11];
  NSStackView *card=[self column:@[title,body,buttons,linkRow,neverRow]];card.spacing=10;card.edgeInsets=NSEdgeInsetsMake(14,14,12,14);card.wantsLayer=YES;card.layer.cornerRadius=8;card.layer.backgroundColor=[ember colorWithAlphaComponent:.1].CGColor;card.layer.borderWidth=1;card.layer.borderColor=[ember colorWithAlphaComponent:.25].CGColor;
  for(NSView *v in card.arrangedSubviews)if([v isKindOfClass:NSStackView.class])[v.widthAnchor constraintEqualToAnchor:card.widthAnchor constant:-28].active=YES;
  return card;
 }
-- (BOOL)thanksNeverTicked {for(NSView *row in ((NSStackView *)self.thanksCard).arrangedSubviews)if([row isKindOfClass:NSStackView.class])for(NSView *v in ((NSStackView *)row).arrangedSubviews)if([v.identifier isEqual:@"thanksNever"])return ((NSButton *)v).state==NSControlStateValueOn;return NO;}
 - (void)removeThanksCard {NSView *card=self.thanksCard;if(!card)return;NSStackView *column=(NSStackView *)card.superview;[column removeArrangedSubview:card];[card removeFromSuperview];self.thanksCard=nil;self.thanksWanted=NO;[column layoutSubtreeIfNeeded];self.settingsTabs.tabViewItems.firstObject.viewController.preferredContentSize=NSMakeSize(500,column.fittingSize.height);self.settingsTabs.selectedTabViewItemIndex=1;self.settingsTabs.selectedTabViewItemIndex=0;}
 - (void)thanksSupport:(id)sender {[NSUserDefaults.standardUserDefaults setObject:[NSDate.date dateByAddingTimeInterval:90*86400] forKey:@"thanksNextDate"];[NSWorkspace.sharedWorkspace openURL:[NSURL URLWithString:LessPullCoffee]];}  // the card stays; it comes back by itself in three months at the earliest
-- (void)thanksHide:(id)sender {if([self thanksNeverTicked]){[NSUserDefaults.standardUserDefaults setBool:YES forKey:@"thanksDismissed"];[NSUserDefaults.standardUserDefaults removeObjectForKey:@"thanksNextDate"];}else if(![NSUserDefaults.standardUserDefaults objectForKey:@"thanksNextDate"]||[[NSUserDefaults.standardUserDefaults objectForKey:@"thanksNextDate"] compare:NSDate.date]==NSOrderedAscending)[NSUserDefaults.standardUserDefaults setObject:[NSDate.date dateByAddingTimeInterval:7*86400] forKey:@"thanksNextDate"];[self removeThanksCard];}
-- (void)thanksLater:(id)sender {[NSUserDefaults.standardUserDefaults setObject:[NSDate.date dateByAddingTimeInterval:30*86400] forKey:@"thanksNextDate"];[self removeThanksCard];}
+// Later, each time after a longer while: a month, three, six, a year, then once a year. No "never": an invitation, not a nag.
+- (void)thanksLater:(id)sender {NSUserDefaults *d=NSUserDefaults.standardUserDefaults;NSInteger n=[d integerForKey:@"thanksLaterCount"];NSArray *days=@[@30,@90,@180,@365];
+ [d setObject:[NSDate.date dateByAddingTimeInterval:[days[MIN(n,(NSInteger)days.count-1)] doubleValue]*86400] forKey:@"thanksNextDate"];[d setInteger:n+1 forKey:@"thanksLaterCount"];[self removeThanksCard];}
+// Those who gave back: once a year a greeting, not a request.
+- (NSView *)thanksGreetingView {
+ NSColor *ember=[NSColor colorWithSRGBRed:.93 green:.55 blue:.28 alpha:1];
+ NSTextField *title=[NSTextField labelWithString:L(@"Another year of Less Pull with you")];title.font=[NSFont systemFontOfSize:15 weight:NSFontWeightSemibold];
+ NSTextField *body=[NSTextField wrappingLabelWithString:L(@"Thank you for being part of it. If you feel like giving again, the door is open; if not, enjoy the quiet.\n\n— Jiri Arion Rose")];body.preferredMaxLayoutWidth=404;
+ NSButton *support=[NSButton buttonWithTitle:L(@"Support my work") target:self action:@selector(thanksSupport:)];[self helpView:support text:L(@"Open buymeacoffee.com/HsERf62fiZ in your default browser.") label:L(@"Support my work")];
+ NSButton *close=[NSButton buttonWithTitle:L(@"Close") target:self action:@selector(thanksClose:)];close.keyEquivalent=@"\r";
+ NSStackView *row=[self row:@[support,[self spacer],close]];
+ NSStackView *card=[self column:@[title,body,row]];card.spacing=10;card.edgeInsets=NSEdgeInsetsMake(14,14,12,14);card.wantsLayer=YES;card.layer.cornerRadius=8;card.layer.backgroundColor=[ember colorWithAlphaComponent:.1].CGColor;card.layer.borderWidth=1;card.layer.borderColor=[ember colorWithAlphaComponent:.25].CGColor;
+ [row.widthAnchor constraintEqualToAnchor:card.widthAnchor constant:-28].active=YES;return card;
+}
 - (void)thanksGiven:(id)sender {
- NSUserDefaults *d=NSUserDefaults.standardUserDefaults;[d setBool:YES forKey:@"thanksDismissed"];[d removeObjectForKey:@"thanksNextDate"];
+ NSUserDefaults *d=NSUserDefaults.standardUserDefaults;[d setBool:YES forKey:@"thanksGiven"];[d setObject:[NSDate.date dateByAddingTimeInterval:365*86400] forKey:@"thanksNextDate"];
  NSStackView *card=(NSStackView *)self.thanksCard;if(!card)return;
  for(NSView *v in card.arrangedSubviews.copy){[card removeArrangedSubview:v];[v removeFromSuperview];}
  NSTextField *title=[NSTextField labelWithString:L(@"Thank you 🧡")];title.font=[NSFont systemFontOfSize:15 weight:NSFontWeightSemibold];
@@ -2045,8 +2055,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  for(NSView *v in @[title,body,row])[card addArrangedSubview:v];[row.widthAnchor constraintEqualToAnchor:card.widthAnchor constant:-28].active=YES;
  if(!NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceMotion){body.alphaValue=0;title.alphaValue=0;[NSAnimationContext runAnimationGroup:^(NSAnimationContext *c){c.duration=.6;title.animator.alphaValue=1;body.animator.alphaValue=1;} completionHandler:nil];}
 }
-- (void)thanksClose:(id)sender {[self removeThanksCard];}
-- (void)thanksNever:(id)sender {[NSUserDefaults.standardUserDefaults setBool:YES forKey:@"thanksDismissed"];[NSUserDefaults.standardUserDefaults removeObjectForKey:@"thanksNextDate"];[self removeThanksCard];}
+- (void)thanksClose:(id)sender {NSUserDefaults *d=NSUserDefaults.standardUserDefaults;if([d boolForKey:@"thanksGiven"])[d setObject:[NSDate.date dateByAddingTimeInterval:365*86400] forKey:@"thanksNextDate"];[self removeThanksCard];}
 - (NSStackView *)aboutTab {
  NSImageView *icon=[NSImageView imageViewWithImage:NSApp.applicationIconImage];[icon.widthAnchor constraintEqualToConstant:64].active=YES;[icon.heightAnchor constraintEqualToConstant:64].active=YES;icon.accessibilityLabel=L(@"Less Pull app icon");
  NSTextField *name=[NSTextField labelWithString:L(@"Less Pull")];name.font=[NSFont systemFontOfSize:20 weight:NSFontWeightSemibold];
