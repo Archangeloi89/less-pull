@@ -661,10 +661,13 @@
 "When the night starts." = "Wann die Nacht beginnt.";
 "When the night ends." = "Wann die Nacht endet.";
 "On at night and off by day, as set under Night below." = "Nachts an und tagsüber aus, wie unter „Nacht“ eingestellt.";
-"\n\nmacOS keeps sunset to sunrise only with Location Services on and, under System Services, Setting time zone allowed. Until then Less Pull works it out from your time zone and switches Night Shift itself." = "\n\nSonnenuntergang bis Sonnenaufgang hält macOS nur mit eingeschalteten Ortungsdiensten und, unter „Systemdienste“, erlaubtem „Zeitzone festlegen“. Bis dahin rechnet Less Pull die Zeiten aus deiner Zeitzone und schaltet Night Shift selbst.";
+"\n\nmacOS keeps sunset to sunrise only when it may use your location for the time zone: Location Services on, and under General → Date & Time, Set time zone automatically on. Until then Less Pull works it out from your time zone and switches Night Shift itself." = "\n\nSonnenuntergang bis Sonnenaufgang hält macOS nur, wenn es deinen Standort für die Zeitzone nutzen darf: Ortungsdienste an und unter „Allgemein“ → „Datum & Uhrzeit“ „Zeitzone automatisch festlegen“ an. Bis dahin rechnet Less Pull die Zeiten aus deiner Zeitzone und schaltet Night Shift selbst.";
 "Location Services…" = "Ortungsdienste …";
-"Opens Privacy & Security → Location Services. Turn them on, then under System Services allow Setting time zone, and macOS keeps sunset to sunrise itself." = "Öffnet „Datenschutz & Sicherheit“ → „Ortungsdienste“. Schalte sie ein und erlaube unter „Systemdienste“ die Zeitzone, dann hält macOS Sonnenuntergang bis Sonnenaufgang selbst.";
 "Open Location Services settings" = "Einstellungen der Ortungsdienste öffnen";
 "Displays Settings…" = "Displays-Einstellungen …";
 "Opens Displays in System Settings. Night Shift… at the bottom shows the same schedule and its color temperature." = "Öffnet „Displays“ in den Systemeinstellungen. „Night Shift …“ ganz unten zeigt denselben Zeitplan und die Farbtemperatur.";
 "Open Displays settings" = "Displays-Einstellungen öffnen";
+"Opens Privacy & Security → Location Services. Turn them on; under System Services (Details… at the bottom), Setting time zone should be allowed too." = "Öffnet „Datenschutz & Sicherheit“ → „Ortungsdienste“. Schalte sie ein; unter „Systemdienste“ (ganz unten „Details …“) sollte auch „Zeitzone festlegen“ erlaubt sein.";
+"Date & Time…" = "Datum & Uhrzeit …";
+"Opens General → Date & Time. Turn on Set time zone automatically using your current location." = "Öffnet „Allgemein“ → „Datum & Uhrzeit“. Schalte „Zeitzone automatisch anhand des aktuellen Standorts festlegen“ ein.";
+"Open Date & Time settings" = "Einstellungen für Datum & Uhrzeit öffnen";
