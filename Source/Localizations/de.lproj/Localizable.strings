@@ -88,7 +88,7 @@
 "A click opens the menu and a right-click opens the session panel. Settings → Shortcuts can give either button the menu, Grayscale or the session panel, and holds a shortcut for turning Grayscale on or off." = "Ein Klick öffnet das Menü, ein Rechtsklick das Sitzungsfenster. Unter Einstellungen → Kurzbefehle bekommt jede Taste das Menü, die Graustufen oder das Sitzungsfenster, und dort liegt auch ein Kurzbefehl, um die Graustufen ein- oder auszuschalten.";
 "Call back" = "Zurückholen";
 "Call me back in" = "Hol mich zurück in";
-"Call me back in %ld min" = "Hol mich zurück in %ld Min.";
+"Call me back in %ld min" = "Zurück in %ld Min.";
 "Call me back in, minutes" = "Hol mich zurück in, Minuten";
 "Cancel" = "Abbrechen";
 "Change a site here, or from the menu while you are on it. Less Pull needs to be running; private tabs are left alone." = "Ändere eine Website hier oder im Menü, während du auf ihr bist. Less Pull muss dafür geöffnet sein; private Tabs bleiben unberührt.";
@@ -624,9 +624,12 @@
 "Session or call me back" = "Sitzung oder zurückholen";
 "A session is focused work with a gentle end. Call me back is no session: Less Pull calls you back once after the time you choose." = "Eine Sitzung ist konzentrierte Arbeit, die sanft ausklingt. Zurückholen ist keine Sitzung: Less Pull holt dich nach der gewählten Zeit einmal zurück.";
 "Break" = "Auszeit";
-"A break with one call back. How long?" = "Eine Auszeit, nach der Less Pull dich einmal zurückholt. Wie lange?";
+"A break with one call back. How long?" = "Kurz weg, sanft zurückgeholt. Wie lang?";
 "A session is focused work with a gentle end. A break is no session: Less Pull calls you back once after the time you choose." = "Eine Sitzung ist konzentrierte Arbeit, die sanft ausklingt. Eine Auszeit ist keine Sitzung: Less Pull holt dich nach der gewählten Zeit einmal zurück.";
 "Session or break" = "Sitzung oder Auszeit";
 "Break · back in %@ min" = "Auszeit · zurück in %@ Min.";
 "Offer a break when a session ends" = "Am Ende einer Sitzung eine Auszeit anbieten";
 "Taking a break? Call me back in" = "Eine Auszeit? Hol mich zurück in";
+"Exception settings" = "Einstellungen der Ausnahme";
+"All app exceptions, under Settings → Apps." = "Alle App-Ausnahmen, unter Einstellungen → Apps.";
+"All website exceptions, under Settings → Websites." = "Alle Website-Ausnahmen, unter Einstellungen → Websites.";
