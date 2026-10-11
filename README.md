@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-40"><b>Download build 40</b></a>
+  <a href="https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-41"><b>Download build 41</b></a>
   &nbsp;·&nbsp; <a href="#install">Install</a>
   &nbsp;·&nbsp; <a href="docs/EXCEPTIONS.md">App and website exceptions</a>
   &nbsp;·&nbsp; <a href="docs/README.md">All docs</a>
@@ -137,16 +137,18 @@ Less Pull changes the display at the very end of the pipeline, after the picture
 ## Sessions
 
 <p align="center">
-  <img src="docs/assets/sessions.png" width="100%" alt="A session, in the menu bar. Five icon states in a row: at rest; a 25-minute session starts, with a thin ring and the number 25; the ring fills as it runs, 11 left; past the end the ring is orange and the count reads minus 4; away, until the call back, dimmed with 9. Below, two panels: A session, with chips 25, 45, 60 and 90 min, a slider at 35 min, Add to presets and Start 35 min; and the panel after the end: minus 4:12, That was 25 minutes, Leaving? Call me back in, chips 5, 9, 13 and 33 min, a slider at 7 min, Keep going and Leave quietly. Between them, a glow and a soft gong.">
+  <img src="docs/assets/sessions.png" width="100%" alt="A session, in the menu bar. Five icon states in a row: at rest; a 25-minute session starts, with a thin ring and the number 25; the ring fills as it runs, 11 left; past the end the ring is orange and the count reads minus 4; a break, until the call back, dimmed with 9. Below, two panels: the start panel with Session and Break at the top, chips 25, 45, 60 and 90 min, a slider at 35 min, Add to presets and Start 35 min; and the panel after the end: minus 4:12, That was 25 minutes, Taking a break? Call me back in, chips 5, 9, 13 and 33 min, Keep going and Leave quietly. Between them, a glow and a soft gong.">
 </p>
 
 <sub>Drawn in the style of the app; the panels are what the icon opens.</sub>
 
-A session is a stretch of focused work with a gentle end. Choose **Start a session…**, the first item in the menu: a small panel grows out of the icon with your lengths (25, 45, 60 and 90 minutes to begin with; change them under **Settings… → Sessions**), and folds back into the icon once you choose. Any other length: scrub the slider below the chips, the number follows, and one button starts it; tick Add to presets to keep it. A right-click on a chip removes it from the presets. The icon gains a thin ring that fills as the session runs, with the minutes left next to it.
+A session is a stretch of focused work with a gentle end. Choose **Session or break…**, the first item in the menu: a small panel grows out of the icon, with **Session | Break** at the top. A session offers your lengths (25, 45, 60 and 90 minutes to begin with; change them under **Settings… → Sessions**), and folds back into the icon once you choose. Any other length: scrub the slider below the chips, the number follows, and one button starts it; tick Add to presets to keep it. A right-click on a chip removes it from the presets. The icon gains a thin ring that fills as the session runs, with the minutes left next to it.
 
 At the end, a warm glow blooms across every display for three seconds with one line of text, and a soft gong sounds, built from pure tones on the 432 Hz reference and the solfeggio pitches, low and short. Two sound styles are tuned by ear, "Strokes" and "Chords", or none; they live with the glow switch, a preview of each sound and a volume slider under the advanced options on the Sessions tab. Nothing to dismiss: the count simply goes on past the end, −0, −1, −2 in the warm color, breathing gently to say it can be clicked, so you can see how far you have stretched. A quieter reminder can come every few minutes if you ask for one; by default it never does. Or choose "Stop quietly" under Sessions, and the session simply ends with the glow and the sound.
 
-While a session runs, a click on the icon opens a small panel under it instead of the menu; the other mouse button still opens the menu. Once the session is over, the panel asks **Leaving? Call me back in** and offers your own choices (5, 9, 13 and 33 minutes to begin with) or any time from a slider, with Add to presets, next to **Keep going**, **Leave quietly**, and a gear that opens the Sessions tab. If you would rather not be offered a call back, untick it under Sessions, and the panel keeps only those two buttons. After the call back, a warm sound of its own, and the session is over for good. You are called back once.
+While a session runs, a click on the icon opens a small panel under it instead of the menu; the other mouse button still opens the menu. Once the session is over, the panel says how long it was and asks **Taking a break? Call me back in**, with your break lengths (5, 9, 13 and 33 minutes to begin with), next to **Keep going**, **Leave quietly**, and a gear that opens the Sessions tab. If you would rather not be offered a break, untick **Offer a break when a session ends** under Sessions, and the panel keeps only those two buttons. After the call back, a warm sound of its own, and the session is over for good. You are called back once.
+
+Stepping away without a session? Choose **Break** at the top of the panel, pick a length or any time from the slider, and Less Pull calls you back once. Meanwhile the menu reads **Break · back in 9 min**.
 
 <sub>The glow never takes focus and never blocks a click. Under Reduce Motion it appears and disappears without animation.</sub>
 
@@ -181,14 +183,14 @@ The icon tells you the state: its left half fills while grayscale is showing, it
 
 - The first line tells you what is applied right now, with **Pause Less Pull** right below it: the plain display for 15 minutes, an hour, or until you resume.
 - **Grayscale**, the **Extra Warmth** slider and **Night Shift** change your defaults. While Grayscale or Night Shift is on, the line below it turns it off for a while, and it comes back by itself.
-- **Start a session…** begins a stretch of focused work, or just a call back when you step away.
+- **Session or break…** begins a stretch of focused work, or a break with one call back when you step away.
 - **Exception for [current app]…** opens a small panel under the icon with the same row as in Settings, and every change applies right away. With a website in front, **Exception for [that site]…** does the same for the domain or the exact page.
 
 <p align="center">
-  <img src="docs/assets/exceptions.png" width="100%" alt="The Less Pull menu under its icon, with Start a session, the status line Grayscale, Warmth 40%, Pause Less Pull, Grayscale, Grayscale off for, the Extra Warmth slider at 40 percent, Night Shift, Night Shift off for, Exception for Finder, Settings and Quit. Beside it, the exception panel for Finder under the icon: Use this exception, Grayscale and Night Shift each as Default, On or Off, and Use default warmth with its slider.">
+  <img src="docs/assets/exceptions.png" width="100%" alt="The Less Pull menu under its icon, with Session or break, the status line Grayscale, Warmth 40%, Pause Less Pull, Grayscale, Grayscale off for, the Extra Warmth slider at 40 percent, Night Shift, Night Shift off for, Exception for Finder, Settings and Quit. Beside it, the exception panel for Finder under the icon: Use this exception, Grayscale and Night Shift each as Default, On or Off, and Use default warmth with its slider.">
 </p>
 
-<sub>The menu and the exception panel it opens. Real screenshots of build 40 with an example rule.</sub>
+<sub>The menu and the exception panel it opens. Real screenshots of build 41 with an example rule.</sub>
 
 <details>
 <summary><b>See the menu beside the Settings window, and every Settings tab</b></summary>
@@ -214,7 +216,7 @@ Display options appear only with two or more displays connected, and the fine-tu
   <img src="docs/assets/settings-tabs.png" width="100%" alt="Five tabs of the Settings window: Shortcuts with Peek in color and the Toggle Grayscale shortcut; Sessions with lengths, call-back times and what happens at the end; Apps with example exceptions for Music, Photos and TextEdit; Websites with example exceptions for example.com and one exact page; About with the version, the author's links, Help, Support and Updates.">
 </p>
 
-<sub>Real screenshots of build 40 with example rules.</sub>
+<sub>Real screenshots of build 41 with example rules.</sub>
 
 </details>
 
@@ -226,7 +228,7 @@ The app changes the display; nothing is injected into pages, and the Mac app has
 
 ## Install
 
-1. Download **Less-Pull-1.4.4-40.dmg** from the [build 40 release](https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-40), open it and drag **Less Pull** onto **Applications**.
+1. Download **Less-Pull-1.4.4-41.dmg** from the [build 41 release](https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-41), open it and drag **Less Pull** onto **Applications**.
 2. Open it. The Settings window greets you once; the circle in the menu bar is where you choose Grayscale and Extra Warmth from then on. On the first launch the welcome opens right under it, the icon fades in and out for a moment, and a small animated drawing shows what to do when the menu bar is full: hold ⌘ and drag the circle toward the clock. (macOS decides where new icons start, and apps cannot choose a spot.)
 3. For website rules, open **Settings… → Websites**, choose **Install Browser Extension…**, pick a browser from the list, and follow the steps for [your browser](docs/INSTALL.md#safari-brave-chrome-firefox-opera-or-edge).
 
@@ -234,7 +236,7 @@ The app changes the display; nothing is injected into pages, and the Mac app has
 > Setting up with an AI agent? The release includes an **agent pack** (`Less-Pull-Agent-Pack.zip`): a script that installs the app and the bridge, and scripts that connect Brave, Chrome, Opera, Edge and Firefox, with the instructions an agent needs. See [tools/agent-pack](tools/agent-pack/README.md).
 
 > [!NOTE]
-> Version 1.4.4 (build 40) is a test build for Apple silicon Macs. The version number stays 1.4.4 on purpose; the build number is what changes. It is signed with a Developer ID and notarized by Apple, so it opens like any other app. It is built for macOS 13 and later and has been tested on macOS 27 only. The browser extension is loaded locally and is not in the Chrome Web Store, on addons.mozilla.org or in the App Store. See [install help](docs/INSTALL.md) and [what is still open](docs/RELEASE-PLAN.md).
+> Version 1.4.4 (build 41) is a test build for Apple silicon Macs. The version number stays 1.4.4 on purpose; the build number is what changes. It is signed with a Developer ID and notarized by Apple, so it opens like any other app. It is built for macOS 13 and later and has been tested on macOS 27 only. The browser extension is loaded locally and is not in the Chrome Web Store, on addons.mozilla.org or in the App Store. See [install help](docs/INSTALL.md) and [what is still open](docs/RELEASE-PLAN.md).
 
 ## Private by design
 
