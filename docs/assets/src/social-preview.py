@@ -69,6 +69,8 @@ color = screen.convert('RGB')
 right = arr[:, sw // 2:] @ matrix(0.35, True).T  # grayscale with a light amber, an everyday setting
 arr[:, sw // 2:] = right.clip(0, 255)
 screen = Image.fromarray(arr.astype('uint8'), 'RGB')
+if '--parts' in sys.argv:  # the two screens, for the moving before/after (before-after-sweep.py)
+    color.save(out + '-color.png'); quiet.save(out + '-quiet.png'); print(out, 'parts'); sys.exit()
 # backdrop, headline, screen with rounded corners and a shadow
 g = np.linspace(0, 1, H)[:, None]; top, bot = np.array([44, 46, 52]), np.array([24, 25, 29])
 im = Image.fromarray((top * (1 - g) + bot * g)[:, None, :].repeat(W, 1).reshape(H, W, 3).astype('uint8'), 'RGB').convert('RGBA')
