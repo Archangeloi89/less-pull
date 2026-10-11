@@ -90,6 +90,9 @@ static NSString *const LessPullReleasesPage=@"https://github.com/Archangeloi89/l
 static NSString *const LessPullWebsite=@"https://jiriarion.com";
 static NSString *const LessPullProjectPage=@"https://github.com/Archangeloi89/less-pull";
 static NSString *const LessPullCoffee=@"https://buymeacoffee.com/HsERf62fiZ";
+static NSString *const LessPullPayPal=@"https://www.paypal.me/JiriArion";
+static NSString *const LessPullWise=@"https://wise.com/pay/me/jiriarionr";
+static NSString *const LessPullBitcoin=@"bc1qf50lauclt6qh7et9s6a0tctexsn04gcm0s8r2y";  // Native SegWit, checksum verified
 static NSString *const LessPullSubstack=@"https://substack.com/@jiriarion";
 static NSString *const LessPullYouTube=@"https://www.youtube.com/@JiriArion";
 static NSString *const LessPullX=@"https://x.com/JiriArion";
@@ -324,7 +327,7 @@ static void QuietScrolling(NSScrollView *s){
 @property NSTextField *sessionPresetsField,*callBackPresetsField;
 @property NSTextField *exclusionText;
 @property NSRunningApplication *lastExternalApp;
-@property SwitchingPolicy *policy;@property NSComboBox *nightBoostPopup;@property NSTextField *nightBoostNote;@property NSDatePicker *nightStartPicker,*nightEndPicker;@property NSStackView *ownHoursRow;@property NSDate *nightPreviewUntil;@property NSTimer *nightPreviewTimer;@property BOOL nightPreviewTurnedNightShiftOn;@property NSSegmentedControl *nightModeControl;@property NSStackView *nightPauseRow;@property BOOL peekKeyHeld;@property NSPopUpButton *nightHoursPopup;@property NSTextField *nightHoursNote;@property NSButton *nightLocationButton,*nightDateTimeButton;@property NSInteger lastSeenMacMode;@property NSTextField *nightModeNote;@property BOOL migrateNightShiftMode,nightModeDirty;@property NSButton *nightTryButton;
+@property SwitchingPolicy *policy;@property NSComboBox *nightBoostPopup;@property NSTextField *nightBoostNote;@property NSDatePicker *nightStartPicker,*nightEndPicker;@property NSStackView *ownHoursRow;@property NSDate *nightPreviewUntil;@property NSTimer *nightPreviewTimer;@property BOOL nightPreviewTurnedNightShiftOn;@property NSSegmentedControl *nightModeControl;@property NSStackView *nightPauseRow;@property NSWindow *supportWindow;@property BOOL peekKeyHeld;@property NSPopUpButton *nightHoursPopup;@property NSTextField *nightHoursNote;@property NSButton *nightLocationButton,*nightDateTimeButton;@property NSInteger lastSeenMacMode;@property NSTextField *nightModeNote;@property BOOL migrateNightShiftMode,nightModeDirty;@property NSButton *nightTryButton;
 @property WarmthEngine *warmth;
 @property NSInteger selectedMode;
 @property NSSlider *warmthSlider;
@@ -2017,7 +2020,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  NSTextField *title=[NSTextField labelWithString:L(@"Are you enjoying Less Pull?")];title.font=[NSFont systemFontOfSize:15 weight:NSFontWeightSemibold];
  NSTextField *body=[NSTextField wrappingLabelWithString:L(@"This app is a gift from the universe to you. It has been fully funded by life.\n\nMy future projects and my work are still growing. Support comes in many forms: a contribution, a word to someone Less Pull might help, feedback that makes the app better, or whatever suits you. Thanks for being part of life and making it more beautiful for everyone.\n\n— Jiri Arion Rose")];body.preferredMaxLayoutWidth=404;
  NSColor *ember=[NSColor colorWithSRGBRed:.93 green:.55 blue:.28 alpha:1];
- NSButton *support=[NSButton buttonWithTitle:L(@"Support my work") target:self action:@selector(thanksSupport:)];support.keyEquivalent=@"\r";support.bezelColor=ember;support.attributedTitle=[[NSAttributedString alloc]initWithString:[@"🧡 " stringByAppendingString:L(@"Support my work")] attributes:@{NSForegroundColorAttributeName:NSColor.whiteColor,NSFontAttributeName:[NSFont systemFontOfSize:13 weight:NSFontWeightSemibold]}];[self helpView:support text:L(@"Open buymeacoffee.com/HsERf62fiZ in your default browser.") label:L(@"Support my work — Buy me a coffee")];
+ NSButton *support=[NSButton buttonWithTitle:L(@"Support my work") target:self action:@selector(thanksSupport:)];support.keyEquivalent=@"\r";support.bezelColor=ember;support.attributedTitle=[[NSAttributedString alloc]initWithString:[@"🧡 " stringByAppendingString:L(@"Support my work")] attributes:@{NSForegroundColorAttributeName:NSColor.whiteColor,NSFontAttributeName:[NSFont systemFontOfSize:13 weight:NSFontWeightSemibold]}];[self helpView:support text:L(@"Shows every way to support my work.") label:L(@"Support my work — Buy me a coffee")];
  NSButton *later=[NSButton buttonWithTitle:L(@"Remind me later") target:self action:@selector(thanksLater:)];[self helpView:later text:L(@"Hide this for now. It comes back later, each time after a longer while.") label:L(@"Remind me later")];
  NSMutableArray *links=[NSMutableArray new];for(NSButton *b in [self authorLinkButtons])if(![b.identifier isEqual:LessPullCoffee]){b.font=[NSFont systemFontOfSize:11];[links addObject:b];}
  NSButton *tell=[NSButton buttonWithTitle:L(@"Tell a friend") target:self action:@selector(shareLessPull:)];tell.bezelStyle=NSBezelStyleInline;tell.font=[NSFont systemFontOfSize:11];tell.image=[NSImage imageWithSystemSymbolName:@"square.and.arrow.up" accessibilityDescription:nil];tell.imagePosition=NSImageLeading;[self helpView:tell text:L(@"Share Less Pull: the project page and one line about it, through Messages, Mail, AirDrop or anywhere else.") label:L(@"Share Less Pull")];
@@ -2029,7 +2032,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  return card;
 }
 - (void)removeThanksCard {NSView *card=self.thanksCard;if(!card)return;NSStackView *column=(NSStackView *)card.superview;[column removeArrangedSubview:card];[card removeFromSuperview];self.thanksCard=nil;self.thanksWanted=NO;[column layoutSubtreeIfNeeded];self.settingsTabs.tabViewItems.firstObject.viewController.preferredContentSize=NSMakeSize(500,column.fittingSize.height);self.settingsTabs.selectedTabViewItemIndex=1;self.settingsTabs.selectedTabViewItemIndex=0;}
-- (void)thanksSupport:(id)sender {[NSUserDefaults.standardUserDefaults setObject:[NSDate.date dateByAddingTimeInterval:90*86400] forKey:@"thanksNextDate"];[NSWorkspace.sharedWorkspace openURL:[NSURL URLWithString:LessPullCoffee]];}  // the card stays; it comes back by itself in three months at the earliest
+- (void)thanksSupport:(id)sender {[NSUserDefaults.standardUserDefaults setObject:[NSDate.date dateByAddingTimeInterval:90*86400] forKey:@"thanksNextDate"];[self showSupportWindow];}  // the card stays; it comes back by itself in three months
 // Later, each time after a longer while: a month, three, six, a year, then once a year. No "never": an invitation, not a nag.
 - (void)thanksLater:(id)sender {NSUserDefaults *d=NSUserDefaults.standardUserDefaults;NSInteger n=[d integerForKey:@"thanksLaterCount"];NSArray *days=@[@30,@90,@180,@365];
  [d setObject:[NSDate.date dateByAddingTimeInterval:[days[MIN(n,(NSInteger)days.count-1)] doubleValue]*86400] forKey:@"thanksNextDate"];[d setInteger:n+1 forKey:@"thanksLaterCount"];[self removeThanksCard];}
@@ -2038,7 +2041,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  NSColor *ember=[NSColor colorWithSRGBRed:.93 green:.55 blue:.28 alpha:1];
  NSTextField *title=[NSTextField labelWithString:L(@"Another year of Less Pull with you")];title.font=[NSFont systemFontOfSize:15 weight:NSFontWeightSemibold];
  NSTextField *body=[NSTextField wrappingLabelWithString:L(@"Thank you for being part of it. If you feel like giving again, the door is open; if not, enjoy the quiet.\n\n— Jiri Arion Rose")];body.preferredMaxLayoutWidth=404;
- NSButton *support=[NSButton buttonWithTitle:L(@"Support my work") target:self action:@selector(thanksSupport:)];[self helpView:support text:L(@"Open buymeacoffee.com/HsERf62fiZ in your default browser.") label:L(@"Support my work")];
+ NSButton *support=[NSButton buttonWithTitle:L(@"Support my work") target:self action:@selector(thanksSupport:)];[self helpView:support text:L(@"Shows every way to support my work.") label:L(@"Support my work")];
  NSButton *close=[NSButton buttonWithTitle:L(@"Close") target:self action:@selector(thanksClose:)];close.keyEquivalent=@"\r";
  NSStackView *row=[self row:@[support,[self spacer],close]];
  NSStackView *card=[self column:@[title,body,row]];card.spacing=10;card.edgeInsets=NSEdgeInsetsMake(14,14,12,14);card.wantsLayer=YES;card.layer.cornerRadius=8;card.layer.backgroundColor=[ember colorWithAlphaComponent:.1].CGColor;card.layer.borderWidth=1;card.layer.borderColor=[ember colorWithAlphaComponent:.25].CGColor;
@@ -2316,7 +2319,44 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
  [picker showRelativeToRect:sender.bounds ofView:sender preferredEdge:NSRectEdgeMaxY];
 }
 - (void)openWebsite:(id)sender {[NSWorkspace.sharedWorkspace openURL:[NSURL URLWithString:LessPullWebsite]];}
-- (void)openSupport:(id)sender {[NSWorkspace.sharedWorkspace openURL:[NSURL URLWithString:LessPullCoffee]];}
+- (void)openSupport:(id)sender {[self showSupportWindow];}
+// One door, then the choice: every way to support, each with what it suits, and the ways without money.
+- (NSImage *)qrImageFor:(NSString *)text size:(CGFloat)size {
+ CIFilter *f=[CIFilter filterWithName:@"CIQRCodeGenerator"];[f setValue:[text dataUsingEncoding:NSUTF8StringEncoding] forKey:@"inputMessage"];[f setValue:@"M" forKey:@"inputCorrectionLevel"];
+ CIImage *qr=f.outputImage;if(!qr)return nil;CGFloat k=size*2/qr.extent.size.width;qr=[qr imageByApplyingTransform:CGAffineTransformMakeScale(k,k)];
+ NSCIImageRep *rep=[NSCIImageRep imageRepWithCIImage:qr];NSImage *img=[[NSImage alloc]initWithSize:NSMakeSize(size,size)];[img addRepresentation:rep];return img;
+}
+- (void)showQR:(NSButton *)sender {
+ NSString *text=sender.identifier;NSImageView *v=[NSImageView imageViewWithImage:[self qrImageFor:text size:180]];v.imageScaling=NSImageScaleNone;
+ NSTextField *hint=[NSTextField labelWithString:L(@"Scan with your phone.")];hint.font=[NSFont systemFontOfSize:11];hint.textColor=NSColor.secondaryLabelColor;
+ NSStackView *col=[self column:@[v,hint]];col.alignment=NSLayoutAttributeCenterX;col.edgeInsets=NSEdgeInsetsMake(14,14,12,14);
+ NSViewController *vc=[NSViewController new];vc.view=col;NSPopover *pop=[NSPopover new];pop.contentViewController=vc;pop.behavior=NSPopoverBehaviorTransient;[pop showRelativeToRect:sender.bounds ofView:sender preferredEdge:NSRectEdgeMaxX];
+}
+- (void)openSupportLink:(NSButton *)sender {[NSWorkspace.sharedWorkspace openURL:[NSURL URLWithString:sender.identifier]];}
+- (void)copyBitcoin:(NSButton *)sender {[NSPasteboard.generalPasteboard clearContents];[NSPasteboard.generalPasteboard setString:LessPullBitcoin forType:NSPasteboardTypeString];NSString *t=sender.title;sender.title=L(@"Copied");dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)(1.6*NSEC_PER_SEC)),dispatch_get_main_queue(),^{sender.title=t;});}
+- (void)showSupportWindow {
+ if(self.supportWindow){[NSApp activateIgnoringOtherApps:YES];[self.supportWindow makeKeyAndOrderFront:nil];return;}
+ NSTextField *title=[NSTextField labelWithString:L(@"Ways to support my work")];title.font=[NSFont systemFontOfSize:17 weight:NSFontWeightSemibold];
+ NSTextField *intro=[NSTextField wrappingLabelWithString:L(@"Whichever is easiest for you. Every way reaches me directly, and every one is welcome.")];intro.preferredMaxLayoutWidth=420;intro.textColor=NSColor.secondaryLabelColor;
+ NSMutableArray *rows=[NSMutableArray arrayWithArray:@[title,intro,[self separator]]];
+ NSButton *(^button)(NSString *,SEL,NSString *)=^NSButton *(NSString *t,SEL a,NSString *ident){NSButton *b=[NSButton buttonWithTitle:t target:self action:a];b.identifier=ident;b.controlSize=NSControlSizeSmall;b.font=[NSFont systemFontOfSize:NSFont.smallSystemFontSize];return b;};
+ NSStackView *(^way)(NSString *,NSString *,NSArray *)=^NSStackView *(NSString *name,NSString *what,NSArray *buttons){
+  NSTextField *n=[NSTextField labelWithString:name];n.font=[NSFont systemFontOfSize:13 weight:NSFontWeightMedium];NSTextField *w=[NSTextField wrappingLabelWithString:what];w.font=[NSFont systemFontOfSize:11];w.textColor=NSColor.secondaryLabelColor;w.preferredMaxLayoutWidth=250;
+  NSStackView *text=[self column:@[n,w]];text.spacing=2;NSStackView *r=[self row:[@[text,[self spacer]] arrayByAddingObjectsFromArray:buttons]];r.alignment=NSLayoutAttributeCenterY;return r;};
+ [rows addObject:way(@"Buy Me a Coffee",L(@"Card or Apple Pay, once or monthly."),@[button(L(@"Open"),@selector(openSupportLink:),LessPullCoffee)])];
+ [rows addObject:way(@"PayPal",L(@"With a PayPal account."),@[button(L(@"Open"),@selector(openSupportLink:),LessPullPayPal)])];
+ [rows addObject:way(@"Wise",L(@"A transfer with low fees, in many currencies."),@[button(L(@"QR code"),@selector(showQR:),LessPullWise),button(L(@"Open"),@selector(openSupportLink:),LessPullWise)])];
+ NSTextField *address=[NSTextField labelWithString:LessPullBitcoin];address.font=[NSFont monospacedSystemFontOfSize:10 weight:NSFontWeightRegular];address.selectable=YES;address.textColor=NSColor.secondaryLabelColor;
+ NSStackView *btc=way(@"Bitcoin",L(@"One address, Native SegWit. Please send Bitcoin only."),@[button(L(@"QR code"),@selector(showQR:),[@"bitcoin:" stringByAppendingString:LessPullBitcoin]),button(L(@"Copy"),@selector(copyBitcoin:),nil)]);
+ [rows addObject:[self column:@[btc,address]]];((NSStackView *)rows.lastObject).spacing=4;
+ [rows addObject:[self separator]];
+ NSButton *tell=button(L(@"Tell a friend"),@selector(shareLessPull:),nil);NSButton *feedback=button(L(@"Send feedback"),@selector(reportProblem:),nil);
+ [rows addObject:way(L(@"Without money"),L(@"A word to someone Less Pull might help, or feedback that makes it better."),@[tell,feedback])];
+ NSStackView *column=[self column:rows];column.spacing=12;column.edgeInsets=NSEdgeInsetsMake(20,22,20,22);
+ for(NSView *v in column.arrangedSubviews)if([v isKindOfClass:NSStackView.class]||[v isKindOfClass:NSBox.class])[v.widthAnchor constraintEqualToAnchor:column.widthAnchor constant:-44].active=YES;
+ NSWindow *w=[[NSWindow alloc]initWithContentRect:NSMakeRect(0,0,480,100) styleMask:NSWindowStyleMaskTitled|NSWindowStyleMaskClosable backing:NSBackingStoreBuffered defer:NO];w.title=L(@"Support my work");w.contentView=column;[w setContentSize:column.fittingSize];w.releasedWhenClosed=NO;[w center];self.supportWindow=w;
+ [NSApp activateIgnoringOtherApps:YES];[w makeKeyAndOrderFront:nil];
+}
 - (void)openLink:(NSButton *)sender {if(sender.identifier.length)[NSWorkspace.sharedWorkspace openURL:[NSURL URLWithString:sender.identifier]];}
 // Link buttons for the About tab and the thanks window; empty addresses are skipped.
 - (NSArray<NSButton *> *)authorLinkButtons {
