@@ -2368,6 +2368,14 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
 }
 - (BOOL)playingFieldDiffers:(NSDictionary *)snap {NSDictionary *stored=LPStoredSettings();for(NSString *k in LPPlayingFieldKeys()){id a=snap[k],b=stored[k];if(a!=b&&![a isEqual:b])return YES;}return NO;}
 - (BOOL)guideChangedSomething {return [self playingFieldChanged];}
+// The Settings window turns into the tour's bar and back: where it is, what it looks like, and stepping aside.
+- (NSRect)guideSettingsFrame {return self.settingsAsideForTour&&self.settings?self.settings.frame:NSZeroRect;}
+- (NSImage *)guideSettingsSnapshot {
+ NSView *frameView=self.settings.contentView.superview;if(!frameView)return nil;[frameView layoutSubtreeIfNeeded];
+ NSBitmapImageRep *rep=[frameView bitmapImageRepForCachingDisplayInRect:frameView.bounds];if(!rep)return nil;[frameView cacheDisplayInRect:frameView.bounds toBitmapImageRep:rep];
+ NSImage *image=[[NSImage alloc]initWithSize:frameView.bounds.size];[image addRepresentation:rep];return image;
+}
+- (void)guideShowSettings:(BOOL)show {if(!self.settings||!self.settingsAsideForTour)return;if(show){self.settings.alphaValue=1;[self.settings orderFrontRegardless];}else [self.settings orderOut:nil];}
 // ---- What the tour may ask about the real Mac, where things are on screen, and the few things it may do itself.
 // It never does what the user is asked to do; it only sets the stage (pause for "the pull"), marks the item to choose,
 // and runs the setups the user said yes to (a browser connection, the night schedule, launch at login, a Peek key).
@@ -2448,7 +2456,7 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
 }
 - (void)guideKeepChanges:(BOOL)keep {[self endPlayingFieldKeeping:keep];}
 // While the circle tours the screen, the Settings window steps aside; the tour's own small bar holds the controls.
-- (void)startGuideTour {if(self.guide)return;self.tourGray=-1;self.tourWarmth=-1;[self borrowScreenForTour:YES];[self beginPlayingField];self.settingsAsideForTour=self.settings.visible;if(self.settingsAsideForTour)[self.settings orderOut:nil];self.guide=[[GuideTour alloc]initWithHost:self];[self.guide start];}
+- (void)startGuideTour {if(self.guide)return;self.tourGray=-1;self.tourWarmth=-1;[self borrowScreenForTour:YES];[self beginPlayingField];self.settingsAsideForTour=self.settings.visible;self.guide=[[GuideTour alloc]initWithHost:self];[self.guide start];}
 - (NSView *)guideScene:(NSInteger)kind {TourScene *s=[[TourScene alloc]initWithFrame:NSMakeRect(0,0,420,140)];s.kind=(TourSceneKind)MAX(0,MIN(5,kind));return s;}
 - (NSRect)guideIconFrame {
  static double hiddenUntil=0;if([NSProcessInfo.processInfo.arguments containsObject:@"--tour-icon-hidden"]){if(hiddenUntil==0)hiddenUntil=CACurrentMediaTime()+45;if(CACurrentMediaTime()<hiddenUntil)return NSZeroRect;}  // test: the circle counts as hidden for the first 45 seconds
@@ -2490,7 +2498,7 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
  self.guide=nil;self.tourGray=-1;self.tourWarmth=-1;self.tourMenuMark=nil;if(self.playingField)[self endPlayingFieldKeeping:NO];  // not asked (ended early, closed, quit): everything goes back
  self.animateAppearance=YES;[self sync];
  if(LessPullBorrowScreen)dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)(.8*NSEC_PER_SEC)),dispatch_get_main_queue(),^{if(!self.guide)[self borrowScreenForTour:NO];});  // after the fade back
- if(self.settingsAsideForTour&&self.settings){self.settingsAsideForTour=NO;[self.settings orderFrontRegardless];}
+ if(self.settingsAsideForTour&&self.settings&&!self.settings.visible)[self.settings orderFrontRegardless];self.settingsAsideForTour=NO;  // the tour normally brings it back itself, growing out of its bar
  if(!self.settings.visible||!self.tourCard)return;
  if(!completed){[self showTourPage:0 animated:NO];return;}  // ended early: the welcome is back, to start again or skip
  if([self tourLastPage]==6)[self showTourPage:6 animated:YES];else [self dismissWelcome:nil];

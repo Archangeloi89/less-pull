@@ -184,6 +184,14 @@ static NSColor *Mix(NSColor *a,NSColor *b,double k){a=[a colorUsingColorSpace:NS
  NSBezierPath *done=[NSBezierPath bezierPath];[done moveToPoint:NSMakePoint(NSMidX(a),y)];[done lineToPoint:NSMakePoint(NSMidX(c),y)];done.lineWidth=2;[GTAmber(.9) setStroke];[done stroke];
 }
 @end
+// The cursor's home during the tour, at the left end of its bar: a little dark circle with an amber ring.
+@interface GTHomeDot : NSView
+@end
+@implementation GTHomeDot
+- (BOOL)isFlipped {return NO;}
+- (void)drawRect:(NSRect)dirty {NSRect c=NSInsetRect(self.bounds,3,3);[[NSColor colorWithSRGBRed:.09 green:.08 blue:.07 alpha:1] setFill];[[NSBezierPath bezierPathWithOvalInRect:c] fill];
+ NSBezierPath *edge=[NSBezierPath bezierPathWithOvalInRect:NSInsetRect(c,-1.2,-1.2)];edge.lineWidth=2.2;[GTAmber(.65) setStroke];[edge stroke];}
+@end
 // Clicking the guide while it only talks: it reacts (a small clickable patch over its arrow, never over a target).
 @interface GTPokeView : NSView
 @property(copy) void (^poked)(void);
@@ -212,6 +220,7 @@ static GTPanel *GTMakePanel(NSRect frame,NSInteger level){
 @property NSInteger pokes;
 @property(copy) NSArray<NSString *> *pokeLines;            // what it says when poked, in order; then the last ones in turn
 @property GTStepper *stepper;
+@property GTHomeDot *homeDot;
 @property NSTextField *barLabel;
 @property NSButton *slowButton,*nextButton,*endButton;
 @property NSArray<NSString *> *stationNames;
@@ -264,7 +273,9 @@ static GTPanel *GTMakePanel(NSRect frame,NSInteger level){
  self.endButton=[NSButton buttonWithTitle:L(@"End tour") target:self action:@selector(endClicked:)];self.endButton.controlSize=NSControlSizeSmall;self.endButton.bezelStyle=NSBezelStyleRounded;
  NSView *flex=[NSView new];[flex setContentHuggingPriority:1 forOrientation:NSLayoutConstraintOrientationHorizontal];[flex.widthAnchor constraintGreaterThanOrEqualToConstant:8].active=YES;
  NSStackView *buttons=[NSStackView stackViewWithViews:@[self.barLabel,flex,self.slowButton,self.nextButton,self.endButton]];buttons.spacing=6;
- NSStackView *column=[NSStackView stackViewWithViews:@[stepper,buttons]];column.orientation=NSUserInterfaceLayoutOrientationVertical;column.alignment=NSLayoutAttributeCenterX;column.spacing=8;column.edgeInsets=NSEdgeInsetsMake(12,14,12,14);
+ GTHomeDot *dot=[[GTHomeDot alloc]initWithFrame:NSMakeRect(0,0,28,28)];[dot.widthAnchor constraintEqualToConstant:28].active=YES;[dot.heightAnchor constraintEqualToConstant:28].active=YES;dot.toolTip=L(@"Guide");self.homeDot=dot;
+ NSStackView *top=[NSStackView stackViewWithViews:@[dot,stepper]];top.spacing=14;
+ NSStackView *column=[NSStackView stackViewWithViews:@[top,buttons]];column.orientation=NSUserInterfaceLayoutOrientationVertical;column.alignment=NSLayoutAttributeCenterX;column.spacing=8;column.edgeInsets=NSEdgeInsetsMake(12,14,12,14);
  [buttons.widthAnchor constraintEqualToAnchor:column.widthAnchor constant:-28].active=YES;[column.widthAnchor constraintGreaterThanOrEqualToConstant:404].active=YES;
  NSVisualEffectView *back=[NSVisualEffectView new];back.material=NSVisualEffectMaterialPopover;back.blendingMode=NSVisualEffectBlendingModeBehindWindow;back.state=NSVisualEffectStateActive;back.wantsLayer=YES;back.layer.cornerRadius=14;back.layer.masksToBounds=YES;
  column.translatesAutoresizingMaskIntoConstraints=NO;[back addSubview:column];[NSLayoutConstraint activateConstraints:@[[column.leadingAnchor constraintEqualToAnchor:back.leadingAnchor],[column.trailingAnchor constraintEqualToAnchor:back.trailingAnchor],[column.topAnchor constraintEqualToAnchor:back.topAnchor],[column.bottomAnchor constraintEqualToAnchor:back.bottomAnchor]]];
@@ -274,8 +285,21 @@ static GTPanel *GTMakePanel(NSRect frame,NSInteger level){
  if(saved){NSPoint o=NSPointFromString(saved);for(NSScreen *s in NSScreen.screens)if(NSContainsRect(s.visibleFrame,NSMakeRect(o.x,o.y,size.width,size.height)))origin=o;}
  [p setFrameOrigin:origin];self.bar=p;
  [NSNotificationCenter.defaultCenter addObserverForName:NSWindowDidMoveNotification object:p queue:nil usingBlock:^(NSNotification *note){[NSUserDefaults.standardUserDefaults setObject:NSStringFromPoint(((NSWindow *)note.object).frame.origin) forKey:@"tourBarOrigin"];}];
- p.alphaValue=0;[p orderFrontRegardless];
- if(self.reduceMotion)p.alphaValue=1;else [NSAnimationContext runAnimationGroup:^(NSAnimationContext *c){c.duration=.35;p.animator.alphaValue=1;} completionHandler:nil];
+ p.alphaValue=0;[p orderFrontRegardless];[p.contentView layoutSubtreeIfNeeded];
+}
+- (void)revealBar {GTPanel *p=self.bar;if(self.reduceMotion)p.alphaValue=1;else [NSAnimationContext runAnimationGroup:^(NSAnimationContext *c){c.duration=.18;p.animator.alphaValue=1;} completionHandler:nil];}
+// One shape that changes, as on the website: the Settings window shrinks and rounds into the tour bar, or grows back
+// out of it. A shell with the window's look travels between the two; the old look fades early, the new one late.
+- (void)morphFrom:(NSRect)from to:(NSRect)to image:(NSImage *)image growing:(BOOL)growing then:(void(^)(void))done {
+ if(self.reduceMotion||!image||NSIsEmptyRect(from)||NSIsEmptyRect(to)){done();return;}
+ GTPanel *shell=GTMakePanel(from,NSFloatingWindowLevel+1);shell.hasShadow=YES;shell.ignoresMouseEvents=YES;
+ NSView *box=[[NSView alloc]initWithFrame:(NSRect){NSZeroPoint,from.size}];box.wantsLayer=YES;box.layer.cornerRadius=growing?14:11;box.layer.masksToBounds=YES;box.layer.backgroundColor=NSColor.windowBackgroundColor.CGColor;box.autoresizingMask=NSViewWidthSizable|NSViewHeightSizable;
+ NSImageView *pic=[NSImageView imageViewWithImage:image];pic.imageScaling=NSImageScaleAxesIndependently;pic.frame=box.bounds;pic.autoresizingMask=NSViewWidthSizable|NSViewHeightSizable;pic.alphaValue=growing?0:1;[box addSubview:pic];
+ shell.contentView=box;[shell orderFrontRegardless];
+ [NSAnimationContext runAnimationGroup:^(NSAnimationContext *c){c.duration=growing?.62:.58;c.timingFunction=[CAMediaTimingFunction functionWithControlPoints:.5 :0 :.15 :1];[shell.animator setFrame:to display:YES];}
+  completionHandler:^{[NSAnimationContext runAnimationGroup:^(NSAnimationContext *c){c.duration=.12;shell.animator.alphaValue=0;} completionHandler:^{[shell orderOut:nil];}];done();}];
+ if(growing)dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)(.36*NSEC_PER_SEC)),dispatch_get_main_queue(),^{[NSAnimationContext runAnimationGroup:^(NSAnimationContext *c){c.duration=.24;pic.animator.alphaValue=1;} completionHandler:nil];});
+ else [NSAnimationContext runAnimationGroup:^(NSAnimationContext *c){c.duration=.18;pic.animator.alphaValue=0;} completionHandler:nil];
 }
 - (void)updateBar {
  for(GTStation *s in self.stepper.stations){s.phase=s.index<self.step?1:s.index==self.step?2:0;s.needsDisplay=YES;}self.stepper.current=self.step;self.stepper.needsDisplay=YES;
@@ -289,8 +313,9 @@ static GTPanel *GTMakePanel(NSRect frame,NSInteger level){
 - (void)slowClicked:(id)sender {[self toggleSlow];}
 - (void)nextClicked:(id)sender {[self next];}
 - (void)endClicked:(id)sender {[self endEarly];}
-- (void)closeBar {GTPanel *p=self.bar;self.bar=nil;if(!p)return;[NSNotificationCenter.defaultCenter removeObserver:self name:NSWindowDidMoveNotification object:p];
- if(self.reduceMotion){[p orderOut:nil];return;}[NSAnimationContext runAnimationGroup:^(NSAnimationContext *c){c.duration=.2;p.animator.alphaValue=0;} completionHandler:^{[p orderOut:nil];}];}
+- (void)closeBar {[self closeBarAt:.2];}
+- (void)closeBarAt:(double)fade {GTPanel *p=self.bar;self.bar=nil;if(!p)return;[NSNotificationCenter.defaultCenter removeObserver:self name:NSWindowDidMoveNotification object:p];
+ if(self.reduceMotion||fade<=0){[p orderOut:nil];return;}[NSAnimationContext runAnimationGroup:^(NSAnimationContext *c){c.duration=fade;p.animator.alphaValue=0;} completionHandler:^{[p orderOut:nil];}];}
 
 #pragma mark a poke
 - (void)placePoke {
@@ -338,25 +363,31 @@ static GTPanel *GTMakePanel(NSRect frame,NSInteger level){
  self.view=[[GuideView alloc]initWithFrame:(NSRect){NSZeroPoint,s.frame.size}];self.view.still=self.reduceMotion;self.overlay.contentView=self.view;[self.overlay setFrame:s.frame display:NO];[self.overlay orderFrontRegardless];
  self.overlay.accessibilityLabel=L(@"Less Pull tour");
  [self buildSteps];[self makeBar];
- GuideView *v=self.view;v.door=[self doorPoint];v.doorK=0;v.pos=self.from=self.target=NSMakePoint(v.door.x-5,v.door.y+7);v.alpha=0;v.size=1;v.leaving=YES;
+ NSRect settings=[self.host guideSettingsFrame];NSImage *look=NSIsEmptyRect(settings)?nil:[self.host guideSettingsSnapshot];
+ GuideView *v=self.view;v.alpha=0;v.size=1;v.leaving=YES;
  self.frameTimer=[NSTimer timerWithTimeInterval:1.0/60 target:self selector:@selector(frame:) userInfo:nil repeats:YES];[NSRunLoop.mainRunLoop addTimer:self.frameTimer forMode:NSRunLoopCommonModes];
- // it comes the way it lives on the website: through a little circle. The Less Pull circle blinks, a door opens under
- // it, the cursor pops out with a little overshoot, hops down, waves, and the door closes behind it.
- if(self.reduceMotion){v.leaving=NO;v.alpha=1;[self playStep:0];return;}
- BOOL shown=!NSEqualPoints([self iconPoint],NSZeroPoint);
- if(shown){[self after:.05 do:^{[self.host guideSpotEmpty:YES];}];[self after:.2 do:^{[self.host guideSpotEmpty:NO];}];}
- [self after:.1 do:^{self.doorTarget=1;}];
- [self after:.45 do:^{GuideView *g=self.view;g.alpha=1;g.arriveAt=CACurrentMediaTime();}];
- [self after:.8 do:^{NSPoint d=self.view.door;[self moveTo:[self onScreen:NSMakePoint(d.x-18,d.y-64)]];}];
- [self after:1.15 do:^{self.doorTarget=0;}];
- [self after:1.55 do:^{[self face:GTFaceWiggle];self.view.leaving=NO;[self playStep:0];}];
+ // The Settings window turns into the tour's small bar; out of the bar's little circle (its home, as the circle in the
+ // website's corner) the cursor pops, with a little overshoot, hops down, waves, and the circle closes behind it.
+ [self.host guideShowSettings:NO];
+ [self morphFrom:settings to:self.bar.frame image:look growing:NO then:^{
+  [self revealBar];GuideView *g=self.view;g.door=[self doorPoint];g.doorK=0;g.pos=self.from=self.target=NSMakePoint(g.door.x-5,g.door.y+7);
+  if(self.reduceMotion){g.leaving=NO;g.alpha=1;[self playStep:0];return;}
+  [self after:.1 do:^{self.doorTarget=1;}];
+  [self after:.4 do:^{GuideView *c=self.view;c.alpha=1;c.arriveAt=CACurrentMediaTime();}];
+  [self after:.75 do:^{NSPoint d=self.view.door;[self moveTo:[self onScreen:NSMakePoint(d.x+40,d.y-70)]];}];
+  [self after:1.1 do:^{self.doorTarget=0;}];
+  [self after:1.5 do:^{[self face:GTFaceWiggle];self.view.leaving=NO;[self playStep:0];}];}];
 }
 - (void)stop {[self finish:NO];}
 - (void)finish:(BOOL)completed {
  if(!self.running)return;self.running=NO;self.generation++;
- [self runCleanup:self.step];[self hideAsk];[self.askPanel orderOut:nil];[self.pokePanel orderOut:nil];[self closeBar];
+ [self runCleanup:self.step];[self hideAsk];[self.askPanel orderOut:nil];[self.pokePanel orderOut:nil];
  [self.frameTimer invalidate];[self.waitTimer invalidate];[self.rampTimer invalidate];self.view.scene=nil;[self.overlay orderOut:nil];self.overlay=nil;
- [self.host guideSpotEmpty:NO];[self.host guideLookGray:-1 warmth:-1];[self.host guideFinished:completed];
+ [self.host guideSpotEmpty:NO];[self.host guideLookGray:-1 warmth:-1];
+ // the bar grows back into the Settings window it came from
+ NSRect settings=[self.host guideSettingsFrame];GTPanel *bar=self.bar;NSRect from=bar.visible?bar.frame:NSZeroRect;NSImage *look=NSIsEmptyRect(settings)?nil:[self.host guideSettingsSnapshot];
+ [self closeBarAt:0];id<GuideTourHost> host=self.host;
+ [self morphFrom:from to:settings image:look growing:YES then:^{[host guideShowSettings:YES];[host guideFinished:completed];}];
 }
 - (void)runCleanup:(NSInteger)step {if(step>=0&&step<(NSInteger)self.cleanups.count){id c=self.cleanups[step];if(c!=NSNull.null)((void(^)(void))c)();}self.avoidRect=NSZeroRect;}
 - (void)halt {[self.host guideDo:@"mark" with:nil];[self runCleanup:self.step];self.generation++;[self.waitTimer invalidate];[self.rampTimer invalidate];self.waiting=NO;self.view.forcedDroop=NO;self.asking=NO;self.askAnswered=nil;[self hideAsk];self.ringBlock=nil;self.view.ringTarget=0;}
@@ -382,7 +413,7 @@ static GTPanel *GTMakePanel(NSRect frame,NSInteger level){
 // End tour: at once. Whatever it showed goes back, the guide pops into its spot, the bar goes.
 - (void)endEarly {
  if(!self.running)return;
- [self halt];[self.host guideLookGray:-1 warmth:-1];[self show:nil scene:-1];[self closeBar];
+ [self halt];[self.host guideLookGray:-1 warmth:-1];[self show:nil scene:-1];
  [self popThen:^{[self finish:NO];}];
 }
 - (void)toggleSlow {self.slow=!self.slow;self.view.pace=self.pace;[self updateBar];[self interject:self.slow?L(@"Slower. My favorite speed. Circles are never in a hurry."):L(@"Normal speed again. I can do fast. For a while.") face:self.slow?GTFaceSquint:GTFaceHop];}
@@ -425,8 +456,8 @@ static GTPanel *GTMakePanel(NSRect frame,NSInteger level){
  self.anticipation=0;self.from=v.pos;self.target=to;self.moveStart=CACurrentMediaTime();self.landedAt=-100;
  self.moveDuration=MIN(1.5,.42+dist/1500)*(1+(self.pace-1)*.5);return self.moveDuration;
 }
-- (NSPoint)doorPoint {NSPoint h=[self local:[self homePoint]];return NSMakePoint(h.x,h.y-44);}
-// Home: it flies to the door under its circle, the door opens, it dives in, the door closes, the circle blinks.
+- (NSPoint)doorPoint {NSRect d=[self screenFrameOf:self.homeDot];if(self.bar&&!NSIsEmptyRect(d))return [self local:NSMakePoint(NSMidX(d),NSMidY(d))];NSPoint h=[self local:[self homePoint]];return NSMakePoint(h.x,h.y-44);}
+// Home: it flies to its little circle, the circle opens, it dives in, the circle closes.
 - (void)goHomeThen:(void(^)(void))done {
  [self show:nil scene:-1];self.view.pointAt=NSZeroPoint;GuideView *v=self.view;v.door=[self doorPoint];
  double t=[self moveTo:[self onScreen:NSMakePoint(v.door.x-16,v.door.y-30)]];
@@ -439,7 +470,7 @@ static GTPanel *GTMakePanel(NSRect frame,NSInteger level){
  double start=CACurrentMediaTime();NSPoint from=self.view.pos,into=NSMakePoint(self.view.door.x-4,self.view.door.y+6);__weak GuideTour *weak=self;
  NSTimer *t=[NSTimer timerWithTimeInterval:1.0/60 repeats:YES block:^(NSTimer *timer){GuideTour *s=weak;if(!s||!s.running){[timer invalidate];return;}double k=MIN(1,(CACurrentMediaTime()-start)/.42),e=Ease(k);
   s.view.pos=NSMakePoint(from.x+(into.x-from.x)*e,from.y+(into.y-from.y)*e+sin(M_PI*e)*22);s.target=s.view.pos;s.view.size=1-.8*e;s.view.alpha=1-pow(k,2);  // a little jump, and in
-  if(k>=1){[timer invalidate];s.doorTarget=0;[s.host guideSpotEmpty:YES];[s after:.15 do:^{[s.host guideSpotEmpty:NO];}];[s after:.3 do:done];}}];
+  if(k>=1){[timer invalidate];s.doorTarget=0;[s after:.3 do:done];}}];
  [NSRunLoop.mainRunLoop addTimer:t forMode:NSRunLoopCommonModes];
 }
 // Ended early: a quick pop where it is, no words.
@@ -532,8 +563,6 @@ static GTPanel *GTMakePanel(NSRect frame,NSInteger level){
  self.ringBlock=b.ring;self.lastRingCheck=0;v.ringTarget=b.ring?1:0;[self.host guideDo:@"mark" with:b.mark];
  if(b.home){[self show:b.say scene:-1];
   [self after:[self readingTime:b.say] do:^{[self goHomeThen:^{
-   [self.host guideSpotEmpty:NO];[self closeBar];  // back in its spot, the real icon again; one blink
-   [self after:.3 do:^{[self.host guideSpotEmpty:YES];}];[self after:.42 do:^{[self.host guideSpotEmpty:NO];}];
    if(!b.afterSay.length){[self after:.6 do:^{[self finish:YES];}];return;}
    [self after:.55 do:^{[self show:b.afterSay scene:-1];}];[self after:.55+2.5*self.pace do:^{[self show:nil scene:-1];[self after:.6 do:^{[self finish:YES];}];}];}];}];
   return;}
