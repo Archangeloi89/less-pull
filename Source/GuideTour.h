@@ -43,4 +43,6 @@
 - (void)toggleSlow;
 - (void)endEarly;              // End tour: at once
 - (void)stop;                  // ends at once and puts everything back, without a word
+- (NSString *)debugState;      // for tests: where the tip, the bubble and the ring are now (screen coordinates)
+- (void)debugPark;             // for tests: goes to its waiting spot by the tour bar with a browser line
 @end

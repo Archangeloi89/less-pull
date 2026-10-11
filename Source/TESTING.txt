@@ -48,7 +48,13 @@ Simulates a display reset after a fade finishes. Checks persistent grayscale, tw
 --tour-icon-hidden    the menu-bar circle counts as hidden for the first 45 s, to try the tour's "bring it out" step.
 --start-tour          opens the welcome and starts the tour on the real screen, as "Start tour and setup" does.
 --tour-peek-test      the tour's Peek step sees a short tap 2 s after it asks, then a hold from 4 to 6 s.
---tour-actions LIST   with --start-tour: presses the tour controls at given seconds, e.g. "slower@3,next@9,back@14,end@24"; "station4@20" jumps to a station.
+--tour-actions LIST   with --start-tour: presses the tour controls at given seconds, e.g. "slower@3,next@9,back@14,end@24"; "station4@20" jumps to a station
+                      (a jump during the knock waits until the cursor is out). Also what a user would do: "menu" opens the status menu, "menuclose"
+                      closes it, "closeSettings" closes Settings, "chip" starts a 25-minute session (on the tour: the five-second sample), and for
+                      checking: "log" writes where the tip, the bubble, the ring, the menu and Settings are; "park" sends the guide to its spot by
+                      the tour bar. The times run on a timer that also fires while the menu is open.
+--tour-no-borrow      a hands-off copy keeps its hands off the screen during its tour too (the installed app's look stays): for tests beside real work.
+LP_TOUR_DEBUG=1       (environment) logs every bubble placement with what it keeps clear of.
 --session-start-panel opens the session panel (Session | Break) 1.5 s after launch.
 
 --screen-height N: pretend the screen is N pt tall, to see the settings tabs scroll on a small display.

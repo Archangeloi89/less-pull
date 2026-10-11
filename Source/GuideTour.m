@@ -62,6 +62,9 @@ static double Ease(double k){k=MAX(0,MIN(1,k));return k<.5?4*k*k*k:1-pow(-2*k+2,
 static NSColor *Mix(NSColor *a,NSColor *b,double k){a=[a colorUsingColorSpace:NSColorSpace.sRGBColorSpace];b=[b colorUsingColorSpace:NSColorSpace.sRGBColorSpace];k=MAX(0,MIN(1,k));
  return [NSColor colorWithSRGBRed:a.redComponent+(b.redComponent-a.redComponent)*k green:a.greenComponent+(b.greenComponent-a.greenComponent)*k blue:a.blueComponent+(b.blueComponent-a.blueComponent)*k alpha:a.alphaComponent+(b.alphaComponent-a.alphaComponent)*k];}
 
+// The text of a bubble (semibold, like the website's) or of a card under a scene; measured and drawn alike.
+static NSDictionary *GTTextAttributes(BOOL card){NSMutableParagraphStyle *ps=[NSMutableParagraphStyle new];ps.lineSpacing=1.5;ps.alignment=card?NSTextAlignmentCenter:NSTextAlignmentNatural;
+ return @{NSFontAttributeName:card?[NSFont systemFontOfSize:14]:[NSFont systemFontOfSize:14.5 weight:NSFontWeightSemibold],NSParagraphStyleAttributeName:ps};}
 // ---- The guide (the cursor from lesspull.com, with its amber Guide tag), its bubble or card, a ring around the real
 // thing to click, and the little door it comes through, on a transparent layer over the whole screen.
 @interface GuideView : NSView
@@ -91,15 +94,19 @@ static NSColor *Mix(NSColor *a,NSColor *b,double k){a=[a colorUsingColorSpace:NS
   double sv=t-self.shiverAt;if(sv>=0&&sv<.6)p.x+=1.6*sin(sv*80)*(1-sv/.6);}
  return p;
 }
-- (NSRect)textRect {double h=self.scene?self.card.size.height-14-14-self.scene.frame.size.height-10:self.card.size.height-26;return NSMakeRect(NSMinX(self.card)+14,NSMinY(self.card)+12+self.askHeight,self.card.size.width-28,h-self.askHeight);}
+- (NSRect)textRect {double h=self.scene?self.card.size.height-14-14-self.scene.frame.size.height-10:self.card.size.height-26;return NSMakeRect(NSMinX(self.card)+14,NSMinY(self.card)+13+self.askHeight,self.card.size.width-28,h-self.askHeight+2);}
 - (void)drawRect:(NSRect)dirty {
  double t=self.clock;
  // the ring: around the real thing to click, with a soft ping now and then
  if(self.ringAlpha>.01&&!NSIsEmptyRect(self.ring)){
-  NSRect rr=NSInsetRect(self.ring,-5,-5);BOOL round=fabs(rr.size.width-rr.size.height)<10;double ph=fmod(t,1.5)/1.5;
-  NSBezierPath *(^shape)(NSRect)=^NSBezierPath *(NSRect r){double cr=MIN(9,r.size.height/2);return round?[NSBezierPath bezierPathWithOvalInRect:r]:[NSBezierPath bezierPathWithRoundedRect:r xRadius:cr yRadius:cr];};
-  NSBezierPath *main=shape(rr);main.lineWidth=2.6;[GTAmber(self.ringAlpha*(.8+.2*sin(t*4))) setStroke];[main stroke];
-  if(!self.still){NSBezierPath *ping=shape(NSInsetRect(rr,-13*ph,-13*ph));ping.lineWidth=2;[GTAmber(self.ringAlpha*.55*(1-ph)) setStroke];[ping stroke];}
+  NSRect rr=NSInsetRect(self.ring,-5,-5);BOOL round=fabs(rr.size.width-rr.size.height)<14;double pulse=.5+.5*sin(t*5.2);
+  NSBezierPath *(^shape)(NSRect)=^NSBezierPath *(NSRect r){double cr=MIN(10,r.size.height/2);return round?[NSBezierPath bezierPathWithOvalInRect:r]:[NSBezierPath bezierPathWithRoundedRect:r xRadius:cr yRadius:cr];};
+  // a soft amber wash inside, a glowing ring that breathes, and two pings that travel well beyond it
+  [GTAmber(self.ringAlpha*(.10+.08*pulse)) setFill];[shape(rr) fill];
+  [NSGraphicsContext saveGraphicsState];NSShadow *glow=[NSShadow new];glow.shadowBlurRadius=10+6*pulse;glow.shadowOffset=NSZeroSize;glow.shadowColor=GTAmber(self.ringAlpha*.9);[glow set];
+  NSBezierPath *main=shape(NSInsetRect(rr,-1.5*pulse,-1.5*pulse));main.lineWidth=3.2;[GTAmber(self.ringAlpha) setStroke];[main stroke];[NSGraphicsContext restoreGraphicsState];
+  if(!self.still){double reach=round?MAX(30,rr.size.width*1.3):MIN(26,MAX(14,rr.size.height*.75));
+   for(int k=0;k<2;k++){double ph=fmod(t/1.3+k*.5,1);NSBezierPath *ping=shape(NSInsetRect(rr,-reach*Ease(ph),-reach*Ease(ph)));ping.lineWidth=3.4*(1-ph)+.6;[GTAmber(self.ringAlpha*.95*pow(1-ph,1.2)) setStroke];[ping stroke];}}
  }
  // the little door: a dark circle with an amber ring, like the website's circle in the corner
  if(self.doorK>.01){double R=24*self.doorK;NSRect dr=NSMakeRect(self.door.x-R,self.door.y-R,2*R,2*R);
@@ -122,9 +129,8 @@ static NSColor *Mix(NSColor *a,NSColor *b,double k){a=[a colorUsingColorSpace:NS
   [(card?[NSColor.windowBackgroundColor colorWithAlphaComponent:.98*a]:GTCream(a)) setFill];[box fill];
   [NSGraphicsContext restoreGraphicsState];
   [GTAmber(.95*a) setStroke];box.lineWidth=1.5;[box stroke];
-  if(self.text.length){NSMutableParagraphStyle *ps=[NSMutableParagraphStyle new];ps.lineSpacing=1.5;ps.alignment=card?NSTextAlignmentCenter:NSTextAlignmentNatural;
-   NSDictionary *at=@{NSFontAttributeName:[NSFont systemFontOfSize:card?14:14.5 weight:card?NSFontWeightRegular:NSFontWeightSemibold],NSForegroundColorAttributeName:card?[NSColor.labelColor colorWithAlphaComponent:a]:GTInk(a),NSParagraphStyleAttributeName:ps};
-   [self.text drawWithRect:[self textRect] options:NSStringDrawingUsesLineFragmentOrigin attributes:at];}
+  if(self.text.length){NSMutableDictionary *at=[GTTextAttributes(card) mutableCopy];at[NSForegroundColorAttributeName]=card?[NSColor.labelColor colorWithAlphaComponent:a]:GTInk(a);
+   [self.text drawWithRect:[self textRect] options:NSStringDrawingUsesLineFragmentOrigin|NSStringDrawingUsesFontLeading attributes:at];}
   self.scene.alphaValue=a;
  }
  if(self.alpha<=0.01)return;
@@ -248,7 +254,13 @@ static GTPanel *GTMakePanel(NSRect frame,NSInteger level){
 @property NSInteger slowCount;
 @property NSMutableSet<NSString *> *eggs;
 @property double lastEggCheck,colleagueAt,hoverSince;
-@property NSRect avoidRect;                    // screen coordinates: the real panel on screen now
+@property(copy) NSValue *(^avoidBlock)(void);  // the real panel to keep clear of (it lasts into the next beats, and counts only while it is on screen)
+@property(readonly) NSRect avoidRect;          // where that panel is now (screen coordinates); empty once it has closed
+@property NSRect lastMenu;                     // where the status menu was when last open (it drops there again)
+@property double lastMenuCheck;
+@property BOOL aimFollowsRing;                 // the tip follows the ring (the item to choose)
+@property BOOL arriving;                       // the knock and the way out of the door: a station picked meanwhile waits for the end of it
+@property NSInteger pendingStation;
 @end
 
 @implementation GuideTour
@@ -327,7 +339,7 @@ static GTPanel *GTMakePanel(NSRect frame,NSInteger level){
 #pragma mark a poke
 - (void)placePoke {
  GuideView *v=self.view;NSRect r=NSMakeRect(v.pos.x-2,v.pos.y-30,28,32);r.origin=[self onScreen:r.origin];
- NSValue *ring=self.ringBlock?self.ringBlock():nil;BOOL resting=self.running&&!v.leaving&&v.alpha>.9&&self.moveDuration<=0&&!self.asking&&self.pokeLines.count&&!(ring&&NSIntersectsRect(NSInsetRect(ring.rectValue,-8,-8),r));
+ NSValue *ring=self.ringBlock?self.ringBlock():nil;NSRect menu=[self.host guideFrame:@"menu"];if(!NSIsEmptyRect(menu)&&NSIntersectsRect(NSInsetRect(menu,-8,-8),r)){[self.pokePanel orderOut:nil];return;}BOOL resting=self.running&&!v.leaving&&v.alpha>.9&&self.moveDuration<=0&&!self.asking&&self.pokeLines.count&&!(ring&&NSIntersectsRect(NSInsetRect(ring.rectValue,-8,-8),r));
  if(!resting){[self.pokePanel orderOut:nil];return;}
  if(!self.pokePanel){self.pokePanel=GTMakePanel(r,NSPopUpMenuWindowLevel+2);GTPokeView *pv=[[GTPokeView alloc]initWithFrame:(NSRect){NSZeroPoint,r.size}];__weak GuideTour *weak=self;pv.poked=^{[weak poked];};self.pokePanel.contentView=pv;}
  if(!NSEqualRects(self.pokePanel.frame,r))[self.pokePanel setFrame:r display:NO];if(!self.pokePanel.visible)[self.pokePanel orderFrontRegardless];
@@ -366,7 +378,7 @@ static GTPanel *GTMakePanel(NSRect frame,NSInteger level){
 
 #pragma mark start and end
 - (void)start {
- if(self.running)return;self.running=YES;
+ if(self.running)return;self.running=YES;self.arriving=YES;self.pendingStation=-1;
  NSScreen *s=self.screen;
  self.overlay=[[NSPanel alloc]initWithContentRect:s.frame styleMask:NSWindowStyleMaskBorderless|NSWindowStyleMaskNonactivatingPanel backing:NSBackingStoreBuffered defer:NO];
  self.overlay.opaque=NO;self.overlay.backgroundColor=NSColor.clearColor;self.overlay.ignoresMouseEvents=YES;self.overlay.hasShadow=NO;self.overlay.level=NSPopUpMenuWindowLevel+1;  // above the real panels and menus; cards are placed beside them
@@ -382,7 +394,7 @@ static GTPanel *GTMakePanel(NSRect frame,NSInteger level){
  [self.host guideShowSettings:NO];
  [self morphFrom:settings to:self.bar.frame image:look growing:NO then:^{
   [self revealBar];GuideView *g=self.view;g.door=[self doorPoint];g.doorK=0;g.pos=self.from=self.target=NSMakePoint(g.door.x-4,g.door.y+6);
-  if(self.reduceMotion){g.leaving=NO;g.alpha=1;[self playStep:0];return;}
+  if(self.reduceMotion){g.leaving=NO;g.alpha=1;[self arrived];return;}
   BOOL shown=!NSEqualPoints([self iconPoint],NSZeroPoint);double t=.2;
   if(shown)for(int i=0;i<2;i++){[self after:t do:^{[self.host guideSpotEmpty:YES];}];[self after:t+.14 do:^{[self.host guideSpotEmpty:NO];}];t+=.36;}  // the circle winks twice
   [self after:t+.2 do:^{self.ringBlock=self.circleRing;self.lastRingCheck=0;self.view.ringTarget=.7;[self show:L(@"Knock knock.") scene:-1];}];  // a bubble at the circle, nobody in it yet
@@ -390,8 +402,9 @@ static GTPanel *GTMakePanel(NSRect frame,NSInteger level){
   [self after:t+2.75 do:^{GuideView *c=self.view;c.alpha=1;c.arriveAt=CACurrentMediaTime();}];
   [self after:t+3.1 do:^{NSPoint d=self.view.door;[self moveTo:[self onScreen:NSMakePoint(d.x-30,d.y-62)]];}];
   [self after:t+3.4 do:^{self.doorTarget=0;}];
-  [self after:t+3.8 do:^{[self face:GTFaceWiggle];self.view.leaving=NO;[self playStep:0];}];}];
+  [self after:t+3.8 do:^{[self face:GTFaceWiggle];self.view.leaving=NO;[self arrived];}];}];
 }
+- (void)arrived {self.arriving=NO;NSInteger first=self.pendingStation>=0?self.pendingStation:0;self.pendingStation=-1;[self playStep:first];}
 - (void)stop {[self finish:NO];}
 - (void)finish:(BOOL)completed {
  if(!self.running)return;self.running=NO;self.generation++;
@@ -403,14 +416,17 @@ static GTPanel *GTMakePanel(NSRect frame,NSInteger level){
  [self closeBarAt:0];id<GuideTourHost> host=self.host;
  [self morphFrom:from to:settings image:look growing:YES then:^{[host guideShowSettings:YES];[host guideFinished:completed];}];
 }
-- (void)runCleanup:(NSInteger)step {if(step>=0&&step<(NSInteger)self.cleanups.count){id c=self.cleanups[step];if(c!=NSNull.null)((void(^)(void))c)();}self.avoidRect=NSZeroRect;}
+- (void)runCleanup:(NSInteger)step {if(step>=0&&step<(NSInteger)self.cleanups.count){id c=self.cleanups[step];if(c!=NSNull.null)((void(^)(void))c)();}self.avoidBlock=nil;}
 - (void)halt {[self.host guideDo:@"mark" with:nil];[self runCleanup:self.step];self.generation++;[self.waitTimer invalidate];[self.rampTimer invalidate];self.waiting=NO;self.view.forcedDroop=NO;self.asking=NO;self.askAnswered=nil;[self hideAsk];self.ringBlock=nil;self.ringOnCircle=NO;self.view.ringTarget=0;self.view.keys=nil;self.peering=NO;}
 
 #pragma mark controls (the tour bar)
 - (void)next {
- if(!self.running)return;
+ if(!self.running||self.arriving)return;  // it is still on its way in
  if(self.asking){[self answer:-1];return;}  // a question: Next means "not now"
- if(self.waiting){GTBeat *b=self.currentBeat;[self.waitTimer invalidate];self.waiting=NO;self.generation++;if(b.onNext)b.onNext();[self endBeat:b to:b.nextTo];return;}  // waiting for your hands: Next does the one step itself, or goes on without it
+ GTBeat *cur=self.currentBeat;
+ if(self.waiting||(cur.until&&!cur.home&&!self.view.leaving)){GTBeat *b=cur;[self.waitTimer invalidate];self.waiting=NO;self.generation++;  // a step for your hands (waiting, or about to): Next does it itself, or goes on without it
+  if(b.onNext){b.onNext();[self after:.45 do:^{[self endBeat:b to:b.nextTo];}];return;}  // a moment for the real panel or window to appear before the next line looks for it
+  [self endBeat:b to:b.nextTo];return;}
  if(self.view.leaving)return;
  if(self.currentBeat&&!self.currentBeat.home&&self.beatIndex<(NSInteger)self.beats.count-1){self.generation++;[self endBeat:self.currentBeat to:nil];return;}  // only talking: on to the next line
  if(self.step+1>=(NSInteger)self.steps.count){  // Done: it still says goodbye and goes through its door, just without the rest of the station
@@ -422,6 +438,7 @@ static GTPanel *GTMakePanel(NSRect frame,NSInteger level){
 - (void)back {if(self.running&&self.step>0)[self jumpTo:self.step-1];}
 - (void)jumpTo:(NSInteger)station {
  if(!self.running||station<0||station>=(NSInteger)self.steps.count)return;
+ if(self.arriving){self.pendingStation=station;return;}  // first it comes in through its door, then it goes there
  GuideView *v=self.view;v.leaving=NO;  // even on its way home, it comes back out
  BOOL back=station<self.step;[self playStep:station];
  if(back)[self interject:L(@"Once more, then.") face:GTFaceNone];
@@ -437,6 +454,11 @@ static GTPanel *GTMakePanel(NSRect frame,NSInteger level){
   GuideView *v=self.view;v.pos=v.door;[self show:L(@"Everything back as it was.") scene:-1];
   [self after:2 do:^{[self show:nil scene:-1];[self after:.35 do:^{[self finish:NO];}];}];} quick:YES];
 }
+- (NSString *)debugState {
+ GuideView *v=self.view;NSRect card=v.card;if(!NSIsEmptyRect(card))card.origin=[self onScreen:card.origin];NSRect ring=v.ring;if(!NSIsEmptyRect(ring))ring.origin=[self onScreen:ring.origin];NSString *t=v.text?:@"";
+ return [NSString stringWithFormat:@"step %ld beat %ld [%@] tip %@ card %@ a%.2f ring %@ a%.2f avoid %@ waiting %d bounds %@ keep %@ zone %@ bar %@",(long)self.step+1,(long)self.beatIndex,[t substringToIndex:MIN(60,t.length)],NSStringFromPoint([self onScreen:v.pos]),NSStringFromRect(card),v.cardAlpha,NSStringFromRect(ring),v.ringAlpha,NSStringFromRect(self.avoidRect),self.waiting,NSStringFromRect([self bounds]),NSStringFromRect([self menuToKeepClear]),NSStringFromRect([self menuZone]),NSStringFromRect([self barFrame])];
+}
+- (void)debugPark {NSValue *p=[self nearBar]();if(!p)return;double t=[self moveTo:p.pointValue];[self after:t*.85 do:^{[self show:L(@"Opera opens the store page. Click Add to Opera, then confirm. I’ll notice.") scene:-1];}];}
 - (void)toggleSlow {
  self.slow=!self.slow;self.view.pace=self.pace;[self updateBar];if(self.slow)self.slowCount++;
  if(self.slow&&self.slowCount==2&&[self egg:@"slower2"])[self interject:L(@"Slower again? No rush; I’m on holiday.") face:GTFaceNone];
@@ -479,7 +501,8 @@ static GTPanel *GTMakePanel(NSRect frame,NSInteger level){
  self.doorVel+=(self.doorTarget-v.doorK)*.22;self.doorVel*=.7;v.doorK=MAX(0,v.doorK+self.doorVel);if(self.doorTarget==0&&v.doorK<.02){v.doorK=0;self.doorVel=0;}
  v.grayK+=(v.grayTarget-v.grayK)*.08;v.blushK+=(v.blushTarget-v.blushK)*.08;v.leftK+=(v.leftTarget-v.leftK)*.08;v.emptyK+=(v.emptyTarget-v.emptyK)*.1;v.cardAlpha+=(v.cardTarget-v.cardAlpha)*(v.still?1:.2);
  // the ring follows the real thing (a panel can move); it fades in and out
- if(self.ringBlock&&now-self.lastRingCheck>.3){self.lastRingCheck=now;NSValue *r=self.ringBlock();v.ring=r?[self localRect:r.rectValue]:NSZeroRect;}
+ if(self.ringBlock&&now-self.lastRingCheck>.3){self.lastRingCheck=now;NSValue *r=self.ringBlock();v.ring=r?[self localRect:r.rectValue]:NSZeroRect;if(self.aimFollowsRing&&!NSIsEmptyRect(v.ring))v.pointAt=NSMakePoint(NSMidX(v.ring),NSMidY(v.ring));}
+ if(now-self.lastMenuCheck>.2){self.lastMenuCheck=now;[self keepOffMenu];}
  v.ringAlpha+=((self.ringBlock&&!NSIsEmptyRect(v.ring)?v.ringTarget:0)-v.ringAlpha)*.15;
  if(self.askPanel.visible)self.askPanel.alphaValue=v.cardAlpha;
  [self placePoke];
@@ -496,11 +519,37 @@ static GTPanel *GTMakePanel(NSRect frame,NSInteger level){
 #pragma mark moving, placing, talking
 // A move: the website's arc (a hop for a short way), leaning into it, with a soft overshoot as it lands. Returns the time until it arrives.
 - (double)moveTo:(NSPoint)screenPoint {
+ NSRect menu=[self.host guideFrame:@"menu"];if(!NSIsEmptyRect(menu)&&NSIntersectsRect([self bodyOnScreenAt:screenPoint],NSInsetRect(menu,-12,-12)))screenPoint=[self spotBeside:menu];  // never onto the open menu
  NSPoint to=[self local:screenPoint];NSRect b=[self bounds];to.x=MIN(MAX(to.x,NSMinX(b)+8),NSMaxX(b)-70);to.y=MIN(MAX(to.y,NSMinY(b)+60),NSMaxY([self localRect:self.screen.frame])-8);
  GuideView *v=self.view;double dist=hypot(to.x-v.pos.x,to.y-v.pos.y);if(dist<2)return 0;
  if(self.reduceMotion){v.pos=self.target=to;self.moveDuration=0;return .2;}
  self.anticipation=0;self.from=v.pos;self.target=to;self.moveStart=CACurrentMediaTime();self.landedAt=-100;
  self.moveDuration=MIN(1.5,.42+dist/1500)*(1+(self.pace-1)*.5);return self.moveDuration;
+}
+// The menu, open now, or about to be (the step asks for it): bubbles keep clear of it.
+- (NSRect)avoidRect {NSValue *a=self.avoidBlock?self.avoidBlock():nil;return a?a.rectValue:NSZeroRect;}
+- (NSRect)menuToKeepClear {NSRect m=[self.host guideFrame:@"menu"];if(!NSIsEmptyRect(m))return m;GTBeat *b=self.currentBeat;return b&&(b.ringIsCircle||b.mark.length)&&!self.view.leaving?[self menuZone]:NSZeroRect;}
+- (NSRect)bodyOnScreenAt:(NSPoint)p {return NSMakeRect(p.x-4,p.y-54,78,58);}
+// The status menu: where it is while open; where it will drop while closed (where it was last time, or under the circle).
+- (NSRect)menuZone {
+ NSRect m=[self.host guideFrame:@"menu"];if(!NSIsEmptyRect(m)){self.lastMenu=m;return m;}if(!NSIsEmptyRect(self.lastMenu))return self.lastMenu;
+ NSRect icon=[self.host guideIconFrame];if(NSIsEmptyRect(icon))return NSZeroRect;NSRect v=self.screen.visibleFrame;
+ return NSMakeRect(MIN(NSMinX(icon)-2,NSMaxX(v)-324),NSMinY(icon)-400,320,400);
+}
+// Beside the menu, on its roomier side, level with its top: the guide's tip, so arrow, tag and bubble stay off it.
+- (NSPoint)spotBeside:(NSRect)m {NSRect v=self.screen.visibleFrame;BOOL left=NSMinX(m)-NSMinX(v)>=420||NSMinX(m)-NSMinX(v)>=NSMaxX(v)-NSMaxX(m);return NSMakePoint(left?NSMinX(m)-100:NSMaxX(m)+26,MIN(NSMaxY(m)-34,NSMaxY(v)-44));}
+// By the circle, but clear of it and of where its menu drops: a little down and to the side, so a click on the circle
+// lands on the circle, and the opening menu finds the guide already beside it.
+- (NSPoint)spotByCircle {NSPoint p=[self homePoint];NSRect zone=[self menuZone];double x=p.x-70;if(!NSIsEmptyRect(zone))x=MIN(x,NSMinX(zone)-100);return NSMakePoint(x,p.y-60);}
+// While the status menu is open, the guide and its bubble keep off it, whatever the beat: they step to its free side.
+- (void)keepOffMenu {
+ GuideView *v=self.view;if(!self.running||v.leaving)return;
+ NSRect m=[self.host guideFrame:@"menu"];if(NSIsEmptyRect(m))return;self.lastMenu=m;
+ NSRect keep=NSInsetRect(m,-12,-12);NSPoint at=self.moveDuration>0?self.target:v.pos;
+ if(NSIntersectsRect([self bodyOnScreenAt:[self onScreen:at]],keep))[self moveTo:[self spotBeside:m]];
+ if(!v.text.length||v.cardTarget<=0||NSIsEmptyRect(v.card))return;
+ NSRect card=v.card;card.origin=[self onScreen:card.origin];if(!NSIntersectsRect(card,keep)&&!NSIntersectsRect([self bodyOnScreenAt:[self onScreen:self.moveDuration>0?self.target:v.pos]],NSInsetRect(card,-4,-4)))return;
+ NSRect want=[self placeSize:[self sizeForText:v.text scene:self.sceneKind>=0] near:self.moveDuration>0?self.target:v.pos scene:self.sceneKind>=0];if(!NSEqualRects(want,v.card))[self show:v.text scene:self.sceneKind];  // the bubble too, on the free side
 }
 - (NSPoint)doorPoint {NSPoint h=[self local:[self homePoint]];return NSMakePoint(h.x,h.y-30);}  // the circle grows into a round door hanging just under the menu bar
 // Home through the door: the circle grows into the door, the guide folds in along an arc, the door shrinks, the icon
@@ -532,29 +581,31 @@ static GTPanel *GTMakePanel(NSRect frame,NSInteger level){
 // A bubble or card goes near the cursor: above it first (as on the website), never over its arrow and tag, inside the
 // screen, clear of the real panel, and if it can, clear of the tour bar.
 - (NSRect)placeSize:(NSSize)size near:(NSPoint)g scene:(BOOL)scene {
- NSRect b=[self bounds];NSRect hard=[self localRect:self.avoidRect],soft=[self localRect:NSInsetRect([self barFrame],-8,-8)];double w=size.width,h=size.height;
+ NSRect b=[self bounds];NSRect hard=[self localRect:self.avoidRect],soft=[self localRect:NSInsetRect([self barFrame],-8,-8)],menu=[self localRect:[self menuToKeepClear]],drop=[self localRect:NSIsEmptyRect(menu)?[self menuZone]:NSZeroRect];double w=size.width,h=size.height;
  NSRect body=NSMakeRect(g.x-4,g.y-54,78,58);
  NSArray *candidates=@[[NSValue valueWithRect:NSMakeRect(g.x-14,g.y+14,w,h)],[NSValue valueWithRect:NSMakeRect(g.x-w+14,g.y+14,w,h)],[NSValue valueWithRect:NSMakeRect(g.x+80,g.y-h/2-18,w,h)],
   [NSValue valueWithRect:NSMakeRect(g.x-w-16,g.y-h/2,w,h)],[NSValue valueWithRect:NSMakeRect(g.x-10,g.y-62-h,w,h)],[NSValue valueWithRect:NSMakeRect(g.x-w+60,g.y-62-h,w,h)]];
- for(int pass=0;pass<2;pass++)for(NSValue *v in candidates){NSRect c=v.rectValue;if(!NSContainsRect(b,c))continue;if(NSIntersectsRect(c,body))continue;if(!NSIsEmptyRect(hard)&&NSIntersectsRect(c,NSInsetRect(hard,-10,-10)))continue;if(pass==0&&!NSIsEmptyRect(soft)&&NSIntersectsRect(c,soft))continue;return c;}
+ if(getenv("LP_TOUR_DEBUG"))NSLog(@"Less Pull tour test: place %@ near %@ hard %@ menu %@ drop %@ soft %@ in %@",NSStringFromSize(size),NSStringFromPoint(g),NSStringFromRect(hard),NSStringFromRect(menu),NSStringFromRect(drop),NSStringFromRect(soft),NSStringFromRect(b));
+ for(int pass=0;pass<2;pass++)for(NSValue *v in candidates){NSRect c=v.rectValue;if(!NSContainsRect(b,c))continue;if(NSIntersectsRect(c,body))continue;if(!NSIsEmptyRect(hard)&&NSIntersectsRect(c,NSInsetRect(hard,-10,-10)))continue;if(!NSIsEmptyRect(menu)&&NSIntersectsRect(c,NSInsetRect(menu,-10,-10)))continue;if(pass==0&&((!NSIsEmptyRect(soft)&&NSIntersectsRect(c,soft))||(!NSIsEmptyRect(drop)&&NSIntersectsRect(c,drop))))continue;return c;}
  NSRect c=[candidates.firstObject rectValue];c.origin.x=MIN(MAX(c.origin.x,NSMinX(b)),NSMaxX(b)-w);c.origin.y=MIN(MAX(c.origin.y,NSMinY(b)),NSMaxY(b)-h);return c;
 }
 // A spot in free space for the guide and a card of this size: away from the real panel and the tour bar; near where it is.
 - (NSValue *)freeSpotFor:(NSSize)size {
- NSRect v=self.screen.visibleFrame,bar=NSInsetRect([self barFrame],-20,-20);NSPoint here=[self onScreen:self.view.pos];
+ NSRect v=self.screen.visibleFrame,bar=NSInsetRect([self barFrame],-20,-20),avoid=self.avoidRect;NSPoint here=[self onScreen:self.view.pos];
  NSPoint best=NSMakePoint(NSMidX(v),NSMidY(v));double bestScore=-1e9;
  for(double fy=.72;fy>=.3;fy-=.14)for(double fx=.18;fx<=.82;fx+=.16){NSPoint q=NSMakePoint(NSMinX(v)+v.size.width*fx,NSMinY(v)+v.size.height*fy);
   NSRect c=[self placeSize:size near:[self local:q] scene:YES];c.origin=[self onScreen:c.origin];
-  double score=0;if(!NSIsEmptyRect(bar)&&NSIntersectsRect(c,bar))score-=1000;if(!NSIsEmptyRect(self.avoidRect)&&NSIntersectsRect(c,self.avoidRect))score-=5000;if(!NSContainsRect(v,c))score-=3000;
+  double score=0;if(!NSIsEmptyRect(bar)&&NSIntersectsRect(c,bar))score-=1000;if(!NSIsEmptyRect(avoid)&&NSIntersectsRect(c,avoid))score-=5000;if(!NSContainsRect(v,c))score-=3000;
   score-=hypot(q.x-here.x,q.y-here.y)*.3;if(score>bestScore){bestScore=score;best=q;}}
  return [NSValue valueWithPoint:best];
 }
 - (NSValue *)stepFreeSpot {if(!self.hasStepSpot){self.stepSpot=[self freeSpotFor:NSMakeSize(452,232)].pointValue;self.hasStepSpot=YES;}return [NSValue valueWithPoint:self.stepSpot];}
+// Measured with the font and spacing it is drawn with, so every line fits (a bubble's text never gets cut off).
 - (NSSize)sizeForText:(NSString *)text scene:(BOOL)scene {
- NSDictionary *a=@{NSFontAttributeName:[NSFont systemFontOfSize:14]};double w=scene?420:312;NSSize ask=self.askView?self.askView.fittingSize:NSZeroSize;
- NSRect t=[text?:@"" boundingRectWithSize:NSMakeSize(w,1000) options:NSStringDrawingUsesLineFragmentOrigin attributes:a];
- if(scene)return NSMakeSize(452,14+140+10+MAX(20,ceil(t.size.height)+4)+14+(ask.height?ask.height+10:0));
- return NSMakeSize(MAX(MAX(120,ceil(t.size.width)+34),ask.width+32),ceil(t.size.height)+30+(ask.height?ask.height+12:0));
+ double w=scene?420:300;NSSize ask=self.askView?self.askView.fittingSize:NSZeroSize;
+ NSRect t=[text?:@"" boundingRectWithSize:NSMakeSize(w,2000) options:NSStringDrawingUsesLineFragmentOrigin|NSStringDrawingUsesFontLeading attributes:GTTextAttributes(scene)];
+ if(scene)return NSMakeSize(452,14+140+10+MAX(20,ceil(t.size.height)+6)+14+(ask.height?ask.height+10:0));
+ return NSMakeSize(MAX(MAX(120,ceil(t.size.width)+30),ask.width+28),ceil(t.size.height)+30+(ask.height?ask.height+10:0));
 }
 - (void)show:(NSString *)text scene:(NSInteger)kind {
  GuideView *v=self.view;
@@ -588,7 +639,11 @@ static GTPanel *GTMakePanel(NSRect frame,NSInteger level){
  if(!self.running||self.view.leaving||self.asking)return;NSString *before=self.view.text;NSInteger kind=self.sceneKind,g=self.generation;[self face:f];[self show:text scene:kind];
  [self after:2.4*self.pace do:^{if(g==self.generation&&[self.view.text isEqual:text])[self show:before scene:kind];}];
 }
-- (void)after:(double)seconds do:(void(^)(void))block {NSInteger g=self.generation;dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)(seconds*NSEC_PER_SEC)),dispatch_get_main_queue(),^{if(g==self.generation&&self.running)block();});}
+- (void)after:(double)seconds do:(void(^)(void))block {
+ NSInteger g=self.generation;__weak GuideTour *weak=self;  // a timer in the common modes: it fires while a menu is open, too
+ NSTimer *t=[NSTimer timerWithTimeInterval:MAX(0,seconds) repeats:NO block:^(NSTimer *timer){GuideTour *s=weak;if(s&&g==s.generation&&s.running)block();}];
+ [NSRunLoop.mainRunLoop addTimer:t forMode:NSRunLoopCommonModes];
+}
 
 #pragma mark the stations
 - (void)playStep:(NSInteger)i {
@@ -618,7 +673,7 @@ static GTPanel *GTMakePanel(NSRect frame,NSInteger level){
  self.jumpTarget=nil;self.currentBeat=b;
  if(b.run)b.run();
  NSString *say=b.sayBlock?b.sayBlock():b.say;
- if(b.avoid){NSValue *a=b.avoid();self.avoidRect=a?a.rectValue:NSZeroRect;}
+ if(b.avoid)self.avoidBlock=b.avoid;
  if(b.face!=GTFaceDroop)self.view.forcedDroop=NO;
  [self face:b.face];
  for(NSArray *f in b.faces){GTFace face=[f[1] integerValue];[self after:[f[0] doubleValue]*self.pace do:^{[self face:face];}];}
@@ -626,6 +681,7 @@ static GTPanel *GTMakePanel(NSRect frame,NSInteger level){
  if(b.ramp.count==3)[self rampFrom:[b.ramp[0] doubleValue] to:[b.ramp[1] doubleValue] over:[b.ramp[2] doubleValue]];
  GuideView *v=self.view;NSValue *aim=b.pointAt?b.pointAt():nil;v.pointAt=aim?[self local:aim.pointValue]:NSZeroPoint;v.keys=b.keys;self.peering=b.lean;
  self.ringBlock=b.ring;self.ringOnCircle=b.ringIsCircle;self.lastRingCheck=0;v.ringTarget=b.ring?1:0;[self.host guideDo:@"mark" with:b.mark];
+ self.aimFollowsRing=NO;if(!b.ring&&b.mark.length){self.ringBlock=[self itemRing:b.mark];self.ringOnCircle=YES;v.ringTarget=1;self.aimFollowsRing=YES;}  // the item to choose pulses in the open menu
  if(b.home){[self show:say scene:-1];
   [self after:[self readingTime:say] do:^{[self foldThen:^{
    if(!b.afterSay.length){[self after:.4 do:^{[self finish:YES];}];return;}
@@ -633,7 +689,7 @@ static GTPanel *GTMakePanel(NSRect frame,NSInteger level){
   return;}
  double travel=0;NSValue *to=b.to?b.to():nil;
  if(!to&&(b.free||(b.scene>=0&&self.sceneKind!=b.scene)))to=[self stepFreeSpot];
- if(to){travel=[self moveTo:to.pointValue];if(travel>0)[self show:nil scene:-1];}
+ if(to){NSPoint was=v.pos;travel=[self moveTo:to.pointValue];if(travel>0&&hypot(self.target.x-was.x,self.target.y-was.y)>150)[self show:nil scene:-1];}
  void (^advance)(void)=^{[self endBeat:b to:nil];};
  // a question: answer buttons in the bubble; the station goes on with the answer
  if(b.ask.count){
@@ -652,7 +708,9 @@ static GTPanel *GTMakePanel(NSRect frame,NSInteger level){
    if(b.until()){[t invalidate];w.waiting=NO;[w after:.35 do:advance];return;}
    double waited=CACurrentMediaTime()-w.waitStart,since=waited-base;
    if(nudged<b.nudges.count&&since>=[b.nudges[nudged][0] doubleValue]*w.pace){NSArray *n=b.nudges[nudged++];[w face:[n[2] integerValue]];
-    if(n.count>3){NSValue *(^na)(void)=n[3];NSValue *p=na();if(p)w.view.pointAt=[w local:p.pointValue];}[w show:n[1] scene:w.sceneKind];}
+    if(n.count>3){NSValue *(^na)(void)=n[3];NSValue *p=na();if(p){w.view.pointAt=[w local:p.pointValue];w.aimFollowsRing=NO;}}[w show:n[1] scene:w.sceneKind];
+    NSValue *(^was)(void)=w.ringBlock;if(n.count>4){w.ringBlock=n[4];w.lastRingCheck=0;w.view.ringTarget=1;}
+    NSString *hint=n[1];if(say.length)[w after:[w readingTime:hint]+1.6*w.pace do:^{if(w.waiting&&w.currentBeat==b&&[w.view.text isEqual:hint]){w.aimFollowsRing=b.mark.length&&!b.ring;if(n.count>4){w.ringBlock=was;w.lastRingCheck=0;w.view.ringTarget=was?1:0;}[w show:say scene:w.sceneKind];}}];}
    // the menu closed without the item it waits for: once more, from the circle
    BOOL open=[[host guideValue:@"menuOpen"] boolValue];if(b.menuItem&&menuWasOpen&&!open&&!b.until()){[w face:GTFaceNone];[w show:[NSString stringWithFormat:L(@"The menu closed. Click the circle again, then %@."),b.menuItem] scene:-1];}menuWasOpen=open;
    if(!said180&&since>180*w.pace){said180=YES;[w interject:L(@"Three minutes. In website time, that’s a full workday. I’m fine.") face:GTFaceNone];}
@@ -668,7 +726,15 @@ static GTPanel *GTMakePanel(NSRect frame,NSInteger level){
 - (BOOL(^)(void))isOn:(NSString *)key {id<GuideTourHost> h=self.host;return ^BOOL{return [[h guideValue:key] boolValue];};}
 - (BOOL(^)(void))isOff:(NSString *)key {id<GuideTourHost> h=self.host;return ^BOOL{return ![[h guideValue:key] boolValue];};}
 // The guide's tip just under the menu-bar circle (its door), or under the menu bar's right end while macOS hides it.
-- (NSValue *(^)(void))underCircle {__weak GuideTour *weak=self;return ^NSValue *{NSPoint p=[weak homePoint];return [NSValue valueWithPoint:NSMakePoint(p.x-18,p.y-46)];};}
+- (NSValue *(^)(void))underCircle {__weak GuideTour *weak=self;return ^NSValue *{return [NSValue valueWithPoint:[weak spotByCircle]];};}
+// Beside the open menu (or where it will drop).
+- (NSValue *(^)(void))menuSide {__weak GuideTour *weak=self;return ^NSValue *{GuideTour *s=weak;NSRect m=[s menuZone];return NSIsEmptyRect(m)?nil:[NSValue valueWithPoint:[s spotBeside:m]];};}
+// Next to the tour bar, out of the way: while the user works in a browser or in System Settings, it waits here.
+- (NSValue *(^)(void))nearBar {__weak GuideTour *weak=self;return ^NSValue *{GuideTour *s=weak;NSRect b=[s barFrame];if(NSIsEmptyRect(b))return nil;NSRect v=s.screen.visibleFrame;BOOL right=NSMidX(b)<NSMidX(v);
+ return [NSValue valueWithPoint:NSMakePoint(right?NSMaxX(b)+26:NSMinX(b)-100,MIN(NSMaxY(b)-4,NSMaxY(v)-44))];};}
+// The item to choose in the menu: its ring while the menu is open, the circle's while it is closed.
+- (NSValue *(^)(void))itemRing:(NSString *)mark {id<GuideTourHost> h=self.host;NSValue *(^circle)(void)=[self circleRing];NSString *key=[@"menu.item." stringByAppendingString:mark];
+ return ^NSValue *{if(![[h guideValue:@"menuOpen"] boolValue])return circle();NSRect r=[h guideFrame:key];return NSIsEmptyRect(r)?nil:[NSValue valueWithRect:r];};}
 - (NSValue *(^)(void))circleAim {__weak GuideTour *weak=self;return ^NSValue *{return [NSValue valueWithPoint:[weak homePoint]];};}
 - (NSValue *(^)(void))circleRing {id<GuideTourHost> h=self.host;return ^NSValue *{NSRect r=[h guideFrame:@"icon"];return NSIsEmptyRect(r)?nil:[NSValue valueWithRect:r];};}
 // Beside a real window or panel, on its free side, level with its upper part; never over it.
@@ -686,7 +752,7 @@ static GTPanel *GTMakePanel(NSRect frame,NSInteger level){
 // The shared Settings sub-flow (3.1): the user opens Settings from the menu, then the tab; Next does it for them.
 - (NSArray<GTBeat *> *)settingsFlowFor:(NSInteger)tab named:(NSString *)name when:(BOOL(^)(void))when {
  id<GuideTourHost> h=self.host;__weak GuideTour *weak=self;
- GTBeat *a=Beat(L(@"Click the circle, then Settings… at the bottom of the menu. My dot marks it."),GTFacePress);a.to=[self underCircle];a.ring=[self circleRing];a.ringIsCircle=YES;a.mark=@"settings";a.menuItem=L(@"Settings…");
+ GTBeat *a=Beat(L(@"Click the circle, then Settings… at the bottom of the menu. My dot marks it."),GTFacePress);a.to=[self underCircle];a.ringIsCircle=YES;a.mark=@"settings";a.lean=YES;a.menuItem=L(@"Settings…");
  a.onlyIf=^BOOL{return when()&&![[h guideValue:@"settingsVisible"] boolValue];};a.until=[self isOn:@"settingsVisible"];a.nudges=[self circleNudges];a.onNext=^{[h guideDo:@"openSettings" with:nil];};
  GTBeat *b=Beat(nil,GTFacePress);b.sayBlock=^NSString *{return [NSString stringWithFormat:L(@"The %@ tab, at the top of the window."),name];};b.avoid=[self frameOf:@"settings"];b.to=[self beside:@"settings"];
  NSString *tabKey=[NSString stringWithFormat:@"settings.tab.%ld",(long)tab];b.ring=[self frameOf:tabKey];b.pointAt=[self midOf:tabKey];
@@ -711,7 +777,7 @@ static GTPanel *GTMakePanel(NSRect frame,NSInteger level){
  BOOL (^iconShown)(void)=^BOOL{return !NSIsEmptyRect([host guideIconFrame]);};
  NSString *(^str)(NSString *)=^NSString *(NSString *k){id v=[host guideValue:k];return [v isKindOfClass:NSString.class]?v:@"";};
  NSValue *(^here)(void)=^NSValue *{GuideTour *s=weak;return [NSValue valueWithPoint:[s onScreen:s.view.pos]];};
- NSValue *(^menuSide)(void)=[self beside:@"menu"];
+ NSValue *(^menuSide)(void)=[self menuSide];NSValue *(^nearBar)(void)=[self nearBar];
  NSValue *(^dockAim)(void)=^NSValue *{NSRect v=weak.screen.frame;return [NSValue valueWithPoint:NSMakePoint(NSMidX(v),NSMinY(v)+20)];};
  NSValue *(^aboveDock)(void)=^NSValue *{NSRect v=weak.screen.visibleFrame;return [NSValue valueWithPoint:NSMakePoint(NSMidX(v)-60,NSMinY(v)+150)];};
  NSValue *(^clockAim)(void)=^NSValue *{NSRect v=weak.screen.frame;return [NSValue valueWithPoint:NSMakePoint(NSMaxX(v)-60,NSMaxY(v)-12)];};
@@ -756,8 +822,8 @@ static GTPanel *GTMakePanel(NSRect frame,NSInteger level){
   GTBeat *lp1=Beat(L(@"That circle is Less Pull. Also my door: I came in through it."),GTFaceTilt);lp1.to=weak.underCircle;lp1.pointAt=weak.circleAim;lp1.onlyIf=iconShown;
   GTBeat *lp1h=Beat(L(@"It’s up there somewhere, hiding. Anyway: that circle is Less Pull, and my door."),GTFaceTilt);lp1h.ident=@"lp.1h";lp1h.to=weak.underCircle;lp1h.onlyIf=^BOOL{return !iconShown();};
   GTBeat *card=Beat(L(@"Your turn: click the circle. The menu drops out of it, like so."),GTFacePress);card.scene=1;card.to=here;card.ring=weak.circleRing;card.ringIsCircle=YES;
-  card.until=[weak isOn:@"menuOpen"];card.nudges=[weak circleNudges];card.onNext=^{[host guideDo:@"resume" with:nil];weak.tourPaused=NO;};card.nextTo=@"lp.skip";
-  GTBeat *dot=Beat(L(@"The amber dot is mine: it marks what to pick. Here: Resume Less Pull."),GTFaceNone);dot.mark=@"resume";dot.lean=YES;dot.to=menuSide;dot.pointAt=[weak midOf:@"menu"];dot.menuItem=L(@"Resume Less Pull");
+  card.mark=@"resume";card.until=[weak isOn:@"menuOpen"];card.nudges=[weak circleNudges];card.onNext=^{[host guideDo:@"resume" with:nil];weak.tourPaused=NO;};card.nextTo=@"lp.skip";
+  GTBeat *dot=Beat(L(@"The amber dot is mine: it marks what to pick. Here: Resume Less Pull."),GTFaceNone);dot.mark=@"resume";dot.lean=YES;dot.to=menuSide;dot.menuItem=L(@"Resume Less Pull");
   dot.until=[weak isOff:@"paused"];dot.nudges=[weak idleNudges];dot.onNext=^{[host guideDo:@"resume" with:nil];weak.tourPaused=NO;};dot.nextTo=@"lp.skip";dot.done=^{weak.tourPaused=NO;};
   GTBeat *on=Beat(L(@"There it goes. The color steps back, and the pull with it."),GTFaceNone);on.free=YES;on.onlyIf=[weak isOn:@"gray"];
   GTBeat *onw=Beat(L(@"There it goes. The screen warms up, and the pull eases."),GTFaceNone);onw.free=YES;onw.onlyIf=[weak isOff:@"gray"];
@@ -788,9 +854,9 @@ static GTPanel *GTMakePanel(NSRect frame,NSInteger level){
   GTBeat *pick=Beat(L(@"Now pick one. Click an app in the Dock, any app that wants its color."),GTFaceNone);pick.lean=YES;pick.to=aboveDock;pick.pointAt=dockAim;
   pick.run=^{start=str(@"frontBundle");};pick.until=^BOOL{return ![str(@"frontBundle") isEqual:start]||[[host guideValue:@"menuOpen"] boolValue];};pick.nudges=[weak nudge:10 say:L(@"Any app will do; the one in front is fine too.")];
   GTBeat *spot=Beat(nil,GTFacePress);spot.sayBlock=^NSString *{return [NSString stringWithFormat:L(@"%@ it is. Click the circle: the menu knows which app is in front."),str(@"frontApp")];};spot.run=^{picked=str(@"frontBundle");};
-  spot.to=weak.underCircle;spot.ring=weak.circleRing;spot.ringIsCircle=YES;spot.until=^BOOL{return [[host guideValue:@"menuOpen"] boolValue]||[[host guideValue:@"exceptionPanel"] boolValue];};spot.nudges=[weak circleNudges];
+  spot.to=weak.underCircle;spot.ring=weak.circleRing;spot.ringIsCircle=YES;spot.mark=@"app-exception";spot.until=^BOOL{return [[host guideValue:@"menuOpen"] boolValue]||[[host guideValue:@"exceptionPanel"] boolValue];};spot.nudges=[weak circleNudges];
   spot.onNext=^{[host guideDo:@"openExceptionPanel" with:nil];};spot.nextTo=@"exc.2";
-  GTBeat *dot=Beat(nil,GTFaceNone);dot.sayBlock=^NSString *{return [NSString stringWithFormat:L(@"My dot is on Exception for %@… Choose it."),str(@"frontApp")];};dot.mark=@"app-exception";dot.lean=YES;dot.to=menuSide;dot.pointAt=[weak midOf:@"menu"];
+  GTBeat *dot=Beat(nil,GTFaceNone);dot.sayBlock=^NSString *{return [NSString stringWithFormat:L(@"My dot is on Exception for %@… Choose it."),str(@"frontApp")];};dot.mark=@"app-exception";dot.lean=YES;dot.to=menuSide;
   dot.menuItem=[NSString stringWithFormat:L(@"Exception for %@…"),str(@"frontApp")];dot.until=[weak isOn:@"exceptionPanel"];dot.nudges=[weak idleNudges];dot.onNext=^{[host guideDo:@"openExceptionPanel" with:nil];};
   GTBeat *ex2=Beat(L(@"The real panel, for the app in front. Change one thing; the rest carries over."),GTFaceNone);ex2.ident=@"exc.2";ex2.avoid=[weak frameOf:@"panel"];ex2.to=[weak beside:@"panel"];ex2.pointAt=[weak midOf:@"panel"];
   GTBeat *off=Beat(L(@"Find Grayscale and click Off. That’s color, for this app only."),GTFacePress);off.avoid=[weak frameOf:@"panel"];off.ring=[weak frameOf:@"panel.gray.off"];off.pointAt=[weak midOf:@"panel.gray.off"];off.lean=YES;
@@ -811,21 +877,28 @@ static GTPanel *GTMakePanel(NSRect frame,NSInteger level){
   BOOL (^anyConnected)(void)=^BOOL{return [[host guideValue:@"browserConnected"] boolValue];};
   // one browser's walk-through: the page opens in it; the user clicks Add, Less Pull notices
   NSArray *(^walk)(NSDictionary *)=^NSArray *(NSDictionary *br){
-   NSString *name=br[@"name"],*bid=br[@"id"],*connId=[@"conn-" stringByAppendingString:bid],*laterId=[@"later-" stringByAppendingString:bid];
+   NSString *name=br[@"name"],*bid=br[@"id"],*connId=[@"conn-" stringByAppendingString:bid],*laterId=[@"later-" stringByAppendingString:bid],*sideId=[@"side-" stringByAppendingString:bid];BOOL opera=[bid isEqual:@"com.operasoftware.Opera"];
    BOOL (^isConnected)(void)=^BOOL{for(NSDictionary *b in [host guideValue:@"browsers"])if([b[@"id"] isEqual:bid])return [b[@"connected"] boolValue];return NO;};
    NSMutableArray *out=[NSMutableArray new];GTBeat *wait;
-   NSArray *waitNudges=@[@[@20,[NSString stringWithFormat:L(@"No rush. The page is in %@; I’m out here, admiring the real pixels."),name],@(GTFaceNone)],@[@60,L(@"Or skip it: Next, on the bar. The setup also waits under Settings → Websites."),@(GTFaceNone),[weak barAim:@"next"]]];
-   if([bid isEqual:@"com.apple.Safari"]){GTBeat *s1=Beat(L(@"A small companion app opens. Click its button: Open Safari Settings."),GTFacePress);s1.run=^{[host guideDo:@"connectBrowser" with:bid];};[out addObject:s1];
+   NSArray *park=br==chosen.firstObject?@[@[@5,L(@"I’ll wait up by the bar, out of your way. Guest rules."),@(GTFaceNone)]]:@[];  // once, as it parks by the bar
+   NSArray *waitNudges=[park arrayByAddingObjectsFromArray:@[@[@20,[NSString stringWithFormat:L(@"No rush. The page is in %@; I’m out here, admiring the real pixels."),name],@(GTFaceNone)],@[@60,L(@"Or skip it: Next. The setup waits behind my door: Less Pull’s Settings → Websites."),@(GTFaceNone),[weak barAim:@"next"],weak.circleRing]]];
+   if([bid isEqual:@"com.apple.Safari"]){GTBeat *s1=Beat(L(@"A small companion app opens. Click its button: Open Safari Settings."),GTFacePress);s1.to=nearBar;s1.run=^{[host guideDo:@"connectBrowser" with:bid];};[out addObject:s1];
     wait=Beat(L(@"In Extensions, turn on Less Pull and allow it on all websites. I’ll notice."),GTFaceNone);}
-   else if([bid isEqual:@"org.mozilla.firefox"]){GTBeat *f1=Beat(L(@"Firefox, for now: a temporary add-on. On that page, click Load Temporary Add-on…"),GTFacePress);f1.run=^{[host guideDo:@"connectBrowser" with:bid];};[out addObject:f1];
+   else if([bid isEqual:@"org.mozilla.firefox"]){GTBeat *f1=Beat(L(@"Firefox, for now: a temporary add-on. On that page, click Load Temporary Add-on…"),GTFacePress);f1.to=nearBar;f1.run=^{[host guideDo:@"connectBrowser" with:bid];};[out addObject:f1];
     wait=Beat(L(@"Then pick manifest.json in the folder Finder is showing. Firefox forgets it on quit."),GTFaceNone);}
+   else if(opera){wait=Beat(L(@"Opera opens the store page. Click Add to Opera, then confirm. I’ll notice."),GTFacePress);wait.run=^{[host guideDo:@"connectBrowser" with:bid];};
+    waitNudges=[park arrayByAddingObjectsFromArray:@[@[@20,L(@"If Opera said “Installation is not enabled”, I know a side door. Next, on the bar."),@(GTFaceNone),[weak barAim:@"next"]],waitNudges.lastObject]];}
    else {BOOL chrome=[bid isEqual:@"com.google.Chrome"];wait=Beat([NSString stringWithFormat:chrome?L(@"%@ opens the store page. Click Add to Chrome, then Add extension. I’ll notice."):L(@"%@ opens the store page. Click its Add button, then Add extension. I’ll notice."),name],GTFacePress);
     wait.run=^{[host guideDo:@"connectBrowser" with:bid];};
-    if([bid isEqual:@"com.microsoft.edgemac"])waitNudges=[@[@[@.1,L(@"Edge asks once about extensions from other stores. Say yes to that first."),@(GTFaceNone)]] arrayByAddingObjectsFromArray:waitNudges];
-    if([bid isEqual:@"com.operasoftware.Opera"])waitNudges=[@[@[@.1,L(@"Opera may first offer its Chrome Web Store helper. Take it, then the Add button."),@(GTFaceNone)]] arrayByAddingObjectsFromArray:waitNudges];}
-   wait.free=YES;wait.until=isConnected;wait.nudges=waitNudges;wait.timeout=150;wait.timeoutTo=laterId;wait.nextTo=laterId;wait.doneTo=connId;[out addObject:wait];
+    if([bid isEqual:@"com.microsoft.edgemac"])waitNudges=[@[@[@.1,L(@"Edge asks once about extensions from other stores. Say yes to that first."),@(GTFaceNone)]] arrayByAddingObjectsFromArray:waitNudges];}
+   wait.to=nearBar;wait.until=isConnected;wait.nudges=waitNudges;wait.timeout=opera?240:150;wait.timeoutTo=laterId;wait.nextTo=opera?sideId:laterId;wait.doneTo=connId;[out addObject:wait];
    GTBeat *ok=Beat([NSString stringWithFormat:L(@"%@ is connected. That was the hard part; the rest is one slider."),name],GTFaceHop);ok.ident=connId;ok.jumpOnly=YES;ok.faces=@[@[@.7,@(GTFaceWiggle)]];ok.doneTo=[@"end-" stringByAppendingString:bid];[out addObject:ok];
-   GTBeat *later=Beat(L(@"Let’s leave it. The setup waits under Settings → Websites. On we go."),GTFaceNone);later.ident=laterId;later.jumpOnly=YES;[out addObject:later];
+   GTBeat *later=Beat(L(@"Let’s leave it. The setup waits in Less Pull’s own Settings, the Websites tab. On we go."),GTFaceNone);later.ident=laterId;later.jumpOnly=YES;later.ring=weak.circleRing;later.ringIsCircle=YES;later.lean=YES;later.pointAt=weak.circleAim;[out addObject:later];
+   if(opera){  // Opera's side door: its own extensions page, Developer mode, and the folder from Less Pull dropped onto it (the same extension)
+    GTBeat *d1=Beat(L(@"Side door, then. In Opera, press ⌘⇧E: its extensions page opens."),GTFacePress);d1.ident=sideId;d1.jumpOnly=YES;d1.to=nearBar;d1.keys=@"⌘⇧E";d1.hold=2.5;d1.doneTo=[@"side2-" stringByAppendingString:bid];[out addObject:d1];
+    GTBeat *d2=Beat(L(@"Top right: Developer mode, on. Then drag the folder Finder shows onto the page. I’ll notice."),GTFaceNone);d2.ident=[@"side2-" stringByAppendingString:bid];d2.jumpOnly=YES;d2.to=nearBar;
+    d2.run=^{[host guideDo:@"revealExtension" with:bid];};d2.until=isConnected;d2.nudges=@[@[@40,L(@"The folder is called Browser Extension. Drag it onto Opera’s extensions page."),@(GTFaceNone)],waitNudges.lastObject];
+    d2.timeout=180;d2.timeoutTo=laterId;d2.nextTo=laterId;d2.doneTo=connId;[out addObject:d2];}
    GTBeat *end=Beat(nil,GTFaceNone);end.ident=[@"end-" stringByAppendingString:bid];[out addObject:end];  // where both ways meet
    return out;};
   NSArray *(^walkAll)(void)=^NSArray *{NSMutableArray *all=[NSMutableArray new];for(NSDictionary *b in chosen)[all addObjectsFromArray:walk(b)];return all;};
@@ -838,19 +911,19 @@ static GTPanel *GTMakePanel(NSRect frame,NSInteger level){
   __weak GTBeat *weakPick=pick;pick.chosen=^(NSArray<NSNumber *> *ticked){NSMutableArray *c=[NSMutableArray new];for(NSNumber *n in ticked)[c addObject:browsers[n.integerValue]];chosen=c;};
   pick.answered=^(NSInteger i){if(i!=0||!chosen.count)weakPick.doneTo=@"web.no";};
   GTBeat *walkHere=Beat(nil,GTFaceNone);walkHere.ident=@"walk";walkHere.then=walkAll;  // the chosen browsers, one after another
-  GTBeat *open=Beat(nil,GTFaceNone);open.sayBlock=^NSString *{return [NSString stringWithFormat:L(@"Open any website in %@ and bring it to the front."),connectedName()];};open.free=YES;
+  GTBeat *open=Beat(nil,GTFaceNone);open.sayBlock=^NSString *{return [NSString stringWithFormat:L(@"Open any website in %@ and bring it to the front."),connectedName()];};open.to=nearBar;
   open.onlyIf=anyConnected;open.until=^BOOL{return str(@"site").length>0;};open.nudges=[weak nudge:10 say:L(@"Any page at all; the first tab you have is fine.")];open.nextTo=@"web.skip";open.done=^{siteFlow=str(@"site").length>0;};
   GTBeat *skip=Beat(L(@"Another time, then. With a website in front, the menu offers it."),GTFaceNone);skip.ident=@"web.skip";skip.jumpOnly=YES;skip.doneTo=@"next-station";
   GTBeat *spot=Beat(L(@"Click the circle. The menu has a new line now."),GTFacePress);spot.onlyIf=^BOOL{return siteFlow;};spot.to=weak.underCircle;spot.ring=weak.circleRing;spot.ringIsCircle=YES;
-  spot.until=^BOOL{return [[host guideValue:@"menuOpen"] boolValue]||[[host guideValue:@"exceptionPanel"] boolValue];};spot.nudges=[weak circleNudges];spot.onNext=^{[host guideDo:@"openSitePanel" with:nil];};spot.nextTo=@"web.panel";
-  GTBeat *dot=Beat(nil,GTFaceNone);dot.onlyIf=^BOOL{return siteFlow;};dot.sayBlock=^NSString *{return [NSString stringWithFormat:L(@"My dot: Exception for %@… Choose it."),str(@"site")];};dot.mark=@"site-exception";dot.lean=YES;dot.to=menuSide;dot.pointAt=[weak midOf:@"menu"];
+  spot.mark=@"site-exception";spot.until=^BOOL{return [[host guideValue:@"menuOpen"] boolValue]||[[host guideValue:@"exceptionPanel"] boolValue];};spot.nudges=[weak circleNudges];spot.onNext=^{[host guideDo:@"openSitePanel" with:nil];};spot.nextTo=@"web.panel";
+  GTBeat *dot=Beat(nil,GTFaceNone);dot.onlyIf=^BOOL{return siteFlow;};dot.sayBlock=^NSString *{return [NSString stringWithFormat:L(@"My dot: Exception for %@… Choose it."),str(@"site")];};dot.mark=@"site-exception";dot.lean=YES;dot.to=menuSide;
   dot.until=[weak isOn:@"exceptionPanel"];dot.nudges=[weak idleNudges];dot.onNext=^{[host guideDo:@"openSitePanel" with:nil];};dot.run=^{weak.currentBeat.menuItem=[NSString stringWithFormat:L(@"Exception for %@…"),str(@"site")];};
   GTBeat *panel=Beat(L(@"Same panel, for a website. Whole domain, or This exact page: your call."),GTFaceNone);panel.ident=@"web.panel";panel.onlyIf=^BOOL{return siteFlow;};panel.avoid=[weak frameOf:@"panel"];panel.to=[weak beside:@"panel"];panel.pointAt=[weak midOf:@"panel.scope"];
   GTBeat *slider=Beat(L(@"Give it some Extra Warmth: drag the slider. Only this site gets it."),GTFacePress);slider.onlyIf=^BOOL{return siteFlow;};slider.avoid=[weak frameOf:@"panel"];slider.ring=[weak frameOf:@"panel.warmth"];slider.pointAt=[weak midOf:@"panel.warmth"];slider.lean=YES;
   slider.until=[weak isOn:@"siteException"];slider.nudges=[weak nudge:10 say:L(@"The Extra Warmth slider, inside the panel. Drag it a little.")];slider.nextTo=@"web.priv";
   GTBeat *warm=Beat(nil,GTFaceTilt);warm.onlyIf=^BOOL{return siteFlow;};warm.sayBlock=^NSString *{return [NSString stringWithFormat:L(@"Warmer, just for %@. Every other site stays as it was."),str(@"site")];};
   GTBeat *priv=Beat(L(@"Only the address goes to Less Pull, never the page. Private tabs: not even that."),GTFaceNone);priv.ident=@"web.priv";priv.onlyIf=^BOOL{return siteFlow;};priv.run=^{weak.saidWebPriv=YES;};priv.doneTo=@"next-station";
-  GTBeat *no=Beat(L(@"No problem. Websites wait under Settings → Websites, whenever you like."),GTFaceNone);no.ident=@"web.no";no.jumpOnly=YES;no.doneTo=@"next-station";
+  GTBeat *no=Beat(L(@"No problem. Websites wait in Less Pull’s own Settings, the Websites tab, whenever you like."),GTFaceNone);no.ident=@"web.no";no.jumpOnly=YES;no.doneTo=@"next-station";no.ring=weak.circleRing;no.ringIsCircle=YES;no.lean=YES;no.pointAt=weak.circleAim;
   return @[have,offer,pick,walkHere,open,skip,spot,dot,panel,slider,warm,priv,no];}];
  [cleanups addObject:^{[host guideDo:@"closeExceptionPanel" with:nil];}];
 
@@ -866,7 +939,7 @@ static GTPanel *GTMakePanel(NSRect frame,NSInteger level){
   set1.timeout=120;set1.timeoutSay=L(@"No problem. Peek waits under Settings → Shortcuts. Moving on.");set1.timeoutTo=@"next-station";set1.nextTo=@"next-station";
   set1.done=^{label=str(@"peekShortcut");[host guideDo:@"keepSetup" with:@[@"peekShortcut"]];};
   GTBeat *setok=Beat(nil,GTFaceHop);setok.onlyIf=^BOOL{return yes&&label.length;};setok.sayBlock=^NSString *{return [NSString stringWithFormat:L(@"%@. Yours now. Let’s try it."),label];};setok.run=^{weak.currentBeat.keys=label;weak.view.keys=label;};
-  GTBeat *none2=Beat(L(@"Whenever you like: Settings → Shortcuts. Moving on."),GTFaceNone);none2.ident=@"peek.none2";none2.jumpOnly=YES;none2.doneTo=@"next-station";
+  GTBeat *none2=Beat(L(@"Whenever you like: Settings → Shortcuts. Moving on."),GTFaceNone);none2.ident=@"peek.none2";none2.jumpOnly=YES;none2.doneTo=@"next-station";none2.ring=weak.circleRing;none2.ringIsCircle=YES;
   GTBeat *p1=Beat(L(@"Sometimes you need color for a second. A chart, a photo, the red button."),GTFaceNone);p1.scene=3;p1.free=YES;p1.hold=1;p1.onlyIf=^BOOL{return label.length>0;};
   GTBeat *p2=Beat(nil,GTFaceNone);p2.onlyIf=^BOOL{return label.length>0;};p2.sayBlock=^NSString *{return [NSString stringWithFormat:L(@"Your turn. Hold %@."),label];};p2.run=^{weak.currentBeat.keys=label;weak.view.keys=label;};
   p2.pokeSay=^NSString *{return [NSString stringWithFormat:L(@"Clicking me doesn’t peek. Hold %@; I’ll wait."),label];};
@@ -887,14 +960,23 @@ static GTPanel *GTMakePanel(NSRect frame,NSInteger level){
   __block BOOL yes=NO;__block NSInteger hoursStart=-1,startMin=-1,endMin=-1,boostStart=-1;BOOL night=[[host guideValue:@"isNight"] boolValue];NSInteger hour=[[host guideValue:@"hour"] integerValue];
   GTBeat *s1=Beat(L(@"A session: a stretch of focused work with a gentle end."),GTFaceNone);s1.scene=4;s1.free=YES;
   GTBeat *s2=Beat(L(@"No alarm. A warm glow, a soft gong, and the count goes on past the end."),GTFaceNone);s2.scene=4;s2.hold=1;
-  GTBeat *open=Beat(L(@"Your turn: click the circle, then the first item, Session or break…"),GTFacePress);open.onlyIf=[weak isOff:@"sessionRunning"];open.to=weak.underCircle;open.ringIsCircle=YES;
-  open.ring=^NSValue *{return [[host guideValue:@"menuOpen"] boolValue]?nil:weak.circleRing();};open.mark=@"session";open.menuItem=L(@"Session or break…");
+  GTBeat *open=Beat(L(@"Your turn: click the circle, then the first item, Session or break…"),GTFacePress);open.onlyIf=[weak isOff:@"sessionRunning"];open.to=weak.underCircle;open.ringIsCircle=YES;open.lean=YES;open.mark=@"session";open.menuItem=L(@"Session or break…");
   open.until=[weak isOn:@"sessionPanel"];open.nudges=[weak circleNudges];open.onNext=^{[host guideDo:@"openSessionPanel" with:nil];};
   GTBeat *s3=Beat(L(@"The real panel. Session or Break: a break calls you back. Once."),GTFaceNone);s3.onlyIf=[weak isOn:@"sessionPanel"];s3.lean=YES;s3.avoid=[weak frameOf:@"session"];s3.to=[weak beside:@"session"];s3.pointAt=[weak midOf:@"session.tabs"];
-  GTBeat *s4=Beat(L(@"At home, 25 minutes take four seconds. Here they take 25. Real time; I checked."),GTFaceHop);s4.onlyIf=[weak isOn:@"sessionPanel"];s4.avoid=[weak frameOf:@"session"];
-  GTBeat *close=Beat(L(@"Leave it for now: click Not now."),GTFacePress);close.onlyIf=[weak isOn:@"sessionPanel"];close.avoid=[weak frameOf:@"session"];close.ring=[weak frameOf:@"session.notnow"];close.pointAt=[weak midOf:@"session.notnow"];
-  close.until=^BOOL{return ![[host guideValue:@"sessionPanel"] boolValue]||[[host guideValue:@"sessionRunning"] boolValue];};close.nudges=[weak nudge:10 say:L(@"Not now, in the panel. Or press Escape.")];close.onNext=^{[host guideDo:@"closeSessionPanel" with:nil];};
-  GTBeat *started=Beat(L(@"A real one, running. It keeps counting while we go on."),GTFaceTilt);started.onlyIf=[weak isOn:@"sessionRunning"];started.run=^{[host guideDo:@"closeSessionPanel" with:nil];};
+  BOOL (^sample)(void)=[weak isOn:@"sessionSample"];__block BOOL sampled=NO;
+  BOOL has25=[[host guideValue:@"sessionPresets"] containsObject:@25];
+  GTBeat *tryOne=Beat(has25?L(@"Start one: 25, or any length. On the tour it takes seconds; I brought website time along."):L(@"Start one, any length. On the tour it takes seconds; I brought website time along."),GTFacePress);tryOne.onlyIf=[weak isOn:@"sessionPanel"];tryOne.avoid=[weak frameOf:@"session"];tryOne.lean=YES;
+  tryOne.ring=[weak frameOf:@"session.chips"];tryOne.pointAt=[weak midOf:@"session.chips"];tryOne.until=^BOOL{return [[host guideValue:@"sessionRunning"] boolValue]||![[host guideValue:@"sessionPanel"] boolValue];};
+  tryOne.nudges=@[@[@10,has25?L(@"The numbers in the panel: 25 will do. Or Not now, and we go on without it."):L(@"The numbers in the panel: any will do. Or Not now, and we go on without it."),@(GTFaceNone)],@[@40,L(@"Take your time. I’m not going anywhere; I only just got here."),@(GTFaceNone)]];
+  tryOne.onNext=^{[host guideDo:@"closeSessionPanel" with:nil];};tryOne.nextTo=@"ses.skip";__weak GTBeat *weakTryOne=tryOne;tryOne.done=^{weakTryOne.doneTo=[[host guideValue:@"sessionRunning"] boolValue]?nil:@"ses.skip";};
+  GTBeat *run=Beat(L(@"Started. Watch the circle in the menu bar: it shows the session. A few seconds, this one."),GTFaceHop);run.onlyIf=^BOOL{if(!sample())return NO;sampled=YES;return YES;};run.to=weak.underCircle;run.ring=weak.circleRing;run.ringIsCircle=YES;run.lean=YES;run.pointAt=weak.circleAim;
+  run.until=^BOOL{return [[host guideValue:@"sessionOver"] boolValue]||![[host guideValue:@"sessionRunning"] boolValue];};run.timeout=15;
+  GTBeat *end=Beat(nil,GTFaceWiggle);end.sayBlock=^NSString *{BOOL is25=[[host guideValue:@"sessionMinutes"] integerValue]==25;  // the glow and the gong only when both are on in Settings → Sessions
+   if([[host guideValue:@"sessionGlowAndGong"] boolValue])return is25?L(@"There: the glow, the gong. 25 minutes in five seconds. Don’t tell the clock up there."):L(@"There: the glow, the gong. A whole session in five seconds. Don’t tell the clock up there.");
+   return is25?L(@"There: the end. 25 minutes in five seconds. Don’t tell the clock up there."):L(@"There: the end. A whole session in five seconds. Don’t tell the clock up there.");};end.onlyIf=^BOOL{return sampled;};end.faces=@[@[@.8,@(GTFaceHop)]];
+  GTBeat *after=Beat(L(@"That was a sample; it won’t be kept. A real one keeps counting past the end, gently."),GTFaceNone);after.onlyIf=^BOOL{return sampled;};after.run=^{[host guideDo:@"endSampleSession" with:nil];};
+  GTBeat *skip=Beat(L(@"Not now, then. Sessions wait in the menu, first item. On we go."),GTFaceNone);skip.ident=@"ses.skip";skip.jumpOnly=YES;skip.run=^{[host guideDo:@"closeSessionPanel" with:nil];};
+  GTBeat *started=Beat(L(@"A real one, running. It keeps counting while we go on."),GTFaceTilt);started.onlyIf=^BOOL{return [[host guideValue:@"sessionRunning"] boolValue]&&!sample();};started.run=^{[host guideDo:@"closeSessionPanel" with:nil];};
   NSString *timeLine=hour>=5&&hour<=11?L(@"Good morning. A tour before lunch: ambitious. I like it."):hour>=12&&hour<=17?L(@"Afternoon. Prime pull hours. Good time for this part."):hour>=18&&hour<=22?L(@"Evening. The room gets darker and the screen gets louder. We’ll fix the screen."):L(@"It’s late. I’ll keep my voice down. I have no voice; still.");
   GTBeat *time=Beat(night?L(@"It’s night by your schedule, so this is on already. A preview of the present."):timeLine,GTFaceNone);time.free=YES;
   GTBeat *n1=Beat(L(@"At night, a few points warmer. Like this."),GTFaceNone);n1.onlyIf=^BOOL{return !night;};n1.run=^{[host guideNightPreview:YES];};n1.pointAt=[weak at:.5 :.4];
@@ -912,8 +994,8 @@ static GTPanel *GTMakePanel(NSRect frame,NSInteger level){
   GTBeat *sun1=Beat(L(@"Sunset needs one thing from macOS: the time zone set by your location."),GTFaceNone);sun1.onlyIf=^BOOL{return sunset()&&![[host guideValue:@"sunsetAvailable"] boolValue];};sun1.avoid=setFrame;
   GTBeat *sun2=Beat(L(@"Click Date & Time…, the small button there. System Settings opens at the spot."),GTFacePress);sun2.onlyIf=sun1.onlyIf;sun2.avoid=setFrame;sun2.ring=[weak frameOf:@"settings.dateTime"];sun2.pointAt=[weak midOf:@"settings.dateTime"];
   sun2.until=[weak isOn:@"systemSettingsFront"];sun2.nudges=[weak nudge:10 say:L(@"The small button under Night schedule: Date & Time…")];sun2.nextTo=@"night.sunlater";
-  GTBeat *sun3=Beat(L(@"In there: Set time zone automatically using your current location. Turn it on."),GTFaceNone);sun3.onlyIf=sun1.onlyIf;sun3.lean=YES;sun3.pointAt=[weak at:.45 :.55];
-  GTBeat *sun4=Beat(L(@"I can’t see inside that window, by the way. Not mine. I’ll wait out here."),GTFaceShiver);sun4.onlyIf=sun1.onlyIf;sun4.until=[weak isOn:@"sunsetAvailable"];
+  GTBeat *sun3=Beat(L(@"In there: Set time zone automatically using your current location. Turn it on."),GTFaceNone);sun3.onlyIf=sun1.onlyIf;sun3.to=nearBar;
+  GTBeat *sun4=Beat(L(@"I can’t see inside that window, by the way. Not mine. I’ll wait out here."),GTFaceShiver);sun4.onlyIf=sun1.onlyIf;sun4.to=nearBar;sun4.until=[weak isOn:@"sunsetAvailable"];
   sun4.nudges=@[@[@30,L(@"If macOS asks about Location Services, allow it: that’s the second switch."),@(GTFaceNone)],@[@60,L(@"If nothing asked: Location Services…, next to Date & Time…, opens the other switch."),@(GTFaceNone),[weak midOf:@"settings.location"]],@[@90,L(@"Or leave it: Next. Less Pull works it out from your time zone meanwhile."),@(GTFaceNone),[weak barAim:@"next"]]];
   sun4.timeout=180;sun4.timeoutSay=L(@"Leave it for now. Less Pull works it out from your time zone until then.");sun4.timeoutTo=@"night.boost";sun4.nextTo=@"night.sunlater";sun4.doneTo=@"night.sunok";
   GTBeat *sunok=Beat(L(@"Sunset’s in. Less Pull noticed by itself; I just stood here looking useful."),GTFaceHop);sunok.ident=@"night.sunok";sunok.jumpOnly=YES;sunok.faces=@[@[@.7,@(GTFaceWiggle)]];sunok.doneTo=@"night.boost";
@@ -926,9 +1008,9 @@ static GTPanel *GTMakePanel(NSRect frame,NSInteger level){
   GTBeat *ns=Beat(L(@"And Night Shift itself: Auto, On or Off, in the menu. Auto follows the same night."),GTFaceNone);ns.onlyIf=^BOOL{return yes;};ns.pointAt=weak.circleAim;
   GTBeat *done=Beat(L(@"Evenings: done. Close the window whenever you like; it’s yours."),GTFaceWiggle);done.onlyIf=^BOOL{return yes;};done.until=[weak isOff:@"settingsVisible"];done.soft=10;
   done.done=^{[host guideDo:@"keepSetup" with:@[@"nightHours",@"nightStart",@"nightEnd",@"nightBoost",@"nightShiftMode",@"nightPhase"]];};done.doneTo=@"next-station";  // a night schedule set up through the offer stays
-  GTBeat *no=Beat(L(@"Fine by me. It waits under Settings → General, Night schedule."),GTFaceNone);no.ident=@"night.no";no.jumpOnly=YES;no.doneTo=@"next-station";
-  return [[@[s1,s2,open,s3,s4,close,started,time,n1,n2,n3,offer] arrayByAddingObjectsFromArray:flow] arrayByAddingObjectsFromArray:@[where,pick,sunhave,sun1,sun2,sun3,sun4,sunok,sunlater,custom,boost,ns,done,no]];}];
- [cleanups addObject:^{[host guideDo:@"closeSessionPanel" with:nil];[host guideNightPreview:NO];}];
+  GTBeat *no=Beat(L(@"Fine by me. It waits under Settings → General, Night schedule."),GTFaceNone);no.ident=@"night.no";no.jumpOnly=YES;no.doneTo=@"next-station";no.ring=weak.circleRing;no.ringIsCircle=YES;
+  return [[@[s1,s2,open,s3,tryOne,run,end,after,skip,started,time,n1,n2,n3,offer] arrayByAddingObjectsFromArray:flow] arrayByAddingObjectsFromArray:@[where,pick,sunhave,sun1,sun2,sun3,sun4,sunok,sunlater,custom,boost,ns,done,no]];}];
+ [cleanups addObject:^{[host guideDo:@"closeSessionPanel" with:nil];[host guideDo:@"endSampleSession" with:nil];[host guideNightPreview:NO];}];
 
  // 7 Your turn: privacy, launch at login (an offer), keep or put back, and home through the door
  [steps addObject:^NSArray *{
@@ -943,7 +1025,7 @@ static GTPanel *GTMakePanel(NSRect frame,NSInteger level){
   GTBeat *tick=Beat(L(@"General, near the bottom: Launch at login. Tick it."),GTFacePress);tick.onlyIf=^BOOL{return yes;};tick.avoid=[weak frameOf:@"settings"];tick.to=[weak beside:@"settings"];
   tick.ring=[weak frameOf:@"settings.login"];tick.pointAt=[weak midOf:@"settings.login"];tick.until=[weak isOn:@"launchAtLogin"];tick.nudges=[weak nudge:10 say:L(@"The checkbox at the bottom of General: Launch at login.")];tick.nextTo=@"turn";
   GTBeat *ok=Beat(L(@"Done. From now on it’s there before you are."),GTFaceHop);ok.onlyIf=^BOOL{return yes&&[[host guideValue:@"launchAtLogin"] boolValue];};ok.doneTo=@"turn";
-  GTBeat *no=Beat(L(@"Sure. The checkbox waits under Settings → General, any time."),GTFaceNone);no.ident=@"login.no";no.jumpOnly=YES;
+  GTBeat *no=Beat(L(@"Sure. The checkbox waits under Settings → General, any time."),GTFaceNone);no.ident=@"login.no";no.jumpOnly=YES;no.ring=weak.circleRing;no.ringIsCircle=YES;
   GTBeat *turn=Beat(nil,GTFaceNone);turn.ident=@"turn";turn.free=YES;turn.onlyIf=^BOOL{return [host guideChangedSomething];};turn.ask=@[L(@"Keep what I set"),L(@"Put everything back")];
   turn.sayBlock=^NSString *{NSArray *changes=[host guideValue:@"changes"];NSString *q=changes.count==1?L(@"You changed one thing on the way. Keep it, or put it back?"):L(@"You changed a thing or two on the way. Keep them, or put everything back?");
    NSMutableString *t=[q mutableCopy];for(NSString *c in changes)[t appendFormat:@"\n· %@",c];return t;};
