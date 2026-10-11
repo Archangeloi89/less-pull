@@ -103,6 +103,7 @@ int main(){@autoreleasepool{
   p=fe.state;p.mode=1;fe.state=p;[t sync];check([t nightShiftMode]==0&&[d integerForKey:@"nightHours"]==0,"Sunset to Sunrise set in System Settings comes back too");
   p=fe.state;p.mode=0;fe.state=p;fe.on=YES;[t sync];check([t nightShiftMode]==1,"the schedule turned off in System Settings, with Night Shift on, reads as On");
   p=fe.state;p.sunSchedulePermitted=NO;fe.state=p;[d setInteger:0 forKey:@"nightShiftMode"];[d setInteger:0 forKey:@"nightHours"];t.nightModeDirty=YES;fe.on=NO;t.testIsNight=YES;[t sync];check(fe.state.mode==0&&fe.on&&[t nightShiftMode]==0,"without Location Services, Automatic sunset to sunrise stays Less Pull's own and switches at night");
+  p=fe.state;p.sunSchedulePermitted=YES;fe.state=p;[t sync];check(fe.state.mode==1&&[t nightShiftMode]==0,"Location Services turned on: the schedule moves into macOS by itself");
   [d removeObjectForKey:@"nightShiftMode"];[d removeObjectForKey:@"nightHours"];[d removeObjectForKey:@"nightPhase"];[d removeObjectForKey:@"nightStart"];[d removeObjectForKey:@"nightEnd"];
  }
  // Warmer at night: your warmth all day, the night bonus on top at night, Red at the most; Grayscale stays as set.

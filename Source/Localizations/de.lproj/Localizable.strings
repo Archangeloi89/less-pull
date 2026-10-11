@@ -665,3 +665,6 @@
 "Location Services…" = "Ortungsdienste …";
 "Opens Privacy & Security → Location Services. Turn them on, then under System Services allow Setting time zone, and macOS keeps sunset to sunrise itself." = "Öffnet „Datenschutz & Sicherheit“ → „Ortungsdienste“. Schalte sie ein und erlaube unter „Systemdienste“ die Zeitzone, dann hält macOS Sonnenuntergang bis Sonnenaufgang selbst.";
 "Open Location Services settings" = "Einstellungen der Ortungsdienste öffnen";
+"Displays Settings…" = "Displays-Einstellungen …";
+"Opens Displays in System Settings. Night Shift… at the bottom shows the same schedule and its color temperature." = "Öffnet „Displays“ in den Systemeinstellungen. „Night Shift …“ ganz unten zeigt denselben Zeitplan und die Farbtemperatur.";
+"Open Displays settings" = "Displays-Einstellungen öffnen";

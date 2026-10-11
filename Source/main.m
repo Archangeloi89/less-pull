@@ -1823,7 +1823,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  self.nightBoostPopup=[NSComboBox new];self.nightBoostPopup.target=self;self.nightBoostPopup.action=@selector(nightBoostChanged:);((NSTextFieldCell *)self.nightBoostPopup.cell).sendsActionOnEndEditing=YES;self.nightBoostPopup.numberOfVisibleItems=10;self.nightBoostPopup.completes=NO;[self.nightBoostPopup.widthAnchor constraintEqualToConstant:140].active=YES;[self helpView:self.nightBoostPopup text:[self nightBoostHelp] label:L(@"Warmer at night")];
  NSButton *tryNight=[NSButton buttonWithTitle:self.nightPreviewUntil?[NSString stringWithFormat:L(@"Night · %ld s"),(long)ceil(self.nightPreviewUntil.timeIntervalSinceNow)]:L(@"Try it") target:self action:@selector(tryNightBoost:)];tryNight.bezelStyle=NSBezelStyleRounded;[tryNight.widthAnchor constraintGreaterThanOrEqualToConstant:96].active=YES;self.nightTryButton=tryNight;[self helpView:tryNight text:L(@"Shows the night look for a minute, long enough to switch to other apps and see it there. Click again to end it sooner.") label:L(@"Try the night look")];
  self.nightBoostNote=[self note:[self nightBoostNoteText]];
- NSButton *nightSettings=[NSButton buttonWithTitle:L(@"Night Shift Settings…") target:self action:@selector(openNightShiftSettings:)]; nightSettings.bezelStyle=NSBezelStyleRounded;[self helpView:nightSettings text:L(@"Opens Displays in System Settings, where the Night Shift… button shows the same schedule and its color temperature.") label:L(@"Open Night Shift settings")];
+ NSButton *nightSettings=[NSButton buttonWithTitle:L(@"Displays Settings…") target:self action:@selector(openNightShiftSettings:)]; nightSettings.bezelStyle=NSBezelStyleRounded;[self helpView:nightSettings text:L(@"Opens Displays in System Settings. Night Shift… at the bottom shows the same schedule and its color temperature.") label:L(@"Open Displays settings")];
  NSTextField *nightHoursTitle=[NSTextField labelWithString:L(@"Night")];nightHoursTitle.font=[NSFont systemFontOfSize:13 weight:NSFontWeightMedium];
  self.nightHoursPopup=[[NSPopUpButton alloc]initWithFrame:NSZeroRect pullsDown:NO];[self.nightHoursPopup addItemsWithTitles:@[L(@"Sunset to sunrise"),L(@"Custom hours")]];self.nightHoursPopup.target=self;self.nightHoursPopup.action=@selector(nightHoursChoice:);[self.nightHoursPopup.widthAnchor constraintEqualToConstant:300].active=YES;[self helpView:self.nightHoursPopup text:L(@"When the night is, for Night Shift on Automatic and for “Warmer at night”.") label:L(@"Night")];
  self.nightHoursNote=[self note:@""];
@@ -2371,6 +2371,9 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
   else if(s.mode==2){[d setInteger:0 forKey:@"nightShiftMode"];[d setInteger:1 forKey:@"nightHours"];[d setInteger:macStart forKey:@"nightStart"];[d setInteger:macEnd forKey:@"nightEnd"];}
   else if(!(m==0&&sunset&&!s.sunSchedulePermitted))[d setInteger:actual?1:2 forKey:@"nightShiftMode"];
   m=[self nightShiftMode];sunset=[d integerForKey:@"nightHours"]==0;}
+ // macOS can now do more (Location Services turned on) or shows something else without anyone changing it: write it again
+ if(!self.nightModeDirty&&s.mode==self.lastSeenMacMode){NSInteger want=m!=0?0:!sunset?2:s.sunSchedulePermitted?1:0;
+  if(s.mode!=want||(want==2&&(macStart!=[d integerForKey:@"nightStart"]||macEnd!=[d integerForKey:@"nightEnd"])))self.nightModeDirty=YES;}
  if(self.nightModeDirty){  // write this setting into macOS
   if(m==0&&!sunset){[self.engine setNightShiftScheduleFrom:[d integerForKey:@"nightStart"] to:[d integerForKey:@"nightEnd"]];[self.engine setNightShiftScheduleMode:2];}
   else if(m==0&&s.sunSchedulePermitted)[self.engine setNightShiftScheduleMode:1];
