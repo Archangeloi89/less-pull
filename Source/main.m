@@ -324,7 +324,7 @@ static void QuietScrolling(NSScrollView *s){
 @property NSTextField *sessionPresetsField,*callBackPresetsField;
 @property NSTextField *exclusionText;
 @property NSRunningApplication *lastExternalApp;
-@property SwitchingPolicy *policy;@property NSPopUpButton *nightBoostPopup;@property NSTextField *nightBoostNote;@property NSDatePicker *nightStartPicker,*nightEndPicker;@property NSStackView *ownHoursRow;@property NSDate *nightPreviewUntil;@property NSTimer *nightPreviewTimer;@property NSButton *nightTryButton;
+@property SwitchingPolicy *policy;@property NSPopUpButton *nightBoostPopup;@property NSTextField *nightBoostNote;@property NSDatePicker *nightStartPicker,*nightEndPicker;@property NSStackView *ownHoursRow;@property NSDate *nightPreviewUntil;@property NSTimer *nightPreviewTimer;@property BOOL nightPreviewTurnedNightShiftOn;@property NSButton *nightTryButton;
 @property WarmthEngine *warmth;
 @property NSInteger selectedMode;
 @property NSSlider *warmthSlider;
@@ -2346,15 +2346,23 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
 }
 // Try: ten seconds of the night look, long enough to switch to another app and see it there.
 // The button counts down; a second click ends it at once. Both ends use the usual fade.
+// It shows the night as it will really be: with a Night Shift schedule, Night Shift is on at night, so the preview turns it on
+// too (and off again after); without a schedule it stays off. A Night Shift timed off stays respected.
+- (void)endNightPreview {
+ [self.nightPreviewTimer invalidate];self.nightPreviewTimer=nil;self.nightPreviewUntil=nil;self.nightTryButton.title=L(@"Try it");
+ if(self.nightPreviewTurnedNightShiftOn){self.nightPreviewTurnedNightShiftOn=NO;[self.engine setNightShiftEnabled:NO];}
+ self.animateAppearance=YES;[self sync];
+}
 - (void)tryNightBoost:(id)sender {
- [self.nightPreviewTimer invalidate];self.nightPreviewTimer=nil;
- if(self.nightPreviewUntil){self.nightPreviewUntil=nil;self.nightTryButton.title=L(@"Try it");self.animateAppearance=YES;[self sync];return;}
+ if(self.nightPreviewUntil){[self endNightPreview];return;}
+ NSBlueStatus s={0};BOOL on=NO;
+ if(!self.pause&&[self.engine readNightShiftStatus:&s]&&s.mode!=0&&[self.engine nightShift:&on]&&!on&&[self.engine setNightShiftEnabled:YES])self.nightPreviewTurnedNightShiftOn=YES;
  self.nightPreviewUntil=[NSDate dateWithTimeIntervalSinceNow:10];self.animateAppearance=YES;[self sync];[self nightPreviewTick:nil];
  self.nightPreviewTimer=[NSTimer timerWithTimeInterval:.25 target:self selector:@selector(nightPreviewTick:) userInfo:nil repeats:YES];[NSRunLoop.mainRunLoop addTimer:self.nightPreviewTimer forMode:NSRunLoopCommonModes];
 }
 - (void)nightPreviewTick:(id)timer {
  double left=self.nightPreviewUntil.timeIntervalSinceNow;
- if(left<=0){[self.nightPreviewTimer invalidate];self.nightPreviewTimer=nil;self.nightPreviewUntil=nil;self.nightTryButton.title=L(@"Try it");self.animateAppearance=YES;[self sync];return;}
+ if(left<=0){[self endNightPreview];return;}
  self.nightTryButton.title=[NSString stringWithFormat:L(@"Night · %ld s"),(long)ceil(left)];
 }
 - (void)nightBoostChanged:(NSPopUpButton *)sender {[NSUserDefaults.standardUserDefaults setInteger:sender.selectedTag forKey:@"nightBoost"];self.animateAppearance=YES;[self sync];[self refreshNightBoostControls];}
@@ -2405,7 +2413,8 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
 - (void)displaysChanged:(id)sender {[self pipelineChanged:sender];[self refreshDisplayRows];[self applyVisibility];[self refitSettings];}
 // A display, its scaling or the Dock changed while Settings is open: measure the tabs for the new screen, then place the window inside it again.
 - (void)refitSettings {if(!self.settings.visible)return;dispatch_async(dispatch_get_main_queue(),^{[self relayoutSettings];dispatch_async(dispatch_get_main_queue(),^{[self.settings setFrame:self.settings.frame display:YES];});});}
-- (void)applicationWillTerminate:(NSNotification *)note {self.quitting=YES;if(self.peekHotKey)UnregisterEventHotKey(self.peekHotKey);if(self.grayscaleHotKey)UnregisterEventHotKey(self.grayscaleHotKey);[self.grayOffTimer invalidate];[self.pauseAllTimer invalidate];[self.eventTimer invalidate];[self.pipelineRecoveryTimer invalidate];[self.menuDismissal end];[self.browserBridge stop];[self.warmth cancelTransition];if(self.relaunching)return;[self endPauseNow:nil];self.excludeNight=NO;[self reconcileExclusion];if(self.grayOverride||self.customWarmth){self.grayOverride=0;self.customWarmth=NO;self.excludeGray=NO;self.excludeWarmth=NO;self.animateAppearance=NO;[self.warmth cancelTransition];[self applyMode:self.selectedMode];}[self.warmth restore];}
+- (void)applicationWillTerminate:(NSNotification *)note {self.quitting=YES;if(self.nightPreviewTurnedNightShiftOn)[self.engine setNightShiftEnabled:NO];  // a night preview never leaves Night Shift on
+if(self.peekHotKey)UnregisterEventHotKey(self.peekHotKey);if(self.grayscaleHotKey)UnregisterEventHotKey(self.grayscaleHotKey);[self.grayOffTimer invalidate];[self.pauseAllTimer invalidate];[self.eventTimer invalidate];[self.pipelineRecoveryTimer invalidate];[self.menuDismissal end];[self.browserBridge stop];[self.warmth cancelTransition];if(self.relaunching)return;[self endPauseNow:nil];self.excludeNight=NO;[self reconcileExclusion];if(self.grayOverride||self.customWarmth){self.grayOverride=0;self.customWarmth=NO;self.excludeGray=NO;self.excludeWarmth=NO;self.animateAppearance=NO;[self.warmth cancelTransition];[self applyMode:self.selectedMode];}[self.warmth restore];}
 - (void)quit:(id)sender {[NSApp terminate:nil];}
 @end
 extern BOOL LessPullHandsOff;
