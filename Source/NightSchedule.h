@@ -8,3 +8,6 @@ double LPNightFactor(NSInteger minuteOfDay, NSInteger start, NSInteger end, doub
 BOOL LPSunTimes(NSDate *day, double latitude, double longitude, NSTimeZone *zone, NSInteger *sunset, NSInteger *sunrise);
 // The coordinates macOS keeps for a time zone's main city (zone.tab). NO if the zone is not listed.
 BOOL LPZoneCoordinates(NSString *zoneName, double *latitude, double *longitude);
+// What someone typed into the night points field, in any language: the first number (also full-width or other
+// scripts' digits), else the localized word for Red (or English "red") as 100, the word for Off as 0. -1 if nothing fits.
+NSInteger LPParseNightPoints(NSString *text, NSString *redWord, NSString *offWord);

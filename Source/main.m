@@ -373,7 +373,7 @@ static void QuietScrolling(NSScrollView *s){
 @property NSStackView *websiteRulesList;
 @property BOOL welcomeWanted;
 @property NSStackView *tourCard;
-@property NSInteger tourPage;
+@property NSInteger tourPage;@property BOOL setupOnly;  // came straight to the browser page, past the tour
 @property CGFloat testScreenHeight;
 @property CGFloat tourHeight;
 @end
@@ -1101,6 +1101,7 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
 }
 - (NSInteger)tourLastPage {return [self browserSetUp]?5:6;}
 - (void)refreshBrowserHostManifests {
+ if([NSProcessInfo.processInfo.arguments containsObject:@"--hands-off"])return;  // a test or demo copy never takes the browsers away from the installed app
  NSString *base=[NSHomeDirectory() stringByAppendingPathComponent:@"Library/Application Support"];BOOL any=NO;
  for(NSString *dir in @[@"Google/Chrome",@"BraveSoftware/Brave-Browser",@"Mozilla",@"com.operasoftware.Opera",@"Microsoft Edge"])if([NSFileManager.defaultManager fileExistsAtPath:[base stringByAppendingPathComponent:[dir stringByAppendingPathComponent:@"NativeMessagingHosts/local.less_pull.browser.json"]]])any=YES;
  if(!any)return;NSTask *t=[NSTask new];t.executableURL=[NSBundle.mainBundle.bundleURL URLByAppendingPathComponent:@"Contents/MacOS/LessPullBrowserHost"];t.arguments=@[@"--install"];t.standardOutput=NSFileHandle.fileHandleWithNullDevice;t.standardError=NSFileHandle.fileHandleWithNullDevice;[t launchAndReturnError:nil];
@@ -2114,7 +2115,11 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  NSView *fill=[NSView new];[fill setContentHuggingPriority:1 forOrientation:NSLayoutConstraintOrientationVertical];[parts addObject:fill];
  NSButton *skip=[NSButton buttonWithTitle:L(@"Skip tour and setup") target:self action:@selector(skipTour:)];skip.bezelStyle=NSBezelStyleInline;skip.font=[NSFont systemFontOfSize:11];[self helpView:skip text:L(@"Closes the welcome, the tour and the setup. You can open them again from the About tab.") label:L(@"Skip tour and setup")];
  NSMutableArray *nav=[NSMutableArray new];
- if(page==0){NSButton *start=[NSButton buttonWithTitle:L(@"Start tour and setup") target:self action:@selector(tourNext:)];start.keyEquivalent=@"\r";[self helpView:start text:L(@"Five short pages, then the browser connection.") label:L(@"Start tour and setup")];[nav addObjectsFromArray:@[[self spacer],skip,start]];}
+ if(page==0){NSButton *start=[NSButton buttonWithTitle:L(@"Start tour and setup") target:self action:@selector(tourNext:)];start.keyEquivalent=@"\r";[self helpView:start text:L(@"Five short pages, then the browser connection.") label:L(@"Start tour and setup")];
+  // Many arrive from the website, where the tour already played: they can go straight to the browser setup.
+  skip.title=L(@"Skip");[nav addObjectsFromArray:@[skip,[self spacer]]];
+  if([self tourLastPage]==6){NSButton *setup=[NSButton buttonWithTitle:L(@"Setup only") target:self action:@selector(setupOnly:)];[self helpView:setup text:L(@"Skips the tour and goes straight to connecting a browser for website exceptions.") label:L(@"Setup only")];[nav addObject:setup];}
+  [nav addObject:start];}
  else {NSButton *back=[NSButton buttonWithTitle:L(@"Back") target:self action:@selector(tourBack:)];[self helpView:back text:L(@"The previous page.") label:L(@"Back")];
   NSTextField *step=[NSTextField labelWithString:[NSString stringWithFormat:L(@"%ld of 5"),(long)page]];step.font=[NSFont systemFontOfSize:11];step.textColor=NSColor.secondaryLabelColor;
   BOOL last=page==[self tourLastPage];NSButton *next=[NSButton buttonWithTitle:last?L(@"Done"):L(@"Next") target:self action:last?@selector(dismissWelcome:):@selector(tourNext:)];next.keyEquivalent=@"\r";[self helpView:next text:last?L(@"Close the tour."):L(@"The next page.") label:next.title];
@@ -2131,8 +2136,9 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  if(animated&&!NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceMotion){next.alphaValue=0;[NSAnimationContext runAnimationGroup:^(NSAnimationContext *ctx){ctx.duration=.5;next.animator.alphaValue=1;} completionHandler:nil];}
  if(self.settings)[self.settings makeFirstResponder:nil];
 }
-- (void)tourNext:(id)sender {if(self.tourPage<[self tourLastPage])[self showTourPage:self.tourPage+1 animated:YES];}
-- (void)tourBack:(id)sender {if(self.tourPage>0)[self showTourPage:self.tourPage-1 animated:YES];}
+- (void)tourNext:(id)sender {self.setupOnly=NO;if(self.tourPage<[self tourLastPage])[self showTourPage:self.tourPage+1 animated:YES];}
+- (void)setupOnly:(id)sender {self.setupOnly=YES;[self showTourPage:6 animated:YES];}
+- (void)tourBack:(id)sender {if(self.tourPage>0)[self showTourPage:self.setupOnly?0:self.tourPage-1 animated:YES];self.setupOnly=NO;}
 // Reopens the welcome and tour from the About tab: the window is rebuilt with the card in place.
 // Where the icon is: the welcome opens under it, and the icon fades in and out a few times.
 - (void)placeSettingsUnderIcon {
@@ -2403,8 +2409,7 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
 - (NSString *)nightBoostLabel:(NSInteger)v {return v>=100?L(@"Red"):v>0?[NSString stringWithFormat:L(@"+%ld points"),(long)v]:L(@"Off");}
 - (void)nightBoostChanged:(NSComboBox *)sender {
  NSString *text=sender.stringValue;NSInteger v=0;
- NSScanner *scan=[NSScanner scannerWithString:text];scan.charactersToBeSkipped=[NSCharacterSet.decimalDigitCharacterSet invertedSet];NSInteger n=0;
- if([scan scanInteger:&n])v=MAX(0,MIN(100,n));else if([text localizedCaseInsensitiveContainsString:L(@"Red")])v=100;
+ v=LPParseNightPoints(text,L(@"Red"),L(@"Off"));if(v<0)v=[self nightBoost];  // nothing recognizable: keep what was there
  // Only what the field says counts: 12, +12, 12 points, Red. A list choice puts its text in the field before this runs.
  if(sender.indexOfSelectedItem>=0)[sender deselectItemAtIndex:sender.indexOfSelectedItem];
  sender.stringValue=[self nightBoostLabel:v];[NSUserDefaults.standardUserDefaults setInteger:v forKey:@"nightBoost"];self.animateAppearance=YES;[self sync];[self refreshNightBoostControls];}

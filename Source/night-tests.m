@@ -14,4 +14,11 @@ int main(void){@autoreleasepool{
  // polar day in Longyearbyen
  NSTimeZone *a=[NSTimeZone timeZoneWithName:@"Arctic/Longyearbyen"];CHECK(!LPSunTimes([f dateFromString:@"2026-06-21 12:00"],78.2,15.6,a,&set,&rise));
  CHECK(!LPZoneCoordinates(@"Nowhere/Nothing",&lat,&lon));
- printf("PASS: night window with ramps across midnight, zone.tab coordinates, sunset and sunrise in Berlin in June and December, polar day.\n");}return 0;}
+ // the night points field, in several languages
+ CHECK(LPParseNightPoints(@"12",@"Rot",@"Aus")==12);CHECK(LPParseNightPoints(@"+12 Punkte",@"Rot",@"Aus")==12);CHECK(LPParseNightPoints(@" 21 ",@"Rot",@"Aus")==21);
+ CHECK(LPParseNightPoints(@"rot",@"Rot",@"Aus")==100);CHECK(LPParseNightPoints(@"Red",@"Rot",@"Aus")==100);CHECK(LPParseNightPoints(@"aus",@"Rot",@"Aus")==0);CHECK(LPParseNightPoints(@"0",@"Rot",@"Aus")==0);
+ CHECK(LPParseNightPoints(@"150",@"Rot",@"Aus")==100);CHECK(LPParseNightPoints(@"hallo",@"Rot",@"Aus")==-1);CHECK(LPParseNightPoints(@"",@"Rot",@"Aus")==-1);
+ CHECK(LPParseNightPoints(@"１２",@"赤",@"オフ")==12);CHECK(LPParseNightPoints(@"+12 ポイント",@"赤",@"オフ")==12);CHECK(LPParseNightPoints(@"赤",@"赤",@"オフ")==100);
+ CHECK(LPParseNightPoints(@"红色",@"红色",@"关")==100);CHECK(LPParseNightPoints(@"+13 пунктов",@"Красный",@"Выкл.")==13);CHECK(LPParseNightPoints(@"красный",@"Красный",@"Выкл.")==100);
+ CHECK(LPParseNightPoints(@"١٢",@"Red",@"Off")==12);
+ printf("PASS: night window with ramps across midnight, zone.tab coordinates, sunset and sunrise in Berlin in June and December, polar day; night points typed as 12, +12 Punkte, １２, Rot, 赤, красный or Arabic digits.\n");}return 0;}

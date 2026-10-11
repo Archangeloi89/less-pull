@@ -30,3 +30,15 @@ BOOL LPZoneCoordinates(NSString *name, double *lat, double *lon) {
   double a=LPCoord([c substringToIndex:split],2),b=LPCoord([c substringFromIndex:split],3);if(isnan(a)||isnan(b))return NO;*lat=a;*lon=b;return YES;}
  return NO;
 }
+NSInteger LPParseNightPoints(NSString *text, NSString *redWord, NSString *offWord) {
+ NSString *t=[[text stringByApplyingTransform:NSStringTransformFullwidthToHalfwidth reverse:NO]?:text stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];
+ NSMutableString *digits=[NSMutableString new];BOOL started=NO;
+ for(NSUInteger i=0;i<t.length;i++){unichar c=[t characterAtIndex:i];if([NSCharacterSet.decimalDigitCharacterSet characterIsMember:c]){
+   int v=-1;if(c>='0'&&c<='9')v=c-'0';else{NSString *one=[NSString stringWithCharacters:&c length:1];NSNumberFormatter *f=[NSNumberFormatter new];f.locale=[NSLocale localeWithLocaleIdentifier:@"ar"];NSNumber *n=[f numberFromString:one];if(!n){f.locale=[NSLocale localeWithLocaleIdentifier:@"hi"];n=[f numberFromString:one];}if(n)v=n.intValue;}
+   if(v>=0){[digits appendFormat:@"%d",v];started=YES;continue;}}
+  if(started)break;}
+ if(digits.length)return MIN(100,(NSInteger)MIN(digits.longLongValue,1000));
+ for(NSString *w in @[redWord?:@"",@"red"])if(w.length&&[t localizedCaseInsensitiveContainsString:w])return 100;
+ if(offWord.length&&[t localizedCaseInsensitiveCompare:offWord]==NSOrderedSame)return 0;
+ return -1;
+}
