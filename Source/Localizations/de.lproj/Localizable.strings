@@ -682,9 +682,7 @@
 "Thank you for being part of it. If you feel like giving again, the door is open; if not, enjoy the quiet.\n\n— Jiri Arion Rose" = "Danke, dass du dabei bist. Wenn du wieder etwas geben magst, steht die Tür offen; wenn nicht, genieß die Ruhe.\n\n– Jiri Arion Rose";
 "Ways to support my work" = "Wege, meine Arbeit zu unterstützen";
 "Whichever is easiest for you. Every way reaches me directly, and every one is welcome." = "Was für dich am einfachsten ist. Jeder Weg kommt direkt bei mir an, und jeder ist willkommen.";
-"Card or Apple Pay, once or monthly." = "Karte oder Apple Pay, einmalig oder monatlich.";
 "With a PayPal account." = "Mit einem PayPal-Konto.";
-"A transfer with low fees, in many currencies." = "Eine Überweisung mit wenig Gebühren, in vielen Währungen.";
 "One address, Native SegWit. Please send Bitcoin only." = "Eine Adresse, Native SegWit. Bitte nur Bitcoin senden.";
 "QR code" = "QR-Code";
 "Open" = "Öffnen";
@@ -695,3 +693,5 @@
 "A word to someone Less Pull might help, or feedback that makes it better." = "Ein Wort an jemanden, dem Less Pull guttun könnte, oder eine Rückmeldung, die es besser macht.";
 "Send feedback" = "Rückmeldung senden";
 "Shows every way to support my work." = "Zeigt alle Wege, meine Arbeit zu unterstützen.";
+"Card or Apple Pay, once or monthly. The easiest for most people." = "Karte oder Apple Pay, einmalig oder monatlich. Für die meisten am einfachsten.";
+"A transfer from almost any currency, with low fees." = "Eine Überweisung aus fast jeder Währung, mit wenig Gebühren.";
