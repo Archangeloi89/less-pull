@@ -632,4 +632,13 @@
 "Red at night" = "Rot bei Nacht";
 "Try the night look" = "Die Nacht ausprobieren";
 "Night · %ld s" = "Nacht · %ld s";
-"Shows the night look for ten seconds, long enough to switch to another app and see it there. Click again to end it sooner." = "Zeigt zehn Sekunden lang die Nacht, lange genug, um in eine andere App zu wechseln und es dort zu sehen. Ein zweiter Klick beendet es früher.";
+"Shows the night look for a minute, long enough to switch to other apps and see it there. Click again to end it sooner." = "Zeigt eine Minute lang die Nacht, lange genug, um in andere Apps zu wechseln und es dort zu sehen. Ein zweiter Klick beendet es früher.";
+"Automatic" = "Automatisch";
+" Right now it is on." = " Gerade ist es an.";
+" Right now it is off." = " Gerade ist es aus.";
+"On, day and night, until you change it." = "An, Tag und Nacht, bis du es änderst.";
+"Off, day and night. “Warmer at night” still warms the night without it." = "Aus, Tag und Nacht. „Wärmer bei Nacht“ wärmt die Nacht auch ohne Night Shift.";
+"On at night and off by day, on the schedule set in macOS." = "Nachts an und tagsüber aus, nach dem Zeitplan in macOS.";
+"On from %@ to %@, the night hours below, and off by day." = "An von %@ bis %@, den Nachtstunden unten, und tagsüber aus.";
+"Automatic: on at night and off by day, on the schedule set in macOS, or on the night hours in Less Pull when there is none. On and Off hold until you change them. In the menu, a click on Automatic lasts until day and night next turn." = "Automatisch: nachts an und tagsüber aus, nach dem Zeitplan in macOS oder, ohne Zeitplan, nach den Nachtstunden in Less Pull. Ein und Aus gelten, bis du sie änderst. Im Menü gilt ein Klick bei „Automatisch“ bis zum nächsten Wechsel von Tag und Nacht.";
+"Night Shift is Automatic, On or Off. Automatic is on at night and off by day: on the schedule set in macOS, or, without one, on the night hours in Less Pull. “Warmer at night” follows the same night and adds a few points to your Extra Warmth, even with Night Shift off. At the lock screen and screensaver, where Less Pull’s warmth cannot reach, Less Pull turns Night Shift on for the night." = "Night Shift steht auf Automatisch, Ein oder Aus. Automatisch ist nachts an und tagsüber aus: nach dem Zeitplan in macOS oder, ohne Zeitplan, nach den Nachtstunden in Less Pull. „Wärmer bei Nacht“ folgt derselben Nacht und legt ein paar Punkte auf deine Extra-Wärme, auch wenn Night Shift aus ist. Auf dem Sperrbildschirm und beim Bildschirmschoner, wo die Wärme von Less Pull nicht hinkommt, schaltet Less Pull nachts Night Shift ein.";

@@ -35,9 +35,12 @@
 @end
 @interface TestApp : AppDelegate
 @property double testNight;  // how far into the night the test says it is
+@property BOOL testIsNight,followModes;  // Night Shift Automatic/On/Off is tested on its own; elsewhere it stays out of the way
 @end
 @implementation TestApp
 - (double)nightFactor {return self.testNight;}
+- (BOOL)nightNow {return self.testIsNight;}
+- (void)followNightShiftMode {if(self.followModes)[super followNightShiftMode];}
 - (void)updateForeground {}
 - (uint32_t)displayUnderMouse {return self.activeDisplay;}
 - (void)refreshControlsKnown:(BOOL)known nightOn:(BOOL)on {}
@@ -74,6 +77,18 @@ int main(){@autoreleasepool{
  p.guard=[a nightGuard];ExclusionPolicy *recovered=[ExclusionPolicy fromDictionary:p.dictionary];check(recovered.active&&recovered.desiredOn&&recovered.guard,"crash recovery snapshot");check(![recovered mayRestoreAt:NSDate.date unchanged:NO calendar:NSCalendar.currentCalendar],"changed schedule blocks resume");
  a.grayOverride=0;a.customWarmth=NO;a.animateAppearance=YES;[a sync];check([d doubleForKey:@"warmth"]==1.5,"globals retained");
 
+ // Night Shift Automatic, On, Off: switched when day and night turn or the mode changes; a hand change lasts until the next turn.
+ {
+  TestApp *t=[TestApp new];FakeFilter *fe=[FakeFilter new];fe.on=NO;fe.state=(NSBlueStatus){.mode=0,.available=YES};FakeWarmth *fw=[FakeWarmth new];t.engine=fe;t.warmth=fw;t.exclusion=[ExclusionPolicy new];t.policy=[SwitchingPolicy new];t.policy.known=YES;t.selectedMode=100;t.followModes=YES;
+  [d setInteger:0 forKey:@"nightShiftMode"];[d removeObjectForKey:@"nightPhase"];t.testIsNight=YES;[t sync];check(fe.on,"Automatic turns Night Shift on at night without a macOS schedule");
+  fe.on=NO;[t sync];check(!fe.on,"a change by hand lasts until the next turn");
+  t.testIsNight=NO;fe.on=YES;[t sync];check(!fe.on,"morning turns it off");
+  t.testIsNight=YES;[t sync];check(fe.on,"evening turns it on again");
+  [d setInteger:2 forKey:@"nightShiftMode"];t.nightModeDirty=YES;[t sync];check(!fe.on,"Off holds at night");
+  [d setInteger:1 forKey:@"nightShiftMode"];t.nightModeDirty=YES;t.testIsNight=NO;[t sync];check(fe.on,"On holds by day");
+  [d setInteger:0 forKey:@"nightShiftMode"];fe.state=(NSBlueStatus){.mode=2,.available=YES};fe.on=NO;t.testIsNight=YES;t.nightModeDirty=YES;NSInteger writes=fe.nightWrites;[t sync];check(!fe.on&&fe.nightWrites==writes,"with a macOS schedule, Automatic leaves Night Shift to macOS");
+  [d removeObjectForKey:@"nightShiftMode"];[d removeObjectForKey:@"nightPhase"];
+ }
  // Warmer at night: your warmth all day, the night bonus on top at night, Red at the most; Grayscale stays as set.
  for(int base=100;base<=101;base++){
   TestApp *t=[TestApp new];FakeFilter *fe=[FakeFilter new];fe.on=NO;fe.state=(NSBlueStatus){.mode=0,.available=YES};FakeWarmth *fw=[FakeWarmth new];t.engine=fe;t.warmth=fw;t.exclusion=[ExclusionPolicy new];t.policy=[SwitchingPolicy new];t.policy.known=YES;t.selectedMode=base;[d setInteger:base forKey:@"manualMode"];

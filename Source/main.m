@@ -324,7 +324,7 @@ static void QuietScrolling(NSScrollView *s){
 @property NSTextField *sessionPresetsField,*callBackPresetsField;
 @property NSTextField *exclusionText;
 @property NSRunningApplication *lastExternalApp;
-@property SwitchingPolicy *policy;@property NSPopUpButton *nightBoostPopup;@property NSTextField *nightBoostNote;@property NSDatePicker *nightStartPicker,*nightEndPicker;@property NSStackView *ownHoursRow;@property NSDate *nightPreviewUntil;@property NSTimer *nightPreviewTimer;@property BOOL nightPreviewTurnedNightShiftOn;@property NSButton *nightTryButton;
+@property SwitchingPolicy *policy;@property NSPopUpButton *nightBoostPopup;@property NSTextField *nightBoostNote;@property NSDatePicker *nightStartPicker,*nightEndPicker;@property NSStackView *ownHoursRow;@property NSDate *nightPreviewUntil;@property NSTimer *nightPreviewTimer;@property BOOL nightPreviewTurnedNightShiftOn;@property NSSegmentedControl *nightModeControl;@property NSStackView *nightPauseRow;@property NSTextField *nightModeNote;@property BOOL migrateNightShiftMode,nightModeDirty;@property NSButton *nightTryButton;
 @property WarmthEngine *warmth;
 @property NSInteger selectedMode;
 @property NSSlider *warmthSlider;
@@ -997,7 +997,8 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  if([d integerForKey:@"nightMode"]==1)[d setInteger:100 forKey:@"nightMode"];
  // Build 42: "Warmer at night" replaces "Extra Warmth follows Night Shift". Everyone sees what they saw before:
  // following users keep no warmth by day and their amount at night (now the night bonus); the others keep theirs all day.
- {NSDictionary *saved=[d persistentDomainForName:NSBundle.mainBundle.bundleIdentifier]?:@{};
+ {NSString *bid=NSBundle.mainBundle.bundleIdentifier;NSDictionary *saved=(bid?[d persistentDomainForName:bid]:nil)?:@{};
+  if(!saved[@"nightShiftMode"])self.migrateNightShiftMode=saved[@"warmth"]||saved[@"welcomeShown"]||saved[@"automatic"];
   if(!saved[@"nightBoost"]){BOOL existing=saved[@"warmth"]||saved[@"welcomeShown"]||saved[@"automatic"];NSInteger boost=13;
    if(existing){if(saved[@"automatic"]?[saved[@"automatic"] boolValue]:YES){boost=MIN(100,lround([d doubleForKey:@"warmth"]/3*100));[d setDouble:0 forKey:@"warmth"];[d setInteger:[d integerForKey:@"nightMode"] forKey:@"manualMode"];}else boost=0;}
    [d setInteger:boost forKey:@"nightBoost"];[d setBool:NO forKey:@"automatic"];[d setInteger:-1 forKey:@"overrideMode"];}}
@@ -1317,7 +1318,7 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  if(self.peeking&&[[self peekEffects][@"nightShift"] boolValue]){self.nightOverride=2;self.excludeNight=YES;}
  if(self.pausedUntil){if(self.grayOverride||self.nightOverride||self.customWarmth)self.animateAppearance=YES;self.grayOverride=0;self.nightOverride=0;self.customWarmth=NO;self.appWarmth=0;self.excludeGray=NO;self.excludeNight=NO;self.excludeWarmth=NO;}
  if(self.screenLocked&&self.lockNightWanted){self.nightOverride=1;self.excludeNight=YES;}
- [self reconcileExclusion];
+ [self reconcileExclusion];[self followNightShiftMode];
  BOOL on=NO;BOOL known=[self logicalNightShift:&on];
  self.policy.automatic=self.automatic;[self.policy observeKnown:known on:on];[self savePolicy];
  NSInteger target=self.automatic?[NSUserDefaults.standardUserDefaults integerForKey:@"nightMode"]:self.selectedMode;
@@ -1341,7 +1342,7 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
 }
 - (NSString *)grayHelp {return L(@"Shades of gray, day and night, whatever Night Shift does. Exceptions bring color back for the apps and websites that need it.");}
 - (NSString *)warmthHelp {return L(@"Adds warmth on top of Night Shift, from none to deep red, all day. At night, “Warmer at night” adds a little more.");}
-- (NSString *)nightHelp {return L(@"Turns Night Shift on or off now. Your schedule in System Settings stays, and takes over again at its next change.");}
+- (NSString *)nightHelp {return L(@"Automatic: on at night and off by day, on the schedule set in macOS, or on the night hours in Less Pull when there is none. On and Off hold until you change them. In the menu, a click on Automatic lasts until day and night next turn.");}
 - (NSString *)pauseHelp {return L(@"Night Shift off for a while, then back on if your schedule wants it. Grayscale stays as it is. Quitting Less Pull ends it early.");}
 - (void)helpView:(NSView *)view text:(NSString *)text label:(NSString *)label {view.toolTip=text;view.accessibilityHelp=text;if(label)view.accessibilityLabel=label;}
 - (NSString *)appearanceSummary {
@@ -1367,11 +1368,12 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  self.nightButton.title=known?(self.exclusion.active?L(@"Default Night Shift"):L(@"Night Shift")):L(@"Night Shift unavailable");  // the check box already says on or off[self helpView:self.nightButton text:self.exclusion.active?[[self exclusionHelp] stringByAppendingString:L(@" This changes your default; the app you are using keeps its own Night Shift setting.")]:self.nightHelp label:nil];
  self.grayscaleButton.state=self.selectedMode==1||self.selectedMode==100;
  self.grayscaleButton.title=self.grayOverride?L(@"Default Grayscale"):L(@"Grayscale");self.grayOnButton.hidden=self.grayOffUntil==nil;self.grayOffPopup.hidden=self.grayOffUntil!=nil||!self.grayscaleButton.state;self.grayOnButton.toolTip=[self grayOffLabel];if(self.clickPopup)[self.clickPopup selectItemAtIndex:[self jobOfButton:NO]];[self.rightClickPopup selectItemAtIndex:[self jobOfButton:YES]?1:0];
- self.endPauseButton.title=[self canResumePause]?L(@"Turn Night Shift back on"):L(@"End timed off");[self helpView:self.endPauseButton text:[self endPauseHelp] label:self.endPauseButton.title];self.endPauseButton.hidden=self.pause==nil;self.pausePopup.hidden=self.pause!=nil;self.pausePopup.enabled=known&&(on||actualOn);
+ self.endPauseButton.title=[self canResumePause]?L(@"Turn Night Shift back on"):L(@"End timed off");[self helpView:self.endPauseButton text:[self endPauseHelp] label:self.endPauseButton.title];self.endPauseButton.hidden=self.pause==nil;self.pausePopup.hidden=self.pause!=nil||!(known&&(on||actualOn));self.pausePopup.enabled=known&&(on||actualOn);self.nightPauseRow.hidden=self.pausePopup.hidden&&self.endPauseButton.hidden;  // "off for" only while Night Shift is on
  self.resetButton.enabled=[self currentWarmth]>0;
  self.warmthSlider.doubleValue=[self currentWarmth]/3*100;NSString *percent=[NSString stringWithFormat:@"%.0f%%",[self currentWarmth]/3*100];self.warmthLabel.stringValue=percent;self.menuWarmthReadout.stringValue=percent;
  self.warmthLabel.accessibilityLabel=[NSString stringWithFormat:L(@"Extra Warmth %@"),percent];
  self.warmthTitle.stringValue=self.customWarmth?L(@"Default Extra Warmth"):[self warmthTitleNow];[self refreshNightBoostControls];
+ self.nightModeControl.selectedSegment=[self nightShiftMode];self.nightModeControl.enabled=known;if(self.nightModeNote)self.nightModeNote.attributedStringValue=Emphasized([self nightModeNoteText],[NSFont systemFontOfSize:11],NSColor.secondaryLabelColor,NSColor.labelColor,YES);
  self.statusText.toolTip=self.status;self.statusDetail.toolTip=[self nightBoostHelp];
  if(self.pausePopup)[self populatePausePopup];
 }
@@ -1708,6 +1710,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
 - (void)toggleNightShift:(id)sender {
  self.pause=nil;[self.pauseTimer invalidate];self.pauseTimer=nil;[NSUserDefaults.standardUserDefaults removeObjectForKey:@"nightShiftPause"];
  BOOL before=NO;BOOL known=[self logicalNightShift:&before];
+ if(known&&[self nightShiftMode]!=0&&!self.exclusion.active)[NSUserDefaults.standardUserDefaults setInteger:before?2:1 forKey:@"nightShiftMode"];  // On and Off: the click changes the mode; Automatic: until day and night next turn
  if(!known||![self requestNightShift:!before]){[self nightShiftFailure];return;}
  // Turning Night Shift on or off here is your doing, not the schedule's: the warmth you set by hand stays.
  // (A scheduled change still ends the override, as "follows Night Shift" promises.)
@@ -1800,7 +1803,9 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  self.warmthLabel=[NSTextField labelWithString:@""];self.warmthLabel.alignment=NSTextAlignmentRight;self.warmthLabel.font=[NSFont monospacedDigitSystemFontOfSize:14 weight:NSFontWeightMedium];[self.warmthLabel.widthAnchor constraintEqualToConstant:56].active=YES;[self helpView:self.warmthLabel text:self.warmthHelp label:L(@"Extra Warmth percentage")];
  NSMutableArray *ticks=[NSMutableArray new];for(NSString *t in @[L(@"Off"),@"25",@"50",@"75",L(@"Red")]){NSTextField *r=[NSTextField labelWithString:t];r.font=[NSFont systemFontOfSize:10];r.textColor=NSColor.secondaryLabelColor;r.alignment=NSTextAlignmentCenter;[r.widthAnchor constraintEqualToConstant:30].active=YES;[ticks addObject:r];}
  NSStackView *tickRow=[self row:ticks];tickRow.distribution=NSStackViewDistributionEqualSpacing;
- self.nightButton=[NSButton checkboxWithTitle:L(@"Night Shift") target:self action:@selector(toggleNightShift:)];[self helpView:self.nightButton text:self.nightHelp label:L(@"Night Shift")];
+ NSTextField *nightTitle=[NSTextField labelWithString:L(@"Night Shift")];nightTitle.font=[NSFont systemFontOfSize:13 weight:NSFontWeightMedium];[self helpView:nightTitle text:self.nightHelp label:nil];
+ self.nightModeControl=[NSSegmentedControl segmentedControlWithLabels:@[L(@"Automatic"),L(@"On"),L(@"Off")] trackingMode:NSSegmentSwitchTrackingSelectOne target:self action:@selector(nightModeChanged:)];self.nightModeControl.selectedSegment=[self nightShiftMode];[self.nightModeControl.widthAnchor constraintEqualToConstant:240].active=YES;[self helpView:self.nightModeControl text:self.nightHelp label:L(@"Night Shift")];
+ self.nightModeNote=[self note:[self nightModeNoteText]];
  self.pausePopup=[[NSPopUpButton alloc]initWithFrame:NSZeroRect pullsDown:YES];[self.pausePopup.widthAnchor constraintEqualToConstant:220].active=YES;[self helpView:self.pausePopup text:self.pauseHelp label:L(@"Turn Night Shift off for…")];
  self.endPauseButton=[NSButton buttonWithTitle:L(@"End timed off") target:self action:@selector(endPauseNow:)];self.endPauseButton.hidden=YES;[self.endPauseButton.widthAnchor constraintEqualToConstant:220].active=YES;[self helpView:self.endPauseButton text:self.pauseHelp label:L(@"End timed off")];
  self.lockGrayButton=[self lockOption:@"lockGray" title:L(@"Grayscale") help:L(@"Keeps Grayscale on the lock screen when it is on. Works on the built-in display.")];
@@ -1809,7 +1814,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  self.saverNightButton=[self lockOption:@"saverNight" title:L(@"Night Shift") help:L(@"Keeps Night Shift at full warmth while the screensaver runs and Less Pull is quieting your screen. Your schedule stays as it is.")];
  NSTextField *boostTitle=[NSTextField labelWithString:L(@"Warmer at night")];boostTitle.font=[NSFont systemFontOfSize:13 weight:NSFontWeightMedium];[self helpView:boostTitle text:[self nightBoostHelp] label:nil];
  self.nightBoostPopup=[[NSPopUpButton alloc]initWithFrame:NSZeroRect pullsDown:NO];self.nightBoostPopup.target=self;self.nightBoostPopup.action=@selector(nightBoostChanged:);[self.nightBoostPopup.widthAnchor constraintEqualToConstant:140].active=YES;[self helpView:self.nightBoostPopup text:[self nightBoostHelp] label:L(@"Warmer at night")];
- NSButton *tryNight=[NSButton buttonWithTitle:self.nightPreviewUntil?[NSString stringWithFormat:L(@"Night · %ld s"),(long)ceil(self.nightPreviewUntil.timeIntervalSinceNow)]:L(@"Try it") target:self action:@selector(tryNightBoost:)];tryNight.bezelStyle=NSBezelStyleInline;[tryNight.widthAnchor constraintGreaterThanOrEqualToConstant:84].active=YES;self.nightTryButton=tryNight;[self helpView:tryNight text:L(@"Shows the night look for ten seconds, long enough to switch to another app and see it there. Click again to end it sooner.") label:L(@"Try the night look")];
+ NSButton *tryNight=[NSButton buttonWithTitle:self.nightPreviewUntil?[NSString stringWithFormat:L(@"Night · %ld s"),(long)ceil(self.nightPreviewUntil.timeIntervalSinceNow)]:L(@"Try it") target:self action:@selector(tryNightBoost:)];tryNight.bezelStyle=NSBezelStyleInline;[tryNight.widthAnchor constraintGreaterThanOrEqualToConstant:84].active=YES;self.nightTryButton=tryNight;[self helpView:tryNight text:L(@"Shows the night look for a minute, long enough to switch to other apps and see it there. Click again to end it sooner.") label:L(@"Try the night look")];
  self.nightBoostNote=[self note:[self nightBoostNoteText]];self.nightBoostNote.preferredMaxLayoutWidth=290;[self.nightBoostNote setContentCompressionResistancePriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationVertical];
  NSButton *nightSettings=[NSButton buttonWithTitle:L(@"Night Shift Settings…") target:self action:@selector(openNightShiftSettings:)];nightSettings.bezelStyle=NSBezelStyleInline;[self helpView:nightSettings text:L(@"Opens Displays in System Settings. Its Night Shift… button sets the schedule, for example Sunset to Sunrise.") label:L(@"Open Night Shift settings")];
  NSStackView *boostNoteRow=[self row:@[self.nightBoostNote,nightSettings]];boostNoteRow.alignment=NSLayoutAttributeTop;
@@ -1830,12 +1835,12 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  [views addObjectsFromArray:@[self.statusText,self.statusDetail,[self separator],
   [self row:@[self.grayscaleButton,[self spacer],self.grayOffPopup,self.grayOnButton]],[self note:L(@"Shades of gray, day and night. Exceptions bring color back where you need it, and “Turn Grayscale off for…” returns by itself.")],
   [self row:@[self.warmthTitle,[self spacer],self.resetButton]],[self row:@[self.warmthSlider,self.warmthLabel]],tickRow,[self note:L(@"Your warmth for the whole day, on top of Night Shift, from Off to Red.")],[self separator],
-  [self row:@[self.nightButton,[self spacer],self.pausePopup,self.endPauseButton]],[self note:L(@"Turns Night Shift on or off now. Your schedule in System Settings stays as it is.")],
+  [self row:@[nightTitle,[self spacer],self.nightModeControl]],self.nightModeNote,(self.nightPauseRow=[self row:@[[self spacer],self.pausePopup,self.endPauseButton]]),
   [self separator],[self row:@[boostTitle,[self spacer],tryNight,self.nightBoostPopup]],boostNoteRow,self.ownHoursRow,[self separator],
   self.loginButton,[self multi:[self separator]],[self multi:[self displaysSection]],[self separator],[self languageRow],[self separator],[self advancedBlock]]];
  NSStackView *column=[self column:views];
  tickRow.identifier=@"fixed";[tickRow.widthAnchor constraintEqualToAnchor:self.warmthSlider.widthAnchor].active=YES;
- NSUInteger base=(self.welcomeCard?1:0)+(self.thanksCard?1:0);[column setCustomSpacing:4 afterView:self.statusText];[column setCustomSpacing:4 afterView:column.arrangedSubviews[base+3]];[column setCustomSpacing:6 afterView:column.arrangedSubviews[base+5]];[column setCustomSpacing:2 afterView:column.arrangedSubviews[base+6]];[column setCustomSpacing:6 afterView:tickRow];[column setCustomSpacing:4 afterView:column.arrangedSubviews[base+10]];[column setCustomSpacing:4 afterView:column.arrangedSubviews[base+13]];[column setCustomSpacing:6 afterView:column.arrangedSubviews[base+14]];
+ NSUInteger base=(self.welcomeCard?1:0)+(self.thanksCard?1:0);[column setCustomSpacing:4 afterView:self.statusText];[column setCustomSpacing:4 afterView:column.arrangedSubviews[base+3]];[column setCustomSpacing:6 afterView:column.arrangedSubviews[base+5]];[column setCustomSpacing:2 afterView:column.arrangedSubviews[base+6]];[column setCustomSpacing:6 afterView:tickRow];[column setCustomSpacing:4 afterView:column.arrangedSubviews[base+10]];[column setCustomSpacing:2 afterView:column.arrangedSubviews[base+11]];[column setCustomSpacing:4 afterView:column.arrangedSubviews[base+14]];[column setCustomSpacing:6 afterView:column.arrangedSubviews[base+15]];
  return column;
 }
 - (NSStackView *)shortcutsTab {
@@ -2136,7 +2141,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  for(int k=0;k<4;k++){dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)((0.6+k*1.2)*NSEC_PER_SEC)),dispatch_get_main_queue(),^{[NSAnimationContext runAnimationGroup:^(NSAnimationContext *c){c.duration=.5;button.animator.alphaValue=.25;} completionHandler:^{[NSAnimationContext runAnimationGroup:^(NSAnimationContext *c){c.duration=.6;button.animator.alphaValue=1;} completionHandler:nil];}];});}
 }
 - (void)releaseSettings {
- [self.settingsTabs removeObserver:self forKeyPath:@"selectedTabViewItemIndex"];self.settings=nil;self.settingsTabs=nil;self.nightBoostPopup=nil;self.nightBoostNote=nil;self.nightStartPicker=nil;self.nightEndPicker=nil;self.ownHoursRow=nil;self.nightTryButton=nil;self.statusText=nil;self.statusDetail=nil;self.autoButton=nil;self.lockNightButton=nil;self.lockGrayButton=nil;self.saverGrayButton=nil;self.saverNightButton=nil;self.loginButton=nil;self.grayscaleButton=nil;self.nightButton=nil;self.resumeButton=nil;self.endPauseButton=nil;self.resetButton=nil;self.pausePopup=nil;self.peekScopePopup=nil;self.websiteStatus=nil;self.exclusionsList=nil;self.displaysList=nil;self.sessionPresetsField=nil;self.callBackPresetsField=nil;self.exclusionText=nil;self.warmthSlider=nil;self.warmthLabel=nil;self.warmthTitle=nil;self.welcomeCard=nil;self.updateCheckbox=nil;self.updateButton=nil;self.updateBanner=nil;self.updateBannerLabel=nil;self.updateBannerButton=nil;self.updateStatusLabel=nil;self.thanksCard=nil;self.peekRecorder=nil;self.grayscaleRecorder=nil;self.peekNote=nil;self.loginNote=nil;self.grayscaleShortcutNote=nil;self.peekGrayButton=nil;self.peekWarmthButton=nil;self.peekNightButton=nil;self.clickPopup=nil;self.rightClickPopup=nil;self.grayOffPopup=nil;self.grayOnButton=nil;self.websiteRulesList=nil;self.tourCard=nil;self.noteViews=nil;self.advancedViews=nil;self.multiDisplayViews=nil;
+ [self.settingsTabs removeObserver:self forKeyPath:@"selectedTabViewItemIndex"];self.settings=nil;self.settingsTabs=nil;self.nightBoostPopup=nil;self.nightBoostNote=nil;self.nightStartPicker=nil;self.nightEndPicker=nil;self.ownHoursRow=nil;self.nightTryButton=nil;self.nightModeControl=nil;self.nightPauseRow=nil;self.nightModeNote=nil;self.statusText=nil;self.statusDetail=nil;self.autoButton=nil;self.lockNightButton=nil;self.lockGrayButton=nil;self.saverGrayButton=nil;self.saverNightButton=nil;self.loginButton=nil;self.grayscaleButton=nil;self.nightButton=nil;self.resumeButton=nil;self.endPauseButton=nil;self.resetButton=nil;self.pausePopup=nil;self.peekScopePopup=nil;self.websiteStatus=nil;self.exclusionsList=nil;self.displaysList=nil;self.sessionPresetsField=nil;self.callBackPresetsField=nil;self.exclusionText=nil;self.warmthSlider=nil;self.warmthLabel=nil;self.warmthTitle=nil;self.welcomeCard=nil;self.updateCheckbox=nil;self.updateButton=nil;self.updateBanner=nil;self.updateBannerLabel=nil;self.updateBannerButton=nil;self.updateStatusLabel=nil;self.thanksCard=nil;self.peekRecorder=nil;self.grayscaleRecorder=nil;self.peekNote=nil;self.loginNote=nil;self.grayscaleShortcutNote=nil;self.peekGrayButton=nil;self.peekWarmthButton=nil;self.peekNightButton=nil;self.clickPopup=nil;self.rightClickPopup=nil;self.grayOffPopup=nil;self.grayOnButton=nil;self.websiteRulesList=nil;self.tourCard=nil;self.noteViews=nil;self.advancedViews=nil;self.multiDisplayViews=nil;
  for(NSNumber *after in @[@1.0,@6.0])dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)(after.doubleValue*NSEC_PER_SEC)),dispatch_get_main_queue(),^{if(!self.settings)malloc_zone_pressure_relief(NULL,0);});  // once the window is truly gone, hand the freed pages back
 }
 - (void)rememberSettingsFrame {if(self.settings){self.keptSettingsFrame=self.settings.frame;self.keepSettingsFrame=YES;}}
@@ -2282,7 +2287,7 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
   @[L(@"What Less Pull does"),L(@"Less Pull takes the color out of your screen, so it pulls at your attention less. Add warmth from amber to red, and keep color where you need it.")],
   @[L(@"Grayscale"),L(@"Shows everything in shades of gray, day and night. Turn it off to see color again.")],
   @[L(@"Extra Warmth"),L(@"Adds warmth on top of Night Shift, from none to red. The slider is in the menu and in Settings.")],
-  @[L(@"Night Shift"),L(@"Less Pull can turn Night Shift on or off, or off for a while; your schedule in System Settings stays as it is. “Warmer at night” follows that schedule even while Night Shift is off: at night it adds a few points to your Extra Warmth. Without a schedule, Less Pull uses its own hours. At the lock screen and screensaver, where Less Pull’s warmth cannot reach, it turns Night Shift on for the night.")],
+  @[L(@"Night Shift"),L(@"Night Shift is Automatic, On or Off. Automatic is on at night and off by day: on the schedule set in macOS, or, without one, on the night hours in Less Pull. “Warmer at night” follows the same night and adds a few points to your Extra Warmth, even with Night Shift off. At the lock screen and screensaver, where Less Pull’s warmth cannot reach, Less Pull turns Night Shift on for the night.")],
   @[L(@"Exceptions for apps"),L(@"Give an app its own settings under Settings → Apps, or choose “Exception for …” in the menu while you use it. Change only what should differ; the rest follows your defaults. “Use this exception” turns it off without losing its settings; changing a setting turns it on again.")],
   @[L(@"Exceptions for websites"),L(@"Install the browser extension from Settings, for Safari, Brave, Chrome, Firefox, Opera or Edge. It only connects the browser and has no buttons. With a website in front, the menu offers “Exception for …”, for the whole site or one page. A page follows its site, and a site follows the browser’s own exception. Several browsers can be connected at once; private tabs are left alone.")],
   @[L(@"Peek in color"),L(@"Hold the Peek shortcut to see the plain display; let go and Less Pull fades back. Press it twice quickly to keep the plain display, once more to return. Under Settings → Shortcuts you choose the keys and what a peek turns off. Your settings stay as they are.")],
@@ -2326,6 +2331,35 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
  NSUserDefaults *d=NSUserDefaults.standardUserDefaults;*start=[d integerForKey:@"nightStart"];*end=[d integerForKey:@"nightEnd"];return 0;
 }
 - (double)nightFactor {if(self.nightPreviewUntil.timeIntervalSinceNow>0)return 1;NSInteger start=0,end=0;[self nightWindowStart:&start end:&end];NSDateComponents *c=[NSCalendar.currentCalendar components:NSCalendarUnitHour|NSCalendarUnitMinute fromDate:NSDate.date];return LPNightFactor(c.hour*60+c.minute,start,end,30);}
+// Night Shift: Automatic (on at night, off by day), On, or Off. With a macOS schedule, Automatic leaves Night Shift to macOS;
+// without one, Less Pull switches it at the night hours. Less Pull acts only when day turns to night or back, or when the
+// mode changes, so a change made by hand (here, in Control Center) lasts until the next turn, as macOS does it.
+- (NSInteger)nightShiftMode {return MAX(0,MIN(2,[NSUserDefaults.standardUserDefaults integerForKey:@"nightShiftMode"]));}
+- (BOOL)nightNow {NSInteger start=0,end=0;[self nightWindowStart:&start end:&end];NSDateComponents *c=[NSCalendar.currentCalendar components:NSCalendarUnitHour|NSCalendarUnitMinute fromDate:NSDate.date];return LPNightFactor(c.hour*60+c.minute,start,end,0)>0;}
+- (void)followNightShiftMode {
+ NSUserDefaults *d=NSUserDefaults.standardUserDefaults;NSBlueStatus s={0};BOOL actual=NO;
+ if(![self.engine readNightShiftStatus:&s]||![self.engine nightShift:&actual])return;
+ NSString *bid=NSBundle.mainBundle.bundleIdentifier;if(!(bid?[d persistentDomainForName:bid][@"nightShiftMode"]:[d objectForKey:@"nightShiftMode"])){[d setInteger:(self.migrateNightShiftMode&&s.mode==0)?(actual?1:2):0 forKey:@"nightShiftMode"];self.nightModeDirty=YES;}
+ BOOL night=[self nightNow];NSInteger last=[d objectForKey:@"nightPhase"]?[d integerForKey:@"nightPhase"]:-1;
+ if(last==(night?1:0)&&!self.nightModeDirty)return;
+ if(self.exclusion.active||self.pause||self.excludeNight||self.screenLocked||self.nightPreviewTurnedNightShiftOn)return;  // someone else holds Night Shift right now; try again later
+ [d setInteger:night?1:0 forKey:@"nightPhase"];self.nightModeDirty=NO;
+ NSInteger m=[self nightShiftMode];if(m==0&&s.mode!=0)return;
+ BOOL want=m==1?YES:m==2?NO:night;if(actual!=want)[self.engine setNightShiftEnabled:want];
+}
+- (void)nightModeChanged:(NSSegmentedControl *)sender {
+ [NSUserDefaults.standardUserDefaults setInteger:sender.selectedSegment forKey:@"nightShiftMode"];
+ self.pause=nil;[self.pauseTimer invalidate];self.pauseTimer=nil;[NSUserDefaults.standardUserDefaults removeObjectForKey:@"nightShiftPause"];
+ self.nightModeDirty=YES;[self sync];
+}
+- (NSString *)nightModeNoteText {
+ BOOL on=NO;BOOL known=[self.engine nightShift:&on];NSString *now=!known?@"":on?L(@" Right now it is on."):L(@" Right now it is off.");
+ NSInteger m=[self nightShiftMode];if(m==1)return [L(@"On, day and night, until you change it.") stringByAppendingString:now];
+ if(m==2)return L(@"Off, day and night. “Warmer at night” still warms the night without it.");
+ NSBlueStatus s={0};if([self.engine readNightShiftStatus:&s]&&s.mode!=0)return [L(@"On at night and off by day, on the schedule set in macOS.") stringByAppendingString:now];
+ NSInteger start=0,end=0;[self nightWindowStart:&start end:&end];
+ return [[NSString stringWithFormat:L(@"On from %@ to %@, the night hours below, and off by day."),[self minuteLabel:start],[self minuteLabel:end]] stringByAppendingString:now];
+}
 - (NSInteger)nightBoost {return MAX(0,MIN(100,[NSUserDefaults.standardUserDefaults integerForKey:@"nightBoost"]));}
 - (double)defaultWarmthNow {return fmin(3,[self currentWarmth]+[self nightBoost]/100.0*3*[self nightFactor]);}
 - (NSString *)minuteLabel:(NSInteger)m {NSDateComponents *c=[NSDateComponents new];c.hour=m/60;c.minute=m%60;NSDate *t=[NSCalendar.currentCalendar dateFromComponents:c];return [NSDateFormatter localizedStringFromDate:t dateStyle:NSDateFormatterNoStyle timeStyle:NSDateFormatterShortStyle];}
@@ -2344,10 +2378,10 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
  NSInteger start=0,end=0;BOOL own=[self nightWindowStart:&start end:&end]==0;self.ownHoursRow.hidden=!own;
  NSDateComponents *c=[NSDateComponents new];c.hour=start/60;c.minute=start%60;self.nightStartPicker.dateValue=[NSCalendar.currentCalendar dateFromComponents:c];c.hour=end/60;c.minute=end%60;self.nightEndPicker.dateValue=[NSCalendar.currentCalendar dateFromComponents:c];
 }
-// Try: ten seconds of the night look, long enough to switch to another app and see it there.
+// Try: a minute of the night look, long enough to switch to other apps and see it there.
 // The button counts down; a second click ends it at once. Both ends use the usual fade.
-// It shows the night as it will really be: with a Night Shift schedule, Night Shift is on at night, so the preview turns it on
-// too (and off again after); without a schedule it stays off. A Night Shift timed off stays respected.
+// It shows the night as it will really be: with Night Shift on Automatic or On, Night Shift is on at night, so the preview turns
+// it on too (and off again after); on Off it stays off. A Night Shift timed off stays respected.
 - (void)endNightPreview {
  [self.nightPreviewTimer invalidate];self.nightPreviewTimer=nil;self.nightPreviewUntil=nil;self.nightTryButton.title=L(@"Try it");
  if(self.nightPreviewTurnedNightShiftOn){self.nightPreviewTurnedNightShiftOn=NO;[self.engine setNightShiftEnabled:NO];}
@@ -2355,9 +2389,9 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
 }
 - (void)tryNightBoost:(id)sender {
  if(self.nightPreviewUntil){[self endNightPreview];return;}
- NSBlueStatus s={0};BOOL on=NO;
- if(!self.pause&&[self.engine readNightShiftStatus:&s]&&s.mode!=0&&[self.engine nightShift:&on]&&!on&&[self.engine setNightShiftEnabled:YES])self.nightPreviewTurnedNightShiftOn=YES;
- self.nightPreviewUntil=[NSDate dateWithTimeIntervalSinceNow:10];self.animateAppearance=YES;[self sync];[self nightPreviewTick:nil];
+ BOOL on=NO;
+ if(!self.pause&&[self nightShiftMode]!=2&&[self.engine nightShift:&on]&&!on&&[self.engine setNightShiftEnabled:YES])self.nightPreviewTurnedNightShiftOn=YES;
+ self.nightPreviewUntil=[NSDate dateWithTimeIntervalSinceNow:60];self.animateAppearance=YES;[self sync];[self nightPreviewTick:nil];
  self.nightPreviewTimer=[NSTimer timerWithTimeInterval:.25 target:self selector:@selector(nightPreviewTick:) userInfo:nil repeats:YES];[NSRunLoop.mainRunLoop addTimer:self.nightPreviewTimer forMode:NSRunLoopCommonModes];
 }
 - (void)nightPreviewTick:(id)timer {
