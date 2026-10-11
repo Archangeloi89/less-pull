@@ -328,7 +328,7 @@ static void QuietScrolling(NSScrollView *s){
 @property NSTextField *sessionPresetsField,*callBackPresetsField;
 @property NSTextField *exclusionText;
 @property NSRunningApplication *lastExternalApp;
-@property SwitchingPolicy *policy;@property NSComboBox *nightBoostPopup;@property NSTextField *nightBoostNote;@property NSDatePicker *nightStartPicker,*nightEndPicker;@property NSStackView *ownHoursRow;@property NSDate *nightPreviewUntil;@property NSTimer *nightPreviewTimer;@property BOOL nightPreviewTurnedNightShiftOn;@property NSSegmentedControl *nightModeControl;@property NSStackView *nightPauseRow;@property NSWindow *supportWindow;@property GuideTour *guide;@property NSInteger tourGray;@property double tourWarmth;@property BOOL peekKeyHeld;@property NSPopUpButton *nightHoursPopup;@property NSTextField *nightHoursNote;@property NSButton *nightLocationButton,*nightDateTimeButton;@property NSInteger lastSeenMacMode;@property NSTextField *nightModeNote;@property BOOL migrateNightShiftMode,nightModeDirty;@property NSButton *nightTryButton;
+@property SwitchingPolicy *policy;@property NSComboBox *nightBoostPopup;@property NSTextField *nightBoostNote;@property NSDatePicker *nightStartPicker,*nightEndPicker;@property NSStackView *ownHoursRow;@property NSDate *nightPreviewUntil;@property NSTimer *nightPreviewTimer;@property BOOL nightPreviewTurnedNightShiftOn;@property NSSegmentedControl *nightModeControl;@property NSStackView *nightPauseRow;@property NSWindow *supportWindow;@property GuideTour *guide;@property NSTextField *tourStepLabel;@property NSButton *tourSlowButton,*tourBackButton,*tourNextButton;@property NSInteger tourGray;@property double tourWarmth;@property BOOL peekKeyHeld;@property NSPopUpButton *nightHoursPopup;@property NSTextField *nightHoursNote;@property NSButton *nightLocationButton,*nightDateTimeButton;@property NSInteger lastSeenMacMode;@property NSTextField *nightModeNote;@property BOOL migrateNightShiftMode,nightModeDirty;@property NSButton *nightTryButton;
 @property WarmthEngine *warmth;
 @property NSInteger selectedMode;
 @property NSSlider *warmthSlider;
@@ -1366,7 +1366,7 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
 - (void)refreshControlsKnown:(BOOL)known nightOn:(BOOL)on {
  NSString *summary=[self appearanceSummary],*detail=[self automationSummaryKnown:known nightOn:on];
  BOOL failed=[self.status containsString:@"Could not"]||[self.status containsString:@"unavailable"]||[self.status containsString:L(@"unavailable")]||[self.status containsString:@"unsupported"];
- self.statusText.stringValue=failed?self.status:summary;self.statusDetail.stringValue=detail;self.websiteStatus.stringValue=[self websiteStatusLine];self.exclusionText.stringValue=[self exclusionSummary];self.exclusionText.toolTip=[self exclusionHelp];self.exclusionText.accessibilityHelp=[self exclusionHelp];
+ if(!(self.guide&&(self.tourGray>=0||self.tourWarmth>=0)))self.statusText.stringValue=failed?self.status:summary;  // the tour's passing look is not your setting: the heading keeps showing yoursself.statusDetail.stringValue=detail;self.websiteStatus.stringValue=[self websiteStatusLine];self.exclusionText.stringValue=[self exclusionSummary];self.exclusionText.toolTip=[self exclusionHelp];self.exclusionText.accessibilityHelp=[self exclusionHelp];
  BOOL actualOn=NO;BOOL actualKnown=[self.engine nightShift:&actualOn];
  self.item.button.toolTip=[NSString stringWithFormat:L(@"%@\n%@\nClick for Grayscale, Extra Warmth and Night Shift."),summary,detail];[self updateStatusIcon];
  self.nightButton.state=actualKnown&&actualOn;self.nightButton.enabled=known;
@@ -2194,6 +2194,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  for(int k=0;k<4;k++){dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)((0.6+k*1.2)*NSEC_PER_SEC)),dispatch_get_main_queue(),^{[NSAnimationContext runAnimationGroup:^(NSAnimationContext *c){c.duration=.5;button.animator.alphaValue=.25;} completionHandler:^{[NSAnimationContext runAnimationGroup:^(NSAnimationContext *c){c.duration=.6;button.animator.alphaValue=1;} completionHandler:nil];}];});}
 }
 - (void)releaseSettings {
+ if(self.guide)[self.guide stop];  // closing Settings ends the tour too; its controls live there
  [self.settingsTabs removeObserver:self forKeyPath:@"selectedTabViewItemIndex"];self.settings=nil;self.settingsTabs=nil;self.nightBoostPopup=nil;self.nightBoostNote=nil;self.nightStartPicker=nil;self.nightEndPicker=nil;self.ownHoursRow=nil;self.nightTryButton=nil;self.nightModeControl=nil;self.nightPauseRow=nil;self.nightHoursPopup=nil;self.nightHoursNote=nil;self.nightLocationButton=nil;self.nightDateTimeButton=nil;self.nightModeNote=nil;self.statusText=nil;self.statusDetail=nil;self.autoButton=nil;self.lockNightButton=nil;self.lockGrayButton=nil;self.saverGrayButton=nil;self.saverNightButton=nil;self.loginButton=nil;self.grayscaleButton=nil;self.nightButton=nil;self.resumeButton=nil;self.endPauseButton=nil;self.resetButton=nil;self.pausePopup=nil;self.peekScopePopup=nil;self.websiteStatus=nil;self.exclusionsList=nil;self.displaysList=nil;self.sessionPresetsField=nil;self.callBackPresetsField=nil;self.exclusionText=nil;self.warmthSlider=nil;self.warmthLabel=nil;self.warmthTitle=nil;self.welcomeCard=nil;self.updateCheckbox=nil;self.updateButton=nil;self.updateBanner=nil;self.updateBannerLabel=nil;self.updateBannerButton=nil;self.updateStatusLabel=nil;self.thanksCard=nil;self.peekRecorder=nil;self.grayscaleRecorder=nil;self.peekNote=nil;self.loginNote=nil;self.grayscaleShortcutNote=nil;self.peekGrayButton=nil;self.peekWarmthButton=nil;self.peekNightButton=nil;self.clickPopup=nil;self.rightClickPopup=nil;self.grayOffPopup=nil;self.grayOnButton=nil;self.websiteRulesList=nil;self.tourCard=nil;self.noteViews=nil;self.advancedViews=nil;self.multiDisplayViews=nil;
  for(NSNumber *after in @[@1.0,@6.0])dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)(after.doubleValue*NSEC_PER_SEC)),dispatch_get_main_queue(),^{if(!self.settings)malloc_zone_pressure_relief(NULL,0);});  // once the window is truly gone, hand the freed pages back
 }
@@ -2332,7 +2333,30 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
 - (void)openWebsite:(id)sender {[NSWorkspace.sharedWorkspace openURL:[NSURL URLWithString:LessPullWebsite]];}
 - (void)openSupport:(id)sender {[self showSupportWindow];}
 // ---- The tour on the real Mac (GuideTour): what is real comes from here.
-- (void)startGuideTour {if(self.guide)return;self.tourGray=-1;self.tourWarmth=-1;self.guide=[[GuideTour alloc]initWithHost:self];[self.guide start];}
+- (void)startGuideTour {if(self.guide)return;self.tourGray=-1;self.tourWarmth=-1;self.guide=[[GuideTour alloc]initWithHost:self];[self showTourControls];[self.guide start];}
+// While the circle tours the screen, the welcome card holds its controls: where you already look, never over the Dock.
+- (void)showTourControls {
+ NSStackView *card=self.tourCard;if(!card)return;for(NSView *v in card.arrangedSubviews.copy){[card removeArrangedSubview:v];[v removeFromSuperview];}
+ NSTextField *title=[NSTextField labelWithString:L(@"The tour is on")];title.font=[NSFont systemFontOfSize:15 weight:NSFontWeightSemibold];
+ NSTextField *text=[NSTextField wrappingLabelWithString:L(@"Follow the circle. It talks a little and shows things on your real screen; nothing is changed for good.")];text.preferredMaxLayoutWidth=404;text.textColor=NSColor.secondaryLabelColor;
+ self.tourStepLabel=[NSTextField labelWithString:@""];self.tourStepLabel.font=[NSFont monospacedDigitSystemFontOfSize:12 weight:NSFontWeightRegular];self.tourStepLabel.textColor=NSColor.secondaryLabelColor;
+ self.tourSlowButton=[NSButton buttonWithTitle:L(@"Slower") target:self action:@selector(tourSlow:)];self.tourSlowButton.buttonType=NSButtonTypePushOnPushOff;[self helpView:self.tourSlowButton text:L(@"The circle takes more time for each step.") label:L(@"Slower")];
+ self.tourBackButton=[NSButton buttonWithTitle:L(@"Back") target:self action:@selector(tourGuideBack:)];
+ self.tourNextButton=[NSButton buttonWithTitle:L(@"Next") target:self action:@selector(tourGuideNext:)];self.tourNextButton.keyEquivalent=@"\r";
+ NSButton *end=[NSButton buttonWithTitle:L(@"End tour") target:self action:@selector(tourGuideEnd:)];end.bezelStyle=NSBezelStyleInline;
+ NSView *fill=[NSView new];[fill setContentHuggingPriority:1 forOrientation:NSLayoutConstraintOrientationVertical];
+ NSStackView *buttons=[self row:@[self.tourSlowButton,[self spacer],self.tourStepLabel,[self spacer],self.tourBackButton,self.tourNextButton]];
+ NSStackView *column=[self column:@[title,text,fill,buttons,[self row:@[[self spacer],end]]]];column.spacing=8;
+ [card addArrangedSubview:column];[column.widthAnchor constraintEqualToAnchor:card.widthAnchor constant:-28].active=YES;for(NSView *v in column.arrangedSubviews)if([v isKindOfClass:NSStackView.class])[v.widthAnchor constraintEqualToAnchor:column.widthAnchor].active=YES;
+ if(self.tourHeight)[column.heightAnchor constraintEqualToConstant:self.tourHeight-26].active=YES;
+}
+- (void)tourSlow:(id)sender {[self.guide toggleSlow];}
+- (void)tourGuideBack:(id)sender {[self.guide back];}
+- (void)tourGuideNext:(id)sender {[self.guide next];}
+- (void)tourGuideEnd:(id)sender {[self.guide stop];}
+- (void)guideProgress:(GuideTour *)tour {self.tourStepLabel.stringValue=[NSString stringWithFormat:L(@"%ld of %ld"),(long)tour.step+1,(long)tour.stepCount];self.tourBackButton.enabled=tour.step>0;self.tourNextButton.title=tour.step+1>=tour.stepCount?L(@"Done"):L(@"Next");self.tourSlowButton.state=tour.slow;}
+- (NSRect)guideSettingsFrame {return self.settings.visible?self.settings.frame:NSZeroRect;}
+- (NSView *)guideScene:(NSInteger)kind {TourScene *s=[[TourScene alloc]initWithFrame:NSMakeRect(0,0,420,140)];s.kind=(TourSceneKind)MAX(0,MIN(5,kind));return s;}
 - (NSRect)guideIconFrame {
  NSWindow *w=self.item.button.window;if(!w||!w.isVisible||!(w.occlusionState&NSWindowOcclusionStateVisible))return NSZeroRect;
  NSRect f=w.frame;NSScreen *screen=nil;for(NSScreen *s in NSScreen.screens)if(NSContainsRect(s.frame,f))screen=s;if(!screen)return NSZeroRect;  // pushed off screen (a full menu bar, or a menu-bar organizer)
@@ -2350,7 +2374,9 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
 - (BOOL)guidePeeking {return self.peeking||self.peekLocked||self.peekLockedDisplays.count>0;}
 - (void)guideFinished:(BOOL)completed {
  self.guide=nil;self.tourGray=-1;self.tourWarmth=-1;self.animateAppearance=YES;[self sync];
- if(completed&&self.tourCard){if([self tourLastPage]==6)[self showTourPage:6 animated:YES];else [self dismissWelcome:nil];}
+ if(!self.settings.visible||!self.tourCard)return;
+ if(!completed){[self showTourPage:0 animated:YES];return;}  // ended early: the welcome is back, to start again or skip
+ if([self tourLastPage]==6)[self showTourPage:6 animated:YES];else [self dismissWelcome:nil];
 }
 // One door, then the choice: every way to support, each with what it suits, and the ways without money.
 - (NSImage *)qrImageFor:(NSString *)text size:(CGFloat)size {
