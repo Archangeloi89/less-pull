@@ -1118,6 +1118,8 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
 - (void)extendSession:(id)sender {[self.session extendMinutes:10];[self persistSession];self.statusImageName=nil;[self updateStatusIcon];[self refreshSessionPanel];}
 - (void)sessionQuiet:(id)sender {[self.session quietFor:5 at:NSDate.date];[self persistSession];[self closeSessionPanel];}
 - (void)sessionLeaving:(id)sender {[self showSessionPanelMode:@"callback"];}
+- (void)justCallMeBack:(id)sender {[self showSessionPanelMode:@"justback"];}
+- (void)openStartPanelNow:(id)sender {[self showSessionPanelMode:@"start"];}
 - (void)sessionCallBack:(NSButton *)sender {[self.session leaveAt:NSDate.date callBackIn:sender.tag];[self persistSession];[self scheduleSessionTimer];[self closeSessionPanel];self.statusImageName=nil;[self updateStatusIcon];}
 - (void)sessionBack:(id)sender {[self endSession:sender];}
 - (void)showSessionsFromPanel:(id)sender {[self closeSessionPanel];[self showSessions:nil];}
@@ -1159,7 +1161,23 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
   self.customStart=[self panelButton:[NSString stringWithFormat:L(@"Start %ld min"),(long)self.customMinutes] action:@selector(startCustomSession:) prominent:NO];
   NSButton *gear=[NSButton buttonWithImage:[NSImage imageWithSystemSymbolName:@"gearshape" accessibilityDescription:L(@"Session settings")] target:self action:@selector(showSessionsFromPanel:)];gear.bezelStyle=NSBezelStyleInline;gear.bordered=NO;[self helpView:gear text:L(@"Lengths, reminders, sound and glow are under Settings → Sessions.") label:L(@"Session settings")];
   NSButton *later=[self panelButton:L(@"Not now") action:@selector(closeSessionPanel) prominent:NO];later.bezelStyle=NSBezelStyleInline;later.controlSize=NSControlSizeRegular;
-  [buttons addObject:[self row:@[self.customSave,[self spacer],self.customStart]]];[buttons addObject:[self row:@[[self spacer],later,gear]]];}
+  [buttons addObject:[self row:@[self.customSave,[self spacer],self.customStart]]];
+  // Forgot to start a session and stepping away? One quiet line turns this panel into the call back alone.
+  NSButton *justBack=[self panelButton:L(@"Or just call me back in…") action:@selector(justCallMeBack:) prominent:NO];justBack.bezelStyle=NSBezelStyleInline;justBack.controlSize=NSControlSizeRegular;[self helpView:justBack text:L(@"No session: Less Pull calls you back once after the time you choose.") label:L(@"Just call me back")];
+  [buttons addObject:[self row:@[justBack,[self spacer],later,gear]]];}
+ else if([mode isEqual:@"justback"]){time.stringValue=L(@"Call me back");time.font=[NSFont systemFontOfSize:22 weight:NSFontWeightLight];time.textColor=NSColor.labelColor;sub.stringValue=L(@"No session, just the call back. In how long?");
+  NSMutableArray *chips=[NSMutableArray new];for(NSNumber *m in [self sessionPresets:@"callBackPresets" fallback:@[@5,@9,@13,@33]])[chips addObject:[self chip:m.integerValue key:@"callBackPresets" action:@selector(sessionCallBack:)]];
+  [buttons addObjectsFromArray:[self chipRows:chips]];
+  self.customBackMinutes=MAX(1,MIN(120,[NSUserDefaults.standardUserDefaults integerForKey:@"customBackMinutes"]));
+  NSSlider *bslider=[NSSlider sliderWithValue:self.customBackMinutes minValue:1 maxValue:120 target:self action:@selector(customBackChanged:)];bslider.continuous=YES;bslider.controlSize=NSControlSizeSmall;[bslider setContentHuggingPriority:1 forOrientation:NSLayoutConstraintOrientationHorizontal];[self helpView:bslider text:L(@"Any time from 1 to 120 minutes.") label:L(@"Call me back in, minutes")];
+  self.customBackLabel=[NSTextField labelWithString:[NSString stringWithFormat:L(@"%ld min"),(long)self.customBackMinutes]];self.customBackLabel.font=[NSFont monospacedDigitSystemFontOfSize:13 weight:NSFontWeightMedium];self.customBackLabel.alignment=NSTextAlignmentRight;[self.customBackLabel.widthAnchor constraintEqualToConstant:58].active=YES;
+  NSTextField *orb=[NSTextField labelWithString:L(@"or")];orb.font=[NSFont systemFontOfSize:12];orb.textColor=NSColor.tertiaryLabelColor;NSStackView *bsliderRow=[self row:@[orb,bslider,self.customBackLabel]];bsliderRow.spacing=8;[buttons addObject:bsliderRow];
+  self.customBackSave=[NSButton checkboxWithTitle:L(@"Add to presets") target:nil action:nil];self.customBackSave.font=[NSFont systemFontOfSize:11];self.customBackSave.controlSize=NSControlSizeSmall;[self helpView:self.customBackSave text:L(@"Keep this time as a chip for next time.") label:L(@"Add this time to the presets")];
+  self.customBackStart=[self panelButton:[NSString stringWithFormat:L(@"Call me back in %ld min"),(long)self.customBackMinutes] action:@selector(customCallBack:) prominent:NO];
+  [buttons addObject:[self row:@[self.customBackSave,[self spacer],self.customBackStart]]];
+  NSButton *back=[self panelButton:L(@"Start a session instead") action:@selector(openStartPanelNow:) prominent:NO];back.bezelStyle=NSBezelStyleInline;back.controlSize=NSControlSizeRegular;
+  NSButton *later2=[self panelButton:L(@"Not now") action:@selector(closeSessionPanel) prominent:NO];later2.bezelStyle=NSBezelStyleInline;later2.controlSize=NSControlSizeRegular;
+  [buttons addObject:[self row:@[back,[self spacer],later2]]];}
  else if([mode isEqual:@"callback"]){sub.stringValue=L(@"Call me back in");time.stringValue=L(@"Leaving now.");time.font=[NSFont systemFontOfSize:22 weight:NSFontWeightLight];time.textColor=NSColor.labelColor;
   NSMutableArray *chips=[NSMutableArray new];for(NSNumber *m in [self sessionPresets:@"callBackPresets" fallback:@[@5,@9,@13,@33]])[chips addObject:[self chip:m.integerValue key:@"callBackPresets" action:@selector(sessionCallBack:)]];
   [buttons addObjectsFromArray:[self chipRows:chips]];
@@ -1187,7 +1205,7 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  return column;
 }
 - (void)showSessionPanelMode:(NSString *)mode {
- if(self.session.state==SessionIdle&&![mode isEqual:@"start"])return;[self closeExceptionPanel];NSView *content=[self sessionPanelContentMode:mode];
+ if(self.session.state==SessionIdle&&![mode isEqual:@"start"]&&![mode isEqual:@"justback"])return;[self closeExceptionPanel];NSView *content=[self sessionPanelContentMode:mode];
  if(!self.sessionPanel){NSPanel *p=[[NSPanel alloc]initWithContentRect:NSMakeRect(0,0,320,150) styleMask:NSWindowStyleMaskBorderless|NSWindowStyleMaskNonactivatingPanel backing:NSBackingStoreBuffered defer:NO];p.opaque=NO;p.backgroundColor=NSColor.clearColor;p.level=NSPopUpMenuWindowLevel;p.hasShadow=YES;p.releasedWhenClosed=NO;p.collectionBehavior=NSWindowCollectionBehaviorCanJoinAllSpaces|NSWindowCollectionBehaviorTransient;p.becomesKeyOnlyIfNeeded=YES;
   NSVisualEffectView *back=[NSVisualEffectView new];back.material=NSVisualEffectMaterialPopover;back.blendingMode=NSVisualEffectBlendingModeBehindWindow;back.state=NSVisualEffectStateActive;back.wantsLayer=YES;back.layer.cornerRadius=14;back.layer.masksToBounds=YES;p.contentView=back;self.sessionPanel=p;}
  NSView *back=self.sessionPanel.contentView;NSView *old=back.subviews.firstObject;content.translatesAutoresizingMaskIntoConstraints=NO;[back addSubview:content];
@@ -1980,7 +1998,6 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  NSTextField *version=[NSTextField labelWithString:[NSString stringWithFormat:L(@"Version %@"),[self runningVersionLabel]]];version.textColor=NSColor.secondaryLabelColor;version.toolTip=L(@"It will always be 1.4.4. The build number is what changes.");version.accessibilityHelp=version.toolTip;
  NSTextField *credit=[NSTextField labelWithString:L(@"© 2026 Jiri Arion Rose")];credit.font=[NSFont systemFontOfSize:11];credit.textColor=NSColor.secondaryLabelColor;
  NSTextField *forever=[NSTextField labelWithString:L(@"It will always be 1.4.4. The build number is what changes.")];forever.font=[NSFont systemFontOfSize:10];forever.textColor=NSColor.tertiaryLabelColor;
- NSStackView *identity=[self column:@[name,version,forever,credit]];identity.spacing=2;
  NSButton *help=[NSButton buttonWithTitle:L(@"Help") target:self action:@selector(showHelp:)];[self helpView:help text:L(@"A short guide to Less Pull.") label:L(@"Help")];
  NSButton *diagnostics=[NSButton buttonWithTitle:L(@"Diagnostics…") target:self action:@selector(diagnostics:)];[self helpView:diagnostics text:L(@"Technical details for troubleshooting.") label:L(@"Diagnostics")];
  NSButton *support=[NSButton buttonWithTitle:L(@"Support my work") target:self action:@selector(showThanks:)];[self helpView:support text:L(@"Shows the thank-you card with ways to support Less Pull, the one that appears after two weeks.") label:L(@"Support my work")];
@@ -1991,8 +2008,25 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  self.updateCheckbox=[NSButton checkboxWithTitle:L(@"Check for updates automatically") target:self action:@selector(toggleUpdateChecks:)];[self helpView:self.updateCheckbox text:L(@"Once a day, Less Pull asks GitHub whether a newer build exists. Nothing about you is sent.") label:L(@"Check for updates automatically")];
  self.updateButton=[NSButton buttonWithTitle:L(@"Check for Updates…") target:self action:@selector(checkForUpdatesNow:)];[self helpView:self.updateButton text:L(@"Ask GitHub now whether a newer version exists.") label:L(@"Check for Updates")];
  self.updateStatusLabel=[self note:@""];
- NSStackView *column=[self column:@[[self row:@[icon,identity]],[self row:[self authorLinkButtons]],[self separator],[self row:@[help,tour,diagnostics,report]],[self row:@[support,share,licenses,[self spacer]]],[self separator],self.updateCheckbox,[self note:L(@"Once a day, Less Pull asks GitHub whether a newer build exists for your macOS version. Nothing about you is sent, and you can turn this off.")],[self row:@[self.updateButton,[self spacer]]],self.updateStatusLabel,[self note:L(@"Everything else stays on this Mac: no account, no analytics, no servers. The browser extension talks only to the app.")]]];
- [(NSStackView *)column.arrangedSubviews[0] setSpacing:16];[column setCustomSpacing:4 afterView:self.updateCheckbox];[column setCustomSpacing:4 afterView:column.arrangedSubviews[7]];[self refreshUpdateControls];
+ // Who and which build; the 1.4.4 note stays as the version's tooltip. The author's links sit under the name, aligned with the text.
+ NSStackView *links=[self row:[self authorLinkButtons]];links.spacing=6;
+ NSStackView *identity=[self column:@[name,version,credit,links]];identity.spacing=3;[identity setCustomSpacing:12 afterView:credit];
+ [help setTitle:L(@"Guide")];
+ // Three labelled rows, like the rest of Settings: what you do here, and the buttons that do it.
+ NSTextField *(^heading)(NSString *)=^NSTextField *(NSString *t){NSTextField *f=[NSTextField labelWithString:t];f.font=[NSFont systemFontOfSize:13 weight:NSFontWeightMedium];[f.widthAnchor constraintEqualToConstant:104].active=YES;return f;};
+ NSStackView *helpRow=[self row:@[heading(L(@"Help")),help,tour,report,[self spacer]]];
+ NSStackView *supportRow=[self row:@[heading(L(@"Support")),support,share,[self spacer]]];
+ self.updateCheckbox.title=L(@"Automatically");
+ NSStackView *updateRow=[self row:@[heading(L(@"Updates")),self.updateCheckbox,[self spacer],self.updateButton]];
+ NSTextField *updateNote=[self note:L(@"Once a day, Less Pull asks GitHub whether a newer build exists for your macOS version. That is its only connection, and nothing about you is sent.")];
+ // Diagnostics and Licenses are rarely needed: two small text buttons at the end.
+ for(NSButton *small in @[diagnostics,licenses]){small.bezelStyle=NSBezelStyleInline;small.controlSize=NSControlSizeSmall;small.font=[NSFont systemFontOfSize:11];}
+ NSStackView *footer=[self row:@[diagnostics,licenses,[self spacer]]];footer.spacing=8;
+ NSStackView *top=[self row:@[icon,identity]];top.spacing=16;top.alignment=NSLayoutAttributeTop;
+ updateNote.preferredMaxLayoutWidth=330;self.updateStatusLabel.preferredMaxLayoutWidth=330;
+ NSView *(^indent)(NSView *)=^NSView *(NSView *v){NSView *gap=[NSView new];[gap.widthAnchor constraintEqualToConstant:104].active=YES;NSStackView *r=[self row:@[gap,v]];r.alignment=NSLayoutAttributeTop;r.identifier=@"fixed";return r;};
+ NSStackView *column=[self column:@[top,[self separator],helpRow,supportRow,[self separator],updateRow,indent(updateNote),indent(self.updateStatusLabel),[self separator],footer]];
+ column.spacing=10;[column setCustomSpacing:4 afterView:updateRow];[column setCustomSpacing:2 afterView:column.arrangedSubviews[6]];[self refreshUpdateControls];
  return column;
 }
 - (NSString *)websiteStatusLine {

@@ -610,3 +610,13 @@
 "Updates" = "Updates";
 "Pointer still in color" = "Mauszeiger bleibt farbig";
 "On some displays, macOS draws the arrow pointer on top of the picture, so Grayscale and warmth miss it. Make the pointer one notch larger in System Settings → Accessibility → Display → Pointer size, and it turns quiet too. “Pointer Size…” in the Displays section of the General tab opens this setting." = "Auf manchen Displays zeichnet macOS den Mauszeiger obenauf, sodass Graustufen und Wärme ihn nicht erreichen. Stell den Zeiger unter Systemeinstellungen → Bedienungshilfen → Anzeige → Zeigergröße eine Stufe größer, dann wird auch er ruhig. „Zeigergröße …“ im Bereich Displays auf dem Tab „Allgemein“ öffnet diese Einstellung.";
+"Guide" = "Anleitung";
+"Support" = "Unterstützen";
+"Automatically" = "Automatisch";
+"Once a day, Less Pull asks GitHub whether a newer build exists for your macOS version. That is its only connection, and nothing about you is sent." = "Einmal am Tag fragt Less Pull bei GitHub, ob es einen neueren Build für deine macOS-Version gibt. Das ist seine einzige Verbindung, und über dich wird nichts gesendet.";
+"Or just call me back in…" = "Oder nur zurückholen in …";
+"Call me back" = "Hol mich zurück";
+"No session, just the call back. In how long?" = "Keine Sitzung, nur das Zurückholen. In wie vielen Minuten?";
+"Start a session instead" = "Lieber eine Sitzung starten";
+"No session: Less Pull calls you back once after the time you choose." = "Ohne Sitzung: Less Pull holt dich nach der gewählten Zeit einmal zurück.";
+"Just call me back" = "Nur zurückholen";

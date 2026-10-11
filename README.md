@@ -173,52 +173,54 @@ More in [Night Shift and warmth](docs/NIGHT-SHIFT.md).
 
 ## Where the controls are
 
-Less Pull has two interfaces, both on the Mac: the menu and the Settings window. The browser extension only connects the browser.
+Less Pull lives in the menu bar. Click the circle for the menu, and choose **Settings…** there for everything in one place. The browser extension only connects the browser.
+
+### The menu, for quick changes
+
+The icon tells you the state: its left half fills while grayscale is showing, its right half warms as you add warmth, and it shows a pause mark while Less Pull is paused. A right-click opens the session panel; Settings → Shortcuts can give either button the menu, Grayscale or the session panel.
+
+- The first line tells you what is applied right now, with **Pause Less Pull** right below it: the plain display for 15 minutes, an hour, or until you resume.
+- **Grayscale**, the **Extra Warmth** slider and **Night Shift** change your defaults. While Grayscale or Night Shift is on, the line below it turns it off for a while, and it comes back by itself.
+- **Start a session…** begins a stretch of focused work, or just a call back when you step away.
+- **Exception for [current app]…** opens a small panel under the icon with the same row as in Settings, and every change applies right away. With a website in front, **Exception for [that site]…** does the same for the domain or the exact page.
 
 <p align="center">
-  <img src="docs/assets/interfaces.png" width="100%" alt="Two screenshots of Less Pull side by side. On the left, the menu-bar dropdown under its half-filled circle icon: the status line Grayscale, Warmth Off, then Grayscale with a check, Grayscale off for with a submenu, the Extra Warmth slider drawn as a ramp from neutral through amber to red at 40 percent with stops labeled Off, 25, 50, 75 and Red, Night Shift: Off with a submenu, Pause Less Pull, Exception for Finder with the Finder icon, Settings and Quit. On the right, the Settings window on its General tab, with the toolbar tabs General, Shortcuts, Apps, Websites and About: the heading Grayscale, Warmth Off, a Grayscale checkbox with a Turn Grayscale off for menu, the Extra Warmth ramp slider at 40 percent with a Reset button, Night Shift: Off with its timed-off menu, Extra Warmth follows Night Shift, and Launch at login, each with a short explanation underneath.">
+  <img src="docs/assets/exceptions.png" width="100%" alt="The Less Pull menu under its icon, with Start a session, the status line Grayscale, Warmth 40%, Pause Less Pull, Grayscale, Grayscale off for, the Extra Warmth slider at 40 percent, Night Shift, Night Shift off for, Exception for Finder, Settings and Quit. Beside it, the exception panel for Finder under the icon: Use this exception, Grayscale and Night Shift each as Default, On or Off, and Use default warmth with its slider.">
 </p>
 
-<sub>Two real screenshots of build 16, placed side by side on a plain backdrop. The menu is translucent, so it carries a tint of whatever was behind it.</sub>
+<sub>The menu and the exception panel it opens. Real screenshots of build 40 with an example rule.</sub>
 
-### The menu bar, for quick changes
+<details>
+<summary><b>See the menu beside the Settings window, and every Settings tab</b></summary>
 
-Click the circle in the menu bar (a right-click opens the session panel; Settings → Shortcuts can give either button the menu, Grayscale or the session). This is the dropdown on the left. The icon itself tells you the state: its left half fills while grayscale is showing, its right half warms as you add warmth, and it shows a pause mark while Less Pull or Night Shift is paused.
-
-- The first line tells you what is applied right now.
-- **Grayscale** and the **Extra Warmth** slider change your defaults. The slider's track shows the real ramp from neutral through amber to red. **Grayscale off for** gives you color for an hour, four hours, or until Night Shift next changes.
-- **Night Shift** holds everything about Night Shift: on or off now, off for a while, and whether Extra Warmth follows it.
-- **Pause Less Pull** shows the plain display for 15 minutes, an hour, or until you resume.
-- **Exception for [current app]** sets the rule for the app you were just using, right in the menu. With a website in front, **Exception for [that site]** does the same for the domain or the exact page.
+<br>
 
 <p align="center">
-  <img src="docs/assets/exceptions.png" width="100%" alt="Two screenshots of the menu with an exception submenu open. Left: Exception for Finder, with Use this exception, Grayscale and Night Shift each as Use default, On or Off, Use default warmth, an Extra Warmth slider for Finder on the ramp, and More in Settings. Right: with Brave in front on mubi.com, Exception for mubi.com, with Use this exception, Apply to Whole domain or This exact page, Grayscale as Use default (On), On or Off, Night Shift as Use default (Off), On or Off, Use default warmth (40 percent), an Extra Warmth slider for mubi.com, and All website exceptions.">
+  <img src="docs/assets/interfaces.png" width="100%" alt="The Less Pull menu under its icon beside the Settings window on its General tab: the heading Grayscale, Warmth 40%, Grayscale with Turn Grayscale off for, the Extra Warmth slider with Reset, Night Shift with Turn Night Shift off for, Launch at login, Language, and Show advanced options, each with a short explanation underneath.">
 </p>
 
-<sub>An app exception and a website exception, set straight from the menu. The default entries show what they resolve to.</sub>
+The Settings window has six tabs:
 
-### The settings window, for everything in one place
-
-Choose **Settings…** in the menu. This is the window on the right, with six tabs.
-
-- **General**: the same controls as the menu, with a short line under each one, plus **Launch at login**.
-- **Sessions**: session lengths, call-back choices, reminders after the end, sound and glow, and Try it.
-- **Shortcuts**: [**Peek in color**](#peek-in-color) (a shortcut you hold to see the plain display, and what it turns off), a **Toggle Grayscale** shortcut, and what a left and a right click on the menu-bar icon do. **Suggest** picks a free shortcut for you.
-- **Apps**: every app exception, one row each: the app's icon, Use this exception, Default / On / Off for Grayscale and Night Shift. **More** opens the row for warmth and, with several displays, the display choices.
+- **General**: the same controls as the menu, with a short line under each one, plus **Launch at login** and **Language**.
+- **Shortcuts**: [**Peek in color**](#peek-in-color) and what it turns off, a **Toggle Grayscale** shortcut, and what a left and a right click on the menu-bar icon do.
+- **Sessions**: session lengths, call-back times, what happens at the end, reminders, sound and glow.
+- **Apps**: every app exception, one row each, with Default / On / Off for Grayscale and Night Shift and its own warmth.
 - **Websites**: the browser extension and the saved website exceptions, in the same shape as the app rows.
-- **About**: version, links, Help, Diagnostics, licenses, and the update check.
+- **About**: version and links, the guide and the tour, support, and the update check.
 
-The window shows what is relevant and hides the rest: display options appear only with two or more displays connected, and the fine-tuning (what Peek turns off, what the mouse buttons do, display options with one display) sits behind **Show advanced options** at the bottom of General. Everything keeps working as set while it is hidden. On the very first launch this window opens by itself with a short welcome and a five-page tour: the screen, exceptions, Peek, sessions and privacy, each with its own small animation drawn in code (a pointer clicking the circle, a menu dropping, keys pressing, a ring filling), in the same card at the same size, with Skip tour always at hand. The two shortcuts are set for new users, ⌥A to peek and ⌥⌘G to toggle, each only if it is free on that Mac and keyboard; the tour shows which ones, and Shortcuts lets you change them. The tour can be opened again from About. After two weeks of use, the next time you open Settings, a small card asks whether you enjoy Less Pull and how to support the author; it never pops up on its own.
+Display options appear only with two or more displays connected, and the fine-tuning sits behind **Show advanced options**; hidden settings keep working as you set them.
 
 <p align="center">
-  <img src="docs/assets/settings-tabs.png" width="100%" alt="Four screenshots of the Settings window on a plain backdrop. Shortcuts: Peek in color with the shortcut Option-A, what peeking turns off, a Toggle Grayscale shortcut Option-Command-G, and what clicking the menu-bar icon does. Apps: three app exceptions, Music, Photos and TextEdit, each with its icon, a Use this exception checkbox, Default, On and Off segments for Grayscale and Night Shift, and a warmth slider on the ramp. Websites: the Install Browser Extension button, the extension connected in Firefox, Brave and Opera, and two saved exceptions for example.com and one exact page with the same controls. About: the app icon, version 1.4.4 build 16, the author's links, Help, Diagnostics and Licenses, and the automatic update check.">
+  <img src="docs/assets/settings-tabs.png" width="100%" alt="Five tabs of the Settings window: Shortcuts with Peek in color and the Toggle Grayscale shortcut; Sessions with lengths, call-back times and what happens at the end; Apps with example exceptions for Music, Photos and TextEdit; Websites with example exceptions for example.com and one exact page; About with the version, the author's links, Help, Support and Updates.">
 </p>
 
-<sub>Real screenshots of build 16 with example rules, placed on a plain backdrop.</sub>
+<sub>Real screenshots of build 40 with example rules.</sub>
+
+</details>
 
 ### Website exceptions, in your browser
 
-The browser extension has no buttons and no settings of its own. It only tells the Mac app which website is in front. With a website open, the Less Pull menu offers **Exception for [that site]**, just like it does for apps: choose **Whole domain** or **This exact page**, set only what you want to change, and it is saved. Saved website rules are listed under **Settings… → Websites**.
+The browser extension has no controls in the browser; everything happens in Less Pull. It only tells the Mac app which website is in front. With a website open, the Less Pull menu offers **Exception for [that site]**, just like it does for apps: choose **Whole domain** or **This exact page**, set only what you want to change, and it is saved. Saved website rules are listed under **Settings… → Websites**.
 
 The app changes the display; nothing is injected into pages, and the Mac app has to be running. Brave, Firefox, Safari and Opera are confirmed working on the author's Mac. Chrome and Edge are implemented but have not yet been through a clean install test. Several browsers can use the extension at the same time; whichever browser window is in front decides.
 
