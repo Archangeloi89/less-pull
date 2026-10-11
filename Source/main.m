@@ -2400,7 +2400,7 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
  NSInteger start=0,end=0,source=[self nightWindowStart:&start end:&end];NSString *a=[self minuteLabel:start],*b=[self minuteLabel:end];
  NSString *first=source==1?[NSString stringWithFormat:L(@"Today about %@ to %@, worked out for your time zone."),a,b]:[NSString stringWithFormat:L(@"Every day from %@ to %@."),a,b];
  NSString *text=[first stringByAppendingString:L(@" Night Shift on Automatic and “Warmer at night” both follow it.")];
- if([self sunsetNeedsLocation])text=[text stringByAppendingString:L(@"\n\nLocation Services are off for System Services in macOS, so System Settings cannot show this schedule. Less Pull works it out from your time zone and switches Night Shift itself until you turn them on.")];
+ if([self sunsetNeedsLocation])text=[text stringByAppendingString:L(@"\n\nmacOS keeps sunset to sunrise only with Location Services on and, under System Services, Setting time zone allowed. Until then Less Pull works it out from your time zone and switches Night Shift itself.")];
  return text;
 }
 - (NSString *)nightModeNoteText {
