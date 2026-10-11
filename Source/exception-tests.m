@@ -11,6 +11,8 @@
 - (BOOL)readNightShiftStatus:(NSBlueStatus *)s {*s=self.state;return YES;}
 - (BOOL)setNightShiftEnabled:(BOOL)on {self.on=on;self.nightWrites++;return YES;}
 - (BOOL)applyMode:(NSInteger)mode {self.mode=mode;self.nativeWrites++;return YES;}
+- (BOOL)setNightShiftScheduleMode:(int)mode {NSBlueStatus s=self.state;s.mode=mode;self.state=s;return YES;}
+- (BOOL)setNightShiftScheduleFrom:(NSInteger)from to:(NSInteger)to {NSBlueStatus s=self.state;s.schedule.from=(NSTimePair){(int)(from/60),(int)(from%60)};s.schedule.to=(NSTimePair){(int)(to/60),(int)(to%60)};self.state=s;return YES;}
 @end
 @interface FakeWarmth : WarmthEngine
 @property double value,lastDuration;
@@ -86,8 +88,22 @@ int main(){@autoreleasepool{
   t.testIsNight=YES;[t sync];check(fe.on,"evening turns it on again");
   [d setInteger:2 forKey:@"nightShiftMode"];t.nightModeDirty=YES;[t sync];check(!fe.on,"Off holds at night");
   [d setInteger:1 forKey:@"nightShiftMode"];t.nightModeDirty=YES;t.testIsNight=NO;[t sync];check(fe.on,"On holds by day");
-  [d setInteger:0 forKey:@"nightShiftMode"];fe.state=(NSBlueStatus){.mode=2,.available=YES};fe.on=NO;t.testIsNight=YES;t.nightModeDirty=YES;NSInteger writes=fe.nightWrites;[t sync];check(!fe.on&&fe.nightWrites==writes,"with a macOS schedule, Automatic leaves Night Shift to macOS");
-  [d removeObjectForKey:@"nightShiftMode"];[d removeObjectForKey:@"nightPhase"];
+  [d setInteger:0 forKey:@"nightShiftMode"];[d setInteger:1 forKey:@"nightHours"];fe.state=(NSBlueStatus){.mode=2,.available=YES};fe.on=NO;t.testIsNight=YES;t.nightModeDirty=YES;NSInteger writes=fe.nightWrites;[t sync];check(!fe.on&&fe.nightWrites==writes,"with a macOS schedule, Automatic leaves Night Shift to macOS");
+  [d removeObjectForKey:@"nightShiftMode"];[d removeObjectForKey:@"nightPhase"];[d removeObjectForKey:@"nightHours"];
+ }
+ // Night Shift and the macOS schedule are one setting: written there, and taken over from System Settings.
+ {
+  TestApp *t=[TestApp new];FakeFilter *fe=[FakeFilter new];fe.on=NO;fe.state=(NSBlueStatus){.mode=0,.available=YES};FakeWarmth *fw=[FakeWarmth new];t.engine=fe;t.warmth=fw;t.exclusion=[ExclusionPolicy new];t.policy=[SwitchingPolicy new];t.policy.known=YES;t.selectedMode=100;t.followModes=YES;
+  [d setInteger:0 forKey:@"nightShiftMode"];[d setInteger:1 forKey:@"nightHours"];[d setInteger:21*60+30 forKey:@"nightStart"];[d setInteger:6*60 forKey:@"nightEnd"];t.nightModeDirty=YES;[t sync];
+  check(fe.state.mode==2&&fe.state.schedule.from.hour==21&&fe.state.schedule.from.minute==30&&fe.state.schedule.to.hour==6,"Automatic with your hours becomes the macOS Custom schedule");
+  [d setInteger:0 forKey:@"nightHours"];NSBlueStatus p=fe.state;p.sunSchedulePermitted=YES;fe.state=p;t.nightModeDirty=YES;[t sync];check(fe.state.mode==1,"Automatic with sunset to sunrise becomes the macOS Sunset to Sunrise schedule");
+  [d setInteger:1 forKey:@"nightShiftMode"];t.nightModeDirty=YES;[t sync];check(fe.state.mode==0&&fe.on,"On: no macOS schedule, Night Shift on");
+  [d setInteger:2 forKey:@"nightShiftMode"];t.nightModeDirty=YES;[t sync];check(fe.state.mode==0&&!fe.on,"Off: no macOS schedule, Night Shift off");
+  p=fe.state;p.mode=2;p.schedule.from=(NSTimePair){20,0};p.schedule.to=(NSTimePair){8,15};fe.state=p;[t sync];check([t nightShiftMode]==0&&[d integerForKey:@"nightHours"]==1&&[d integerForKey:@"nightStart"]==20*60&&[d integerForKey:@"nightEnd"]==8*60+15,"a Custom schedule set in System Settings comes back as Automatic with those hours");
+  p=fe.state;p.mode=1;fe.state=p;[t sync];check([t nightShiftMode]==0&&[d integerForKey:@"nightHours"]==0,"Sunset to Sunrise set in System Settings comes back too");
+  p=fe.state;p.mode=0;fe.state=p;fe.on=YES;[t sync];check([t nightShiftMode]==1,"the schedule turned off in System Settings, with Night Shift on, reads as On");
+  p=fe.state;p.sunSchedulePermitted=NO;fe.state=p;[d setInteger:0 forKey:@"nightShiftMode"];[d setInteger:0 forKey:@"nightHours"];t.nightModeDirty=YES;fe.on=NO;t.testIsNight=YES;[t sync];check(fe.state.mode==0&&fe.on&&[t nightShiftMode]==0,"without Location Services, Automatic sunset to sunrise stays Less Pull's own and switches at night");
+  [d removeObjectForKey:@"nightShiftMode"];[d removeObjectForKey:@"nightHours"];[d removeObjectForKey:@"nightPhase"];[d removeObjectForKey:@"nightStart"];[d removeObjectForKey:@"nightEnd"];
  }
  // Warmer at night: your warmth all day, the night bonus on top at night, Red at the most; Grayscale stays as set.
  for(int base=100;base<=101;base++){

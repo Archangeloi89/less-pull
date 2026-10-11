@@ -47,6 +47,16 @@ static void filterPreferencesChanged(CFNotificationCenterRef center,void *observ
  *enabled=status.enabled && status.disableFlags==0;
  return YES;
 }
+extern BOOL LessPullHandsOff;
+- (BOOL)setNightShiftScheduleMode:(int)mode {
+ if(LessPullHandsOff)return YES;if(!self.client||self.error||![self.client respondsToSelector:@selector(setMode:)])return NO;
+ BOOL (*set)(id,SEL,int)=(void *)[self.client methodForSelector:@selector(setMode:)];return set(self.client,@selector(setMode:),mode);
+}
+- (BOOL)setNightShiftScheduleFrom:(NSInteger)from to:(NSInteger)to {
+ if(LessPullHandsOff)return YES;if(!self.client||self.error||![self.client respondsToSelector:@selector(setSchedule:)])return NO;
+ struct {NSTimePair from,to;} schedule={{(int)(from/60),(int)(from%60)},{(int)(to/60),(int)(to%60)}};
+ BOOL (*set)(id,SEL,const void *)=(void *)[self.client methodForSelector:@selector(setSchedule:)];return set(self.client,@selector(setSchedule:),&schedule);
+}
 - (BOOL)readNightShiftStatus:(NSBlueStatus *)status {return self.client&&!self.error&&[self.client getBlueLightStatus:status]&&status->available;}
 __attribute__((weak)) BOOL LessPullHandsOff=NO;
 - (BOOL)setNightShiftEnabled:(BOOL)enabled {
