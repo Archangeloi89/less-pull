@@ -324,7 +324,7 @@ static void QuietScrolling(NSScrollView *s){
 @property NSTextField *sessionPresetsField,*callBackPresetsField;
 @property NSTextField *exclusionText;
 @property NSRunningApplication *lastExternalApp;
-@property SwitchingPolicy *policy;@property NSComboBox *nightBoostPopup;@property NSTextField *nightBoostNote;@property NSDatePicker *nightStartPicker,*nightEndPicker;@property NSStackView *ownHoursRow;@property NSDate *nightPreviewUntil;@property NSTimer *nightPreviewTimer;@property BOOL nightPreviewTurnedNightShiftOn;@property NSSegmentedControl *nightModeControl;@property NSStackView *nightPauseRow;@property NSPopUpButton *nightHoursPopup;@property NSTextField *nightHoursNote;@property NSButton *nightLocationButton,*nightDateTimeButton;@property NSInteger lastSeenMacMode;@property NSTextField *nightModeNote;@property BOOL migrateNightShiftMode,nightModeDirty;@property NSButton *nightTryButton;
+@property SwitchingPolicy *policy;@property NSComboBox *nightBoostPopup;@property NSTextField *nightBoostNote;@property NSDatePicker *nightStartPicker,*nightEndPicker;@property NSStackView *ownHoursRow;@property NSDate *nightPreviewUntil;@property NSTimer *nightPreviewTimer;@property BOOL nightPreviewTurnedNightShiftOn;@property NSSegmentedControl *nightModeControl;@property NSStackView *nightPauseRow;@property BOOL peekKeyHeld;@property NSPopUpButton *nightHoursPopup;@property NSTextField *nightHoursNote;@property NSButton *nightLocationButton,*nightDateTimeButton;@property NSInteger lastSeenMacMode;@property NSTextField *nightModeNote;@property BOOL migrateNightShiftMode,nightModeDirty;@property NSButton *nightTryButton;
 @property WarmthEngine *warmth;
 @property NSInteger selectedMode;
 @property NSSlider *warmthSlider;
@@ -1461,7 +1461,7 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  NSString *line=[self appearanceSummary];
  if(self.pausedUntil)return [self lessPullPauseLabel];
  if(self.peekLocked)return L(@"Peeking · press the shortcut to return");
- if(self.peekLockedDisplays.count)return self.peekLockedDisplays.count>1?L(@"Peeking on several displays · press the shortcut on each to return"):L(@"Peeking on one display · press the shortcut there to return");
+ if(self.peekLockedDisplays.count)return self.peekLockedDisplays.count>1?L(@"Peeking on several displays"):L(@"Peeking on one display");  // short: the menu is as wide as its longest line
  if(self.grayOffUntil)line=[NSString stringWithFormat:@"%@ · %@",line,[self grayOffLabel]];
  if(self.pause)return [line stringByAppendingFormat:L(@" · Night Shift off until %@"),[self timeLabel:self.pause.expiry]];
  if(self.grayOverride||self.nightOverride||self.customWarmth)return [line stringByAppendingFormat:L(@" · %@ exception"),self.foregroundName];
@@ -1486,6 +1486,8 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
 // The display under the mouse pointer: where you are looking, no click needed.
 - (uint32_t)displayUnderMouse {NSPoint p=NSEvent.mouseLocation;CGPoint cg=CGPointMake(p.x,CGDisplayBounds(CGMainDisplayID()).size.height-p.y);CGDirectDisplayID id=0;uint32_t n=0;if(CGGetDisplaysWithPoint(cg,1,&id,&n)==kCGErrorSuccess&&n)return id;return self.activeDisplay?:CGMainDisplayID();}
 - (void)peekKeyPressed:(BOOL)pressed at:(NSTimeInterval)now {
+ // A held shortcut can arrive again as key repeat; only a press after a release counts, so holding never locks the peek.
+ if(pressed){if(self.peekKeyHeld)return;self.peekKeyHeld=YES;}else self.peekKeyHeld=NO;
  if(pressed)[self updateForeground];
  if(pressed&&[self peeksPerDisplay]){
   self.peekDisplay=[self displayUnderMouse];

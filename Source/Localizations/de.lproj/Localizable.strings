@@ -669,3 +669,5 @@
 "Night schedule" = "Nacht-Zeitplan";
 "On at night and off by day, as set under Night schedule below." = "Nachts an und tagsüber aus, wie unten im „Nacht-Zeitplan“ eingestellt.";
 "Opens General → Date & Time. Turn on Set time zone automatically using your current location; macOS then asks for Location Services if they are off." = "Öffnet „Allgemein“ → „Datum & Uhrzeit“. Schalte „Zeitzone automatisch anhand des aktuellen Standorts festlegen“ ein; sind die Ortungsdienste aus, fragt macOS danach.";
+"Peeking on several displays" = "Farbblick auf mehreren Displays";
+"Peeking on one display" = "Farbblick auf einem Display";

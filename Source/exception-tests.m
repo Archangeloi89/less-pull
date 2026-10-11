@@ -242,6 +242,7 @@ int main(){@autoreleasepool{
   [t peekKeyPressed:YES at:20];[t peekKeyPressed:NO at:20.1];[t peekKeyPressed:YES at:20.3];[t peekKeyPressed:NO at:20.4];check(t.peeking&&t.peekLocked&&!fw.gray,"a quick double press keeps the peek");
   [t peekKeyPressed:YES at:25];check(!t.peeking&&!t.peekLocked&&fw.gray,"the next press lets go");[t peekKeyPressed:NO at:25.2];check(!t.peeking,"its release changes nothing");
   [t peekKeyPressed:YES at:30];[t peekKeyPressed:NO at:30.1];[t peekKeyPressed:YES at:31];check(t.peeking&&!t.peekLocked,"a slow second press is a plain hold");[t peekKeyPressed:NO at:31.2];check(!t.peeking,"and releases normally");
+  [t peekKeyPressed:YES at:40];[t peekKeyPressed:YES at:40.2];[t peekKeyPressed:YES at:40.4];check(t.peeking&&!t.peekLocked,"key repeat while held never locks the peek");[t peekKeyPressed:NO at:41];check(!t.peeking,"and letting go returns");
  }
  NSUInteger combinations=0;
  for(int follow=0;follow<2;follow++)for(int globalNight=0;globalNight<2;globalNight++)for(int base=100;base<=101;base++)for(int grayRule=0;grayRule<3;grayRule++)for(int nightRule=0;nightRule<3;nightRule++)for(int custom=0;custom<2;custom++)for(NSNumber *percent in @[@0,@25,@77,@100]){
