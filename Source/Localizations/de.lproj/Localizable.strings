@@ -661,7 +661,7 @@
 "When the night starts." = "Wann die Nacht beginnt.";
 "When the night ends." = "Wann die Nacht endet.";
 "On at night and off by day, as set under Night below." = "Nachts an und tagsüber aus, wie unter „Nacht“ eingestellt.";
-"\n\nmacOS keeps sunset to sunrise only when it may use your location for the time zone: Location Services on, and under General → Date & Time, Set time zone automatically on. Until then Less Pull works it out from your time zone and switches Night Shift itself." = "\n\nSonnenuntergang bis Sonnenaufgang hält macOS nur, wenn es deinen Standort für die Zeitzone nutzen darf: Ortungsdienste an und unter „Allgemein“ → „Datum & Uhrzeit“ „Zeitzone automatisch festlegen“ an. Bis dahin rechnet Less Pull die Zeiten aus deiner Zeitzone und schaltet Night Shift selbst.";
+"\n\nmacOS keeps sunset to sunrise only when it may use your location for the time zone. Turn on Set time zone automatically under General → Date & Time; macOS then asks for Location Services if they are off. Until then Less Pull works it out from your time zone and switches Night Shift itself." = "\n\nSonnenuntergang bis Sonnenaufgang hält macOS nur, wenn es deinen Standort für die Zeitzone nutzen darf. Schalte unter „Allgemein“ → „Datum & Uhrzeit“ „Zeitzone automatisch festlegen“ ein; sind die Ortungsdienste aus, fragt macOS danach. Bis dahin rechnet Less Pull die Zeiten aus deiner Zeitzone und schaltet Night Shift selbst.";
 "Location Services…" = "Ortungsdienste …";
 "Open Location Services settings" = "Einstellungen der Ortungsdienste öffnen";
 "Displays Settings…" = "Displays-Einstellungen …";

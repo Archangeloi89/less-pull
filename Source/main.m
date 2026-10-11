@@ -1829,8 +1829,8 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  self.nightHoursNote=[self note:@""];
  self.nightLocationButton=[NSButton buttonWithTitle:L(@"Location Services…") target:self action:@selector(openLocationServices:)];self.nightLocationButton.bezelStyle=NSBezelStyleRounded;[self helpView:self.nightLocationButton text:L(@"Opens Privacy & Security → Location Services. Turn them on; under System Services (Details… at the bottom), Setting time zone should be allowed too.") label:L(@"Open Location Services settings")];
  self.nightDateTimeButton=[NSButton buttonWithTitle:L(@"Date & Time…") target:self action:@selector(openDateTime:)];self.nightDateTimeButton.bezelStyle=NSBezelStyleRounded;[self helpView:self.nightDateTimeButton text:L(@"Opens General → Date & Time. Turn on Set time zone automatically using your current location.") label:L(@"Open Date & Time settings")];
- for(NSButton *b in @[self.nightLocationButton,self.nightDateTimeButton,nightSettings]){b.controlSize=NSControlSizeSmall;b.font=[NSFont systemFontOfSize:NSFont.smallSystemFontSize];}  // three fit in the row
- NSStackView *nightButtonsRow=[self row:@[[self spacer],self.nightLocationButton,self.nightDateTimeButton,nightSettings]];NSStackView *nightHoursNoteRow=[self column:@[self.nightHoursNote,nightButtonsRow]];nightHoursNoteRow.spacing=8;
+ for(NSButton *b in @[self.nightDateTimeButton,self.nightLocationButton,nightSettings]){b.controlSize=NSControlSizeSmall;b.font=[NSFont systemFontOfSize:NSFont.smallSystemFontSize];}  // three fit in the row
+ NSStackView *nightButtonsRow=[self row:@[[self spacer],self.nightDateTimeButton,self.nightLocationButton,nightSettings]];NSStackView *nightHoursNoteRow=[self column:@[self.nightHoursNote,nightButtonsRow]];nightHoursNoteRow.spacing=8;
  NSDatePicker *(^hourPicker)(void)=^NSDatePicker *{NSDatePicker *p=[NSDatePicker new];p.datePickerStyle=NSDatePickerStyleTextFieldAndStepper;p.datePickerElements=NSDatePickerElementFlagHourMinute;p.target=self;p.action=@selector(nightHoursChanged:);return p;};
  self.nightStartPicker=hourPicker();self.nightEndPicker=hourPicker();[self helpView:self.nightStartPicker text:L(@"When the night starts.") label:L(@"Night starts")];[self helpView:self.nightEndPicker text:L(@"When the night ends.") label:L(@"Night ends")];
  NSTextField *fromLabel=[NSTextField labelWithString:L(@"From")],*toLabel=[NSTextField labelWithString:L(@"to")];fromLabel.font=toLabel.font=[NSFont systemFontOfSize:12];
@@ -2403,7 +2403,7 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
  NSInteger start=0,end=0,source=[self nightWindowStart:&start end:&end];NSString *a=[self minuteLabel:start],*b=[self minuteLabel:end];
  NSString *first=source==1?[NSString stringWithFormat:L(@"Today about %@ to %@, worked out for your time zone."),a,b]:[NSString stringWithFormat:L(@"Every day from %@ to %@."),a,b];
  NSString *text=[first stringByAppendingString:L(@" Night Shift on Automatic and “Warmer at night” both follow it.")];
- if([self sunsetNeedsLocation])text=[text stringByAppendingString:L(@"\n\nmacOS keeps sunset to sunrise only when it may use your location for the time zone: Location Services on, and under General → Date & Time, Set time zone automatically on. Until then Less Pull works it out from your time zone and switches Night Shift itself.")];
+ if([self sunsetNeedsLocation])text=[text stringByAppendingString:L(@"\n\nmacOS keeps sunset to sunrise only when it may use your location for the time zone. Turn on Set time zone automatically under General → Date & Time; macOS then asks for Location Services if they are off. Until then Less Pull works it out from your time zone and switches Night Shift itself.")];
  return text;
 }
 - (NSString *)nightModeNoteText {
