@@ -1814,7 +1814,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  self.saverNightButton=[self lockOption:@"saverNight" title:L(@"Night Shift") help:L(@"Keeps Night Shift at full warmth while the screensaver runs and Less Pull is quieting your screen. Your schedule stays as it is.")];
  NSTextField *boostTitle=[NSTextField labelWithString:L(@"Warmer at night")];boostTitle.font=[NSFont systemFontOfSize:13 weight:NSFontWeightMedium];[self helpView:boostTitle text:[self nightBoostHelp] label:nil];
  // Pick from the list or type any number from 0 to 100; Red is 100.
- self.nightBoostPopup=[NSComboBox new];self.nightBoostPopup.target=self;self.nightBoostPopup.action=@selector(nightBoostChanged:);((NSTextFieldCell *)self.nightBoostPopup.cell).sendsActionOnEndEditing=YES;self.nightBoostPopup.numberOfVisibleItems=10;self.nightBoostPopup.completes=NO;self.nightBoostPopup.delegate=(id<NSComboBoxDelegate>)self;[self.nightBoostPopup.widthAnchor constraintEqualToConstant:140].active=YES;[self helpView:self.nightBoostPopup text:[self nightBoostHelp] label:L(@"Warmer at night")];
+ self.nightBoostPopup=[NSComboBox new];self.nightBoostPopup.target=self;self.nightBoostPopup.action=@selector(nightBoostChanged:);((NSTextFieldCell *)self.nightBoostPopup.cell).sendsActionOnEndEditing=YES;self.nightBoostPopup.numberOfVisibleItems=10;self.nightBoostPopup.completes=NO;[self.nightBoostPopup.widthAnchor constraintEqualToConstant:140].active=YES;[self helpView:self.nightBoostPopup text:[self nightBoostHelp] label:L(@"Warmer at night")];
  NSButton *tryNight=[NSButton buttonWithTitle:self.nightPreviewUntil?[NSString stringWithFormat:L(@"Night · %ld s"),(long)ceil(self.nightPreviewUntil.timeIntervalSinceNow)]:L(@"Try it") target:self action:@selector(tryNightBoost:)];tryNight.bezelStyle=NSBezelStyleInline;[tryNight.widthAnchor constraintGreaterThanOrEqualToConstant:84].active=YES;self.nightTryButton=tryNight;[self helpView:tryNight text:L(@"Shows the night look for a minute, long enough to switch to other apps and see it there. Click again to end it sooner.") label:L(@"Try the night look")];
  self.nightBoostNote=[self note:[self nightBoostNoteText]];self.nightBoostNote.preferredMaxLayoutWidth=290;[self.nightBoostNote setContentCompressionResistancePriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationVertical];
  NSButton *nightSettings=[NSButton buttonWithTitle:L(@"Night Shift Settings…") target:self action:@selector(openNightShiftSettings:)];nightSettings.bezelStyle=NSBezelStyleInline;[self helpView:nightSettings text:L(@"Opens Displays in System Settings. Its Night Shift… button sets the schedule, for example Sunset to Sunrise.") label:L(@"Open Night Shift settings")];
@@ -2400,13 +2400,13 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
  if(left<=0){[self endNightPreview];return;}
  self.nightTryButton.title=[NSString stringWithFormat:L(@"Night · %ld s"),(long)ceil(left)];
 }
-// Choosing from the list: the action can arrive before the field shows the choice, so take the chosen item itself.
-- (void)comboBoxSelectionDidChange:(NSNotification *)note {NSComboBox *c=note.object;if(c!=self.nightBoostPopup||c.indexOfSelectedItem<0)return;c.stringValue=c.objectValueOfSelectedItem;[self nightBoostChanged:c];}
 - (NSString *)nightBoostLabel:(NSInteger)v {return v>=100?L(@"Red"):v>0?[NSString stringWithFormat:L(@"+%ld points"),(long)v]:L(@"Off");}
 - (void)nightBoostChanged:(NSComboBox *)sender {
  NSString *text=sender.stringValue;NSInteger v=0;
  NSScanner *scan=[NSScanner scannerWithString:text];scan.charactersToBeSkipped=[NSCharacterSet.decimalDigitCharacterSet invertedSet];NSInteger n=0;
  if([scan scanInteger:&n])v=MAX(0,MIN(100,n));else if([text localizedCaseInsensitiveContainsString:L(@"Red")])v=100;
+ // Only what the field says counts: 12, +12, 12 points, Red. A list choice puts its text in the field before this runs.
+ if(sender.indexOfSelectedItem>=0)[sender deselectItemAtIndex:sender.indexOfSelectedItem];
  sender.stringValue=[self nightBoostLabel:v];[NSUserDefaults.standardUserDefaults setInteger:v forKey:@"nightBoost"];self.animateAppearance=YES;[self sync];[self refreshNightBoostControls];}
 - (void)nightHoursChanged:(NSDatePicker *)sender {NSDateComponents *c=[NSCalendar.currentCalendar components:NSCalendarUnitHour|NSCalendarUnitMinute fromDate:sender.dateValue];[NSUserDefaults.standardUserDefaults setInteger:c.hour*60+c.minute forKey:sender==self.nightStartPicker?@"nightStart":@"nightEnd"];self.animateAppearance=YES;[self sync];}
 - (void)openNightShiftSettings:(id)sender {[NSWorkspace.sharedWorkspace openURL:[NSURL URLWithString:@"x-apple.systempreferences:com.apple.Displays-Settings.extension"]];}
