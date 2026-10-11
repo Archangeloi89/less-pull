@@ -17,6 +17,10 @@
 - (void)guideNightPreview:(BOOL)on;
 - (NSString *)guidePeekLabel;             // the Peek shortcut as shown (e.g. ⌥A), nil when there is none
 - (BOOL)guidePeeking;
+- (BOOL)guidePeekKept;                   // the peek was kept with a double press
+- (BOOL)guideHasNotch;                   // the screen with the menu-bar circle has a notch
+- (NSRect)guideControlFrame:(NSString *)which;  // "card", "slower" or "next" in the Settings window, screen coordinates
+- (void)guideSpotEmpty:(BOOL)empty;      // while the guide is out, the menu bar shows its empty spot (a dotted circle)
 - (void)guideProgress:(GuideTour *)tour;  // step or pace changed: update the tour controls in the Settings window
 - (void)guideFinished:(BOOL)completed;    // the tour ended (completed or skipped); everything it showed is already put back
 @end
@@ -30,5 +34,6 @@
 - (void)next;
 - (void)back;
 - (void)toggleSlow;
+- (void)endEarly;  // End tour: a short goodbye, then home
 - (void)stop;     // ends at once and puts everything back
 @end

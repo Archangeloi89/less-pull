@@ -28,3 +28,5 @@ typedef struct { BOOL active, enabled, sunSchedulePermitted; int mode; struct { 
 - (BOOL)setSystemFilterEnabled:(BOOL)enabled type:(int)type;
 - (NSString *)diagnostics;
 @end
+// Tells every app that watches the display filter (an installed Less Pull among them) to look again. Changes nothing.
+void LessPullAnnounceFilterChange(void);

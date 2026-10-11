@@ -37,6 +37,10 @@ static void filterPreferencesChanged(CFNotificationCenterRef center,void *observ
  }
  return self;
 }
+void LessPullAnnounceFilterChange(void) {
+ void *ma=dlopen("/System/Library/Frameworks/MediaAccessibility.framework/MediaAccessibility",RTLD_NOW);CFStringRef *name=ma?dlsym(ma,"kMADisplayFilterSettingsChangedNotification"):NULL;
+ if(name&&*name)CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(),*name,NULL,NULL,YES);
+}
 - (void)dealloc {CFNotificationCenterRemoveEveryObserver(CFNotificationCenterGetDarwinNotifyCenter(),(__bridge void *)self);}
 - (BOOL)nightShift:(BOOL *)enabled {
  if(!self.client||self.error)return NO;
