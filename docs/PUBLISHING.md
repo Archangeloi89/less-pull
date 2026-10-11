@@ -1,6 +1,6 @@
 # Publishing safely
 
-How Less Pull and its browser extension reach other people without anyone being able to slip something into them. Written 8 October 2026; nothing here has been done yet unless the release plan says so.
+How Less Pull and its browser extension reach other people without anyone being able to slip something into them. Written 8 October 2026 and kept up to date; the release plan says what is done.
 
 ## The principle
 
@@ -36,5 +36,5 @@ Store identity: the Chrome Web Store assigns its own extension ID when the packa
 
 - The privacy page states what the extension can see and cannot do; the manifest is the proof.
 - Browsers show the permissions before installation, and show them again if an update asks for more.
-- The app's update check sends nothing about the user; installing stays a deliberate step until signed releases exist.
+- The app's update check sends nothing about the user. Install update checks the download against the release's checksums, requires Less Pull's Developer ID signature and Apple's notarization, and only then replaces the app.
 - Since build 35 the release carries a disk image (`Less Pull.dmg` from build.sh: the app plus an Applications shortcut, signed and notarized on its own) for people, and the zip for the in-app updater, which downloads, verifies and unpacks it in the background.

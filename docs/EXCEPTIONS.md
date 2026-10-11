@@ -70,7 +70,7 @@ Things to know:
 - Avoid saving exact pages whose address contains tokens or other secrets. Saved rules are stored on your Mac. See [Privacy](PRIVACY.md).
 - Several browsers can use the extension at once; whichever window is in front decides.
 
-Browser support in build 16: Brave, Firefox, Safari and Opera are confirmed working on the author's Mac. Chrome and Edge are implemented, but none has been through a clean installation test on a fresh machine. Firefox keeps a temporary add-on only until it quits unless the extension is signed; Safari needs Allow Unsigned Extensions until the companion app is signed by Apple.
+Browser support: Chrome, Brave, Edge and Opera install the extension from the Chrome Web Store. Safari gets it through the Less Pull for Safari companion app, signed and notarized with Less Pull. Firefox loads it as a temporary add-on, which it keeps only until it quits, until Mozilla has approved the extension. Brave, Chrome, Firefox, Safari and Opera are confirmed working on the author's Macs; Edge is implemented but not yet tested.
 
 ## Examples
 
