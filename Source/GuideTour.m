@@ -937,7 +937,7 @@ static GTPanel *GTMakePanel(NSRect frame,NSInteger level){
   GTBeat *hid=Beat(notch?L(@"Hm. My door is behind the notch. Of all the places."):L(@"Hm. My door is hidden. Your menu bar is full."),GTFaceTilt);hid.to=weak.underCircle;hid.pointAt=weak.circleAim;
   hid.onlyIf=^BOOL{if(iconShown())return NO;wasHidden=YES;weak.iconWasHidden=YES;return YES;};
   hid.later=@[@[@1.1,^{GuideTour *s=weak;s.view.pointAt=NSMakePoint(s.view.pos.x-300,s.view.pos.y+60);}],@[@1.8,^{GuideTour *s=weak;s.view.pointAt=NSMakePoint(s.view.pos.x+300,s.view.pos.y+60);}],@[@2.5,^{[weak aimAt:weak.circleAim()];}]];
-  GTBeat *drag=Beat(L(@"Make some room up there, then hold ⌘ and drag my circle toward the clock. Like this."),GTFacePress);drag.scene=0;drag.to=here;drag.onlyIf=^BOOL{return !iconShown();};
+  GTBeat *drag=Beat(L(@"Show the hidden icons up there, then hold ⌘ and drag my circle toward the clock. Like this."),GTFacePress);drag.scene=0;drag.to=here;drag.onlyIf=^BOOL{return !iconShown();};
   drag.until=iconShown;drag.timeout=90;drag.timeoutSay=L(@"Let’s carry on. You can come back to this; the tour is under About.");drag.timeoutTo=@"lp.1h";drag.nextTo=@"lp.1h";
   drag.nudges=@[@[@4,L(@"I’d drag it myself, but guest rules: I don’t touch anything here."),@(GTFaceNone)],@[@20,L(@"Room: quit an app whose icon you don’t need, or ⌘-drag a system icon out of the bar."),@(GTFaceNone)],@[@45,L(@"Or leave it for now: → on the bar. I’ll manage without my door."),@(GTFaceNone),[weak barAim:@"next"]]];
   GTBeat *found=Beat(L(@"There it is! Thank you. A door I can see: luxury."),GTFaceSpin);found.to=weak.underCircle;found.pointAt=weak.circleAim;found.faces=@[@[@.9,@(GTFaceHop)]];

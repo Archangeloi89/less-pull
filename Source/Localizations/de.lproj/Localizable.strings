@@ -924,7 +924,6 @@
 "If Opera said “Installation is not enabled”, I know a side door: → on the bar." = "Falls Opera sagt, die Installation sei nicht aktiviert: Ich kenne eine Seitentür. → in der Leiste.";
 "I’ll walk you through %@. It takes a minute." = "Ich führ dich durch %@. Das dauert eine Minute.";
 "Let’s leave it for now. Set up… tries again whenever you like." = "Lassen wir es für jetzt. „Einrichten …“ versucht es jederzeit wieder.";
-"Make some room up there, then hold ⌘ and drag my circle toward the clock. Like this." = "Schaff oben etwas Platz, dann halt ⌘ und zieh meinen Kreis Richtung Uhr. So.";
 "More time for each line." = "Mehr Zeit für jeden Satz.";
 "Now click another app, or the desktop: it goes quiet again." = "Jetzt klick auf eine andere App oder auf den Schreibtisch: Es wird wieder ruhig.";
 "One line back" = "Einen Satz zurück";
@@ -953,6 +952,12 @@
 "Yours: Sunset to sunrise. Keep it, or pick Custom hours there." = "Bei dir: Sonnenuntergang bis Sonnenaufgang. Behalt das, oder wähl dort Eigene Uhrzeiten.";
 "← and → go one line back or on: here, or on your keyboard. Handy if I’m too quick." = "← und → gehen einen Satz zurück oder weiter: hier oder auf der Tastatur. Praktisch, wenn ich zu schnell bin.";
 "A short tour on your own screen, with a browser connection if you like." = "Eine kurze Tour auf deinem eigenen Bildschirm, mit Browser-Verbindung, wenn du willst.";
-"Holding the Command key, the pointer drags the circle toward the clock; the other icons make room" = "Mit gedrückter Befehlstaste zieht der Zeiger den Kreis Richtung Uhr; die anderen Symbole machen Platz";
-"This is your icon, right above this window. If you can’t see it, your menu bar is full: make some room there, then hold ⌘ and drag the circle toward the clock." = "Das ist dein Symbol, direkt über diesem Fenster. Siehst du es nicht, ist deine Menüleiste voll: Schaff dort etwas Platz, dann halt ⌘ gedrückt und zieh den Kreis Richtung Uhr.";
 "You have arrived somewhere quieter.\n\nLess Pull takes the color out of your screen, so it pulls at you less. Think of noise cancelling, for your eyes: nothing is gone, everything still works. It just stops shouting." = "Du bist an einem ruhigeren Ort angekommen.\n\nLess Pull nimmt deinem Bildschirm die Farbe, damit er weniger an dir zerrt. Wie Geräuschunterdrückung, nur für die Augen: Nichts ist weg, alles funktioniert. Es schreit nur nicht mehr.";
+"First, bring out your icon" = "Hol zuerst dein Symbol hervor";
+"The tour starts at the Less Pull circle in the menu bar, and right now it’s hidden. Show the hidden menu-bar icons, then hold ⌘ and drag the circle toward the clock. The tour begins as soon as it’s there." = "Die Tour beginnt beim Less-Pull-Kreis in der Menüleiste, und der ist gerade versteckt. Zeig die versteckten Symbole der Menüleiste an, dann halt ⌘ gedrückt und zieh den Kreis Richtung Uhr. Die Tour beginnt, sobald er da ist.";
+"Start when it’s there" = "Starten, sobald er da ist";
+"Start anyway" = "Trotzdem starten";
+"Waiting for your icon…" = "Warte auf dein Symbol …";
+"This is your icon, right above this window. Can’t see it? Show the hidden menu-bar icons, then hold ⌘ and drag the circle toward the clock." = "Das ist dein Symbol, direkt über diesem Fenster. Du siehst es nicht? Zeig die versteckten Symbole der Menüleiste an, dann halt ⌘ gedrückt und zieh den Kreis Richtung Uhr.";
+"The » shows the hidden icons; holding the Command key, the pointer drags the circle out toward the clock, and the other icons make room" = "Das » zeigt die versteckten Symbole; mit gedrückter Befehlstaste zieht der Zeiger den Kreis Richtung Uhr heraus, und die anderen Symbole machen Platz";
+"Show the hidden icons up there, then hold ⌘ and drag my circle toward the clock. Like this." = "Zeig oben die versteckten Symbole an, dann halt ⌘ und zieh meinen Kreis Richtung Uhr. So.";
