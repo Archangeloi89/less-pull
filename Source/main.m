@@ -2355,6 +2355,7 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
  NSStackView *column=[self column:@[title,text,fill,buttons,[self row:@[[self spacer],end]]]];column.spacing=8;
  [card addArrangedSubview:column];[column.widthAnchor constraintEqualToAnchor:card.widthAnchor constant:-28].active=YES;for(NSView *v in column.arrangedSubviews)if([v isKindOfClass:NSStackView.class])[v.widthAnchor constraintEqualToAnchor:column.widthAnchor].active=YES;
  if(self.tourHeight)[column.heightAnchor constraintEqualToConstant:self.tourHeight-26].active=YES;
+ [self.settings makeFirstResponder:nil];  // no field keeps the keyboard during the tour; Return is Next
 }
 - (void)tourSlow:(id)sender {[self.guide toggleSlow];}
 - (void)tourGuideBack:(id)sender {[self.guide back];}

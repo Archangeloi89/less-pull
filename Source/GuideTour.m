@@ -181,7 +181,10 @@ static NSColor *Mix(NSColor *a,NSColor *b,double k){a=[a colorUsingColorSpace:NS
 - (void)next {
  if(!self.running||self.view.leaving)return;
  if(self.waiting){[self.waitTimer invalidate];self.waiting=NO;self.generation++;self.beatIndex++;[self playBeat];return;}  // waiting for your hands: Next means "not now", and the step goes on without it
- if(self.step+1>=(NSInteger)self.steps.count){[self finish:YES];return;}
+ if(self.step+1>=(NSInteger)self.steps.count){  // Done: it still flies home and says goodbye, just without the rest of the step
+  NSUInteger h=[self.beats indexOfObjectPassingTest:^BOOL(GTBeat *b,NSUInteger i,BOOL *stop){return b.home;}];
+  if(h!=NSNotFound&&(NSInteger)h>self.beatIndex){self.generation++;[self.waitTimer invalidate];self.waiting=NO;self.beatIndex=h;[self playBeat];}
+  else [self finish:YES];return;}
  [self playStep:self.step+1];
 }
 - (void)back {
@@ -303,7 +306,7 @@ static NSColor *Mix(NSColor *a,NSColor *b,double k){a=[a colorUsingColorSpace:NS
   double k=MIN(1,(CACurrentMediaTime()-start)/(seconds*s.pace)),x=a+(b-a)*k;[host guideLookGray:-1 warmth:x];s.view.blushTarget=MIN(1,x/3);if(k>=1)[t invalidate];}];
  [NSRunLoop.mainRunLoop addTimer:self.rampTimer forMode:NSRunLoopCommonModes];
 }
-- (double)readingTime:(NSString *)text {if(!text.length)return 0;NSUInteger words=[text componentsSeparatedByCharactersInSet:NSCharacterSet.whitespaceCharacterSet].count;return MAX(2.4,words*.36+1.0)*self.pace;}
+- (double)readingTime:(NSString *)text {if(!text.length)return 0;NSUInteger words=[text componentsSeparatedByCharactersInSet:NSCharacterSet.whitespaceCharacterSet].count;return MAX(2.2,words*.3+1.0)*self.pace;}  // about 200 words a minute, plus a breath
 - (void)interject:(NSString *)text face:(GTFace)f {
  if(!self.running||self.view.leaving)return;NSString *before=self.view.text;NSInteger kind=self.sceneKind,g=self.generation;[self face:f];[self show:text scene:kind];
  [self after:2.4*self.pace do:^{if(g==self.generation&&[self.view.text isEqual:text])[self show:before scene:kind];}];
