@@ -101,18 +101,18 @@ The percentage is a relative control. It is not a Kelvin value and not a measure
 
 ## Peek in color
 
-Sometimes you need color for a moment: to tell two lines in a chart apart, to check a photo, to find the red button. You do not have to change anything for that. Record a shortcut under **Settings… → Shortcuts** (or let **Suggest** pick a free one), then hold it. The screen is in color for exactly as long as you hold the keys, and quiet again the moment you let go.
+Sometimes you need color for a moment: to tell two lines in a chart apart, to check a photo, to find the red button. You do not have to change anything for that. Hold the Peek shortcut, **Option-A** unless you have chosen another. The screen is in color for exactly as long as you hold the keys, and quiet again the moment you let go.
 
 <p align="center">
   <img src="docs/assets/peek.png" width="100%" alt="Three drawings of the same busy web page in a row. Left: the page as Less Pull shows it, in grayscale with a little warmth, captioned Your screen, as usual. Middle, under two keys drawn as held, Option and A: the page in full color, captioned Color while you hold the Peek shortcut. Right: the page quiet again, captioned Let go, and it is quiet again.">
 </p>
 
-<sub>Drawn with the app's own color matrix. Option-A is an example; Less Pull ships without a shortcut, and Suggest offers one that is free on your Mac.</sub>
+<sub>Drawn with the app's own color matrix. A new install starts with Option-A, if it is free on your Mac; change it, or let Suggest pick another, under Settings → Shortcuts.</sub>
 
 - **Press it twice quickly to keep the peek.** The plain display then stays until you press the shortcut once more. Nothing is saved and no exception is made.
 - **With more than one display,** Peek works on the display under the mouse pointer, no click needed. A double press keeps that display plain; move the pointer to another display and do the same there, and each one is let go on its own with a press. "All displays" under Shortcuts peeks everywhere at once.
 - **Choose what peeking turns off.** Grayscale and Extra Warmth by default; Night Shift too, if you like.
-- **Toggle Grayscale** is the second shortcut, for switching your default on and off without opening the menu. Either mouse button on the menu-bar icon can do the same, under Settings → Shortcuts; by default the left opens the menu and the right opens the session panel.
+- **Toggle Grayscale** is the second shortcut (Option-Command-G to begin with, if it is free), for switching your default on and off without opening the menu. Either mouse button on the menu-bar icon can do the same, under Settings → Shortcuts; by default the left opens the menu and the right opens the session panel.
 - **For longer than a moment**, there is **Grayscale off for** an hour, four hours, or until Night Shift next changes, and **Pause Less Pull** for 15 minutes, an hour, or until you resume. Both are in the menu.
 
 ## Every display on its own
