@@ -39,7 +39,7 @@ Keep the Mac app running, and keep it in the place it was installed. If you move
 - **Signed with a Developer ID and notarized by Apple** since 9 October 2026 (Team ID CT4CF9Z423).
 - **The extension is in the Chrome Web Store** (published 9 October 2026); the Firefox add-on is in review. It asks for access to tab addresses and for a connection to the local app.
 - **Brave, Chrome, Firefox, Safari and Opera are confirmed working** on the author's Macs. Edge is implemented but not yet tested. The Safari companion app is in every release; if you build Less Pull yourself, it is included only when Xcode is installed.
-- **Updates are checked, not installed.** Once a day the app asks GitHub whether a newer build exists and shows a dot on its icon if one is made for your macOS. Installing is still by hand, until the app is signed and notarized.
+- **Updates in one click.** Once a day the app asks GitHub whether a newer build exists and shows a dot on its icon if one is made for your macOS. **Install update** in the menu downloads it, checks it against the release's checksums, Less Pull's signature and Apple's notarization, and replaces the app; your settings and exceptions stay.
 - Less Pull uses private macOS display interfaces. A macOS update can change how they behave.
 
 The [release plan](RELEASE-PLAN.md) lists what is still open.
