@@ -146,8 +146,8 @@
 "End session" = "Sitzung beenden";
 "End the session without a call back." = "Beendet die Sitzung, ohne dich zurückzuholen.";
 "End the session." = "Beendet die Sitzung.";
-"End the timed off and show Grayscale again now." = "Beendet die Auszeit und zeigt die Graustufen jetzt wieder.";
-"End timed off" = "Auszeit beenden";
+"End the timed off and show Grayscale again now." = "Holt die Graustufen jetzt zurück.";
+"End timed off" = "Vorzeitig beenden";
 "Night Shift comes back on now." = "Night Shift ist jetzt wieder an.";
 "Night Shift comes back now if your schedule wants it on. The app you are using keeps its own Night Shift setting." = "Night Shift kommt jetzt zurück, wenn dein Zeitplan es will. Die App, mit der du arbeitest, behält ihre eigene Night-Shift-Einstellung.";
 "Night Shift stays off for now, because your schedule has it off at this hour." = "Night Shift bleibt vorerst aus, weil dein Zeitplan es um diese Zeit ausgeschaltet hat.";
@@ -458,7 +458,7 @@
 "Turn Off" = "Ausschalten";
 "Turn On" = "Einschalten";
 "Turned off while you hold the Peek shortcut." = "Ist aus, solange du den Kurzbefehl für den Farbblick gedrückt hältst.";
-"Night Shift off for a while, then back on if your schedule wants it. Grayscale stays as it is. Quitting Less Pull ends it early." = "Night Shift eine Weile aus, danach wieder an, wenn dein Zeitplan es will. Die Graustufen bleiben, wie sie sind. Beendest du Less Pull, endet die Auszeit früher.";
+"Night Shift off for a while, then back on if your schedule wants it. Grayscale stays as it is. Quitting Less Pull ends it early." = "Night Shift eine Weile aus, danach wieder an, wenn dein Zeitplan es will. Die Graustufen bleiben, wie sie sind. Beendest du Less Pull, endet das früher.";
 "Turns Night Shift on or off now. Your schedule in System Settings stays, and takes over again at its next change." = "Schaltet Night Shift jetzt ein oder aus. Dein Zeitplan in den Systemeinstellungen bleibt und übernimmt beim nächsten Wechsel wieder.";
 "Turns Night Shift on or off now. Your schedule in System Settings stays as it is." = "Schaltet Night Shift jetzt ein oder aus. Dein Zeitplan in den Systemeinstellungen bleibt, wie er ist.";
 "unavailable" = "nicht verfügbar";
@@ -620,3 +620,13 @@
 "Start a session instead" = "Lieber eine Sitzung starten";
 "No session: Less Pull calls you back once after the time you choose." = "Ohne Sitzung: Less Pull holt dich nach der gewählten Zeit einmal zurück.";
 "Just call me back" = "Nur zurückholen";
+"Session" = "Sitzung";
+"Session or call me back" = "Sitzung oder zurückholen";
+"A session is focused work with a gentle end. Call me back is no session: Less Pull calls you back once after the time you choose." = "Eine Sitzung ist konzentrierte Arbeit, die sanft ausklingt. Zurückholen ist keine Sitzung: Less Pull holt dich nach der gewählten Zeit einmal zurück.";
+"Break" = "Auszeit";
+"A break with one call back. How long?" = "Eine Auszeit, nach der Less Pull dich einmal zurückholt. Wie lange?";
+"A session is focused work with a gentle end. A break is no session: Less Pull calls you back once after the time you choose." = "Eine Sitzung ist konzentrierte Arbeit, die sanft ausklingt. Eine Auszeit ist keine Sitzung: Less Pull holt dich nach der gewählten Zeit einmal zurück.";
+"Session or break" = "Sitzung oder Auszeit";
+"Break · back in %@ min" = "Auszeit · zurück in %@ Min.";
+"Offer a break when a session ends" = "Am Ende einer Sitzung eine Auszeit anbieten";
+"Taking a break? Call me back in" = "Eine Auszeit? Hol mich zurück in";
