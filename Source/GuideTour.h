@@ -20,6 +20,11 @@
 - (BOOL)guidePeekKept;                    // the peek was kept with a double press
 - (BOOL)guideHasNotch;                    // the screen with the menu-bar circle has a notch
 - (void)guideSpotEmpty:(BOOL)empty;       // while the guide is out, the menu bar shows its empty spot (a dotted circle)
+- (BOOL)guideChangedSomething;            // the user changed a setting on the tour (the playing field)
+- (void)guideKeepChanges:(BOOL)keep;      // the answer at the end: keep what was set, or put everything back
+- (id)guideValue:(NSString *)key;         // what is real now (menuOpen, paused, warmth, frontApp, appException, site, browsers, …)
+- (NSRect)guideFrame:(NSString *)key;     // where a real thing is on screen (icon, menu, menu.warmth, panel.gray, session.notnow, …)
+- (void)guideDo:(NSString *)action with:(id)argument;  // the few things the guide does itself (pause, mark, the setups you said yes to)
 - (void)guideFinished:(BOOL)completed;    // the tour ended (completed or ended early); everything it showed is already put back
 @end
 

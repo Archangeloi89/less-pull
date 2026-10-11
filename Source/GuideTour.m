@@ -4,7 +4,6 @@
 
 // The website, once it is live: the goodbye then mentions the guide's second home there. nil: no website lines yet.
 static NSString *const GTWebsite=nil;
-static NSColor *GTEmber(double a){return [NSColor colorWithSRGBRed:.93 green:.55 blue:.28 alpha:a];}
 
 // What the guide (the cursor from lesspull.com) does on a beat. HOP, SPIN, WAVE (= WIGGLE), NOD (= SQUINT), POP (= WIDE),
 // DIZZY, PRESS (a click in the air; it never clicks for you), POKED, TILT, SHIVER and ARRIVE play once (a SPIN ends DIZZY);
@@ -37,6 +36,9 @@ static NSColor *GTInk(double a){return [NSColor colorWithSRGBRed:36/255.0 green:
 @property(copy) NSArray *ramp;                  // @[@from,@to,@seconds]: real warmth rising, the right half blushing with it
 @property(copy) NSArray<NSString *> *ask;       // answer buttons in the card; the beat waits for one (Next picks the last)
 @property(copy) void (^answered)(NSInteger index);
+@property(copy) NSArray *(^choices)(void);      // check boxes before the buttons (e.g. the installed browsers); their names
+@property(copy) void (^chosen)(NSArray<NSNumber *> *picked);  // which boxes were ticked when a button was pressed
+@property(copy) NSString *mark;                 // the menu item to choose gets the guide's amber dot (resume, grayscale, app-exception, …)
 @property(copy) NSString *afterSay;             // home: a last line in the bubble alone, once the guide is back in its spot
 @property(copy) NSString *keys;                 // keycaps beside the guide while the beat is up (e.g. ⌥A)
 @end
@@ -164,9 +166,9 @@ static NSColor *Mix(NSColor *a,NSColor *b,double k){a=[a colorUsingColorSpace:NS
 - (BOOL)acceptsFirstMouse:(NSEvent *)e {return YES;}
 - (void)drawRect:(NSRect)dirty {
  double d=self.hover||self.phase==2?22:19;NSRect c=NSMakeRect(NSMidX(self.bounds)-d/2,NSMidY(self.bounds)-d/2,d,d);NSBezierPath *o=[NSBezierPath bezierPathWithOvalInRect:c];NSColor *ink;
- if(self.phase==2){[GTEmber(1) setFill];[o fill];ink=NSColor.whiteColor;}
- else if(self.phase==1){[NSColor.windowBackgroundColor setFill];[o fill];[GTEmber(.32) setFill];[o fill];[GTEmber(.9) setStroke];o.lineWidth=1.2;[o stroke];ink=NSColor.labelColor;}
- else {[NSColor.windowBackgroundColor setFill];[o fill];[(self.hover?GTEmber(.9):NSColor.tertiaryLabelColor) setStroke];o.lineWidth=1.2;[o stroke];ink=NSColor.secondaryLabelColor;}
+ if(self.phase==2){[GTAmber(1) setFill];[o fill];ink=NSColor.whiteColor;}
+ else if(self.phase==1){[NSColor.windowBackgroundColor setFill];[o fill];[GTAmber(.32) setFill];[o fill];[GTAmber(.9) setStroke];o.lineWidth=1.2;[o stroke];ink=NSColor.labelColor;}
+ else {[NSColor.windowBackgroundColor setFill];[o fill];[(self.hover?GTAmber(.9):NSColor.tertiaryLabelColor) setStroke];o.lineWidth=1.2;[o stroke];ink=NSColor.secondaryLabelColor;}
  NSString *n=[NSString stringWithFormat:@"%ld",(long)self.index+1];NSDictionary *a=@{NSFontAttributeName:[NSFont monospacedDigitSystemFontOfSize:11 weight:self.phase==2?NSFontWeightBold:NSFontWeightMedium],NSForegroundColorAttributeName:ink};
  NSSize s=[n sizeWithAttributes:a];[n drawAtPoint:NSMakePoint(NSMidX(c)-s.width/2,NSMidY(c)-s.height/2) withAttributes:a];
 }
@@ -179,8 +181,17 @@ static NSColor *Mix(NSColor *a,NSColor *b,double k){a=[a colorUsingColorSpace:NS
 - (void)drawRect:(NSRect)dirty {
  if(self.stations.count<2)return;NSRect a=self.stations.firstObject.frame,b=self.stations.lastObject.frame,c=self.stations[MAX(0,MIN(self.current,(NSInteger)self.stations.count-1))].frame;double y=NSMidY(a);
  NSBezierPath *line=[NSBezierPath bezierPath];[line moveToPoint:NSMakePoint(NSMidX(a),y)];[line lineToPoint:NSMakePoint(NSMidX(b),y)];line.lineWidth=2;[NSColor.quaternaryLabelColor setStroke];[line stroke];
- NSBezierPath *done=[NSBezierPath bezierPath];[done moveToPoint:NSMakePoint(NSMidX(a),y)];[done lineToPoint:NSMakePoint(NSMidX(c),y)];done.lineWidth=2;[GTEmber(.9) setStroke];[done stroke];
+ NSBezierPath *done=[NSBezierPath bezierPath];[done moveToPoint:NSMakePoint(NSMidX(a),y)];[done lineToPoint:NSMakePoint(NSMidX(c),y)];done.lineWidth=2;[GTAmber(.9) setStroke];[done stroke];
 }
+@end
+// Clicking the guide while it only talks: it reacts (a small clickable patch over its arrow, never over a target).
+@interface GTPokeView : NSView
+@property(copy) void (^poked)(void);
+@end
+@implementation GTPokeView
+- (BOOL)acceptsFirstMouse:(NSEvent *)e {return YES;}
+- (void)mouseDown:(NSEvent *)e {if(self.poked)self.poked();}
+- (void)resetCursorRects {[self addCursorRect:self.bounds cursor:NSCursor.pointingHandCursor];}
 @end
 // A panel that never takes the focus: clicks on its buttons work, the app you are in stays in front.
 @interface GTPanel : NSPanel
@@ -197,12 +208,15 @@ static GTPanel *GTMakePanel(NSRect frame,NSInteger level){
 @interface GuideTour ()
 @property NSPanel *overlay;
 @property GuideView *view;
-@property GTPanel *bar,*askPanel;
+@property GTPanel *bar,*askPanel,*pokePanel;
+@property NSInteger pokes;
+@property(copy) NSArray<NSString *> *pokeLines;            // what it says when poked, in order; then the last ones in turn
 @property GTStepper *stepper;
 @property NSTextField *barLabel;
 @property NSButton *slowButton,*nextButton,*endButton;
 @property NSArray<NSString *> *stationNames;
 @property NSView *askView;
+@property NSArray<NSButton *> *askBoxes;
 @property(copy) void (^askAnswered)(NSInteger index);
 @property NSTimer *frameTimer,*waitTimer,*rampTimer;
 @property NSArray<NSArray<GTBeat *> *(^)(void)> *steps;
@@ -268,7 +282,7 @@ static GTPanel *GTMakePanel(NSRect frame,NSInteger level){
  [self hoverStation:-1];self.slowButton.state=self.slow;self.nextButton.title=self.step+1>=self.stepCount?L(@"Done"):L(@"Next");
 }
 - (void)hoverStation:(NSInteger)i {
- if(i>=0&&i!=self.step){self.barLabel.stringValue=[NSString stringWithFormat:L(@"Go to %ld · %@"),(long)i+1,self.stationNames[i]];self.barLabel.textColor=GTEmber(1);return;}
+ if(i>=0&&i!=self.step){self.barLabel.stringValue=[NSString stringWithFormat:L(@"Go to %ld · %@"),(long)i+1,self.stationNames[i]];self.barLabel.textColor=GTAmber(1);return;}
  NSInteger s=MAX(0,MIN(self.step,(NSInteger)self.stationNames.count-1));self.barLabel.stringValue=[NSString stringWithFormat:L(@"Step %ld of %ld · %@"),(long)s+1,(long)self.stationNames.count,self.stationNames[s]];self.barLabel.textColor=NSColor.secondaryLabelColor;
 }
 - (void)stationClicked:(GTStation *)sender {[self jumpTo:sender.index];}
@@ -278,15 +292,34 @@ static GTPanel *GTMakePanel(NSRect frame,NSInteger level){
 - (void)closeBar {GTPanel *p=self.bar;self.bar=nil;if(!p)return;[NSNotificationCenter.defaultCenter removeObserver:self name:NSWindowDidMoveNotification object:p];
  if(self.reduceMotion){[p orderOut:nil];return;}[NSAnimationContext runAnimationGroup:^(NSAnimationContext *c){c.duration=.2;p.animator.alphaValue=0;} completionHandler:^{[p orderOut:nil];}];}
 
-#pragma mark answers in the card
-- (void)showAsk:(NSArray<NSString *> *)labels answered:(void(^)(NSInteger))done {
- NSStackView *row=[NSStackView new];row.spacing=8;
- for(NSUInteger i=0;i<labels.count;i++){NSButton *b=[NSButton buttonWithTitle:labels[i] target:self action:@selector(askClicked:)];b.tag=i;b.bezelStyle=NSBezelStyleRounded;if(i==0)b.bezelColor=GTEmber(1);[row addArrangedSubview:b];}
- self.askView=row;self.askAnswered=done;self.asking=YES;
+#pragma mark a poke
+- (void)placePoke {
+ GuideView *v=self.view;BOOL resting=self.running&&!v.leaving&&v.alpha>.9&&self.moveDuration<=0&&!self.asking&&!self.ringBlock&&!self.waiting&&self.pokeLines.count;
+ if(!resting){[self.pokePanel orderOut:nil];return;}
+ NSRect r=NSMakeRect(v.pos.x-2,v.pos.y-30,28,32);r.origin=[self onScreen:r.origin];
+ if(!self.pokePanel){self.pokePanel=GTMakePanel(r,NSPopUpMenuWindowLevel+2);GTPokeView *pv=[[GTPokeView alloc]initWithFrame:(NSRect){NSZeroPoint,r.size}];__weak GuideTour *weak=self;pv.poked=^{[weak poked];};self.pokePanel.contentView=pv;}
+ if(!NSEqualRects(self.pokePanel.frame,r))[self.pokePanel setFrame:r display:NO];if(!self.pokePanel.visible)[self.pokePanel orderFrontRegardless];
 }
+- (void)poked {
+ if(!self.pokeLines.count)return;NSInteger n=self.pokes++,count=self.pokeLines.count;NSString *line=n<count?self.pokeLines[n]:self.pokeLines[count-1-(n-count)%MIN(2,count)];
+ [self interject:line face:GTFacePoked];
+}
+
+#pragma mark answers in the card
+- (void)showAsk:(NSArray<NSString *> *)labels choices:(NSArray<NSString *> *)choices answered:(void(^)(NSInteger))done {
+ NSStackView *row=[NSStackView new];row.spacing=8;
+ for(NSUInteger i=0;i<labels.count;i++){NSButton *b=[NSButton buttonWithTitle:labels[i] target:self action:@selector(askClicked:)];b.tag=i;b.bezelStyle=NSBezelStyleRounded;if(i==0)b.bezelColor=GTAmber(1);[row addArrangedSubview:b];}
+ NSMutableArray *boxes=[NSMutableArray new];for(NSString *c in choices){NSButton *box=[NSButton checkboxWithTitle:c target:nil action:nil];box.state=choices.count==1;[boxes addObject:box];}
+ self.askBoxes=boxes;
+ if(boxes.count){NSStackView *list=[NSStackView stackViewWithViews:boxes];list.orientation=NSUserInterfaceLayoutOrientationVertical;list.alignment=NSLayoutAttributeLeading;list.spacing=4;
+  NSStackView *all=[NSStackView stackViewWithViews:@[list,row]];all.orientation=NSUserInterfaceLayoutOrientationVertical;all.alignment=NSLayoutAttributeLeading;all.spacing=10;self.askView=all;}
+ else self.askView=row;
+ self.askAnswered=done;self.asking=YES;
+}
+- (NSArray<NSNumber *> *)tickedBoxes {NSMutableArray *out=[NSMutableArray new];[self.askBoxes enumerateObjectsUsingBlock:^(NSButton *b,NSUInteger i,BOOL *stop){if(b.state==NSControlStateValueOn)[out addObject:@(i)];}];return out;}
 - (void)askClicked:(NSButton *)sender {[self answer:sender.tag];}
-- (void)answer:(NSInteger)i {if(!self.asking)return;self.asking=NO;void (^d)(NSInteger)=self.askAnswered;self.askAnswered=nil;[self hideAsk];if(d)d(i);}
-- (void)hideAsk {self.askView=nil;self.view.askHeight=0;[self.askPanel orderOut:nil];self.askPanel.contentView=nil;}
+- (void)answer:(NSInteger)i {if(!self.asking)return;self.asking=NO;void (^d)(NSInteger)=self.askAnswered;self.askAnswered=nil;if(d)d(i);[self hideAsk];}
+- (void)hideAsk {self.askView=nil;self.askBoxes=nil;self.view.askHeight=0;[self.askPanel orderOut:nil];self.askPanel.contentView=nil;}
 - (void)placeAsk {
  if(!self.askView){[self.askPanel orderOut:nil];return;}
  NSSize as=self.askView.fittingSize;NSRect c=self.view.card;NSRect f=NSMakeRect(NSMinX(c)+16,NSMinY(c)+12,c.size.width-32,as.height);f.origin=[self onScreen:f.origin];
@@ -321,12 +354,12 @@ static GTPanel *GTMakePanel(NSRect frame,NSInteger level){
 - (void)stop {[self finish:NO];}
 - (void)finish:(BOOL)completed {
  if(!self.running)return;self.running=NO;self.generation++;
- [self runCleanup:self.step];[self hideAsk];[self.askPanel orderOut:nil];[self closeBar];
+ [self runCleanup:self.step];[self hideAsk];[self.askPanel orderOut:nil];[self.pokePanel orderOut:nil];[self closeBar];
  [self.frameTimer invalidate];[self.waitTimer invalidate];[self.rampTimer invalidate];self.view.scene=nil;[self.overlay orderOut:nil];self.overlay=nil;
  [self.host guideSpotEmpty:NO];[self.host guideLookGray:-1 warmth:-1];[self.host guideFinished:completed];
 }
 - (void)runCleanup:(NSInteger)step {if(step>=0&&step<(NSInteger)self.cleanups.count){id c=self.cleanups[step];if(c!=NSNull.null)((void(^)(void))c)();}self.avoidRect=NSZeroRect;}
-- (void)halt {[self runCleanup:self.step];self.generation++;[self.waitTimer invalidate];[self.rampTimer invalidate];self.waiting=NO;self.view.forcedDroop=NO;self.asking=NO;self.askAnswered=nil;[self hideAsk];self.ringBlock=nil;self.view.ringTarget=0;}
+- (void)halt {[self.host guideDo:@"mark" with:nil];[self runCleanup:self.step];self.generation++;[self.waitTimer invalidate];[self.rampTimer invalidate];self.waiting=NO;self.view.forcedDroop=NO;self.asking=NO;self.askAnswered=nil;[self hideAsk];self.ringBlock=nil;self.view.ringTarget=0;}
 
 #pragma mark controls (the tour bar)
 - (void)next {
@@ -372,6 +405,7 @@ static GTPanel *GTMakePanel(NSRect frame,NSInteger level){
  if(self.ringBlock&&now-self.lastRingCheck>.3){self.lastRingCheck=now;NSValue *r=self.ringBlock();v.ring=r?[self localRect:r.rectValue]:NSZeroRect;}
  v.ringAlpha+=((self.ringBlock&&!NSIsEmptyRect(v.ring)?v.ringTarget:0)-v.ringAlpha)*.15;
  if(self.askPanel.visible)self.askPanel.alphaValue=v.cardAlpha;
+ [self placePoke];
  if(!v.leaving){if(v.alpha<1)v.alpha=MIN(1,v.alpha+.08);if(v.size<1)v.size=MIN(1,v.size+.06);}
  // waiting for you: a sleepy look after a while, and a little shuffle now and then
  if(self.waiting){double w=now-self.waitStart;v.droop=w>6;if(w>4&&fmod(w,4.5)<1.0/60*1.5)v.wiggleAt=now;}else v.droop=NO;
@@ -495,7 +529,7 @@ static GTPanel *GTMakePanel(NSRect frame,NSInteger level){
  for(NSArray *l in b.later)[self after:[l[0] doubleValue]*self.pace do:l[1]];
  if(b.ramp.count==3)[self rampFrom:[b.ramp[0] doubleValue] to:[b.ramp[1] doubleValue] over:[b.ramp[2] doubleValue]];
  GuideView *v=self.view;NSValue *aim=b.pointAt?b.pointAt():nil;v.pointAt=aim?[self local:aim.pointValue]:NSZeroPoint;
- self.ringBlock=b.ring;self.lastRingCheck=0;v.ringTarget=b.ring?1:0;
+ self.ringBlock=b.ring;self.lastRingCheck=0;v.ringTarget=b.ring?1:0;[self.host guideDo:@"mark" with:b.mark];
  if(b.home){[self show:b.say scene:-1];
   [self after:[self readingTime:b.say] do:^{[self goHomeThen:^{
    [self.host guideSpotEmpty:NO];[self closeBar];  // back in its spot, the real icon again; one blink
@@ -509,7 +543,8 @@ static GTPanel *GTMakePanel(NSRect frame,NSInteger level){
  void (^advance)(void)=^{self.waiting=NO;self.ringBlock=nil;self.view.ringTarget=0;self.beatIndex++;[self playBeat];};
  // a question: answer buttons in the card; the station goes on with the answer
  if(b.ask.count){
-  void (^speak)(void)=^{[self showAsk:b.ask answered:^(NSInteger i){NSInteger pick=i<0?(NSInteger)b.ask.count-1:i;if(b.answered)b.answered(pick);[self after:.25 do:advance];}];[self show:b.say scene:b.scene];};
+  NSArray *choices=b.choices?b.choices():nil;
+  void (^speak)(void)=^{[self showAsk:b.ask choices:choices answered:^(NSInteger i){NSInteger pick=i<0?(NSInteger)b.ask.count-1:i;NSArray *ticked=i<0?@[]:[self tickedBoxes];if(b.chosen)b.chosen(ticked);if(b.answered)b.answered(pick);[self after:.25 do:advance];}];[self show:b.say scene:b.scene];};
   if(travel>0)[self after:travel*.85 do:speak];else speak();
   return;}
  void (^speak)(void)=^{[self show:b.say scene:b.scene];};
