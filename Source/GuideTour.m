@@ -300,10 +300,11 @@ static NSColor *Mix(NSColor *a,NSColor *b,double k){a=[a colorUsingColorSpace:NS
  [cleanups addObject:NSNull.null];
  // 2 home, and help when the menu bar hides it
  [steps addObject:^NSArray *{
+  __block BOOL wasHidden=NO;  // remembered, so the happy line plays once the circle is out again
   GTBeat *home=Beat(L(@"That’s where I live, up there. One click on me opens the menu."),GTFaceNone);home.to=belowIcon;home.pointAt=iconAim;home.onlyIf=iconShown;
-  GTBeat *hidden=Beat(L(@"Hm. I can’t find my own home. The menu bar is full, or the notch is in the way."),GTFaceDroop);hidden.scene=0;hidden.onlyIf=^BOOL{return !iconShown();};
+  GTBeat *hidden=Beat(L(@"Hm. I can’t find my own home. The menu bar is full, or the notch is in the way."),GTFaceDroop);hidden.scene=0;hidden.onlyIf=^BOOL{if(iconShown())return NO;wasHidden=YES;return YES;};
   GTBeat *drag=Beat(L(@"Click » in the menu bar to see what’s hidden, then hold ⌘ and drag me toward the clock. I’ll wait."),GTFaceNone);drag.scene=0;drag.onlyIf=^BOOL{return !iconShown();};drag.until=iconShown;drag.timeout=60;drag.timeoutSay=L(@"No rush. You can do it later; the menu bar keeps my place.");
-  GTBeat *found=Beat(L(@"There I am! Much better."),GTFaceSpin);found.to=belowIcon;found.pointAt=iconAim;found.onlyIf=^BOOL{return iconShown()&&!home.onlyIf();};
+  GTBeat *found=Beat(L(@"There I am! Much better."),GTFaceSpin);found.to=belowIcon;found.pointAt=iconAim;found.onlyIf=^BOOL{return wasHidden&&iconShown();};
   return @[home,hidden,drag,found];}];
  [cleanups addObject:NSNull.null];
  // 3 quiet: the scene first, then the real screen

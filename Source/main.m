@@ -2358,6 +2358,7 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
 - (NSRect)guideSettingsFrame {return self.settings.visible?self.settings.frame:NSZeroRect;}
 - (NSView *)guideScene:(NSInteger)kind {TourScene *s=[[TourScene alloc]initWithFrame:NSMakeRect(0,0,420,140)];s.kind=(TourSceneKind)MAX(0,MIN(5,kind));return s;}
 - (NSRect)guideIconFrame {
+ static double hiddenUntil=0;if([NSProcessInfo.processInfo.arguments containsObject:@"--tour-icon-hidden"]){if(hiddenUntil==0)hiddenUntil=CACurrentMediaTime()+25;if(CACurrentMediaTime()<hiddenUntil)return NSZeroRect;}  // test: the circle counts as hidden for the first 25 seconds
  NSWindow *w=self.item.button.window;if(!w||!w.isVisible||!(w.occlusionState&NSWindowOcclusionStateVisible))return NSZeroRect;
  NSRect f=w.frame;NSScreen *screen=nil;for(NSScreen *s in NSScreen.screens)if(NSContainsRect(s.frame,f))screen=s;if(!screen)return NSZeroRect;  // pushed off screen (a full menu bar, or a menu-bar organizer)
  if(@available(macOS 12.0,*)){if(screen.safeAreaInsets.top>0){NSRect right=screen.auxiliaryTopRightArea;if(!NSIsEmptyRect(right)&&!NSContainsRect(NSInsetRect(right,-2,-2),f))return NSZeroRect;}}  // under the notch
