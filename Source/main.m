@@ -2022,7 +2022,9 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  NSButton *never=[NSButton checkboxWithTitle:L(@"Don’t show this again") target:nil action:nil];never.font=[NSFont systemFontOfSize:11];never.identifier=@"thanksNever";[self helpView:never text:L(@"Hide this for good.") label:L(@"Don’t show this again")];
  NSMutableArray *links=[NSMutableArray new];for(NSButton *b in [self authorLinkButtons])if(![b.identifier isEqual:LessPullCoffee]){b.font=[NSFont systemFontOfSize:11];[links addObject:b];}
  NSButton *tell=[NSButton buttonWithTitle:L(@"Tell a friend") target:self action:@selector(shareLessPull:)];tell.bezelStyle=NSBezelStyleInline;tell.font=[NSFont systemFontOfSize:11];tell.image=[NSImage imageWithSystemSymbolName:@"square.and.arrow.up" accessibilityDescription:nil];tell.imagePosition=NSImageLeading;[self helpView:tell text:L(@"Share Less Pull: the project page and one line about it, through Messages, Mail, AirDrop or anywhere else.") label:L(@"Share Less Pull")];
- NSStackView *buttons=[self row:@[support,later,[self spacer]]];buttons.spacing=8;NSStackView *linkRow=[self row:[links arrayByAddingObjectsFromArray:@[tell,[self spacer],hide]]];linkRow.spacing=4;NSStackView *neverRow=[self row:@[[self spacer],never]];
+ // For those who already did: a warm thank-you instead of the card, and it stays away for good.
+ NSButton *given=[NSButton buttonWithTitle:L(@"I’ve already given back") target:self action:@selector(thanksGiven:)];given.bezelStyle=NSBezelStyleInline;[self helpView:given text:L(@"Hide this card for good, with thanks.") label:L(@"I’ve already given back")];
+ NSStackView *buttons=[self row:@[support,later,[self spacer]]];buttons.spacing=8;NSStackView *linkRow=[self row:[links arrayByAddingObjectsFromArray:@[tell,[self spacer],hide]]];linkRow.spacing=4;NSStackView *neverRow=[self row:@[given,[self spacer],never]];given.font=[NSFont systemFontOfSize:11];
  NSStackView *card=[self column:@[title,body,buttons,linkRow,neverRow]];card.spacing=10;card.edgeInsets=NSEdgeInsetsMake(14,14,12,14);card.wantsLayer=YES;card.layer.cornerRadius=8;card.layer.backgroundColor=[ember colorWithAlphaComponent:.1].CGColor;card.layer.borderWidth=1;card.layer.borderColor=[ember colorWithAlphaComponent:.25].CGColor;
  for(NSView *v in card.arrangedSubviews)if([v isKindOfClass:NSStackView.class])[v.widthAnchor constraintEqualToAnchor:card.widthAnchor constant:-28].active=YES;
  return card;
@@ -2032,6 +2034,18 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
 - (void)thanksSupport:(id)sender {[NSUserDefaults.standardUserDefaults setObject:[NSDate.date dateByAddingTimeInterval:90*86400] forKey:@"thanksNextDate"];[NSWorkspace.sharedWorkspace openURL:[NSURL URLWithString:LessPullCoffee]];}  // the card stays; it comes back by itself in three months at the earliest
 - (void)thanksHide:(id)sender {if([self thanksNeverTicked]){[NSUserDefaults.standardUserDefaults setBool:YES forKey:@"thanksDismissed"];[NSUserDefaults.standardUserDefaults removeObjectForKey:@"thanksNextDate"];}else if(![NSUserDefaults.standardUserDefaults objectForKey:@"thanksNextDate"]||[[NSUserDefaults.standardUserDefaults objectForKey:@"thanksNextDate"] compare:NSDate.date]==NSOrderedAscending)[NSUserDefaults.standardUserDefaults setObject:[NSDate.date dateByAddingTimeInterval:7*86400] forKey:@"thanksNextDate"];[self removeThanksCard];}
 - (void)thanksLater:(id)sender {[NSUserDefaults.standardUserDefaults setObject:[NSDate.date dateByAddingTimeInterval:30*86400] forKey:@"thanksNextDate"];[self removeThanksCard];}
+- (void)thanksGiven:(id)sender {
+ NSUserDefaults *d=NSUserDefaults.standardUserDefaults;[d setBool:YES forKey:@"thanksDismissed"];[d removeObjectForKey:@"thanksNextDate"];
+ NSStackView *card=(NSStackView *)self.thanksCard;if(!card)return;
+ for(NSView *v in card.arrangedSubviews.copy){[card removeArrangedSubview:v];[v removeFromSuperview];}
+ NSTextField *title=[NSTextField labelWithString:L(@"Thank you 🧡")];title.font=[NSFont systemFontOfSize:15 weight:NSFontWeightSemibold];
+ NSTextField *body=[NSTextField wrappingLabelWithString:L(@"Giving and regiving, Walter Russell called it: the rhythm all of life moves in. Thank you for being part of it, and for giving back.")];body.preferredMaxLayoutWidth=404;
+ NSButton *close=[NSButton buttonWithTitle:L(@"Close") target:self action:@selector(thanksClose:)];close.keyEquivalent=@"\r";
+ NSStackView *row=[self row:@[[self spacer],close]];
+ for(NSView *v in @[title,body,row])[card addArrangedSubview:v];[row.widthAnchor constraintEqualToAnchor:card.widthAnchor constant:-28].active=YES;
+ if(!NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceMotion){body.alphaValue=0;title.alphaValue=0;[NSAnimationContext runAnimationGroup:^(NSAnimationContext *c){c.duration=.6;title.animator.alphaValue=1;body.animator.alphaValue=1;} completionHandler:nil];}
+}
+- (void)thanksClose:(id)sender {[self removeThanksCard];}
 - (void)thanksNever:(id)sender {[NSUserDefaults.standardUserDefaults setBool:YES forKey:@"thanksDismissed"];[NSUserDefaults.standardUserDefaults removeObjectForKey:@"thanksNextDate"];[self removeThanksCard];}
 - (NSStackView *)aboutTab {
  NSImageView *icon=[NSImageView imageViewWithImage:NSApp.applicationIconImage];[icon.widthAnchor constraintEqualToConstant:64].active=YES;[icon.heightAnchor constraintEqualToConstant:64].active=YES;icon.accessibilityLabel=L(@"Less Pull app icon");
