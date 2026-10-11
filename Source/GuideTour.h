@@ -37,12 +37,17 @@
 @property(nonatomic,readonly) NSInteger step,stepCount;
 - (instancetype)initWithHost:(id<GuideTourHost>)host;
 - (void)start;
+- (void)startHelper:(NSString *)kind with:(id)argument;  // one thing outside the tour: @"browser" (a browser dictionary: id, name) or @"sunset"
 - (void)next;                  // continue: ends a wait for your hands, or goes on to the next station
-- (void)back;                  // the station before
+- (void)back;                  // the stop before
+- (void)lineBack;              // ←: one line back, within the stop
+- (void)arrowKey:(NSInteger)direction;  // the real ← (-1) or → (1) key, while the tour has them
 - (void)jumpTo:(NSInteger)station;
 - (void)toggleSlow;
 - (void)endEarly;              // End tour: at once
 - (void)stop;                  // ends at once and puts everything back, without a word
 - (NSString *)debugState;      // for tests: where the tip, the bubble and the ring are now (screen coordinates)
 - (void)debugPark;             // for tests: goes to its waiting spot by the tour bar with a browser line
+- (void)debugTick:(NSInteger)box;  // for tests: ticks a box in the question that is up
+- (void)debugAnswer:(NSInteger)button;  // for tests: presses an answer button of the question that is up
 @end

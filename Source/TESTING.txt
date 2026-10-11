@@ -52,7 +52,10 @@ Simulates a display reset after a fade finishes. Checks persistent grayscale, tw
                       (a jump during the knock waits until the cursor is out). Also what a user would do: "menu" opens the status menu, "menuclose"
                       closes it, "closeSettings" closes Settings, "chip" starts a 25-minute session (on the tour: the five-second sample), and for
                       checking: "log" writes where the tip, the bubble, the ring, the menu and Settings are; "park" sends the guide to its spot by
-                      the tour bar. The times run on a timer that also fires while the menu is open.
+                      the tour bar; "left" and "right" press ← and →; "tick0" ticks the first box of the question that is up, "answer0" presses its first button;
+                      "warmth" changes Extra Warmth (something to keep or put back); "helperBrowser" and "helperSunset" start
+                      the helpers that Settings starts (Chrome's setup; Sunset to sunrise). The times run on a timer that also
+                      fires while the menu is open.
 --tour-no-borrow      a hands-off copy keeps its hands off the screen during its tour too (the installed app's look stays): for tests beside real work.
 LP_TOUR_DEBUG=1       (environment) logs every bubble placement with what it keeps clear of.
 --session-start-panel opens the session panel (Session | Break) 1.5 s after launch.
