@@ -633,3 +633,9 @@
 "Exception settings" = "Einstellungen der Ausnahme";
 "All app exceptions, under Settings → Apps." = "Alle App-Ausnahmen, unter Einstellungen → Apps.";
 "All website exceptions, under Settings → Websites." = "Alle Website-Ausnahmen, unter Einstellungen → Websites.";
+"of 1 minute" = "von 1 Minute";
+"of %ld minutes" = "von %ld Minuten";
+"That was 1 minute." = "Das war 1 Minute.";
+"That was %ld minutes." = "Das waren %ld Minuten.";
+"1 minute past." = "1 Minute drüber.";
+"%ld minutes past." = "%ld Minuten drüber.";
