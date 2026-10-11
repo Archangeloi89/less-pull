@@ -8,6 +8,7 @@
 #import "Engine.h"
 #import "SwitchingPolicy.h"
 #import "NightSchedule.h"
+#import "GuideTour.h"
 #import "WarmthEngine.h"
 #import "PausePolicy.h"
 #import "ExclusionPolicy.h"
@@ -270,7 +271,7 @@ static void QuietScrolling(NSScrollView *s){
  [ramp drawInBezierPath:path angle:0];[[NSColor.labelColor colorWithAlphaComponent:.2] setStroke];path.lineWidth=.5;[path stroke];
 }
 @end
-@interface AppDelegate : NSObject<NSApplicationDelegate,NSMenuDelegate,NSTextFieldDelegate>
+@interface AppDelegate : NSObject<NSApplicationDelegate,NSMenuDelegate,NSTextFieldDelegate,GuideTourHost>
 @property NSStatusItem *item;
 @property NSMenu *statusMenu;
 @property BrowserBridge *browserBridge;
@@ -327,7 +328,7 @@ static void QuietScrolling(NSScrollView *s){
 @property NSTextField *sessionPresetsField,*callBackPresetsField;
 @property NSTextField *exclusionText;
 @property NSRunningApplication *lastExternalApp;
-@property SwitchingPolicy *policy;@property NSComboBox *nightBoostPopup;@property NSTextField *nightBoostNote;@property NSDatePicker *nightStartPicker,*nightEndPicker;@property NSStackView *ownHoursRow;@property NSDate *nightPreviewUntil;@property NSTimer *nightPreviewTimer;@property BOOL nightPreviewTurnedNightShiftOn;@property NSSegmentedControl *nightModeControl;@property NSStackView *nightPauseRow;@property NSWindow *supportWindow;@property BOOL peekKeyHeld;@property NSPopUpButton *nightHoursPopup;@property NSTextField *nightHoursNote;@property NSButton *nightLocationButton,*nightDateTimeButton;@property NSInteger lastSeenMacMode;@property NSTextField *nightModeNote;@property BOOL migrateNightShiftMode,nightModeDirty;@property NSButton *nightTryButton;
+@property SwitchingPolicy *policy;@property NSComboBox *nightBoostPopup;@property NSTextField *nightBoostNote;@property NSDatePicker *nightStartPicker,*nightEndPicker;@property NSStackView *ownHoursRow;@property NSDate *nightPreviewUntil;@property NSTimer *nightPreviewTimer;@property BOOL nightPreviewTurnedNightShiftOn;@property NSSegmentedControl *nightModeControl;@property NSStackView *nightPauseRow;@property NSWindow *supportWindow;@property GuideTour *guide;@property NSInteger tourGray;@property double tourWarmth;@property BOOL peekKeyHeld;@property NSPopUpButton *nightHoursPopup;@property NSTextField *nightHoursNote;@property NSButton *nightLocationButton,*nightDateTimeButton;@property NSInteger lastSeenMacMode;@property NSTextField *nightModeNote;@property BOOL migrateNightShiftMode,nightModeDirty;@property NSButton *nightTryButton;
 @property WarmthEngine *warmth;
 @property NSInteger selectedMode;
 @property NSSlider *warmthSlider;
@@ -1005,7 +1006,7 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
   if(!saved[@"nightBoost"]){BOOL existing=saved[@"warmth"]||saved[@"welcomeShown"]||saved[@"automatic"];NSInteger boost=13;
    if(existing){if(saved[@"automatic"]?[saved[@"automatic"] boolValue]:YES){boost=MIN(100,lround([d doubleForKey:@"warmth"]/3*100));[d setDouble:0 forKey:@"warmth"];[d setInteger:[d integerForKey:@"nightMode"] forKey:@"manualMode"];}else boost=0;}
    [d setInteger:boost forKey:@"nightBoost"];[d setBool:NO forKey:@"automatic"];[d setInteger:-1 forKey:@"overrideMode"];}}
- self.automatic=[d boolForKey:@"automatic"];self.lastSeenMacMode=-1;
+ self.automatic=[d boolForKey:@"automatic"];self.lastSeenMacMode=-1;self.tourGray=-1;self.tourWarmth=-1;
  if(![d boolForKey:@"nightScheduleMirrored"]){self.nightModeDirty=YES;[d setBool:YES forKey:@"nightScheduleMirrored"];}  // once: put the Night Shift setting into the macOS schedule
  self.selectedMode=[d integerForKey:self.automatic?@"nightMode":@"manualMode"];
  self.policy=[SwitchingPolicy new];self.policy.automatic=self.automatic;
@@ -2175,7 +2176,8 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  if(animated&&!NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceMotion){next.alphaValue=0;[NSAnimationContext runAnimationGroup:^(NSAnimationContext *ctx){ctx.duration=.5;next.animator.alphaValue=1;} completionHandler:nil];}
  if(self.settings)[self.settings makeFirstResponder:nil];
 }
-- (void)tourNext:(id)sender {self.setupOnly=NO;if(self.tourPage<[self tourLastPage])[self showTourPage:self.tourPage+1 animated:YES];}
+- (void)tourNext:(id)sender {self.setupOnly=NO;if(self.tourPage==0){[self startGuideTour];return;}  // the tour now happens on the real screen
+ if(self.tourPage<[self tourLastPage])[self showTourPage:self.tourPage+1 animated:YES];}
 - (void)setupOnly:(id)sender {self.setupOnly=YES;[self showTourPage:6 animated:YES];}
 - (void)tourBack:(id)sender {if(self.tourPage>0)[self showTourPage:self.setupOnly?0:self.tourPage-1 animated:YES];self.setupOnly=NO;}
 // Reopens the welcome and tour from the About tab: the window is rebuilt with the card in place.
@@ -2320,6 +2322,27 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
 }
 - (void)openWebsite:(id)sender {[NSWorkspace.sharedWorkspace openURL:[NSURL URLWithString:LessPullWebsite]];}
 - (void)openSupport:(id)sender {[self showSupportWindow];}
+// ---- The tour on the real Mac (GuideTour): what is real comes from here.
+- (void)startGuideTour {if(self.guide)return;self.tourGray=-1;self.tourWarmth=-1;self.guide=[[GuideTour alloc]initWithHost:self];[self.guide start];}
+- (NSRect)guideIconFrame {
+ NSWindow *w=self.item.button.window;if(!w||!w.isVisible||!(w.occlusionState&NSWindowOcclusionStateVisible))return NSZeroRect;
+ NSRect f=w.frame;NSScreen *screen=nil;for(NSScreen *s in NSScreen.screens)if(NSContainsRect(s.frame,f))screen=s;if(!screen)return NSZeroRect;  // pushed off screen (a full menu bar, or a menu-bar organizer)
+ if(@available(macOS 12.0,*)){if(screen.safeAreaInsets.top>0){NSRect right=screen.auxiliaryTopRightArea;if(!NSIsEmptyRect(right)&&!NSContainsRect(NSInsetRect(right,-2,-2),f))return NSZeroRect;}}  // under the notch
+ return f;
+}
+- (NSRect)guideStartFrame {NSRect f=self.settings.frame;if(self.tourCard&&self.tourCard.window){NSRect c=[self.tourCard convertRect:self.tourCard.bounds toView:nil];f=[self.tourCard.window convertRectToScreen:c];}return NSIsEmptyRect(f)?NSScreen.mainScreen.visibleFrame:f;}
+- (void)guideLookGray:(NSInteger)gray warmth:(double)strength {self.tourGray=gray;self.tourWarmth=strength;self.animateAppearance=YES;[self sync];}
+- (NSRect)guideShowExceptionPanel {[self openAppExceptionPanel:nil];return self.exceptionPanel.visible?self.exceptionPanel.frame:NSZeroRect;}
+- (void)guideHideExceptionPanel {[self closeExceptionPanel];}
+- (NSRect)guideShowSessionPanel {if(self.session.state!=SessionIdle)return NSZeroRect;[self showSessionPanelMode:@"start"];return self.sessionPanel.visible?self.sessionPanel.frame:NSZeroRect;}
+- (void)guideHideSessionPanel {[self closeSessionPanel];}
+- (void)guideNightPreview:(BOOL)on {if(on&&!self.nightPreviewUntil)[self tryNightBoost:nil];else if(!on&&self.nightPreviewUntil)[self endNightPreview];}
+- (NSString *)guidePeekLabel {NSDictionary *peek=[self shortcutForKey:@"peekShortcut"];return peek?[PeekShortcut labelForKeyCode:[peek[@"keyCode"] integerValue] modifiers:[peek[@"modifiers"] integerValue]]:nil;}
+- (BOOL)guidePeeking {return self.peeking||self.peekLocked||self.peekLockedDisplays.count>0;}
+- (void)guideFinished:(BOOL)completed {
+ self.guide=nil;self.tourGray=-1;self.tourWarmth=-1;self.animateAppearance=YES;[self sync];
+ if(completed&&self.tourCard){if([self tourLastPage]==6)[self showTourPage:6 animated:YES];else [self dismissWelcome:nil];}
+}
 // One door, then the choice: every way to support, each with what it suits, and the ways without money.
 - (NSImage *)qrImageFor:(NSString *)text size:(CGFloat)size {
  CIFilter *f=[CIFilter filterWithName:@"CIQRCodeGenerator"];[f setValue:[text dataUsingEncoding:NSUTF8StringEncoding] forKey:@"inputMessage"];[f setValue:@"M" forKey:@"inputCorrectionLevel"];
@@ -2529,6 +2552,7 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
  double strength=self.customWarmth?self.appWarmth/100*3:((mode==100||mode==101)?defaultWarmth:0);
  if(self.pausedUntil||self.screenLocked){effective=101;strength=0;}
  else if(self.peeking){NSDictionary *e=[self peekEffects];if([e[@"grayscale"] boolValue])effective=101;if([e[@"warmth"] boolValue])strength=0;}
+ if(self.guide&&self.tourGray>=0)effective=self.tourGray?100:101;if(self.guide&&self.tourWarmth>=0)strength=self.tourWarmth;  // the tour's passing look, never saved
  if(mode!=self.selectedMode||effective!=self.effectiveMode||strength!=self.targetStrength)self.animateAppearance=YES;
  self.targetStrength=strength;
  BOOL gray=effective==100||effective==1;
@@ -2543,6 +2567,7 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
    if([o[@"plain"] boolValue]){eff=101;str=0;}
    BOOL peekHere=(self.peeking&&(self.frontPeekDisplays?[self.frontPeekDisplays containsObject:dn]:(self.frontPeekSpansAll||!peekActiveOnly||d==self.peekDisplay)))||[self.peekLockedDisplays containsObject:dn];
    if(self.pausedUntil||(self.screenLocked&&(!CGDisplayIsBuiltin(d)||!self.lockGrayWanted))){eff=101;str=0;}else if(peekHere){NSDictionary *e=[self peekEffects];if([e[@"grayscale"] boolValue])eff=101;if([e[@"warmth"] boolValue])str=0;}
+   if(self.guide&&self.tourGray>=0)eff=self.tourGray?100:101;if(self.guide&&self.tourWarmth>=0)str=self.tourWarmth;
    BOOL grayHere=eff==100||eff==1;NSArray *last=[self.warmth stateForDisplay:d];
    if(last&&([last[0] doubleValue]!=str||[last[1] boolValue]!=grayHere)&&!self.quitting){__weak AppDelegate *weak=self;[self.warmth transitionStrength:str grayscale:grayHere display:d reduceMotion:reduce duration:self.fade completion:^{[weak.warmth applyStrength:str grayscale:grayHere display:d];}];}
    else if(!last||![self.warmth transitioning]){if(![self.warmth applyStrength:str grayscale:grayHere display:d])ok=NO;}
