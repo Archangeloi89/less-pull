@@ -2182,9 +2182,14 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
 - (void)tourBack:(id)sender {if(self.tourPage>0)[self showTourPage:self.setupOnly?0:self.tourPage-1 animated:YES];self.setupOnly=NO;}
 // Reopens the welcome and tour from the About tab: the window is rebuilt with the card in place.
 // Where the icon is: the welcome opens under it, and the icon fades in and out a few times.
+// The first welcome opens right under the menu-bar circle (where "right above this window" is true), in place before it
+// shows, so nothing jumps. A hidden circle (full menu bar, notch) leaves the window where it is.
+- (BOOL)moveSettingsUnderIcon {
+ NSRect icon=[self guideIconFrame];if(NSIsEmptyRect(icon)||!self.settings)return NO;NSScreen *screen=self.item.button.window.screen?:NSScreen.mainScreen;NSRect f=self.settings.frame;
+ f.origin.x=MIN(NSMaxX(screen.visibleFrame)-f.size.width-8,MAX(screen.visibleFrame.origin.x+8,NSMidX(icon)-f.size.width+60));f.origin.y=icon.origin.y-f.size.height-10;((SettingsWindow *)self.settings).preferredTop=NSMaxY(f);[self.settings setFrame:f display:YES];return YES;
+}
 - (void)placeSettingsUnderIcon {
- NSWindow *bar=self.item.button.window;if(!bar||!self.settings)return;NSRect icon=bar.frame;NSScreen *screen=bar.screen?:NSScreen.mainScreen;NSRect f=self.settings.frame;
- f.origin.x=MIN(NSMaxX(screen.visibleFrame)-f.size.width-8,MAX(screen.visibleFrame.origin.x+8,NSMidX(icon)-f.size.width+60));f.origin.y=icon.origin.y-f.size.height-10;((SettingsWindow *)self.settings).preferredTop=NSMaxY(f);[self.settings setFrame:f display:YES];
+ if(![self moveSettingsUnderIcon])return;
  NSView *button=self.item.button;if(NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceMotion)return;
  for(int k=0;k<4;k++){dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)((0.6+k*1.2)*NSEC_PER_SEC)),dispatch_get_main_queue(),^{[NSAnimationContext runAnimationGroup:^(NSAnimationContext *c){c.duration=.5;button.animator.alphaValue=.25;} completionHandler:^{[NSAnimationContext runAnimationGroup:^(NSAnimationContext *c){c.duration=.6;button.animator.alphaValue=1;} completionHandler:nil];}];});}
 }
@@ -2233,8 +2238,12 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
   [NSNotificationCenter.defaultCenter addObserverForName:NSWindowDidMoveNotification object:self.settings queue:nil usingBlock:^(NSNotification *n){SettingsWindow *w=(SettingsWindow *)self.settings;if(w.adjusting||!w.visible||fabs(NSMaxY(w.frame)-w.lastSetTop)<0.5)return;w.preferredTop=NSMaxY(w.frame);if(!self.welcomeWanted)[NSUserDefaults.standardUserDefaults setObject:NSStringFromPoint(NSMakePoint(w.frame.origin.x,NSMaxY(w.frame))) forKey:@"settingsTopLeft"];}];
   if(self.keepSettingsFrame){NSRect f=self.settings.frame;f.origin.x=self.keptSettingsFrame.origin.x;f.origin.y=NSMaxY(self.keptSettingsFrame)-f.size.height;((SettingsWindow *)self.settings).preferredTop=NSMaxY(self.keptSettingsFrame);[self.settings setFrame:[self.settings constrainFrameRect:f toScreen:self.settings.screen?:NSScreen.mainScreen] display:NO];self.keepSettingsFrame=NO;};
  }
- self.loginButton.state=SMAppService.mainAppService.status==SMAppServiceStatusEnabled;[self rebuildExclusionsList];[self sync];dispatch_async(dispatch_get_main_queue(),^{[self fixSettingsOverflow];});[NSApp activateIgnoringOtherApps:YES];[self.settings makeKeyAndOrderFront:nil];if([self.settings.firstResponder isKindOfClass:NSTextView.class]||[self.settings.firstResponder isKindOfClass:NSDatePicker.class])[self.settings makeFirstResponder:nil];  // the night hours must not open selected
-if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.welcomePlaced=YES;if(first){dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)(0.45*NSEC_PER_SEC)),dispatch_get_main_queue(),^{[self placeSettingsUnderIcon];});}}
+ self.loginButton.state=SMAppService.mainAppService.status==SMAppServiceStatusEnabled;[self rebuildExclusionsList];[self sync];dispatch_async(dispatch_get_main_queue(),^{[self fixSettingsOverflow];});
+ BOOL firstWelcome=self.welcomeWanted&&self.welcomeCard&&!self.welcomePlaced,placedNow=firstWelcome&&[self moveSettingsUnderIcon];
+ if(firstWelcome&&!placedNow){self.welcomePlaced=YES;  // the circle is not in place yet: show the welcome a moment later, already where it belongs
+  dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)(0.45*NSEC_PER_SEC)),dispatch_get_main_queue(),^{[self placeSettingsUnderIcon];[NSApp activateIgnoringOtherApps:YES];[self.settings makeKeyAndOrderFront:nil];});return;}
+ [NSApp activateIgnoringOtherApps:YES];[self.settings makeKeyAndOrderFront:nil];if([self.settings.firstResponder isKindOfClass:NSTextView.class]||[self.settings.firstResponder isKindOfClass:NSDatePicker.class])[self.settings makeFirstResponder:nil];  // the night hours must not open selected
+if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.welcomePlaced=YES;if(first){dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)(0.45*NSEC_PER_SEC)),dispatch_get_main_queue(),^{[self placeSettingsUnderIcon];});}}  // already in place: this only adds the circle's gentle pulse
 }
 // Before anything is installed: what the extension can see, in plain words.
 - (BOOL)confirmExtensionData {
