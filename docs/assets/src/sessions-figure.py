@@ -30,7 +30,7 @@ def icon(x, y, ring, over=False, away=False, label='', scale=2.6, alpha=255):
         d.text((cx + r + 8 * scale / 2.6, cy - 12 * scale / 2.6 - 4), label, font=font(int(13 * scale)), fill=col)
 y0 = 150; xs = [120, 340, 560, 790, 1030]
 states = [(None, False, False, '', 'At rest'), (0.0, False, False, '25', 'A 25-minute session starts'), (0.55, False, False, '11', 'The ring fills as it runs'),
-          (1.0, True, False, '−4', 'Past the end: the count breathes'), (0.4, False, True, '9', 'Away, until the call back')]
+          (1.0, True, False, '−4', 'Past the end: the count breathes'), (0.4, False, True, '9', 'A break, until the call back')]
 for (ring, over, away, label, cap), x in zip(states, xs):
     icon(x, y0, ring, over, away, label)
     f = font(17); w = d.textlength(cap, font=f); d.text((x - w / 2 + (18 if label else 0), y0 + 44), cap, font=f, fill=LIGHT)
@@ -44,22 +44,21 @@ def chip(x, y, w, t, strong=False):
 def center(x, y, t, f, fill): d.text((x - d.textlength(t, font=f) / 2, y), t, font=f, fill=fill)
 px, py, pw, ph = 120, 260, 440, 300
 panel(px, py, pw, ph); d = ImageDraw.Draw(im)
-center(px + pw / 2, py + 24, 'A session', font(26), INK); center(px + pw / 2, py + 62, 'Focused work with a gentle end. How long?', font(15), DIM)
+d.rounded_rectangle((px + 95, py + 20, px + 345, py + 52), 10, fill=(70, 72, 80)); d.rounded_rectangle((px + 98, py + 23, px + 220, py + 49), 8, fill=(112, 114, 122))
+center(px + 159, py + 26, 'Session', font(16), INK); center(px + 282, py + 26, 'Break', font(16), LIGHT); center(px + pw / 2, py + 62, 'Focused work with a gentle end. How long?', font(15), DIM)
 for k, t in enumerate(['25 min', '45 min', '60 min', '90 min']): chip(px + 24 + k * 100, py + 100, 90, t)
 d.text((px + 24, py + 152), 'or', font=font(14), fill=(110, 112, 120)); d.rounded_rectangle((px + 52, py + 160, px + 330, py + 164), 2, fill=(96, 98, 106)); d.rounded_rectangle((px + 52, py + 160, px + 170, py + 164), 2, fill=LIGHT); d.ellipse((px + 162, py + 153, px + 180, py + 171), fill=INK)
 d.text((px + 346, py + 150), '35 min', font=font(16, True), fill=INK)
 d.rectangle((px + 24, py + 196, px + 38, py + 210), outline=LIGHT, width=2); d.text((px + 46, py + 194), 'Add to presets', font=font(14), fill=LIGHT); chip(px + 300, py + 188, 116, 'Start 35 min')
 d.text((px + 300, py + 246), 'Not now', font=font(14), fill=(110, 112, 120)); d.ellipse((px + 386, py + 244, px + 404, py + 262), outline=(110, 112, 120), width=2)
-center(px + pw / 2, py + ph + 14, 'Start a session… in the menu: the panel grows out of the icon', font(15), DIM)
+center(px + pw / 2, py + ph + 14, 'Session or break… in the menu: the panel grows out of the icon', font(15), DIM)
 qx, qy, qw, qh = 720, 260, 440, 300
 panel(qx, qy, qw, qh); d = ImageDraw.Draw(im)
 center(qx + qw / 2, qy + 18, '−4:12', font(34), ORANGE); center(qx + qw / 2, qy + 62, 'That was 25 minutes.', font(15), DIM)
-center(qx + qw / 2, qy + 92, 'Leaving? Call me back in', font(14), DIM)
-for k, t in enumerate(['5 min', '9 min', '13 min', '33 min']): chip(qx + 24 + k * 100, qy + 118, 90, t)
-d.text((qx + 24, qy + 168), 'or', font=font(14), fill=(110, 112, 120)); d.rounded_rectangle((qx + 52, qy + 176, qx + 330, qy + 180), 2, fill=(96, 98, 106)); d.rounded_rectangle((qx + 52, qy + 176, qx + 110, qy + 180), 2, fill=LIGHT); d.ellipse((qx + 102, qy + 169, qx + 120, qy + 187), fill=INK)
-d.text((qx + 346, qy + 166), '7 min', font=font(16, True), fill=INK)
-chip(qx + 24, qy + 212, 110, 'Keep going'); d.text((qx + 280, qy + 218), 'Leave quietly', font=font(14), fill=(110, 112, 120)); d.ellipse((qx + 386, qy + 216, qx + 404, qy + 234), outline=(110, 112, 120), width=2)
-center(qx + qw / 2, qy + qh + 14, 'After the end: a click on the icon, and the way back is one tap', font(15), DIM)
+center(qx + qw / 2, qy + 104, 'Taking a break? Call me back in', font(14), DIM)
+for k, t in enumerate(['5 min', '9 min', '13 min', '33 min']): chip(qx + 24 + k * 100, qy + 134, 90, t)
+chip(qx + 24, qy + 188, 110, 'Keep going'); chip(qx + 230, qy + 188, 130, 'Leave quietly'); d.ellipse((qx + 386, qy + 194, qx + 404, qy + 212), outline=(110, 112, 120), width=2)
+center(qx + qw / 2, qy + qh + 14, 'After the end: a break is one tap, or keep going', font(15), DIM)
 # the glow, hinted between the panels
 gx, gy = 640, 410
 glow = Image.new('RGBA', im.size, (0, 0, 0, 0)); ImageDraw.Draw(glow).ellipse((gx - 90, gy - 60, gx + 90, gy + 60), fill=(255, 190, 120, 70)); im = Image.alpha_composite(im, glow.filter(ImageFilter.GaussianBlur(30)))

@@ -1,7 +1,5 @@
 /* Less Pull 日本語。キーは英語の原文。用語: グレイスケール (Grayscale)、暖かさ (Extra Warmth)、Night Shift、カラーでひと目 (Peek)、セッション、個別設定 (exception)、ショートカット、メニューバー、ディスプレイ、フィルターなし (plain display)。実験的: 丁寧に書かれていますが、まだネイティブの確認を受けていません。 */
 
-"   Off" = "   オフ";
-"   Use default" = "   標準のまま";
 " (main)" = "（メイン）";
 " and " = "と";
 " Suggest picks %@, which no macOS shortcut uses." = " 「候補」は、macOS のどのショートカットとも重ならない %@ を選びます。";
@@ -31,8 +29,6 @@
 "%@: what it shows" = "%@: 表示内容";
 "%@\n%@\nClick for Grayscale, Extra Warmth and Night Shift." = "%@\n%@\nクリックでグレイスケール、暖かさ、Night Shift。";
 "%ld min" = "%ld 分";
-"%ld minute%@" = "%ld 分%@";
-"%ld minute%@ past." = "終了から %ld 分%@。";
 "%ld minutes" = "%ld 分";
 "%ld minutes. Right-click to remove it from the presets." = "%ld 分。右クリックで候補から外します。";
 "%ld of 5" = "%ld / 5";
@@ -50,7 +46,7 @@
 "A peek, when you need it" = "必要なときだけ、カラーでひと目";
 "A quieter glow and sound while you stay past the end, until you leave or end the session." = "終了時刻を過ぎて続けている間、離れるかセッションを終えるまで、控えめな光と音でお知らせします。";
 "A session" = "セッション";
-"A session is a stretch of focused work with a gentle end. Start one from the menu. The icon shows the minutes left; at the end comes a soft glow and a calm sound, and the count goes on so you can finish your thought. When you leave, Less Pull can call you back once." = "セッションは、やわらかく終わる集中時間です。メニューから始めます。アイコンに残り分数が出て、終わりにはやわらかな光と静かな音が訪れます。そのあとも数え続けるので、考えを最後までまとめられます。離れたときは、Less Pull が一度だけ呼び戻せます。";
+"A session is a stretch of focused work with a gentle end. Start one from the menu. The icon shows the minutes left; at the end comes a soft glow and a calm sound, and the count goes on so you can finish your thought. Need a break? Less Pull calls you back once." = "セッションは、やわらかく終わる集中時間です。メニューから始めます。アイコンに残り分数が出て、終わりにはやわらかな光と静かな音が訪れます。そのあとも数え続けるので、考えを最後までまとめられます。休憩するときは、Less Pull が一度だけ呼び戻します。";
 "A session, with a gentle end" = "やわらかく終わるセッション";
 "A session. How long?" = "セッション。何分にしますか?";
 "A short guide to Less Pull." = "Less Pull の短い案内。";
@@ -77,8 +73,6 @@
 "Pointer still in color on one display? macOS draws the arrow on top there. Make the pointer one notch larger and it turns quiet too." = "ひとつのディスプレイでポインタだけカラーのまま? そこでは macOS が矢印を上に描いています。ポインタを一段大きくすると、矢印も落ち着きます。";
 "Ask GitHub now whether a newer version exists." = "新しいバージョンがあるか、今 GitHub に確認します。";
 "At the end" = "終了時";
-"Away · back in %@ min" = "離席中 · %@ 分後に戻る";
-"away, back in" = "離席中、戻るまで";
 "Back" = "戻る";
 "Browser Extension" = "ブラウザ拡張機能";
 "Browser Extension (Firefox)" = "ブラウザ拡張機能（Firefox）";
@@ -107,7 +101,6 @@
 "Click the circle in the menu bar. Grayscale takes the color out of everything. Warmth is the second step, and not decoration: from amber to red it takes the blue out of the light, makes the screen quieter still, and puts you back in charge of what light reaches your eyes — and through them, your mind." = "メニューバーの丸をクリック。グレイスケールはすべてから色を抜きます。暖かさは二つ目の一歩で、飾りではありません。琥珀色から赤まで、光から青を取り除き、画面をいっそう静かにして、どんな光が目に届くか、そして目を通して心に届くかを、あなたの手に戻します。";
 "Click, then press the keys you want. Hold them to see the plain display; let go to return." = "クリックして、使いたいキーを押します。押している間はフィルターなしの画面になり、離すと戻ります。";
 "Click, then press the keys you want. Press them anywhere to turn Grayscale on or off." = "クリックして、使いたいキーを押します。どこで押しても、グレイスケールをオン / オフできます。";
-"Clicking the menu-bar icon" = "メニューバーのアイコンをクリック";
 "Close" = "閉じる";
 "Close the tour." = "ツアーを閉じます。";
 "Color" = "カラー";
@@ -132,8 +125,6 @@
 "Default Extra Warmth" = "標準の暖かさ";
 "Default Grayscale" = "標準のグレイスケール";
 "Default keeps what the site inherits." = "「標準」では、サイトが引き継ぐ設定のままです。";
-"Default Night Shift: Off" = "標準の Night Shift: オフ";
-"Default Night Shift: On" = "標準の Night Shift: オン";
 "Diagnostics" = "診断情報";
 "Diagnostics shows technical details you can include when asking for help. Nothing is sent anywhere." = "診断情報には、問い合わせに添えられる技術的な詳細が表示されます。どこにも送信されません。";
 "Diagnostics…" = "診断情報…";
@@ -141,7 +132,6 @@
 "Display options show up by themselves when a second display is connected. Tick this to see them with one display too." = "ディスプレイの項目は、2 台目をつなぐと自動で表示されます。1 台でも表示したいときにチェックします。";
 "Displays" = "ディスプレイ";
 "Done" = "完了";
-"Don’t show again" = "今後は表示しない";
 "Don’t show explanations" = "説明を隠す";
 "Don’t show this again" = "今後は表示しない";
 "Each display can follow what is on it: the app you are using sets its own display, and every other display follows the app on top there. Peek has its own choice under “Shortcuts”." = "ディスプレイはそれぞれ、映っているものに従えます。使っているアプリが自分のディスプレイを決め、ほかのディスプレイはそこで一番上にあるアプリに従います。「ひと目」の対象は「ショートカット」で別に選べます。";
@@ -155,10 +145,7 @@
 "Night Shift comes back now if your schedule wants it on. The app you are using keeps its own Night Shift setting." = "スケジュールがオンを望めば、Night Shift が今戻ります。使っているアプリには、その Night Shift の設定がそのまま残ります。";
 "Night Shift stays off for now, because your schedule has it off at this hour." = "この時間はスケジュールがオフなので、Night Shift はしばらくオフのままです。";
 "English and German are read line by line. A language marked experimental is written with care but not yet checked by a native speaker. If something sounds off, “Report a Problem…” under “About” reaches me." = "英語とドイツ語は一行ずつ確認済みです。「実験的」と付いた言語は丁寧に書かれていますが、まだネイティブの確認を受けていません。おかしなところがあれば、「情報」タブの「報告…」がわたしに届きます。";
-"Everything else stays on this Mac: no account, no analytics, no servers. The browser extension talks only to the app." = "それ以外はすべてこの Mac の中にとどまります。アカウントも、分析も、サーバもありません。ブラウザ拡張機能はアプリとだけ通信します。";
 "Exact page" = "このページのみ";
-"Exception for %@" = "%@ の個別設定";
-"Exception for Photos ›" = "「写真」の個別設定 ›";
 "Exceptions for apps" = "アプリの個別設定";
 "Exceptions for websites" = "ウェブサイトの個別設定";
 "Extension connected in %@." = "%@ で拡張機能が接続されました。";
@@ -214,7 +201,6 @@
 "How loud the session sounds are. Let go to hear it." = "セッションの音の大きさ。離すと試聴できます。";
 "Night Shift turned off for a while stays off, even for an app that turns it on. Grayscale, warmth and Night Shift all off show the plain display." = "Night Shift をしばらくオフにしている間は、オンにするアプリでもオフのままです。グレイスケール、暖かさ、Night Shift がすべてオフなら、フィルターなしの画面になります。";
 "I’m back" = "戻りました";
-"in color" = "カラー";
 "Turn Grayscale off for an hour, four hours, or until Night Shift changes next, from the menu or in Settings. It comes back by itself." = "メニューか設定で、1 時間、4 時間、または Night Shift が次に切り替わるまでカラーに戻せます。グレーは自動で戻ります。";
 "Install %@ first; this list notices it by itself. Then come back to Set up…" = "まず %@ をインストールしてください。この一覧が自動で気づきます。そのあと「設定…」に戻ってください。";
 "Install Browser Extension" = "ブラウザ拡張機能をインストール";
@@ -236,7 +222,6 @@
 "Leave quietly" = "このまま";
 "Leaving now." = "離れます。";
 "Leaving now…" = "離れます…";
-"Leaving? Call me back in" = "離れますか? 呼び戻すまで";
 "Left-clicking the menu-bar icon" = "アイコンを左クリック";
 "Less" = "たたむ";
 "Less Pull" = "Less Pull";
@@ -254,15 +239,12 @@
 "Licenses" = "ライセンス";
 "Login setting needs attention" = "ログインの設定を確認してください";
 "Looks again for installed browsers. The list also checks by itself every few seconds while this window is open." = "インストール済みのブラウザをもう一度探します。このウインドウが開いている間は、数秒ごとに自動でも確認します。";
-"Minutes, separated by commas. Offered when you leave a session; Less Pull calls you back once." = "分数をコンマで区切ります。セッションを離れるときに提示され、Less Pull が一度だけ呼び戻します。";
-"Minutes, separated by commas. They appear under “Start a session…” in the menu." = "分数をコンマで区切ります。メニューの「セッションを始める」の下に表示されます。";
 "More" = "詳細";
 "More in Settings…" = "その他は設定で…";
 "Natural Colors" = "自然な色";
 "news.example" = "news.example";
 "Next" = "次へ";
 "Night Shift" = "Night Shift";
-"Night Shift  ›" = "Night Shift  ›";
 "Night Shift %@" = "Night Shift %@";
 "Night Shift %@ for %@ · usually %@" = "Night Shift %@ · %@ · 通常は %@";
 "Night Shift cannot be read right now; your choice is kept. " = "Night Shift を今は読み取れません。選択は保持されます。";
@@ -273,8 +255,6 @@
 "Night Shift off until %@" = "Night Shift は %@ までオフ";
 "Night Shift on" = "Night Shift オン";
 "Night Shift unavailable" = "Night Shift は使えません";
-"Night Shift: Off" = "Night Shift: オフ";
-"Night Shift: On" = "Night Shift: オン";
 "No account, no analytics, nothing leaves your Mac. The website in front is known to the app only for as long as it is in front, then forgotten: never sent anywhere, never written to disk. And because Less Pull changes the display, not the picture, screenshots, recordings and screen sharing keep their normal colors." = "アカウントも分析もなく、何もこの Mac から出ていきません。手前のウェブサイトは、手前にある間だけアプリが知っていて、そのあとは忘れます。どこにも送らず、ディスクにも書きません。そして Less Pull が変えるのは画像ではなくディスプレイなので、スクリーンショット、録画、画面共有は通常の色のままです。";
 "no disk" = "ディスクなし";
 "No exceptions yet. Add an app and choose how it should look." = "個別設定はまだありません。アプリを追加して、見え方を選びます。";
@@ -286,7 +266,6 @@
 "Not now" = "今はしない";
 "Not set up yet" = "未設定";
 "Not today" = "今日はしない";
-"of %@" = "/ %@";
 "Off" = "オフ";
 "off" = "オフ";
 "Off for 1 hour" = "1 時間オフ";
@@ -295,8 +274,6 @@
 "Off until morning · %@" = "朝までオフ · %@";
 "Off until Night Shift changes" = "Night Shift が切り替わるまでオフ";
 "Off: when the session ends, the panel offers only Keep going and Leave quietly." = "オフ: セッションが終わると、パネルには「続ける」と「このまま」だけが出ます。";
-"Offer a call back when I leave" = "離れるときに呼び戻しを提案";
-"Offered when you choose “Leaving now…”. Less Pull calls you back once, then the session is over." = "「離れます」を選んだときに提示されます。Less Pull が一度だけ呼び戻し、そのあとセッションは終わります。";
 "OK" = "OK";
 "On" = "オン";
 "on" = "オン";
@@ -306,7 +283,6 @@
 "On: warmth comes with Night Shift in the evening and leaves with it in the morning. Off: warmth stays all day." = "オン: 暖かさは夕方に Night Shift とともに訪れ、朝に一緒に去ります。オフ: 暖かさは一日中そのままです。";
 "Once a day, Less Pull asks GitHub whether a newer build exists for your macOS. When one is ready, the icon shows a small dot and the menu offers “Install update”. Nothing about you is sent. You can turn this off under Settings → About." = "1 日 1 回、お使いの macOS 向けの新しいビルドがあるか、Less Pull が GitHub に問い合わせます。用意できるとアイコンに小さな点が付き、メニューに「アップデートをインストール」が出ます。あなたに関する情報は送られません。設定 → 情報 でオフにできます。";
 "Once a day, Less Pull asks GitHub whether a newer build exists. Nothing about you is sent." = "Less Pull は 1 日 1 回、新しいビルドがあるか GitHub に問い合わせます。あなたに関する情報は送られません。";
-"Once a day, Less Pull asks GitHub whether a newer build exists for your macOS version. Nothing about you is sent, and you can turn this off." = "1 日 1 回、お使いの macOS 向けの新しいビルドがあるか、Less Pull が GitHub に問い合わせます。あなたに関する情報は送られず、オフにもできます。";
 "One display is connected. With more, each one gets its own choice here." = "ディスプレイは 1 台接続されています。2 台以上になると、それぞれの項目がここに出ます。";
 "Open a new GitHub issue with the technical details filled in." = "技術的な詳細を記入済みの GitHub Issue を新しく開きます。";
 "Open all Less Pull settings, exceptions and help." = "Less Pull のすべての設定、個別設定、ヘルプを開きます。";
@@ -421,8 +397,7 @@
 "Something not working?" = "うまく動きませんか?";
 "Sound" = "音";
 "Start %ld min" = "%ld 分で始める";
-"Start a session from the menu: a stretch of focused work with a gentle end. The icon shows the minutes left. At the end comes a warm glow and a soft gong, nothing to click away, and the count goes on so you can see how far you stretch. When you leave, it can call you back once." = "メニューからセッションを始めます。やわらかく終わる集中時間です。アイコンに残り分数が出ます。終わりには暖かい光とやわらかな銅鑼の音。閉じるものは何もなく、そのあとも数え続けるので、どれだけ延びたかが分かります。離れたときは、一度だけ呼び戻せます。";
-"Start a session…" = "セッションを始める…";
+"Start a session from the menu: a stretch of focused work with a gentle end. The icon shows the minutes left. At the end comes a warm glow and a soft gong, nothing to click away, and the count goes on so you can see how far you stretch. Need a break? Less Pull calls you back once." = "メニューからセッションを始めます。やわらかく終わる集中時間です。アイコンに残り分数が出ます。終わりには暖かい光とやわらかな銅鑼の音。閉じるものは何もなく、そのあとも数え続けるので、どれだけ延びたかが分かります。休憩するときは、Less Pull が一度だけ呼び戻します。";
 "Stop quietly" = "静かに終える";
 "Strokes: three gong strokes at the end, two rising notes for the call back. Chords: each as one soft chord. Both are tuned to 432 Hz and the solfeggio tones." = "打音: 終わりに銅鑼を 3 回、呼び戻しに上がる 2 音。和音: それぞれをやわらかな和音 1 つで。どちらも 432 Hz とソルフェジオの音に合わせています。";
 "Strokes" = "打音";
@@ -438,8 +413,6 @@
 "Technical details for troubleshooting." = "トラブルシューティング用の技術的な詳細。";
 "Tell a friend" = "友だちに教える";
 "This shortcut could not be set; another app may be using it. Click to choose another." = "このショートカットは設定できませんでした。別のアプリが使っているかもしれません。クリックして別のものを選びます。";
-"That was %@." = "%@ でした。";
-"That was %ld minute%@." = "%ld 分%@でした。";
 "That was 25 minutes." = "25 分でした。";
 "That was 30 minutes." = "30 分でした。";
 "The display change could not be confirmed" = "ディスプレイの変更を確認できませんでした";
@@ -455,7 +428,6 @@
 "The previous page." = "前のページ。";
 "The Safari extension is not in this build" = "このビルドには Safari 拡張機能が含まれていません";
 "The screen, quieter" = "画面を、静かに";
-"the screenshot," = "画面の写真、";
 "The short tour from the first launch, again." = "初回起動時の短いツアーを、もう一度。";
 "The thank-you card with the ways to support Less Pull." = "Less Pull を支える方法をまとめた感謝のカード。";
 "The Toggle Grayscale shortcut" = "グレイスケール切り替えのショートカット";
@@ -477,8 +449,6 @@
 "Turn Grayscale off for…" = "しばらくカラーに…";
 "Turn Night Shift back on" = "Night Shift をオンに戻す";
 "Turn Night Shift off for…" = "Night Shift をしばらくオフ…";
-"Turn Off" = "オフにする";
-"Turn On" = "オンにする";
 "Turned off while you hold the Peek shortcut." = "「ひと目」のショートカットを押している間、オフになります。";
 "Night Shift off for a while, then back on if your schedule wants it. Grayscale stays as it is. Quitting Less Pull ends it early." = "Night Shift をしばらくオフにし、スケジュールが望めばまたオンに戻します。グレイスケールはそのままです。Less Pull を終了すると早めに終わります。";
 "Turns Night Shift on or off now. Your schedule in System Settings stays, and takes over again at its next change." = "Night Shift を今すぐオン / オフにします。システム設定のスケジュールはそのままで、次の切り替えからまた引き継ぎます。";
@@ -602,3 +572,36 @@
 "Default Night Shift" = "標準の Night Shift";
 "Night Shift off for" = "Night Shift をオフにする";
 "Night Shift off for  ›" = "Night Shift をオフにする  ›";
+"Pausing" = "一時停止";
+"Quitting" = "終了";
+"Updates" = "アップデート";
+"Pointer still in color" = "ポインタがカラーのまま";
+"On some displays, macOS draws the arrow pointer on top of the picture, so Grayscale and warmth miss it. Make the pointer one notch larger in System Settings → Accessibility → Display → Pointer size, and it turns quiet too. “Pointer Size…” in the Displays section of the General tab opens this setting." = "一部のディスプレイでは、macOS がポインタを画像の上に描くため、グレイスケールや暖かさが届きません。システム設定 → アクセシビリティ → ディスプレイ → ポインタのサイズ で一段大きくすると、ポインタも落ち着きます。「一般」タブのディスプレイ欄にある「ポインタのサイズ…」から、この設定を開けます。";
+"Guide" = "ガイド";
+"Support" = "支援";
+"Automatically" = "自動";
+"Once a day, Less Pull asks GitHub whether a newer build exists for your macOS version. That is its only connection, and nothing about you is sent." = "1 日 1 回、お使いの macOS 向けの新しいビルドがあるか、Less Pull が GitHub に問い合わせます。外部とのつながりはこれだけで、あなたに関する情報は送られません。";
+"Session" = "セッション";
+"Break" = "休憩";
+"A break with one call back. How long?" = "一度だけ呼び戻す休憩です。何分？";
+"A session is focused work with a gentle end. A break is no session: Less Pull calls you back once after the time you choose." = "セッションは、やわらかく終わる集中時間です。休憩はセッションではありません。選んだ時間が過ぎたら、Less Pull が一度だけ呼び戻します。";
+"Session or break" = "セッションか休憩";
+"Session or break…" = "セッションか休憩…";
+"Break · back in %@ min" = "休憩 · 戻るまで %@ 分";
+"on a break, back in" = "休憩中、戻るまで";
+"Offer a break when a session ends" = "セッションの終わりに休憩を提案";
+"Taking a break? Call me back in" = "休憩しますか？呼び戻すまで";
+"Exception settings" = "個別設定の管理";
+"All app exceptions, under Settings → Apps." = "アプリの個別設定はすべて 設定 → アプリ にあります。";
+"All website exceptions, under Settings → Websites." = "ウェブサイトの個別設定はすべて 設定 → ウェブサイト にあります。";
+"of 1 minute" = "1 分のうち";
+"of %ld minutes" = "%ld 分のうち";
+"That was 1 minute." = "1 分でした。";
+"That was %ld minutes." = "%ld 分でした。";
+"1 minute past." = "1 分超過。";
+"%ld minutes past." = "%ld 分超過。";
+"Changes apply right away." = "変更はすぐに反映されます。";
+"the screenshot, in color" = "画面の写真はカラー";
+"Minutes, separated by commas. They appear when you start a session." = "分数をコンマで区切ります。セッションを始めるときに表示されます。";
+"Minutes, separated by commas. Offered for a break and when a session ends." = "分数をコンマで区切ります。休憩のときと、セッションの終わりに提示されます。";
+"Offered for a break and when a session ends. Less Pull calls you back once." = "休憩のときと、セッションの終わりに提示されます。Less Pull が一度だけ呼び戻します。";

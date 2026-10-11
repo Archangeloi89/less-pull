@@ -1,7 +1,5 @@
 /* Less Pull, polski. Kluczem jest tekst angielski. Forma „ty”, jak w macOS. Terminy: Skala szarości, Dodatkowe ciepło (w krótkich wierszach po prostu „ciepło”), Night Shift, Zerknięcie w kolorze (Peek), Sesja, Wyjątek, Skrót, pasek menu, ekran, bez filtra (plain display). Eksperymentalny: napisany starannie, jeszcze nie przeczytany przez osobę, dla której to język ojczysty. */
 
-"   Off" = "   Nie";
-"   Use default" = "   Domyślnie";
 " (main)" = " (główny)";
 " and " = " i ";
 " Suggest picks %@, which no macOS shortcut uses." = " „Zaproponuj” wybiera %@, którego nie używa żaden skrót macOS.";
@@ -31,8 +29,6 @@
 "%@: what it shows" = "%@: co pokazuje";
 "%@\n%@\nClick for Grayscale, Extra Warmth and Night Shift." = "%@\n%@\nKliknij: skala szarości, ciepło i Night Shift.";
 "%ld min" = "%ld min";
-"%ld minute%@" = "%ld min%@";
-"%ld minute%@ past." = "%ld min%@ po czasie.";
 "%ld minutes" = "%ld minut";
 "%ld minutes. Right-click to remove it from the presets." = "%ld minut. Prawy klik usuwa z zapisanych.";
 "%ld of 5" = "%ld z 5";
@@ -50,7 +46,7 @@
 "A peek, when you need it" = "Zerknięcie w kolorze, kiedy go potrzebujesz";
 "A quieter glow and sound while you stay past the end, until you leave or end the session." = "Cichsza poświata i cichszy dźwięk, gdy zostajesz po czasie, aż wyjdziesz albo zakończysz sesję.";
 "A session" = "Sesja";
-"A session is a stretch of focused work with a gentle end. Start one from the menu. The icon shows the minutes left; at the end comes a soft glow and a calm sound, and the count goes on so you can finish your thought. When you leave, Less Pull can call you back once." = "Sesja to czas skupionej pracy z łagodnym zakończeniem. Uruchamiasz ją z menu. Ikona pokazuje, ile minut zostało; na koniec przychodzą miękka poświata i spokojny dźwięk, a licznik biegnie dalej, żebyś mógł dokończyć myśl. Gdy wychodzisz, Less Pull może raz zawołać cię z powrotem.";
+"A session is a stretch of focused work with a gentle end. Start one from the menu. The icon shows the minutes left; at the end comes a soft glow and a calm sound, and the count goes on so you can finish your thought. Need a break? Less Pull calls you back once." = "Sesja to czas skupionej pracy z łagodnym zakończeniem. Uruchamiasz ją z menu. Ikona pokazuje, ile minut zostało; na koniec przychodzą miękka poświata i spokojny dźwięk, a licznik biegnie dalej, żebyś mógł dokończyć myśl. Potrzebujesz przerwy? Less Pull raz zawoła cię z powrotem.";
 "A session, with a gentle end" = "Sesja z łagodnym zakończeniem";
 "A session. How long?" = "Sesja. Jak długo?";
 "A short guide to Less Pull." = "Krótki przewodnik po Less Pull.";
@@ -77,8 +73,6 @@
 "Pointer still in color on one display? macOS draws the arrow on top there. Make the pointer one notch larger and it turns quiet too." = "Wskaźnik na jednym ekranie wciąż w kolorze? Tam macOS rysuje strzałkę na wierzchu. Powiększ wskaźnik o jeden stopień, a też się uspokoi.";
 "Ask GitHub now whether a newer version exists." = "Zapytaj teraz GitHub, czy jest nowsza wersja.";
 "At the end" = "Na koniec";
-"Away · back in %@ min" = "Poza · powrót za %@ min";
-"away, back in" = "poza, powrót za";
 "Back" = "Wstecz";
 "Browser Extension" = "Rozszerzenie przeglądarki";
 "Browser Extension (Firefox)" = "Rozszerzenie przeglądarki (Firefox)";
@@ -107,7 +101,6 @@
 "Click the circle in the menu bar. Grayscale takes the color out of everything. Warmth is the second step, and not decoration: from amber to red it takes the blue out of the light, makes the screen quieter still, and puts you back in charge of what light reaches your eyes — and through them, your mind." = "Kliknij kółko na pasku menu. Skala szarości zabiera kolor wszystkiemu. Ciepło to drugi krok, i nie ozdoba: od bursztynu do czerwieni zabiera światłu niebieski, jeszcze bardziej uspokaja ekran i oddaje ci wybór, jakie światło trafia do twoich oczu, a przez nie do głowy.";
 "Click, then press the keys you want. Hold them to see the plain display; let go to return." = "Kliknij i wciśnij wybrane klawisze. Przytrzymaj je, by zobaczyć ekran bez filtra; puść, a wróci.";
 "Click, then press the keys you want. Press them anywhere to turn Grayscale on or off." = "Kliknij i wciśnij wybrane klawisze. Wciskaj je gdziekolwiek, by włączać i wyłączać skalę szarości.";
-"Clicking the menu-bar icon" = "Kliknięcie ikony na pasku menu";
 "Close" = "Zamknij";
 "Close the tour." = "Zamyka przewodnik.";
 "Color" = "Kolor";
@@ -132,8 +125,6 @@
 "Default Extra Warmth" = "Domyślne ciepło";
 "Default Grayscale" = "Domyślna skala szarości";
 "Default keeps what the site inherits." = "„Auto” zostawia to, co strona dziedziczy.";
-"Default Night Shift: Off" = "Domyślny Night Shift: nie";
-"Default Night Shift: On" = "Domyślny Night Shift: tak";
 "Diagnostics" = "Diagnostyka";
 "Diagnostics shows technical details you can include when asking for help. Nothing is sent anywhere." = "Diagnostyka pokazuje szczegóły techniczne, które możesz dołączyć, prosząc o pomoc. Nic nigdzie nie jest wysyłane.";
 "Diagnostics…" = "Diagnostyka…";
@@ -141,7 +132,6 @@
 "Display options show up by themselves when a second display is connected. Tick this to see them with one display too." = "Opcje ekranów pojawiają się same, gdy podłączysz drugi ekran. Zaznacz, by widzieć je także przy jednym.";
 "Displays" = "Ekrany";
 "Done" = "Gotowe";
-"Don’t show again" = "Nie pokazuj więcej";
 "Don’t show explanations" = "Ukryj objaśnienia";
 "Don’t show this again" = "Nie pokazuj więcej";
 "Each display can follow what is on it: the app you are using sets its own display, and every other display follows the app on top there. Peek has its own choice under “Shortcuts”." = "Każdy ekran może podążać za tym, co na nim: aplikacja, której używasz, decyduje o swoim ekranie, a każdy inny ekran podąża za aplikacją, która jest tam na wierzchu. Zerknięcie ma własny wybór w „Skrótach”.";
@@ -155,10 +145,7 @@
 "Night Shift comes back now if your schedule wants it on. The app you are using keeps its own Night Shift setting." = "Night Shift wraca teraz, jeśli harmonogram chce go włączonego. Aplikacja, której używasz, zachowuje własne ustawienie Night Shift.";
 "Night Shift stays off for now, because your schedule has it off at this hour." = "Night Shift na razie zostaje wyłączony, bo o tej porze harmonogram go wyłącza.";
 "English and German are read line by line. A language marked experimental is written with care but not yet checked by a native speaker. If something sounds off, “Report a Problem…” under “About” reaches me." = "Angielski i niemiecki są sprawdzone linijka po linijce. Język oznaczony jako eksperymentalny jest napisany starannie, ale nie przeczytał go jeszcze nikt, dla kogo to język ojczysty. Jeśli coś brzmi dziwnie, „Zgłoś błąd” w karcie „O programie” trafi do mnie.";
-"Everything else stays on this Mac: no account, no analytics, no servers. The browser extension talks only to the app." = "Cała reszta zostaje na tym Macu: bez konta, bez statystyk, bez serwerów. Rozszerzenie przeglądarki rozmawia tylko z aplikacją.";
 "Exact page" = "Tylko ta strona";
-"Exception for %@" = "Wyjątek dla %@";
-"Exception for Photos ›" = "Wyjątek dla Zdjęć ›";
 "Exceptions for apps" = "Wyjątki dla aplikacji";
 "Exceptions for websites" = "Wyjątki dla stron";
 "Extension connected in %@." = "Rozszerzenie połączone w %@.";
@@ -214,7 +201,6 @@
 "How loud the session sounds are. Let go to hear it." = "Jak głośno grają dźwięki sesji. Puść, by posłuchać.";
 "Night Shift turned off for a while stays off, even for an app that turns it on. Grayscale, warmth and Night Shift all off show the plain display." = "Jeśli wyłączysz Night Shift na jakiś czas, zostaje wyłączony, nawet dla aplikacji, która go włącza. Skala szarości, ciepło i Night Shift wyłączone razem dają ekran bez filtra.";
 "I’m back" = "Wróciłem";
-"in color" = "w kolorze";
 "Turn Grayscale off for an hour, four hours, or until Night Shift changes next, from the menu or in Settings. It comes back by itself." = "Wróć do koloru na godzinę, cztery godziny albo do następnej zmiany Night Shift, z menu lub w Ustawieniach. Szarość wraca sama.";
 "Install %@ first; this list notices it by itself. Then come back to Set up…" = "Najpierw zainstaluj %@; ta lista zauważy to sama. Potem wróć do „Skonfiguruj…”.";
 "Install Browser Extension" = "Zainstaluj rozszerzenie przeglądarki";
@@ -236,7 +222,6 @@
 "Leave quietly" = "Zostaw";
 "Leaving now." = "Wychodzę.";
 "Leaving now…" = "Wychodzę…";
-"Leaving? Call me back in" = "Wychodzisz? Zawołaj mnie za";
 "Left-clicking the menu-bar icon" = "Lewy klik na ikonie";
 "Less" = "Mniej";
 "Less Pull" = "Less Pull";
@@ -254,15 +239,12 @@
 "Licenses" = "Licencje";
 "Login setting needs attention" = "Ustawienie logowania wymaga uwagi";
 "Looks again for installed browsers. The list also checks by itself every few seconds while this window is open." = "Ponownie szuka zainstalowanych przeglądarek. Lista sprawdza też sama co kilka sekund, póki to okno jest otwarte.";
-"Minutes, separated by commas. Offered when you leave a session; Less Pull calls you back once." = "Minuty, po przecinku. Proponowane, gdy opuszczasz sesję; Less Pull raz woła cię z powrotem.";
-"Minutes, separated by commas. They appear under “Start a session…” in the menu." = "Minuty, po przecinku. Pojawiają się w menu pod „Rozpocznij sesję”.";
 "More" = "Więcej";
 "More in Settings…" = "Więcej w Ustawieniach…";
 "Natural Colors" = "Naturalne kolory";
 "news.example" = "news.example";
 "Next" = "Dalej";
 "Night Shift" = "Night Shift";
-"Night Shift  ›" = "Night Shift  ›";
 "Night Shift %@" = "Night Shift %@";
 "Night Shift %@ for %@ · usually %@" = "Night Shift %@ dla %@ · zwykle %@";
 "Night Shift cannot be read right now; your choice is kept. " = "Nie można teraz odczytać Night Shift; twój wybór jest zachowany. ";
@@ -273,8 +255,6 @@
 "Night Shift off until %@" = "Night Shift wył. do %@";
 "Night Shift on" = "Night Shift wł.";
 "Night Shift unavailable" = "Night Shift niedostępny";
-"Night Shift: Off" = "Night Shift: nie";
-"Night Shift: On" = "Night Shift: tak";
 "No account, no analytics, nothing leaves your Mac. The website in front is known to the app only for as long as it is in front, then forgotten: never sent anywhere, never written to disk. And because Less Pull changes the display, not the picture, screenshots, recordings and screen sharing keep their normal colors." = "Bez konta, bez statystyk, nic nie opuszcza twojego Maca. Która strona jest na wierzchu, aplikacja wie tylko w tej chwili, a potem zapomina: nigdy nigdzie nie wysyła, nigdy nie zapisuje na dysku. A ponieważ Less Pull zmienia ekran, nie obraz, zrzuty ekranu, nagrania i udostępnianie ekranu zachowują normalne kolory.";
 "no disk" = "bez dysku";
 "No exceptions yet. Add an app and choose how it should look." = "Jeszcze nie ma wyjątków. Dodaj aplikację i wybierz, jak ma wyglądać.";
@@ -286,7 +266,6 @@
 "Not now" = "Nie teraz";
 "Not set up yet" = "Jeszcze nieskonfigurowany";
 "Not today" = "Nie dziś";
-"of %@" = "z %@";
 "Off" = "Nie";
 "off" = "nie";
 "Off for 1 hour" = "Wyłączony na 1 godzinę";
@@ -295,8 +274,6 @@
 "Off until morning · %@" = "Wyłączony do rana · %@";
 "Off until Night Shift changes" = "Wyłączony do zmiany Night Shift";
 "Off: when the session ends, the panel offers only Keep going and Leave quietly." = "Nie: gdy sesja się kończy, panel proponuje tylko „Pracuję dalej” i „Zostaw”.";
-"Offer a call back when I leave" = "Proponuj zawołanie, gdy wychodzę";
-"Offered when you choose “Leaving now…”. Less Pull calls you back once, then the session is over." = "Proponowane, gdy wybierzesz „Wychodzę”. Less Pull raz woła cię z powrotem, potem sesja się kończy.";
 "OK" = "OK";
 "On" = "Tak";
 "on" = "tak";
@@ -306,7 +283,6 @@
 "On: warmth comes with Night Shift in the evening and leaves with it in the morning. Off: warmth stays all day." = "Tak: ciepło przychodzi z Night Shift wieczorem i odchodzi z nim rano. Nie: ciepło zostaje przez cały dzień.";
 "Once a day, Less Pull asks GitHub whether a newer build exists for your macOS. When one is ready, the icon shows a small dot and the menu offers “Install update”. Nothing about you is sent. You can turn this off under Settings → About." = "Raz dziennie Less Pull pyta GitHuba, czy jest nowsza kompilacja dla twojego macOS. Gdy jakaś jest gotowa, ikona pokazuje małą kropkę, a menu proponuje „Zainstaluj aktualizację”. Nic o tobie nie jest wysyłane. Wyłączysz to w Ustawieniach → O programie.";
 "Once a day, Less Pull asks GitHub whether a newer build exists. Nothing about you is sent." = "Raz dziennie Less Pull pyta GitHub, czy jest nowsza kompilacja. Nic o tobie nie jest wysyłane.";
-"Once a day, Less Pull asks GitHub whether a newer build exists for your macOS version. Nothing about you is sent, and you can turn this off." = "Raz dziennie Less Pull pyta GitHuba, czy jest nowsza kompilacja dla twojej wersji macOS. Nic o tobie nie jest wysyłane i możesz to wyłączyć.";
 "One display is connected. With more, each one gets its own choice here." = "Podłączony jest jeden ekran. Przy kilku każdy dostanie tu własny wybór.";
 "Open a new GitHub issue with the technical details filled in." = "Otwiera nowe zgłoszenie na GitHubie z wypełnionymi szczegółami technicznymi.";
 "Open all Less Pull settings, exceptions and help." = "Otwiera wszystkie ustawienia, wyjątki i pomoc Less Pull.";
@@ -421,8 +397,7 @@
 "Something not working?" = "Coś nie działa?";
 "Sound" = "Dźwięk";
 "Start %ld min" = "Rozpocznij %ld min";
-"Start a session from the menu: a stretch of focused work with a gentle end. The icon shows the minutes left. At the end comes a warm glow and a soft gong, nothing to click away, and the count goes on so you can see how far you stretch. When you leave, it can call you back once." = "Rozpocznij sesję z menu: czas skupionej pracy z łagodnym zakończeniem. Ikona pokazuje, ile minut zostało. Na koniec ciepła poświata i miękki gong, nic do zamykania, a licznik biegnie dalej, byś widział, jak daleko sięgasz. Gdy wychodzisz, może raz zawołać cię z powrotem.";
-"Start a session…" = "Rozpocznij sesję…";
+"Start a session from the menu: a stretch of focused work with a gentle end. The icon shows the minutes left. At the end comes a warm glow and a soft gong, nothing to click away, and the count goes on so you can see how far you stretch. Need a break? Less Pull calls you back once." = "Rozpocznij sesję z menu: czas skupionej pracy z łagodnym zakończeniem. Ikona pokazuje, ile minut zostało. Na koniec ciepła poświata i miękki gong, nic do zamykania, a licznik biegnie dalej, byś widział, jak daleko sięgasz. Potrzebujesz przerwy? Less Pull raz zawoła cię z powrotem.";
 "Stop quietly" = "Zakończ po cichu";
 "Strokes: three gong strokes at the end, two rising notes for the call back. Chords: each as one soft chord. Both are tuned to 432 Hz and the solfeggio tones." = "Uderzenia: na koniec trzy uderzenia gongu, dla zawołania dwie wznoszące się nuty. Akordy: każdy jako jeden miękki akord. Oba strojone na 432 Hz i tony solfeżowe.";
 "Strokes" = "Uderzenia";
@@ -438,8 +413,6 @@
 "Technical details for troubleshooting." = "Szczegóły techniczne do rozwiązywania problemów.";
 "Tell a friend" = "Powiedz komuś";
 "This shortcut could not be set; another app may be using it. Click to choose another." = "Nie udało się ustawić tego skrótu; może używa go inna aplikacja. Kliknij, by wybrać inny.";
-"That was %@." = "To było %@.";
-"That was %ld minute%@." = "To było %ld min%@.";
 "That was 25 minutes." = "To było 25 minut.";
 "That was 30 minutes." = "To było 30 minut.";
 "The display change could not be confirmed" = "Nie udało się potwierdzić zmiany ekranu";
@@ -455,7 +428,6 @@
 "The previous page." = "Poprzednia strona.";
 "The Safari extension is not in this build" = "W tej kompilacji nie ma rozszerzenia dla Safari";
 "The screen, quieter" = "Spokojniejszy ekran";
-"the screenshot," = "zrzut ekranu,";
 "The short tour from the first launch, again." = "Krótki przewodnik z pierwszego uruchomienia, jeszcze raz.";
 "The thank-you card with the ways to support Less Pull." = "Karta z podziękowaniem i sposobami wsparcia Less Pull.";
 "The Toggle Grayscale shortcut" = "Skrót skali szarości";
@@ -477,8 +449,6 @@
 "Turn Grayscale off for…" = "Wróć do koloru na…";
 "Turn Night Shift back on" = "Włącz Night Shift z powrotem";
 "Turn Night Shift off for…" = "Wyłącz Night Shift na…";
-"Turn Off" = "Wyłącz";
-"Turn On" = "Włącz";
 "Turned off while you hold the Peek shortcut." = "Wyłączone, gdy trzymasz skrót zerknięcia w kolorze.";
 "Night Shift off for a while, then back on if your schedule wants it. Grayscale stays as it is. Quitting Less Pull ends it early." = "Night Shift wyłączony na jakiś czas, potem znów włączony, jeśli harmonogram tego chce. Skala szarości zostaje, jak jest. Zakończenie Less Pull kończy przerwę wcześniej.";
 "Turns Night Shift on or off now. Your schedule in System Settings stays, and takes over again at its next change." = "Włącza lub wyłącza Night Shift teraz. Harmonogram w Ustawieniach systemowych zostaje i przejmuje znów przy następnej zmianie.";
@@ -602,3 +572,36 @@
 "Default Night Shift" = "Domyślny Night Shift";
 "Night Shift off for" = "Night Shift wyłączony przez";
 "Night Shift off for  ›" = "Night Shift wyłączony przez  ›";
+"Pausing" = "Wstrzymywanie";
+"Quitting" = "Zamykanie";
+"Updates" = "Aktualizacje";
+"Pointer still in color" = "Wskaźnik wciąż w kolorze";
+"On some displays, macOS draws the arrow pointer on top of the picture, so Grayscale and warmth miss it. Make the pointer one notch larger in System Settings → Accessibility → Display → Pointer size, and it turns quiet too. “Pointer Size…” in the Displays section of the General tab opens this setting." = "Na niektórych ekranach macOS rysuje wskaźnik nad obrazem, więc skala szarości i ciepło go nie obejmują. Powiększ wskaźnik o jeden stopień w Ustawieniach systemowych → Dostępność → Monitor → Rozmiar wskaźnika, a też się uspokoi. „Rozmiar wskaźnika…” w sekcji Ekrany na karcie Ogólne otwiera to ustawienie.";
+"Guide" = "Przewodnik";
+"Support" = "Wsparcie";
+"Automatically" = "Automatycznie";
+"Once a day, Less Pull asks GitHub whether a newer build exists for your macOS version. That is its only connection, and nothing about you is sent." = "Raz dziennie Less Pull pyta GitHuba, czy jest nowsza kompilacja dla twojej wersji macOS. To jego jedyne połączenie i nic o tobie nie jest wysyłane.";
+"Session" = "Sesja";
+"Break" = "Przerwa";
+"A break with one call back. How long?" = "Przerwa z jednym zawołaniem. Na ile?";
+"A session is focused work with a gentle end. A break is no session: Less Pull calls you back once after the time you choose." = "Sesja to skupiona praca z łagodnym zakończeniem. Przerwa to nie sesja: Less Pull raz woła cię z powrotem po wybranym czasie.";
+"Session or break" = "Sesja lub przerwa";
+"Session or break…" = "Sesja lub przerwa…";
+"Break · back in %@ min" = "Przerwa · powrót za %@ min";
+"on a break, back in" = "na przerwie, powrót za";
+"Offer a break when a session ends" = "Proponuj przerwę po zakończeniu sesji";
+"Taking a break? Call me back in" = "Przerwa? Zawołaj mnie za";
+"Exception settings" = "Ustawienia wyjątku";
+"All app exceptions, under Settings → Apps." = "Wszystkie wyjątki aplikacji, w Ustawieniach → Aplikacje.";
+"All website exceptions, under Settings → Websites." = "Wszystkie wyjątki stron, w Ustawieniach → Strony.";
+"of 1 minute" = "z 1 minuty";
+"of %ld minutes" = "z %ld min";
+"That was 1 minute." = "To była 1 minuta.";
+"That was %ld minutes." = "To było %ld min.";
+"1 minute past." = "1 minuta po czasie.";
+"%ld minutes past." = "%ld min po czasie.";
+"Changes apply right away." = "Zmiany działają od razu.";
+"the screenshot, in color" = "zrzut ekranu, w kolorze";
+"Minutes, separated by commas. They appear when you start a session." = "Minuty, po przecinku. Pojawiają się, gdy rozpoczynasz sesję.";
+"Minutes, separated by commas. Offered for a break and when a session ends." = "Minuty, po przecinku. Proponowane przy przerwie i na końcu sesji.";
+"Offered for a break and when a session ends. Less Pull calls you back once." = "Proponowane przy przerwie i na końcu sesji. Less Pull raz woła cię z powrotem.";

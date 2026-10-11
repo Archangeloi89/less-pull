@@ -1,7 +1,5 @@
 /* Less Pull 한국어. 키는 영어 원문. 용어: 회색조 (Grayscale), 따뜻함 (Extra Warmth), Night Shift, 컬러로 잠깐 보기 (Peek), 세션, 개별 설정 (exception), 단축키, 메뉴 막대, 디스플레이, 필터 없는 화면 (plain display). 실험적: 정성껏 썼지만 아직 원어민 검토를 거치지 않았습니다. */
 
-"   Off" = "   끔";
-"   Use default" = "   기본값 사용";
 " (main)" = " (주)";
 " and " = " 및 ";
 " Suggest picks %@, which no macOS shortcut uses." = " ‘추천’은 어떤 macOS 단축키와도 겹치지 않는 %@을(를) 고릅니다.";
@@ -31,8 +29,6 @@
 "%@: what it shows" = "%@: 표시 내용";
 "%@\n%@\nClick for Grayscale, Extra Warmth and Night Shift." = "%@\n%@\n클릭하면 회색조, 따뜻함, Night Shift.";
 "%ld min" = "%ld분";
-"%ld minute%@" = "%ld분%@";
-"%ld minute%@ past." = "종료 후 %ld분%@ 지남.";
 "%ld minutes" = "%ld분";
 "%ld minutes. Right-click to remove it from the presets." = "%ld분. 오른쪽 클릭하면 목록에서 뺍니다.";
 "%ld of 5" = "%ld / 5";
@@ -50,7 +46,7 @@
 "A peek, when you need it" = "필요할 때만, 컬러로 잠깐";
 "A quieter glow and sound while you stay past the end, until you leave or end the session." = "종료 시각을 넘겨 머무는 동안, 자리를 비우거나 세션을 끝낼 때까지 더 은은한 빛과 소리로 알립니다.";
 "A session" = "세션";
-"A session is a stretch of focused work with a gentle end. Start one from the menu. The icon shows the minutes left; at the end comes a soft glow and a calm sound, and the count goes on so you can finish your thought. When you leave, Less Pull can call you back once." = "세션은 부드럽게 끝나는 집중 시간입니다. 메뉴에서 시작하세요. 아이콘에 남은 분이 표시되고, 끝나면 은은한 빛과 차분한 소리가 찾아옵니다. 그 뒤에도 계속 세어 주니 생각을 마무리할 수 있습니다. 자리를 비우면 Less Pull이 한 번 다시 불러 줄 수 있습니다.";
+"A session is a stretch of focused work with a gentle end. Start one from the menu. The icon shows the minutes left; at the end comes a soft glow and a calm sound, and the count goes on so you can finish your thought. Need a break? Less Pull calls you back once." = "세션은 부드럽게 끝나는 집중 시간입니다. 메뉴에서 시작하세요. 아이콘에 남은 분이 표시되고, 끝나면 은은한 빛과 차분한 소리가 찾아옵니다. 그 뒤에도 계속 세어 주니 생각을 마무리할 수 있습니다. 쉬고 싶을 때는 Less Pull이 한 번 다시 불러 줍니다.";
 "A session, with a gentle end" = "부드럽게 끝나는 세션";
 "A session. How long?" = "세션. 몇 분으로 할까요?";
 "A short guide to Less Pull." = "Less Pull 짧은 안내.";
@@ -77,8 +73,6 @@
 "Pointer still in color on one display? macOS draws the arrow on top there. Make the pointer one notch larger and it turns quiet too." = "한 디스플레이에서 포인터만 아직 컬러인가요? 거기서는 macOS가 화살표를 위에 따로 그립니다. 포인터를 한 단계 키우면 화살표도 차분해집니다.";
 "Ask GitHub now whether a newer version exists." = "새 버전이 있는지 지금 GitHub에 확인합니다.";
 "At the end" = "종료 시";
-"Away · back in %@ min" = "자리 비움 · %@분 뒤 복귀";
-"away, back in" = "자리 비움, 복귀까지";
 "Back" = "이전";
 "Browser Extension" = "브라우저 확장 프로그램";
 "Browser Extension (Firefox)" = "브라우저 확장 프로그램 (Firefox)";
@@ -107,7 +101,6 @@
 "Click the circle in the menu bar. Grayscale takes the color out of everything. Warmth is the second step, and not decoration: from amber to red it takes the blue out of the light, makes the screen quieter still, and puts you back in charge of what light reaches your eyes — and through them, your mind." = "메뉴 막대의 동그라미를 클릭하세요. 회색조는 모든 것에서 색을 걷어냅니다. 따뜻함은 두 번째 단계이고, 장식이 아닙니다. 호박색에서 빨강까지, 빛에서 파랑을 덜어내 화면을 한층 더 고요하게 하고, 어떤 빛이 눈에 닿을지, 그리고 눈을 거쳐 마음에 닿을지를 다시 당신 손에 맡깁니다.";
 "Click, then press the keys you want. Hold them to see the plain display; let go to return." = "클릭한 뒤 원하는 키를 누르세요. 누르고 있는 동안 필터 없는 화면이 보이고, 놓으면 돌아옵니다.";
 "Click, then press the keys you want. Press them anywhere to turn Grayscale on or off." = "클릭한 뒤 원하는 키를 누르세요. 어디서든 누르면 회색조가 켜지거나 꺼집니다.";
-"Clicking the menu-bar icon" = "메뉴 막대 아이콘 클릭";
 "Close" = "닫기";
 "Close the tour." = "둘러보기를 닫습니다.";
 "Color" = "컬러";
@@ -132,8 +125,6 @@
 "Default Extra Warmth" = "기본 따뜻함";
 "Default Grayscale" = "기본 회색조";
 "Default keeps what the site inherits." = "‘기본’은 사이트가 물려받는 설정을 그대로 둡니다.";
-"Default Night Shift: Off" = "기본 Night Shift: 끔";
-"Default Night Shift: On" = "기본 Night Shift: 켬";
 "Diagnostics" = "진단 정보";
 "Diagnostics shows technical details you can include when asking for help. Nothing is sent anywhere." = "진단 정보에는 도움을 요청할 때 함께 보낼 수 있는 기술적 세부 사항이 표시됩니다. 어디에도 전송되지 않습니다.";
 "Diagnostics…" = "진단…";
@@ -141,7 +132,6 @@
 "Display options show up by themselves when a second display is connected. Tick this to see them with one display too." = "디스플레이 항목은 두 번째 디스플레이를 연결하면 저절로 나타납니다. 한 대일 때도 보려면 체크하세요.";
 "Displays" = "디스플레이";
 "Done" = "완료";
-"Don’t show again" = "다시 표시 안 함";
 "Don’t show explanations" = "설명 숨기기";
 "Don’t show this again" = "다시 표시 안 함";
 "Each display can follow what is on it: the app you are using sets its own display, and every other display follows the app on top there. Peek has its own choice under “Shortcuts”." = "디스플레이마다 표시된 것을 따를 수 있습니다. 쓰고 있는 앱이 자기 디스플레이를 정하고, 다른 디스플레이는 거기서 맨 위에 있는 앱을 따릅니다. ‘잠깐 보기’ 대상은 ‘단축키’에서 따로 고릅니다.";
@@ -155,10 +145,7 @@
 "Night Shift comes back now if your schedule wants it on. The app you are using keeps its own Night Shift setting." = "일정이 켜지기를 원하면 Night Shift가 지금 돌아옵니다. 쓰고 있는 앱의 Night Shift 설정은 그대로 유지됩니다.";
 "Night Shift stays off for now, because your schedule has it off at this hour." = "이 시간에는 일정상 꺼져 있으므로 Night Shift는 당분간 꺼진 채로 둡니다.";
 "English and German are read line by line. A language marked experimental is written with care but not yet checked by a native speaker. If something sounds off, “Report a Problem…” under “About” reaches me." = "영어와 독일어는 한 줄씩 검토했습니다. ‘실험적’으로 표시된 언어는 정성껏 썼지만 아직 원어민이 읽지 않았습니다. 어색한 곳이 있으면 ‘정보’ 탭의 ‘신고…’가 저에게 닿습니다.";
-"Everything else stays on this Mac: no account, no analytics, no servers. The browser extension talks only to the app." = "나머지는 모두 이 Mac 안에 머뭅니다. 계정도, 분석도, 서버도 없습니다. 브라우저 확장 프로그램은 앱과만 통신합니다.";
 "Exact page" = "이 페이지만";
-"Exception for %@" = "%@ 개별 설정";
-"Exception for Photos ›" = "‘사진’ 개별 설정 ›";
 "Exceptions for apps" = "앱 개별 설정";
 "Exceptions for websites" = "웹사이트 개별 설정";
 "Extension connected in %@." = "%@에서 확장 프로그램이 연결되었습니다.";
@@ -214,7 +201,6 @@
 "How loud the session sounds are. Let go to hear it." = "세션 소리의 크기. 놓으면 들어볼 수 있습니다.";
 "Night Shift turned off for a while stays off, even for an app that turns it on. Grayscale, warmth and Night Shift all off show the plain display." = "Night Shift를 잠시 꺼 두면, 켜는 앱이 있어도 꺼진 채로 있습니다. 회색조, 따뜻함, Night Shift가 모두 꺼지면 필터 없는 화면이 됩니다.";
 "I’m back" = "돌아왔어요";
-"in color" = "컬러";
 "Turn Grayscale off for an hour, four hours, or until Night Shift changes next, from the menu or in Settings. It comes back by itself." = "메뉴나 설정에서 1시간, 4시간, 또는 Night Shift가 다음에 바뀔 때까지 컬러로 되돌릴 수 있습니다. 회색은 저절로 돌아옵니다.";
 "Install %@ first; this list notices it by itself. Then come back to Set up…" = "먼저 %@을(를) 설치하세요. 이 목록이 알아서 알아챕니다. 그런 다음 ‘설정…’으로 돌아오세요.";
 "Install Browser Extension" = "브라우저 확장 프로그램 설치";
@@ -236,7 +222,6 @@
 "Leave quietly" = "이대로";
 "Leaving now." = "자리 비움.";
 "Leaving now…" = "자리 비움…";
-"Leaving? Call me back in" = "자리 비우나요? 다시 부르기까지";
 "Left-clicking the menu-bar icon" = "아이콘 왼쪽 클릭";
 "Less" = "접기";
 "Less Pull" = "Less Pull";
@@ -254,15 +239,12 @@
 "Licenses" = "라이선스";
 "Login setting needs attention" = "로그인 설정을 확인해 주세요";
 "Looks again for installed browsers. The list also checks by itself every few seconds while this window is open." = "설치된 브라우저를 다시 찾습니다. 이 창이 열려 있는 동안 목록이 몇 초마다 스스로 확인하기도 합니다.";
-"Minutes, separated by commas. Offered when you leave a session; Less Pull calls you back once." = "분 단위, 쉼표로 구분. 세션을 떠날 때 제안되며, Less Pull이 한 번 다시 불러 줍니다.";
-"Minutes, separated by commas. They appear under “Start a session…” in the menu." = "분 단위, 쉼표로 구분. 메뉴의 ‘세션 시작’ 아래에 표시됩니다.";
 "More" = "더 보기";
 "More in Settings…" = "설정에서 더 보기…";
 "Natural Colors" = "자연스러운 색상";
 "news.example" = "news.example";
 "Next" = "다음";
 "Night Shift" = "Night Shift";
-"Night Shift  ›" = "Night Shift  ›";
 "Night Shift %@" = "Night Shift %@";
 "Night Shift %@ for %@ · usually %@" = "Night Shift %@ · %@ · 평소 %@";
 "Night Shift cannot be read right now; your choice is kept. " = "지금은 Night Shift를 읽을 수 없습니다. 선택은 유지됩니다. ";
@@ -273,8 +255,6 @@
 "Night Shift off until %@" = "Night Shift %@까지 끔";
 "Night Shift on" = "Night Shift 켬";
 "Night Shift unavailable" = "Night Shift 사용 불가";
-"Night Shift: Off" = "Night Shift: 끔";
-"Night Shift: On" = "Night Shift: 켬";
 "No account, no analytics, nothing leaves your Mac. The website in front is known to the app only for as long as it is in front, then forgotten: never sent anywhere, never written to disk. And because Less Pull changes the display, not the picture, screenshots, recordings and screen sharing keep their normal colors." = "계정도 분석도 없고, 아무것도 Mac 밖으로 나가지 않습니다. 앞에 있는 웹사이트는 앞에 있는 동안만 앱이 알고, 그 뒤에는 잊습니다. 어디에도 보내지 않고 디스크에도 쓰지 않습니다. 그리고 Less Pull은 그림이 아니라 디스플레이를 바꾸기 때문에 스크린샷, 녹화, 화면 공유는 원래 색을 유지합니다.";
 "no disk" = "디스크 없음";
 "No exceptions yet. Add an app and choose how it should look." = "아직 개별 설정이 없습니다. 앱을 추가하고 어떻게 보일지 고르세요.";
@@ -286,7 +266,6 @@
 "Not now" = "나중에";
 "Not set up yet" = "아직 설정 안 됨";
 "Not today" = "오늘은 안 함";
-"of %@" = "/ %@";
 "Off" = "끔";
 "off" = "끔";
 "Off for 1 hour" = "1시간 끔";
@@ -295,8 +274,6 @@
 "Off until morning · %@" = "아침까지 끔 · %@";
 "Off until Night Shift changes" = "Night Shift가 바뀔 때까지 끔";
 "Off: when the session ends, the panel offers only Keep going and Leave quietly." = "끔: 세션이 끝나면 패널에 ‘계속’과 ‘이대로’만 표시됩니다.";
-"Offer a call back when I leave" = "자리 비울 때 다시 부르기 제안";
-"Offered when you choose “Leaving now…”. Less Pull calls you back once, then the session is over." = "‘자리 비움’을 선택할 때 제안됩니다. Less Pull이 한 번 다시 불러 주고, 그 뒤에는 세션이 끝납니다.";
 "OK" = "확인";
 "On" = "켬";
 "on" = "켬";
@@ -306,7 +283,6 @@
 "On: warmth comes with Night Shift in the evening and leaves with it in the morning. Off: warmth stays all day." = "켬: 따뜻함이 저녁에 Night Shift와 함께 오고 아침에 함께 떠납니다. 끔: 따뜻함이 하루 종일 유지됩니다.";
 "Once a day, Less Pull asks GitHub whether a newer build exists for your macOS. When one is ready, the icon shows a small dot and the menu offers “Install update”. Nothing about you is sent. You can turn this off under Settings → About." = "하루에 한 번, Less Pull이 사용 중인 macOS용 새 빌드가 있는지 GitHub에 묻습니다. 준비되면 아이콘에 작은 점이 생기고 메뉴에 ‘업데이트 설치’가 표시됩니다. 사용자에 관한 정보는 보내지 않습니다. 설정 → 정보에서 끌 수 있습니다.";
 "Once a day, Less Pull asks GitHub whether a newer build exists. Nothing about you is sent." = "Less Pull은 하루에 한 번 GitHub에 새 빌드가 있는지 묻습니다. 사용자에 관한 정보는 보내지 않습니다.";
-"Once a day, Less Pull asks GitHub whether a newer build exists for your macOS version. Nothing about you is sent, and you can turn this off." = "하루에 한 번, Less Pull이 사용 중인 macOS용 새 빌드가 있는지 GitHub에 묻습니다. 사용자에 관한 정보는 보내지 않으며, 끌 수 있습니다.";
 "One display is connected. With more, each one gets its own choice here." = "디스플레이 한 대가 연결되어 있습니다. 더 연결하면 디스플레이마다 항목이 여기에 생깁니다.";
 "Open a new GitHub issue with the technical details filled in." = "기술적 세부 사항이 채워진 새 GitHub 이슈를 엽니다.";
 "Open all Less Pull settings, exceptions and help." = "Less Pull의 모든 설정, 개별 설정, 도움말을 엽니다.";
@@ -421,8 +397,7 @@
 "Something not working?" = "뭔가 안 되나요?";
 "Sound" = "소리";
 "Start %ld min" = "%ld분 시작";
-"Start a session from the menu: a stretch of focused work with a gentle end. The icon shows the minutes left. At the end comes a warm glow and a soft gong, nothing to click away, and the count goes on so you can see how far you stretch. When you leave, it can call you back once." = "메뉴에서 세션을 시작하세요. 부드럽게 끝나는 집중 시간입니다. 아이콘에 남은 분이 표시됩니다. 끝나면 따뜻한 빛과 부드러운 징 소리가 나고, 닫을 것은 없으며, 계속 세어 주니 얼마나 늘어났는지 볼 수 있습니다. 자리를 비우면 한 번 다시 불러 줄 수 있습니다.";
-"Start a session…" = "세션 시작…";
+"Start a session from the menu: a stretch of focused work with a gentle end. The icon shows the minutes left. At the end comes a warm glow and a soft gong, nothing to click away, and the count goes on so you can see how far you stretch. Need a break? Less Pull calls you back once." = "메뉴에서 세션을 시작하세요. 부드럽게 끝나는 집중 시간입니다. 아이콘에 남은 분이 표시됩니다. 끝나면 따뜻한 빛과 부드러운 징 소리가 나고, 닫을 것은 없으며, 계속 세어 주니 얼마나 늘어났는지 볼 수 있습니다. 쉬고 싶을 때는 Less Pull이 한 번 다시 불러 줍니다.";
 "Stop quietly" = "조용히 끝내기";
 "Strokes: three gong strokes at the end, two rising notes for the call back. Chords: each as one soft chord. Both are tuned to 432 Hz and the solfeggio tones." = "타음: 끝날 때 징 세 번, 다시 부를 때 올라가는 두 음. 화음: 각각 부드러운 화음 하나. 둘 다 432 Hz와 솔페지오 음에 맞췄습니다.";
 "Strokes" = "타음";
@@ -438,8 +413,6 @@
 "Technical details for troubleshooting." = "문제 해결을 위한 기술적 세부 사항.";
 "Tell a friend" = "친구에게 알리기";
 "This shortcut could not be set; another app may be using it. Click to choose another." = "이 단축키를 설정하지 못했습니다. 다른 앱이 쓰고 있을 수 있습니다. 클릭하여 다른 것을 고르세요.";
-"That was %@." = "%@이었습니다.";
-"That was %ld minute%@." = "%ld분%@이었습니다.";
 "That was 25 minutes." = "25분이었습니다.";
 "That was 30 minutes." = "30분이었습니다.";
 "The display change could not be confirmed" = "디스플레이 변경을 확인하지 못했습니다";
@@ -455,7 +428,6 @@
 "The previous page." = "이전 페이지.";
 "The Safari extension is not in this build" = "이 빌드에는 Safari 확장 프로그램이 없습니다";
 "The screen, quieter" = "화면을, 더 고요하게";
-"the screenshot," = "스크린샷,";
 "The short tour from the first launch, again." = "처음 실행할 때 본 짧은 둘러보기, 다시 한 번.";
 "The thank-you card with the ways to support Less Pull." = "Less Pull을 후원하는 방법을 담은 감사 카드.";
 "The Toggle Grayscale shortcut" = "회색조 전환 단축키";
@@ -477,8 +449,6 @@
 "Turn Grayscale off for…" = "잠시 컬러로…";
 "Turn Night Shift back on" = "Night Shift 다시 켜기";
 "Turn Night Shift off for…" = "Night Shift 잠시 끄기…";
-"Turn Off" = "끄기";
-"Turn On" = "켜기";
 "Turned off while you hold the Peek shortcut." = "‘잠깐 보기’ 단축키를 누르고 있는 동안 꺼집니다.";
 "Night Shift off for a while, then back on if your schedule wants it. Grayscale stays as it is. Quitting Less Pull ends it early." = "Night Shift를 잠시 끄고, 일정이 원하면 다시 켭니다. 회색조는 그대로입니다. Less Pull을 종료하면 일찍 끝납니다.";
 "Turns Night Shift on or off now. Your schedule in System Settings stays, and takes over again at its next change." = "Night Shift를 지금 켜거나 끕니다. 시스템 설정의 일정은 그대로 남아 다음 전환부터 다시 이어받습니다.";
@@ -602,3 +572,36 @@
 "Default Night Shift" = "기본 Night Shift";
 "Night Shift off for" = "Night Shift 끄기";
 "Night Shift off for  ›" = "Night Shift 끄기  ›";
+"Pausing" = "일시 정지";
+"Quitting" = "종료";
+"Updates" = "업데이트";
+"Pointer still in color" = "포인터가 컬러로 남을 때";
+"On some displays, macOS draws the arrow pointer on top of the picture, so Grayscale and warmth miss it. Make the pointer one notch larger in System Settings → Accessibility → Display → Pointer size, and it turns quiet too. “Pointer Size…” in the Displays section of the General tab opens this setting." = "일부 디스플레이에서는 macOS가 포인터를 화면 위에 따로 그려서 회색조와 따뜻함이 닿지 않습니다. 시스템 설정 → 손쉬운 사용 → 디스플레이 → 포인터 크기에서 한 단계 키우면 포인터도 차분해집니다. ‘일반’ 탭의 디스플레이 영역에 있는 ‘포인터 크기…’로 이 설정을 열 수 있습니다.";
+"Guide" = "안내서";
+"Support" = "후원";
+"Automatically" = "자동";
+"Once a day, Less Pull asks GitHub whether a newer build exists for your macOS version. That is its only connection, and nothing about you is sent." = "하루에 한 번, Less Pull이 사용 중인 macOS용 새 빌드가 있는지 GitHub에 묻습니다. 외부와의 연결은 이것뿐이며, 사용자에 관한 정보는 보내지 않습니다.";
+"Session" = "세션";
+"Break" = "휴식";
+"A break with one call back. How long?" = "잠시 쉬면 한 번 다시 불러 드려요. 얼마나?";
+"A session is focused work with a gentle end. A break is no session: Less Pull calls you back once after the time you choose." = "세션은 부드럽게 끝나는 집중 시간입니다. 휴식은 세션이 아닙니다. 고른 시간이 지나면 Less Pull이 한 번 다시 불러 줍니다.";
+"Session or break" = "세션 또는 휴식";
+"Session or break…" = "세션 또는 휴식…";
+"Break · back in %@ min" = "휴식 · 복귀까지 %@분";
+"on a break, back in" = "휴식 중, 복귀까지";
+"Offer a break when a session ends" = "세션이 끝나면 휴식 제안";
+"Taking a break? Call me back in" = "쉬어 갈까요? 다시 부르기까지";
+"Exception settings" = "개별 설정 관리";
+"All app exceptions, under Settings → Apps." = "앱 개별 설정은 모두 설정 → 앱에 있습니다.";
+"All website exceptions, under Settings → Websites." = "웹사이트 개별 설정은 모두 설정 → 웹사이트에 있습니다.";
+"of 1 minute" = "1분 중";
+"of %ld minutes" = "%ld분 중";
+"That was 1 minute." = "1분이었어요.";
+"That was %ld minutes." = "%ld분이었어요.";
+"1 minute past." = "1분 지남.";
+"%ld minutes past." = "%ld분 지남.";
+"Changes apply right away." = "변경은 바로 적용됩니다.";
+"the screenshot, in color" = "스크린샷은 컬러";
+"Minutes, separated by commas. They appear when you start a session." = "분 단위, 쉼표로 구분. 세션을 시작할 때 표시됩니다.";
+"Minutes, separated by commas. Offered for a break and when a session ends." = "분 단위, 쉼표로 구분. 휴식할 때와 세션이 끝날 때 제안됩니다.";
+"Offered for a break and when a session ends. Less Pull calls you back once." = "휴식할 때와 세션이 끝날 때 제안됩니다. Less Pull이 한 번 다시 불러 줍니다.";

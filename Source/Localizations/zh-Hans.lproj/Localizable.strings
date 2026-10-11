@@ -1,7 +1,5 @@
 /* Less Pull 简体中文。键为英文原文。用语：灰度 (Grayscale)、暖色 (Extra Warmth)、夜览 (Night Shift)、彩色一瞥 (Peek)、专注时段 (session)、单独设置 (exception)、快捷键、菜单栏、显示器、无滤镜画面 (plain display)。实验性：用心写成，但尚未经母语者校对。 */
 
-"   Off" = "   关";
-"   Use default" = "   保持默认";
 " (main)" = "（主）";
 " and " = "和";
 " Suggest picks %@, which no macOS shortcut uses." = " “推荐”会选出 %@，没有任何 macOS 快捷键使用它。";
@@ -31,8 +29,6 @@
 "%@: what it shows" = "%@：显示内容";
 "%@\n%@\nClick for Grayscale, Extra Warmth and Night Shift." = "%@\n%@\n点按以设置灰度、暖色和夜览。";
 "%ld min" = "%ld 分钟";
-"%ld minute%@" = "%ld 分钟%@";
-"%ld minute%@ past." = "已超时 %ld 分钟%@。";
 "%ld minutes" = "%ld 分钟";
 "%ld minutes. Right-click to remove it from the presets." = "%ld 分钟。右键点按可从预设中移除。";
 "%ld of 5" = "%ld / 5";
@@ -50,7 +46,7 @@
 "A peek, when you need it" = "需要时，彩色一瞥";
 "A quieter glow and sound while you stay past the end, until you leave or end the session." = "超时后你继续停留期间，在你离开或结束专注之前，以更轻的光晕和声音提醒。";
 "A session" = "专注时段";
-"A session is a stretch of focused work with a gentle end. Start one from the menu. The icon shows the minutes left; at the end comes a soft glow and a calm sound, and the count goes on so you can finish your thought. When you leave, Less Pull can call you back once." = "专注时段是一段温和收尾的专注工作。从菜单开始。图标显示剩余分钟；结束时会有柔和的光晕和平静的声音，之后继续计数，好让你把思路收完。你离开时，Less Pull 可以唤回你一次。";
+"A session is a stretch of focused work with a gentle end. Start one from the menu. The icon shows the minutes left; at the end comes a soft glow and a calm sound, and the count goes on so you can finish your thought. Need a break? Less Pull calls you back once." = "专注时段是一段温和收尾的专注工作。从菜单开始。图标显示剩余分钟；结束时会有柔和的光晕和平静的声音，之后继续计数，好让你把思路收完。想休息时，Less Pull 会唤回你一次。";
 "A session, with a gentle end" = "温和收尾的专注时段";
 "A session. How long?" = "专注时段。多长？";
 "A short guide to Less Pull." = "Less Pull 简短指南。";
@@ -77,8 +73,6 @@
 "Pointer still in color on one display? macOS draws the arrow on top there. Make the pointer one notch larger and it turns quiet too." = "某台显示器上的指针仍是彩色？那里 macOS 把箭头画在最上层。把指针调大一档，它也会安静下来。";
 "Ask GitHub now whether a newer version exists." = "现在向 GitHub 询问是否有新版本。";
 "At the end" = "结束时";
-"Away · back in %@ min" = "离开 · %@ 分钟后回来";
-"away, back in" = "离开，回来还需";
 "Back" = "上一页";
 "Browser Extension" = "浏览器扩展";
 "Browser Extension (Firefox)" = "浏览器扩展 (Firefox)";
@@ -107,7 +101,6 @@
 "Click the circle in the menu bar. Grayscale takes the color out of everything. Warmth is the second step, and not decoration: from amber to red it takes the blue out of the light, makes the screen quieter still, and puts you back in charge of what light reaches your eyes — and through them, your mind." = "点按菜单栏中的圆圈。灰度抽走一切颜色。暖色是第二步，而不是装饰：从琥珀到红，它滤去光中的蓝，让屏幕更安静，也把“什么样的光进入眼睛、再进入头脑”交回你手中。";
 "Click, then press the keys you want. Hold them to see the plain display; let go to return." = "点按，然后按下想用的按键。按住即可看到无滤镜画面；松开即恢复。";
 "Click, then press the keys you want. Press them anywhere to turn Grayscale on or off." = "点按，然后按下想用的按键。在任何地方按下即可开关灰度。";
-"Clicking the menu-bar icon" = "点按菜单栏图标";
 "Close" = "关闭";
 "Close the tour." = "关闭导览。";
 "Color" = "彩色";
@@ -132,8 +125,6 @@
 "Default Extra Warmth" = "默认暖色";
 "Default Grayscale" = "默认灰度";
 "Default keeps what the site inherits." = "“默认”保留网站继承的设置。";
-"Default Night Shift: Off" = "默认夜览：关";
-"Default Night Shift: On" = "默认夜览：开";
 "Diagnostics" = "诊断信息";
 "Diagnostics shows technical details you can include when asking for help. Nothing is sent anywhere." = "诊断信息显示求助时可附上的技术细节。不会发送到任何地方。";
 "Diagnostics…" = "诊断…";
@@ -141,7 +132,6 @@
 "Display options show up by themselves when a second display is connected. Tick this to see them with one display too." = "接入第二台显示器时，显示器选项会自动出现。勾选后只有一台显示器时也显示。";
 "Displays" = "显示器";
 "Done" = "完成";
-"Don’t show again" = "不再显示";
 "Don’t show explanations" = "隐藏说明";
 "Don’t show this again" = "不再显示";
 "Each display can follow what is on it: the app you are using sets its own display, and every other display follows the app on top there. Peek has its own choice under “Shortcuts”." = "每台显示器都可以跟随其上内容：你正在用的应用决定自己的显示器，其他显示器跟随那里最上面的应用。“一瞥”的范围在“快捷键”中单独选择。";
@@ -155,10 +145,7 @@
 "Night Shift comes back now if your schedule wants it on. The app you are using keeps its own Night Shift setting." = "若时间表需要开启，夜览现在就会回来。你正在用的应用保留自己的夜览设置。";
 "Night Shift stays off for now, because your schedule has it off at this hour." = "夜览暂时保持关闭，因为时间表在这个时段关闭它。";
 "English and German are read line by line. A language marked experimental is written with care but not yet checked by a native speaker. If something sounds off, “Report a Problem…” under “About” reaches me." = "英语和德语已逐行校对。标为“实验性”的语言用心写成，但尚未经母语者阅读。若有不妥之处，“关于”标签页的“反馈…”会送到我这里。";
-"Everything else stays on this Mac: no account, no analytics, no servers. The browser extension talks only to the app." = "其他一切都留在这台 Mac 上：没有账户，没有统计，没有服务器。浏览器扩展只与应用通信。";
 "Exact page" = "仅此页面";
-"Exception for %@" = "%@ 的单独设置";
-"Exception for Photos ›" = "“照片”的单独设置 ›";
 "Exceptions for apps" = "应用单独设置";
 "Exceptions for websites" = "网站单独设置";
 "Extension connected in %@." = "扩展已在 %@ 中连接。";
@@ -214,7 +201,6 @@
 "How loud the session sounds are. Let go to hear it." = "专注提示音的音量。松开即可试听。";
 "Night Shift turned off for a while stays off, even for an app that turns it on. Grayscale, warmth and Night Shift all off show the plain display." = "如果暂时关闭了夜览，即使应用会开启它，它也保持关闭。灰度、暖色和夜览都关时，就是无滤镜画面。";
 "I’m back" = "我回来了";
-"in color" = "彩色";
 "Turn Grayscale off for an hour, four hours, or until Night Shift changes next, from the menu or in Settings. It comes back by itself." = "从菜单或设置中，恢复彩色 1 小时、4 小时，或直到夜览下次切换。灰度会自动回来。";
 "Install %@ first; this list notices it by itself. Then come back to Set up…" = "请先安装 %@；这个列表会自动察觉。然后回到“设置…”。";
 "Install Browser Extension" = "安装浏览器扩展";
@@ -236,7 +222,6 @@
 "Leave quietly" = "就这样";
 "Leaving now." = "离开一会儿。";
 "Leaving now…" = "离开一会儿…";
-"Leaving? Call me back in" = "要离开？多久后唤回我";
 "Left-clicking the menu-bar icon" = "左键点按图标";
 "Less" = "收起";
 "Less Pull" = "Less Pull";
@@ -254,15 +239,12 @@
 "Licenses" = "许可证";
 "Login setting needs attention" = "登录设置需要注意";
 "Looks again for installed browsers. The list also checks by itself every few seconds while this window is open." = "重新查找已安装的浏览器。此窗口打开时，列表每隔几秒也会自动检查。";
-"Minutes, separated by commas. Offered when you leave a session; Less Pull calls you back once." = "分钟数，用逗号分隔。离开专注时提供；Less Pull 会唤回你一次。";
-"Minutes, separated by commas. They appear under “Start a session…” in the menu." = "分钟数，用逗号分隔。显示在菜单的“开始专注”之下。";
 "More" = "更多";
 "More in Settings…" = "设置中还有更多…";
 "Natural Colors" = "自然色";
 "news.example" = "news.example";
 "Next" = "下一页";
 "Night Shift" = "夜览";
-"Night Shift  ›" = "夜览  ›";
 "Night Shift %@" = "夜览 %@";
 "Night Shift %@ for %@ · usually %@" = "夜览 %@ · %@ · 平时 %@";
 "Night Shift cannot be read right now; your choice is kept. " = "目前无法读取夜览；你的选择已保留。";
@@ -273,8 +255,6 @@
 "Night Shift off until %@" = "夜览关闭至 %@";
 "Night Shift on" = "夜览开";
 "Night Shift unavailable" = "夜览不可用";
-"Night Shift: Off" = "夜览：关";
-"Night Shift: On" = "夜览：开";
 "No account, no analytics, nothing leaves your Mac. The website in front is known to the app only for as long as it is in front, then forgotten: never sent anywhere, never written to disk. And because Less Pull changes the display, not the picture, screenshots, recordings and screen sharing keep their normal colors." = "没有账户，没有统计，什么都不会离开你的 Mac。前台网站只在它位于前台时被应用知晓，之后即忘记：从不发送，从不写入磁盘。而且 Less Pull 改变的是显示器而不是画面，所以截屏、录屏和屏幕共享都保持正常颜色。";
 "no disk" = "无磁盘";
 "No exceptions yet. Add an app and choose how it should look." = "还没有单独设置。添加一个应用，选择它的样子。";
@@ -286,7 +266,6 @@
 "Not now" = "暂不";
 "Not set up yet" = "尚未设置";
 "Not today" = "今天不了";
-"of %@" = "/ %@";
 "Off" = "关";
 "off" = "关";
 "Off for 1 hour" = "关闭 1 小时";
@@ -295,8 +274,6 @@
 "Off until morning · %@" = "关闭至早晨 · %@";
 "Off until Night Shift changes" = "关闭至夜览切换";
 "Off: when the session ends, the panel offers only Keep going and Leave quietly." = "关：专注结束时，面板只提供“继续”和“就这样”。";
-"Offer a call back when I leave" = "我离开时提供唤回";
-"Offered when you choose “Leaving now…”. Less Pull calls you back once, then the session is over." = "选择“离开一会儿”时提供。Less Pull 会唤回你一次，之后专注时段结束。";
 "OK" = "好";
 "On" = "开";
 "on" = "开";
@@ -306,7 +283,6 @@
 "On: warmth comes with Night Shift in the evening and leaves with it in the morning. Off: warmth stays all day." = "开：暖色在傍晚随夜览而来，清晨随它而去。关：暖色全天保持。";
 "Once a day, Less Pull asks GitHub whether a newer build exists for your macOS. When one is ready, the icon shows a small dot and the menu offers “Install update”. Nothing about you is sent. You can turn this off under Settings → About." = "每天一次，Less Pull 向 GitHub 询问是否有适合你的 macOS 的新构建。有准备好的版本时，图标会显示一个小点，菜单中出现“安装更新”。不会发送任何关于你的信息。可在 设置 → 关于 中关闭。";
 "Once a day, Less Pull asks GitHub whether a newer build exists. Nothing about you is sent." = "Less Pull 每天向 GitHub 询问一次是否有新构建。不会发送任何关于你的信息。";
-"Once a day, Less Pull asks GitHub whether a newer build exists for your macOS version. Nothing about you is sent, and you can turn this off." = "每天一次，Less Pull 向 GitHub 询问是否有适合你的 macOS 版本的新构建。不会发送任何关于你的信息，而且可以关闭。";
 "One display is connected. With more, each one gets its own choice here." = "已连接一台显示器。接入更多后，每台都会在这里有自己的选项。";
 "Open a new GitHub issue with the technical details filled in." = "新建一个已填好技术细节的 GitHub Issue。";
 "Open all Less Pull settings, exceptions and help." = "打开 Less Pull 的全部设置、单独设置和帮助。";
@@ -421,8 +397,7 @@
 "Something not working?" = "有什么不正常？";
 "Sound" = "提示音";
 "Start %ld min" = "开始 %ld 分钟";
-"Start a session from the menu: a stretch of focused work with a gentle end. The icon shows the minutes left. At the end comes a warm glow and a soft gong, nothing to click away, and the count goes on so you can see how far you stretch. When you leave, it can call you back once." = "从菜单开始专注时段：一段温和收尾的专注工作。图标显示剩余分钟。结束时有温暖的光晕和轻柔的锣声，无需关闭任何东西，计数继续，让你看到自己延长了多久。你离开时，它可以唤回你一次。";
-"Start a session…" = "开始专注…";
+"Start a session from the menu: a stretch of focused work with a gentle end. The icon shows the minutes left. At the end comes a warm glow and a soft gong, nothing to click away, and the count goes on so you can see how far you stretch. Need a break? Less Pull calls you back once." = "从菜单开始专注时段：一段温和收尾的专注工作。图标显示剩余分钟。结束时有温暖的光晕和轻柔的锣声，无需关闭任何东西，计数继续，让你看到自己延长了多久。想休息时，Less Pull 会唤回你一次。";
 "Stop quietly" = "安静结束";
 "Strokes: three gong strokes at the end, two rising notes for the call back. Chords: each as one soft chord. Both are tuned to 432 Hz and the solfeggio tones." = "敲击：结束时三声锣，唤回时两个上行音。和弦：各为一个柔和的和弦。两者都调到 432 Hz 和唱名音。";
 "Strokes" = "敲击";
@@ -438,8 +413,6 @@
 "Technical details for troubleshooting." = "用于排查问题的技术细节。";
 "Tell a friend" = "告诉朋友";
 "This shortcut could not be set; another app may be using it. Click to choose another." = "无法设置此快捷键；可能已被其他应用使用。点按选择另一个。";
-"That was %@." = "这次是 %@。";
-"That was %ld minute%@." = "这次是 %ld 分钟%@。";
 "That was 25 minutes." = "这次是 25 分钟。";
 "That was 30 minutes." = "这次是 30 分钟。";
 "The display change could not be confirmed" = "未能确认显示器更改";
@@ -455,7 +428,6 @@
 "The previous page." = "上一页。";
 "The Safari extension is not in this build" = "此构建不包含 Safari 扩展";
 "The screen, quieter" = "屏幕，更安静";
-"the screenshot," = "截屏，";
 "The short tour from the first launch, again." = "首次启动时的简短导览，再看一次。";
 "The thank-you card with the ways to support Less Pull." = "列出支持 Less Pull 方式的感谢卡片。";
 "The Toggle Grayscale shortcut" = "切换灰度的快捷键";
@@ -477,8 +449,6 @@
 "Turn Grayscale off for…" = "暂时恢复彩色…";
 "Turn Night Shift back on" = "重新开启夜览";
 "Turn Night Shift off for…" = "暂时关闭夜览…";
-"Turn Off" = "关闭";
-"Turn On" = "开启";
 "Turned off while you hold the Peek shortcut." = "按住“一瞥”快捷键期间关闭。";
 "Night Shift off for a while, then back on if your schedule wants it. Grayscale stays as it is. Quitting Less Pull ends it early." = "暂时关闭夜览，之后若时间表需要就重新开启。灰度保持不变。退出 Less Pull 会提前结束。";
 "Turns Night Shift on or off now. Your schedule in System Settings stays, and takes over again at its next change." = "现在开关夜览。系统设置中的时间表保持不变，并在下次切换时重新接手。";
@@ -602,3 +572,36 @@
 "Default Night Shift" = "默认夜览";
 "Night Shift off for" = "暂时关闭夜览";
 "Night Shift off for  ›" = "暂时关闭夜览  ›";
+"Pausing" = "暂停";
+"Quitting" = "退出";
+"Updates" = "更新";
+"Pointer still in color" = "指针仍是彩色";
+"On some displays, macOS draws the arrow pointer on top of the picture, so Grayscale and warmth miss it. Make the pointer one notch larger in System Settings → Accessibility → Display → Pointer size, and it turns quiet too. “Pointer Size…” in the Displays section of the General tab opens this setting." = "在某些显示器上，macOS 把指针画在画面之上，灰度和暖色因此碰不到它。在 系统设置 → 辅助功能 → 显示 → 指针大小 中把指针调大一档，它也会安静下来。“通用”标签页显示器部分的“指针大小…”可打开这项设置。";
+"Guide" = "使用指南";
+"Support" = "支持";
+"Automatically" = "自动";
+"Once a day, Less Pull asks GitHub whether a newer build exists for your macOS version. That is its only connection, and nothing about you is sent." = "每天一次，Less Pull 向 GitHub 询问是否有适合你的 macOS 版本的新构建。这是它唯一的联网，不会发送任何关于你的信息。";
+"Session" = "专注";
+"Break" = "休息";
+"A break with one call back. How long?" = "休息一下，到时唤回你一次。多久？";
+"A session is focused work with a gentle end. A break is no session: Less Pull calls you back once after the time you choose." = "专注时段是一段温和收尾的专注工作。休息不是专注时段：到了你选的时间，Less Pull 唤回你一次。";
+"Session or break" = "专注或休息";
+"Session or break…" = "专注或休息…";
+"Break · back in %@ min" = "休息 · 回来还需 %@ 分钟";
+"on a break, back in" = "休息中，回来还需";
+"Offer a break when a session ends" = "专注结束时提供休息";
+"Taking a break? Call me back in" = "休息一下？多久后唤回我";
+"Exception settings" = "管理单独设置";
+"All app exceptions, under Settings → Apps." = "所有应用的单独设置，在 设置 → 应用 中。";
+"All website exceptions, under Settings → Websites." = "所有网站的单独设置，在 设置 → 网站 中。";
+"of 1 minute" = "共 1 分钟";
+"of %ld minutes" = "共 %ld 分钟";
+"That was 1 minute." = "这次 1 分钟。";
+"That was %ld minutes." = "这次 %ld 分钟。";
+"1 minute past." = "超时 1 分钟。";
+"%ld minutes past." = "超时 %ld 分钟。";
+"Changes apply right away." = "更改立即生效。";
+"the screenshot, in color" = "截屏是彩色的";
+"Minutes, separated by commas. They appear when you start a session." = "分钟数，用逗号分隔。开始专注时显示。";
+"Minutes, separated by commas. Offered for a break and when a session ends." = "分钟数，用逗号分隔。休息时和专注结束时提供。";
+"Offered for a break and when a session ends. Less Pull calls you back once." = "休息时和专注结束时提供。Less Pull 会唤回你一次。";

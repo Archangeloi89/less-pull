@@ -1,7 +1,5 @@
 /* Less Pull, Nederlands. Engels is de sleutel. Je-vorm, zoals macOS. Termen: Grijstinten, Extra warmte, Night Shift, Kleurblik (Peek), Sessie, Uitzondering, Sneltoets, menubalk, scherm, zonder filter (plain display). Experimenteel: met zorg geschreven, nog niet nagelezen door iemand die de taal spreekt. */
 
-"   Off" = "   Uit";
-"   Use default" = "   Standaard";
 " (main)" = " (hoofd)";
 " and " = " en ";
 " Suggest picks %@, which no macOS shortcut uses." = " ‘Stel voor’ kiest %@, die geen enkele macOS-sneltoets gebruikt.";
@@ -31,8 +29,6 @@
 "%@: what it shows" = "%@: wat het toont";
 "%@\n%@\nClick for Grayscale, Extra Warmth and Night Shift." = "%@\n%@\nKlik voor Grijstinten, Extra warmte en Night Shift.";
 "%ld min" = "%ld min";
-"%ld minute%@" = "%ld min%@";
-"%ld minute%@ past." = "%ld min%@ over tijd.";
 "%ld minutes" = "%ld minuten";
 "%ld minutes. Right-click to remove it from the presets." = "%ld minuten. Rechtsklik om het uit de keuzes te halen.";
 "%ld of 5" = "%ld van 5";
@@ -50,7 +46,7 @@
 "A peek, when you need it" = "Een kleurblik, als je die nodig hebt";
 "A quieter glow and sound while you stay past the end, until you leave or end the session." = "Een zachtere gloed en een zachter geluid zolang je na het einde blijft, tot je weggaat of de sessie beëindigt.";
 "A session" = "Een sessie";
-"A session is a stretch of focused work with a gentle end. Start one from the menu. The icon shows the minutes left; at the end comes a soft glow and a calm sound, and the count goes on so you can finish your thought. When you leave, Less Pull can call you back once." = "Een sessie is een tijd van geconcentreerd werk die zacht afloopt. Je start er een vanuit het menu. Het symbool toont de minuten die nog over zijn; aan het einde komen een zachte gloed en een rustig geluid, en de teller loopt door zodat je je gedachte kunt afmaken. Als je weggaat, kan Less Pull je één keer terugroepen.";
+"A session is a stretch of focused work with a gentle end. Start one from the menu. The icon shows the minutes left; at the end comes a soft glow and a calm sound, and the count goes on so you can finish your thought. Need a break? Less Pull calls you back once." = "Een sessie is een tijd van geconcentreerd werk die zacht afloopt. Je start er een vanuit het menu. Het symbool toont de minuten die nog over zijn; aan het einde komen een zachte gloed en een rustig geluid, en de teller loopt door zodat je je gedachte kunt afmaken. Even een adempauze? Less Pull roept je één keer terug.";
 "A session, with a gentle end" = "Een sessie die zacht afloopt";
 "A session. How long?" = "Een sessie. Hoe lang?";
 "A short guide to Less Pull." = "Een korte gids voor Less Pull.";
@@ -77,8 +73,6 @@
 "Pointer still in color on one display? macOS draws the arrow on top there. Make the pointer one notch larger and it turns quiet too." = "Blijft de aanwijzer op één scherm in kleur? Daar tekent macOS de pijl bovenop. Zet de aanwijzer één stap groter en ook hij wordt rustig.";
 "Ask GitHub now whether a newer version exists." = "Vraagt nu aan GitHub of er een nieuwere versie is.";
 "At the end" = "Aan het einde";
-"Away · back in %@ min" = "Weg · terug over %@ min";
-"away, back in" = "weg, terug over";
 "Back" = "Terug";
 "Browser Extension" = "Browserextensie";
 "Browser Extension (Firefox)" = "Browserextensie (Firefox)";
@@ -107,7 +101,6 @@
 "Click the circle in the menu bar. Grayscale takes the color out of everything. Warmth is the second step, and not decoration: from amber to red it takes the blue out of the light, makes the screen quieter still, and puts you back in charge of what light reaches your eyes — and through them, your mind." = "Klik op de cirkel in de menubalk. Grijstinten halen de kleur uit alles. Warmte is de tweede stap, en geen versiering: van amber tot rood haalt ze het blauw uit het licht, maakt het scherm nog rustiger, en jij bepaalt weer zelf welk licht je ogen bereikt, en daardoor je hoofd.";
 "Click, then press the keys you want. Hold them to see the plain display; let go to return." = "Klik en druk dan op de toetsen die je wilt. Houd ze ingedrukt om het scherm zonder filter te zien; laat los en het komt terug.";
 "Click, then press the keys you want. Press them anywhere to turn Grayscale on or off." = "Klik en druk dan op de toetsen die je wilt. Druk ze overal in om grijstinten aan of uit te zetten.";
-"Clicking the menu-bar icon" = "Klik op het menubalksymbool";
 "Close" = "Sluit";
 "Close the tour." = "Sluit de rondleiding.";
 "Color" = "Kleur";
@@ -132,8 +125,6 @@
 "Default Extra Warmth" = "Standaard extra warmte";
 "Default Grayscale" = "Standaard grijstinten";
 "Default keeps what the site inherits." = "‘Standaard’ houdt wat de site overneemt.";
-"Default Night Shift: Off" = "Standaard Night Shift: uit";
-"Default Night Shift: On" = "Standaard Night Shift: aan";
 "Diagnostics" = "Diagnose";
 "Diagnostics shows technical details you can include when asking for help. Nothing is sent anywhere." = "De diagnose toont technische details die je kunt meesturen als je hulp vraagt. Er wordt niets verstuurd.";
 "Diagnostics…" = "Diagnose…";
@@ -141,7 +132,6 @@
 "Display options show up by themselves when a second display is connected. Tick this to see them with one display too." = "De schermopties verschijnen vanzelf zodra er een tweede scherm is aangesloten. Vink dit aan om ze ook met één scherm te zien.";
 "Displays" = "Schermen";
 "Done" = "Klaar";
-"Don’t show again" = "Niet meer tonen";
 "Don’t show explanations" = "Uitleg verbergen";
 "Don’t show this again" = "Niet meer tonen";
 "Each display can follow what is on it: the app you are using sets its own display, and every other display follows the app on top there. Peek has its own choice under “Shortcuts”." = "Elk scherm kan volgen wat erop staat: de app die je gebruikt bepaalt zijn eigen scherm, en elk ander scherm volgt de app die daar bovenop ligt. De kleurblik heeft een eigen keuze onder ‘Sneltoetsen’.";
@@ -155,10 +145,7 @@
 "Night Shift comes back now if your schedule wants it on. The app you are using keeps its own Night Shift setting." = "Night Shift komt nu terug als je schema het aan wil. De app die je gebruikt houdt zijn eigen Night Shift-instelling.";
 "Night Shift stays off for now, because your schedule has it off at this hour." = "Night Shift blijft voorlopig uit, omdat je schema het op dit uur uit heeft.";
 "English and German are read line by line. A language marked experimental is written with care but not yet checked by a native speaker. If something sounds off, “Report a Problem…” under “About” reaches me." = "Engels en Duits zijn regel voor regel nagelezen. Een taal met de toevoeging ‘experimenteel’ is met zorg geschreven, maar nog niet nagelezen door iemand die de taal spreekt. Klinkt er iets vreemd, dan bereikt ‘Meld een bug’ onder ‘Info’ mij.";
-"Everything else stays on this Mac: no account, no analytics, no servers. The browser extension talks only to the app." = "Al het andere blijft op deze Mac: geen account, geen statistieken, geen servers. De browserextensie praat alleen met de app.";
 "Exact page" = "Precies deze pagina";
-"Exception for %@" = "Uitzondering voor %@";
-"Exception for Photos ›" = "Uitzondering voor Foto’s ›";
 "Exceptions for apps" = "Uitzonderingen voor apps";
 "Exceptions for websites" = "Uitzonderingen voor websites";
 "Extension connected in %@." = "Extensie verbonden in %@.";
@@ -214,7 +201,6 @@
 "How loud the session sounds are. Let go to hear it." = "Hoe hard de sessiegeluiden klinken. Laat los om het te horen.";
 "Night Shift turned off for a while stays off, even for an app that turns it on. Grayscale, warmth and Night Shift all off show the plain display." = "Zet je Night Shift een tijdje uit, dan blijft het uit, ook bij een app die het aanzet. Grijstinten, warmte en Night Shift allemaal uit tonen het scherm zonder filter.";
 "I’m back" = "Ik ben terug";
-"in color" = "in kleur";
 "Turn Grayscale off for an hour, four hours, or until Night Shift changes next, from the menu or in Settings. It comes back by itself." = "Ga een uur, vier uur of tot de volgende wissel van Night Shift terug naar kleur, via het menu of in Instellingen. Het grijs komt vanzelf terug.";
 "Install %@ first; this list notices it by itself. Then come back to Set up…" = "Installeer eerst %@; deze lijst merkt het vanzelf. Kom dan terug bij ‘Stel in…’.";
 "Install Browser Extension" = "Browserextensie installeren";
@@ -236,7 +222,6 @@
 "Leave quietly" = "Hier laten";
 "Leaving now." = "Ik ga nu weg.";
 "Leaving now…" = "Ik ga nu weg…";
-"Leaving? Call me back in" = "Ga je weg? Roep me terug over";
 "Left-clicking the menu-bar icon" = "Linksklik op het symbool";
 "Less" = "Minder";
 "Less Pull" = "Less Pull";
@@ -254,15 +239,12 @@
 "Licenses" = "Licenties";
 "Login setting needs attention" = "De inloginstelling verdient een blik";
 "Looks again for installed browsers. The list also checks by itself every few seconds while this window is open." = "Zoekt opnieuw naar geïnstalleerde browsers. De lijst controleert ook zelf om de paar seconden zolang dit venster open is.";
-"Minutes, separated by commas. Offered when you leave a session; Less Pull calls you back once." = "Minuten, gescheiden door komma’s. Worden aangeboden als je een sessie verlaat; Less Pull roept je één keer terug.";
-"Minutes, separated by commas. They appear under “Start a session…” in the menu." = "Minuten, gescheiden door komma’s. Ze verschijnen in het menu onder ‘Start een sessie’.";
 "More" = "Meer";
 "More in Settings…" = "Meer in Instellingen…";
 "Natural Colors" = "Natuurlijke kleuren";
 "news.example" = "news.example";
 "Next" = "Volgende";
 "Night Shift" = "Night Shift";
-"Night Shift  ›" = "Night Shift  ›";
 "Night Shift %@" = "Night Shift %@";
 "Night Shift %@ for %@ · usually %@" = "Night Shift %@ voor %@ · normaal %@";
 "Night Shift cannot be read right now; your choice is kept. " = "Night Shift kan nu niet worden gelezen; je keuze blijft bewaard. ";
@@ -273,8 +255,6 @@
 "Night Shift off until %@" = "Night Shift uit tot %@";
 "Night Shift on" = "Night Shift aan";
 "Night Shift unavailable" = "Night Shift niet beschikbaar";
-"Night Shift: Off" = "Night Shift: uit";
-"Night Shift: On" = "Night Shift: aan";
 "No account, no analytics, nothing leaves your Mac. The website in front is known to the app only for as long as it is in front, then forgotten: never sent anywhere, never written to disk. And because Less Pull changes the display, not the picture, screenshots, recordings and screen sharing keep their normal colors." = "Geen account, geen statistieken, niets verlaat je Mac. Welke website vooraan staat, weet de app alleen op dat moment, daarna is het vergeten: nooit ergens heen gestuurd, nooit naar schijf geschreven. En omdat Less Pull het scherm verandert en niet het beeld, houden schermafbeeldingen, opnames en schermdeling hun gewone kleuren.";
 "no disk" = "geen schijf";
 "No exceptions yet. Add an app and choose how it should look." = "Nog geen uitzonderingen. Voeg een app toe en kies hoe hij eruit moet zien.";
@@ -286,7 +266,6 @@
 "Not now" = "Niet nu";
 "Not set up yet" = "Nog niet ingesteld";
 "Not today" = "Vandaag niet";
-"of %@" = "van %@";
 "Off" = "Uit";
 "off" = "uit";
 "Off for 1 hour" = "1 uur uit";
@@ -295,8 +274,6 @@
 "Off until morning · %@" = "Uit tot de ochtend · %@";
 "Off until Night Shift changes" = "Uit tot Night Shift wisselt";
 "Off: when the session ends, the panel offers only Keep going and Leave quietly." = "Uit: als de sessie eindigt, biedt het paneel alleen ‘Doorgaan’ en ‘Hier laten’.";
-"Offer a call back when I leave" = "Terugroepen aanbieden als ik wegga";
-"Offered when you choose “Leaving now…”. Less Pull calls you back once, then the session is over." = "Verschijnt als je ‘Ik ga nu weg’ kiest. Less Pull roept je één keer terug, daarna is de sessie voorbij.";
 "OK" = "OK";
 "On" = "Aan";
 "on" = "aan";
@@ -306,7 +283,6 @@
 "On: warmth comes with Night Shift in the evening and leaves with it in the morning. Off: warmth stays all day." = "Aan: de warmte komt ’s avonds met Night Shift en gaat ’s ochtends met hem mee. Uit: de warmte blijft de hele dag.";
 "Once a day, Less Pull asks GitHub whether a newer build exists for your macOS. When one is ready, the icon shows a small dot and the menu offers “Install update”. Nothing about you is sent. You can turn this off under Settings → About." = "Eén keer per dag vraagt Less Pull aan GitHub of er een nieuwere build is voor jouw macOS. Staat er een klaar, dan toont het symbool een stipje en biedt het menu ‘Update installeren’. Over jou wordt niets verstuurd. Zet het uit onder Instellingen → Info.";
 "Once a day, Less Pull asks GitHub whether a newer build exists. Nothing about you is sent." = "Eén keer per dag vraagt Less Pull aan GitHub of er een nieuwere build is. Over jou wordt niets verstuurd.";
-"Once a day, Less Pull asks GitHub whether a newer build exists for your macOS version. Nothing about you is sent, and you can turn this off." = "Eén keer per dag vraagt Less Pull aan GitHub of er een nieuwere build is voor jouw macOS-versie. Over jou wordt niets verstuurd, en je kunt dit uitzetten.";
 "One display is connected. With more, each one gets its own choice here." = "Er is één scherm aangesloten. Met meer krijgt hier elk scherm zijn eigen keuze.";
 "Open a new GitHub issue with the technical details filled in." = "Opent een nieuw GitHub-issue met de technische details al ingevuld.";
 "Open all Less Pull settings, exceptions and help." = "Opent alle instellingen, uitzonderingen en de help van Less Pull.";
@@ -421,8 +397,7 @@
 "Something not working?" = "Werkt er iets niet?";
 "Sound" = "Geluid";
 "Start %ld min" = "Start %ld min";
-"Start a session from the menu: a stretch of focused work with a gentle end. The icon shows the minutes left. At the end comes a warm glow and a soft gong, nothing to click away, and the count goes on so you can see how far you stretch. When you leave, it can call you back once." = "Start een sessie vanuit het menu: een tijd van geconcentreerd werk die zacht afloopt. Het symbool toont de minuten die nog over zijn. Aan het einde een warme gloed en een zachte gong, niets om weg te klikken, en de teller loopt door zodat je ziet hoe ver je komt. Als je weggaat, kan hij je één keer terugroepen.";
-"Start a session…" = "Start een sessie…";
+"Start a session from the menu: a stretch of focused work with a gentle end. The icon shows the minutes left. At the end comes a warm glow and a soft gong, nothing to click away, and the count goes on so you can see how far you stretch. Need a break? Less Pull calls you back once." = "Start een sessie vanuit het menu: een tijd van geconcentreerd werk die zacht afloopt. Het symbool toont de minuten die nog over zijn. Aan het einde een warme gloed en een zachte gong, niets om weg te klikken, en de teller loopt door zodat je ziet hoe ver je komt. Even een adempauze? Less Pull roept je één keer terug.";
 "Stop quietly" = "Stil stoppen";
 "Strokes: three gong strokes at the end, two rising notes for the call back. Chords: each as one soft chord. Both are tuned to 432 Hz and the solfeggio tones." = "Slagen: drie gongslagen aan het einde, twee stijgende tonen voor het terugroepen. Akkoorden: elk als één zacht akkoord. Beide gestemd op 432 Hz en de solfeggio-tonen.";
 "Strokes" = "Slagen";
@@ -438,8 +413,6 @@
 "Technical details for troubleshooting." = "Technische details om problemen op te lossen.";
 "Tell a friend" = "Vertel het iemand";
 "This shortcut could not be set; another app may be using it. Click to choose another." = "Deze sneltoets kon niet worden ingesteld; misschien gebruikt een andere app hem. Klik om een andere te kiezen.";
-"That was %@." = "Dat was %@.";
-"That was %ld minute%@." = "Dat was %ld min%@.";
 "That was 25 minutes." = "Dat was 25 minuten.";
 "That was 30 minutes." = "Dat was 30 minuten.";
 "The display change could not be confirmed" = "De schermwijziging kon niet worden bevestigd";
@@ -455,7 +428,6 @@
 "The previous page." = "De vorige pagina.";
 "The Safari extension is not in this build" = "De Safari-extensie zit niet in deze build";
 "The screen, quieter" = "Een rustiger scherm";
-"the screenshot," = "de screenshot,";
 "The short tour from the first launch, again." = "De korte rondleiding van de eerste start, opnieuw.";
 "The thank-you card with the ways to support Less Pull." = "De bedankkaart met de manieren om Less Pull te steunen.";
 "The Toggle Grayscale shortcut" = "De sneltoets voor grijstinten";
@@ -477,8 +449,6 @@
 "Turn Grayscale off for…" = "Terug naar kleur voor…";
 "Turn Night Shift back on" = "Zet Night Shift weer aan";
 "Turn Night Shift off for…" = "Night Shift uit voor…";
-"Turn Off" = "Zet uit";
-"Turn On" = "Zet aan";
 "Turned off while you hold the Peek shortcut." = "Uit zolang je de sneltoets voor de kleurblik ingedrukt houdt.";
 "Night Shift off for a while, then back on if your schedule wants it. Grayscale stays as it is. Quitting Less Pull ends it early." = "Night Shift een tijdje uit, daarna weer aan als je schema dat wil. Grijstinten blijven zoals ze zijn. Less Pull stoppen beëindigt de pauze eerder.";
 "Turns Night Shift on or off now. Your schedule in System Settings stays, and takes over again at its next change." = "Zet Night Shift nu aan of uit. Je schema in Systeeminstellingen blijft en neemt het bij de volgende wissel weer over.";
@@ -602,3 +572,36 @@
 "Default Night Shift" = "Standaard Night Shift";
 "Night Shift off for" = "Night Shift uit voor";
 "Night Shift off for  ›" = "Night Shift uit voor  ›";
+"Pausing" = "Pauzeren";
+"Quitting" = "Stoppen";
+"Updates" = "Updates";
+"Pointer still in color" = "Aanwijzer blijft in kleur";
+"On some displays, macOS draws the arrow pointer on top of the picture, so Grayscale and warmth miss it. Make the pointer one notch larger in System Settings → Accessibility → Display → Pointer size, and it turns quiet too. “Pointer Size…” in the Displays section of the General tab opens this setting." = "Op sommige schermen tekent macOS de aanwijzer bovenop het beeld, zodat grijstinten en warmte hem niet bereiken. Zet de aanwijzer één stap groter in Systeeminstellingen → Toegankelijkheid → Beeldscherm → Aanwijzergrootte, en ook hij wordt rustig. ‘Aanwijzergrootte…’ in het gedeelte Schermen van het tabblad Algemeen opent deze instelling.";
+"Guide" = "Handleiding";
+"Support" = "Steunen";
+"Automatically" = "Automatisch";
+"Once a day, Less Pull asks GitHub whether a newer build exists for your macOS version. That is its only connection, and nothing about you is sent." = "Eén keer per dag vraagt Less Pull aan GitHub of er een nieuwere build is voor jouw macOS-versie. Dat is zijn enige verbinding, en over jou wordt niets verstuurd.";
+"Session" = "Sessie";
+"Break" = "Adempauze";
+"A break with one call back. How long?" = "Een adempauze, één keer teruggeroepen. Hoe lang?";
+"A session is focused work with a gentle end. A break is no session: Less Pull calls you back once after the time you choose." = "Een sessie is geconcentreerd werk dat zacht afloopt. Een adempauze is geen sessie: Less Pull roept je één keer terug na de tijd die je kiest.";
+"Session or break" = "Sessie of adempauze";
+"Session or break…" = "Sessie of adempauze…";
+"Break · back in %@ min" = "Adempauze · terug over %@ min";
+"on a break, back in" = "adempauze, terug over";
+"Offer a break when a session ends" = "Aan het eind van een sessie een adempauze aanbieden";
+"Taking a break? Call me back in" = "Adempauze? Roep me terug over";
+"Exception settings" = "Instellingen van de uitzondering";
+"All app exceptions, under Settings → Apps." = "Alle app-uitzonderingen, onder Instellingen → Apps.";
+"All website exceptions, under Settings → Websites." = "Alle website-uitzonderingen, onder Instellingen → Websites.";
+"of 1 minute" = "van 1 minuut";
+"of %ld minutes" = "van %ld minuten";
+"That was 1 minute." = "Dat was 1 minuut.";
+"That was %ld minutes." = "Dat waren %ld minuten.";
+"1 minute past." = "1 minuut over tijd.";
+"%ld minutes past." = "%ld minuten over tijd.";
+"Changes apply right away." = "Wijzigingen gelden meteen.";
+"the screenshot, in color" = "de screenshot, in kleur";
+"Minutes, separated by commas. They appear when you start a session." = "Minuten, gescheiden door komma’s. Ze verschijnen als je een sessie start.";
+"Minutes, separated by commas. Offered for a break and when a session ends." = "Minuten, gescheiden door komma’s. Aangeboden voor een adempauze en aan het einde van een sessie.";
+"Offered for a break and when a session ends. Less Pull calls you back once." = "Aangeboden voor een adempauze en aan het einde van een sessie. Less Pull roept je één keer terug.";

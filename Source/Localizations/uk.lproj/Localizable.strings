@@ -1,7 +1,5 @@
 /* Less Pull, українська. Ключ — англійський текст. Звертання на «ви», як у macOS. Терміни: Відтінки сірого, Тепло (Extra Warmth), Night Shift, Погляд у кольорі (Peek), Сесія, Виняток, Сполучення клавіш, рядок меню, екран, без фільтра (plain display). Експериментальна: написана уважно, але ще не вичитана носієм мови. */
 
-"   Off" = "   Вимк";
-"   Use default" = "   Типово";
 " (main)" = " (основний)";
 " and " = " і ";
 " Suggest picks %@, which no macOS shortcut uses." = " «Підібрати» обирає %@: його не використовує жодне сполучення macOS.";
@@ -31,8 +29,6 @@
 "%@: what it shows" = "%@: що показує";
 "%@\n%@\nClick for Grayscale, Extra Warmth and Night Shift." = "%@\n%@\nНатисніть: відтінки сірого, тепло та Night Shift.";
 "%ld min" = "%ld хв";
-"%ld minute%@" = "%ld хв%@";
-"%ld minute%@ past." = "%ld хв%@ понад час.";
 "%ld minutes" = "%ld хвилин";
 "%ld minutes. Right-click to remove it from the presets." = "%ld хвилин. Правий клік прибирає зі збережених.";
 "%ld of 5" = "%ld з 5";
@@ -50,7 +46,7 @@
 "A peek, when you need it" = "Погляд у кольорі, коли він потрібен";
 "A quieter glow and sound while you stay past the end, until you leave or end the session." = "Тихіші світіння і звук, поки ви лишаєтеся понад час, доки не підете або не завершите сесію.";
 "A session" = "Сесія";
-"A session is a stretch of focused work with a gentle end. Start one from the menu. The icon shows the minutes left; at the end comes a soft glow and a calm sound, and the count goes on so you can finish your thought. When you leave, Less Pull can call you back once." = "Сесія — це відрізок зосередженої роботи з м’яким завершенням. Запускається з меню. Значок показує, скільки хвилин лишилося; наприкінці приходять м’яке світіння і спокійний звук, а лік іде далі, щоб ви могли закінчити думку. Коли ви йдете, Less Pull може один раз покликати вас назад.";
+"A session is a stretch of focused work with a gentle end. Start one from the menu. The icon shows the minutes left; at the end comes a soft glow and a calm sound, and the count goes on so you can finish your thought. Need a break? Less Pull calls you back once." = "Сесія — це відрізок зосередженої роботи з м’яким завершенням. Запускається з меню. Значок показує, скільки хвилин лишилося; наприкінці приходять м’яке світіння і спокійний звук, а лік іде далі, щоб ви могли закінчити думку. Потрібна перерва? Less Pull один раз покличе вас назад.";
 "A session, with a gentle end" = "Сесія з м’яким завершенням";
 "A session. How long?" = "Сесія. На скільки?";
 "A short guide to Less Pull." = "Короткий посібник із Less Pull.";
@@ -77,8 +73,6 @@
 "Pointer still in color on one display? macOS draws the arrow on top there. Make the pointer one notch larger and it turns quiet too." = "Вказівник на одному екрані досі кольоровий? Там macOS малює стрілку поверх. Зробіть вказівник на одну поділку більшим — і він теж заспокоїться.";
 "Ask GitHub now whether a newer version exists." = "Запитати GitHub просто зараз, чи є новіша версія.";
 "At the end" = "Наприкінці";
-"Away · back in %@ min" = "Відійшли · назад за %@ хв";
-"away, back in" = "відійшли, назад за";
 "Back" = "Назад";
 "Browser Extension" = "Розширення браузера";
 "Browser Extension (Firefox)" = "Розширення браузера (Firefox)";
@@ -107,7 +101,6 @@
 "Click the circle in the menu bar. Grayscale takes the color out of everything. Warmth is the second step, and not decoration: from amber to red it takes the blue out of the light, makes the screen quieter still, and puts you back in charge of what light reaches your eyes — and through them, your mind." = "Натисніть кружечок у рядку меню. Відтінки сірого забирають колір у всього. Тепло — другий крок, і це не прикраса: від бурштинового до червоного воно прибирає зі світла синій, робить екран ще спокійнішим і повертає вам право вирішувати, яке світло потрапляє у ваші очі — а через них у голову.";
 "Click, then press the keys you want. Hold them to see the plain display; let go to return." = "Натисніть, потім введіть потрібні клавіші. Утримуйте їх, щоб побачити екран без фільтра; відпустіть — і все повернеться.";
 "Click, then press the keys you want. Press them anywhere to turn Grayscale on or off." = "Натисніть, потім введіть потрібні клавіші. Натискайте їх будь-де, щоб вмикати й вимикати відтінки сірого.";
-"Clicking the menu-bar icon" = "Клік по значку в рядку меню";
 "Close" = "Закрити";
 "Close the tour." = "Закрити знайомство.";
 "Color" = "Колір";
@@ -132,8 +125,6 @@
 "Default Extra Warmth" = "Типове тепло";
 "Default Grayscale" = "Типові відтінки сірого";
 "Default keeps what the site inherits." = "«Авто» лишає те, що сайт успадковує.";
-"Default Night Shift: Off" = "Night Shift типово: вимк";
-"Default Night Shift: On" = "Night Shift типово: увімк";
 "Diagnostics" = "Діагностика";
 "Diagnostics shows technical details you can include when asking for help. Nothing is sent anywhere." = "Діагностика показує технічні відомості, які можна додати до прохання про допомогу. Нікуди нічого не надсилається.";
 "Diagnostics…" = "Діагностика…";
@@ -141,7 +132,6 @@
 "Display options show up by themselves when a second display is connected. Tick this to see them with one display too." = "Налаштування екранів з’являються самі, коли під’єднано другий екран. Позначте, щоб бачити їх і з одним.";
 "Displays" = "Екрани";
 "Done" = "Готово";
-"Don’t show again" = "Більше не показувати";
 "Don’t show explanations" = "Сховати пояснення";
 "Don’t show this again" = "Більше не показувати";
 "Each display can follow what is on it: the app you are using sets its own display, and every other display follows the app on top there. Peek has its own choice under “Shortcuts”." = "Кожен екран може йти за тим, що на ньому: програма, якою ви користуєтеся, визначає свій екран, а кожен інший екран іде за програмою, яка там зверху. У погляду в кольорі своє налаштування в «Сполученнях».";
@@ -155,10 +145,7 @@
 "Night Shift comes back now if your schedule wants it on. The app you are using keeps its own Night Shift setting." = "Night Shift повернеться зараз, якщо розклад хоче його ввімкнути. У програми, якою ви користуєтеся, лишається своє налаштування Night Shift.";
 "Night Shift stays off for now, because your schedule has it off at this hour." = "Night Shift поки лишається вимкненим: у цей час розклад тримає його вимкненим.";
 "English and German are read line by line. A language marked experimental is written with care but not yet checked by a native speaker. If something sounds off, “Report a Problem…” under “About” reaches me." = "Англійську і німецьку вичитано рядок за рядком. Мова з позначкою «експериментальна» написана уважно, але носій її ще не читав. Якщо щось звучить не так, «Звіт…» на вкладці «Про програму» дійде до мене.";
-"Everything else stays on this Mac: no account, no analytics, no servers. The browser extension talks only to the app." = "Усе інше лишається на цьому Mac: ні облікового запису, ні статистики, ні серверів. Розширення браузера спілкується лише з програмою.";
 "Exact page" = "Лише ця сторінка";
-"Exception for %@" = "Виняток для %@";
-"Exception for Photos ›" = "Виняток для Фото ›";
 "Exceptions for apps" = "Винятки для програм";
 "Exceptions for websites" = "Винятки для сайтів";
 "Extension connected in %@." = "Розширення під’єднано в %@.";
@@ -214,7 +201,6 @@
 "How loud the session sounds are. Let go to hear it." = "Гучність звуків сесії. Відпустіть, щоб почути.";
 "Night Shift turned off for a while stays off, even for an app that turns it on. Grayscale, warmth and Night Shift all off show the plain display." = "Якщо вимкнути Night Shift на час, він лишиться вимкненим навіть для програми, яка його вмикає. Відтінки сірого, тепло і Night Shift, вимкнені разом, дають екран без фільтра.";
 "I’m back" = "Я повернувся";
-"in color" = "у кольорі";
 "Turn Grayscale off for an hour, four hours, or until Night Shift changes next, from the menu or in Settings. It comes back by itself." = "Поверніть колір на годину, на чотири години або до наступного перемикання Night Shift — з меню або в Параметрах. Сірий повернеться сам.";
 "Install %@ first; this list notices it by itself. Then come back to Set up…" = "Спочатку встановіть %@; список помітить його сам. Потім поверніться до «Налаштувати…».";
 "Install Browser Extension" = "Встановити розширення браузера";
@@ -236,7 +222,6 @@
 "Leave quietly" = "Лишити";
 "Leaving now." = "Я йду.";
 "Leaving now…" = "Я йду…";
-"Leaving? Call me back in" = "Ідете? Покликати за";
 "Left-clicking the menu-bar icon" = "Лівий клік по значку";
 "Less" = "Менше";
 "Less Pull" = "Less Pull";
@@ -254,15 +239,12 @@
 "Licenses" = "Ліцензії";
 "Login setting needs attention" = "Налаштування входу потребує уваги";
 "Looks again for installed browsers. The list also checks by itself every few seconds while this window is open." = "Знову шукає встановлені браузери. Поки вікно відкрите, список і сам перевіряє це кожні кілька секунд.";
-"Minutes, separated by commas. Offered when you leave a session; Less Pull calls you back once." = "Хвилини через кому. Пропонуються, коли ви йдете із сесії; Less Pull покличе вас один раз.";
-"Minutes, separated by commas. They appear under “Start a session…” in the menu." = "Хвилини через кому. Вони з’являються в меню під «Почати сесію».";
 "More" = "Більше";
 "More in Settings…" = "Більше в Параметрах…";
 "Natural Colors" = "Природні кольори";
 "news.example" = "news.example";
 "Next" = "Далі";
 "Night Shift" = "Night Shift";
-"Night Shift  ›" = "Night Shift  ›";
 "Night Shift %@" = "Night Shift %@";
 "Night Shift %@ for %@ · usually %@" = "Night Shift %@ для %@ · зазвичай %@";
 "Night Shift cannot be read right now; your choice is kept. " = "Night Shift зараз не читається; ваш вибір збережено. ";
@@ -273,8 +255,6 @@
 "Night Shift off until %@" = "Night Shift вимк до %@";
 "Night Shift on" = "Night Shift увімк";
 "Night Shift unavailable" = "Night Shift недоступний";
-"Night Shift: Off" = "Night Shift: вимк";
-"Night Shift: On" = "Night Shift: увімк";
 "No account, no analytics, nothing leaves your Mac. The website in front is known to the app only for as long as it is in front, then forgotten: never sent anywhere, never written to disk. And because Less Pull changes the display, not the picture, screenshots, recordings and screen sharing keep their normal colors." = "Ні облікового запису, ні статистики — ніщо не залишає ваш Mac. Який сайт зараз на передньому плані, програма знає лише в цю мить, а потім забуває: нікуди не надсилає, на диск не пише. А оскільки Less Pull змінює екран, а не картинку, знімки екрана, записи і спільний доступ до екрана зберігають звичайні кольори.";
 "no disk" = "без диска";
 "No exceptions yet. Add an app and choose how it should look." = "Винятків поки немає. Додайте програму і виберіть, як вона має виглядати.";
@@ -286,7 +266,6 @@
 "Not now" = "Не зараз";
 "Not set up yet" = "Ще не налаштовано";
 "Not today" = "Не сьогодні";
-"of %@" = "з %@";
 "Off" = "Вимк";
 "off" = "вимк";
 "Off for 1 hour" = "Вимк на 1 годину";
@@ -295,8 +274,6 @@
 "Off until morning · %@" = "Вимк до ранку · %@";
 "Off until Night Shift changes" = "Вимк, поки Night Shift не перемкнеться";
 "Off: when the session ends, the panel offers only Keep going and Leave quietly." = "Вимк: коли сесія закінчується, панель пропонує лише «Продовжити» і «Лишити».";
-"Offer a call back when I leave" = "Пропонувати покликати, коли йду";
-"Offered when you choose “Leaving now…”. Less Pull calls you back once, then the session is over." = "Пропонується, коли ви обираєте «Я йду». Less Pull покличе вас один раз, після цього сесія закінчена.";
 "OK" = "OK";
 "On" = "Увімк";
 "on" = "увімк";
@@ -306,7 +283,6 @@
 "On: warmth comes with Night Shift in the evening and leaves with it in the morning. Off: warmth stays all day." = "Увімк: тепло приходить разом із Night Shift увечері й іде з ним уранці. Вимк: тепло тримається весь день.";
 "Once a day, Less Pull asks GitHub whether a newer build exists for your macOS. When one is ready, the icon shows a small dot and the menu offers “Install update”. Nothing about you is sent. You can turn this off under Settings → About." = "Раз на день Less Pull питає GitHub, чи є новіша збірка для вашої macOS. Коли вона готова, значок показує маленьку крапку, а в меню з’являється «Установити оновлення». Про вас нічого не надсилається. Вимикається в Параметрах → Про програму.";
 "Once a day, Less Pull asks GitHub whether a newer build exists. Nothing about you is sent." = "Раз на день Less Pull питає GitHub, чи є новіша збірка. Про вас нічого не надсилається.";
-"Once a day, Less Pull asks GitHub whether a newer build exists for your macOS version. Nothing about you is sent, and you can turn this off." = "Раз на день Less Pull питає GitHub, чи є новіша збірка для вашої версії macOS. Про вас нічого не надсилається, і це можна вимкнути.";
 "One display is connected. With more, each one gets its own choice here." = "Під’єднано один екран. Коли їх більше, кожен матиме тут своє налаштування.";
 "Open a new GitHub issue with the technical details filled in." = "Відкрити нове звернення на GitHub із уже заповненими технічними відомостями.";
 "Open all Less Pull settings, exceptions and help." = "Відкрити всі налаштування, винятки й довідку Less Pull.";
@@ -421,8 +397,7 @@
 "Something not working?" = "Щось не працює?";
 "Sound" = "Звук";
 "Start %ld min" = "Почати %ld хв";
-"Start a session from the menu: a stretch of focused work with a gentle end. The icon shows the minutes left. At the end comes a warm glow and a soft gong, nothing to click away, and the count goes on so you can see how far you stretch. When you leave, it can call you back once." = "Почніть сесію з меню: відрізок зосередженої роботи з м’яким завершенням. Значок показує, скільки хвилин лишилося. Наприкінці — тепле світіння і м’який гонг, нічого не треба закривати, а лік іде далі, щоб ви бачили, наскільки затрималися. Коли ви йдете, вона може один раз покликати вас назад.";
-"Start a session…" = "Почати сесію…";
+"Start a session from the menu: a stretch of focused work with a gentle end. The icon shows the minutes left. At the end comes a warm glow and a soft gong, nothing to click away, and the count goes on so you can see how far you stretch. Need a break? Less Pull calls you back once." = "Почніть сесію з меню: відрізок зосередженої роботи з м’яким завершенням. Значок показує, скільки хвилин лишилося. Наприкінці — тепле світіння і м’який гонг, нічого не треба закривати, а лік іде далі, щоб ви бачили, наскільки затрималися. Потрібна перерва? Less Pull один раз покличе вас назад.";
 "Stop quietly" = "Тихо закінчити";
 "Strokes: three gong strokes at the end, two rising notes for the call back. Chords: each as one soft chord. Both are tuned to 432 Hz and the solfeggio tones." = "Удари: три удари гонга наприкінці, дві висхідні ноти для кличу. Акорди: кожен як один м’який акорд. Обидва налаштовані на 432 Гц і тони сольфеджіо.";
 "Strokes" = "Удари";
@@ -438,8 +413,6 @@
 "Technical details for troubleshooting." = "Технічні відомості для пошуку несправностей.";
 "Tell a friend" = "Розповісти";
 "This shortcut could not be set; another app may be using it. Click to choose another." = "Це сполучення не вдалося задати; можливо, його використовує інша програма. Натисніть, щоб вибрати інше.";
-"That was %@." = "Минуло %@.";
-"That was %ld minute%@." = "Минуло %ld хв%@.";
 "That was 25 minutes." = "Минуло 25 хвилин.";
 "That was 30 minutes." = "Минуло 30 хвилин.";
 "The display change could not be confirmed" = "Не вдалося підтвердити зміну екрана";
@@ -455,7 +428,6 @@
 "The previous page." = "Попередня сторінка.";
 "The Safari extension is not in this build" = "У цій збірці немає розширення для Safari";
 "The screen, quieter" = "Екран спокійніший";
-"the screenshot," = "знімок екрана,";
 "The short tour from the first launch, again." = "Коротке знайомство з першого запуску, ще раз.";
 "The thank-you card with the ways to support Less Pull." = "Картка подяки зі способами підтримати Less Pull.";
 "The Toggle Grayscale shortcut" = "Сполучення для відтінків сірого";
@@ -477,8 +449,6 @@
 "Turn Grayscale off for…" = "Повернути колір на…";
 "Turn Night Shift back on" = "Знову ввімкнути Night Shift";
 "Turn Night Shift off for…" = "Вимкнути Night Shift на…";
-"Turn Off" = "Вимкнути";
-"Turn On" = "Увімкнути";
 "Turned off while you hold the Peek shortcut." = "Вимкнено, поки ви утримуєте сполучення для погляду в кольорі.";
 "Night Shift off for a while, then back on if your schedule wants it. Grayscale stays as it is. Quitting Less Pull ends it early." = "Night Shift вимкнено на час, потім він знову вмикається, якщо розклад цього хоче. Відтінки сірого лишаються як є. Вихід із Less Pull закінчує паузу раніше.";
 "Turns Night Shift on or off now. Your schedule in System Settings stays, and takes over again at its next change." = "Вмикає або вимикає Night Shift зараз. Розклад у Системних параметрах лишається і знову діятиме з наступного перемикання.";
@@ -602,3 +572,36 @@
 "Default Night Shift" = "Типовий Night Shift";
 "Night Shift off for" = "Night Shift вимкнено на";
 "Night Shift off for  ›" = "Night Shift вимкнено на  ›";
+"Pausing" = "Пауза";
+"Quitting" = "Вихід";
+"Updates" = "Оновлення";
+"Pointer still in color" = "Вказівник лишається кольоровим";
+"On some displays, macOS draws the arrow pointer on top of the picture, so Grayscale and warmth miss it. Make the pointer one notch larger in System Settings → Accessibility → Display → Pointer size, and it turns quiet too. “Pointer Size…” in the Displays section of the General tab opens this setting." = "На деяких екранах macOS малює вказівник поверх картинки, тож відтінки сірого й тепло його не зачіпають. Зробіть вказівник на одну поділку більшим у Системних параметрах → Доступність → Монітор → Розмір вказівника — і він теж заспокоїться. «Розмір вказівника…» у розділі «Екрани» на вкладці «Основні» відкриває це налаштування.";
+"Guide" = "Посібник";
+"Support" = "Підтримка";
+"Automatically" = "Автоматично";
+"Once a day, Less Pull asks GitHub whether a newer build exists for your macOS version. That is its only connection, and nothing about you is sent." = "Раз на день Less Pull питає GitHub, чи є новіша збірка для вашої версії macOS. Це його єдине з’єднання, і про вас нічого не надсилається.";
+"Session" = "Сесія";
+"Break" = "Перерва";
+"A break with one call back. How long?" = "Перерва: Less Pull покличе вас один раз. Скільки?";
+"A session is focused work with a gentle end. A break is no session: Less Pull calls you back once after the time you choose." = "Сесія — це зосереджена робота з м’яким завершенням. Перерва — не сесія: Less Pull один раз покличе вас назад через обраний час.";
+"Session or break" = "Сесія або перерва";
+"Session or break…" = "Сесія або перерва…";
+"Break · back in %@ min" = "Перерва · назад за %@ хв";
+"on a break, back in" = "на перерві, назад за";
+"Offer a break when a session ends" = "Пропонувати перерву наприкінці сесії";
+"Taking a break? Call me back in" = "Перерва? Покликати мене за";
+"Exception settings" = "Налаштування винятку";
+"All app exceptions, under Settings → Apps." = "Усі винятки для програм — у Параметрах → Програми.";
+"All website exceptions, under Settings → Websites." = "Усі винятки для сайтів — у Параметрах → Сайти.";
+"of 1 minute" = "з 1 хвилини";
+"of %ld minutes" = "з %ld хв";
+"That was 1 minute." = "Це була 1 хвилина.";
+"That was %ld minutes." = "Це було %ld хв.";
+"1 minute past." = "1 хвилина понад час.";
+"%ld minutes past." = "%ld хв понад час.";
+"Changes apply right away." = "Зміни діють одразу.";
+"the screenshot, in color" = "знімок екрана — у кольорі";
+"Minutes, separated by commas. They appear when you start a session." = "Хвилини через кому. Вони з’являються, коли ви починаєте сесію.";
+"Minutes, separated by commas. Offered for a break and when a session ends." = "Хвилини через кому. Пропонуються для перерви і наприкінці сесії.";
+"Offered for a break and when a session ends. Less Pull calls you back once." = "Пропонуються для перерви і наприкінці сесії. Less Pull один раз покличе вас назад.";

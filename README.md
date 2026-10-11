@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-40"><b>Download build 40</b></a>
+  <a href="https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-41"><b>Download build 41</b></a>
   &nbsp;·&nbsp; <a href="#install">Install</a>
   &nbsp;·&nbsp; <a href="docs/EXCEPTIONS.md">App and website exceptions</a>
   &nbsp;·&nbsp; <a href="docs/README.md">All docs</a>
@@ -101,18 +101,18 @@ The percentage is a relative control. It is not a Kelvin value and not a measure
 
 ## Peek in color
 
-Sometimes you need color for a moment: to tell two lines in a chart apart, to check a photo, to find the red button. You do not have to change anything for that. Record a shortcut under **Settings… → Shortcuts** (or let **Suggest** pick a free one), then hold it. The screen is in color for exactly as long as you hold the keys, and quiet again the moment you let go.
+Sometimes you need color for a moment: to tell two lines in a chart apart, to check a photo, to find the red button. You do not have to change anything for that. Hold the Peek shortcut, **Option-A** unless you have chosen another. The screen is in color for exactly as long as you hold the keys, and quiet again the moment you let go.
 
 <p align="center">
   <img src="docs/assets/peek.png" width="100%" alt="Three drawings of the same busy web page in a row. Left: the page as Less Pull shows it, in grayscale with a little warmth, captioned Your screen, as usual. Middle, under two keys drawn as held, Option and A: the page in full color, captioned Color while you hold the Peek shortcut. Right: the page quiet again, captioned Let go, and it is quiet again.">
 </p>
 
-<sub>Drawn with the app's own color matrix. Option-A is an example; Less Pull ships without a shortcut, and Suggest offers one that is free on your Mac.</sub>
+<sub>Drawn with the app's own color matrix. A new install starts with Option-A, if it is free on your Mac; change it, or let Suggest pick another, under Settings → Shortcuts.</sub>
 
 - **Press it twice quickly to keep the peek.** The plain display then stays until you press the shortcut once more. Nothing is saved and no exception is made.
 - **With more than one display,** Peek works on the display under the mouse pointer, no click needed. A double press keeps that display plain; move the pointer to another display and do the same there, and each one is let go on its own with a press. "All displays" under Shortcuts peeks everywhere at once.
 - **Choose what peeking turns off.** Grayscale and Extra Warmth by default; Night Shift too, if you like.
-- **Toggle Grayscale** is the second shortcut, for switching your default on and off without opening the menu. Either mouse button on the menu-bar icon can do the same, under Settings → Shortcuts; by default the left opens the menu and the right opens the session panel.
+- **Toggle Grayscale** is the second shortcut (Option-Command-G to begin with, if it is free), for switching your default on and off without opening the menu. Either mouse button on the menu-bar icon can do the same, under Settings → Shortcuts; by default the left opens the menu and the right opens the session panel.
 - **For longer than a moment**, there is **Grayscale off for** an hour, four hours, or until Night Shift next changes, and **Pause Less Pull** for 15 minutes, an hour, or until you resume. Both are in the menu.
 
 ## Every display on its own
@@ -137,16 +137,18 @@ Less Pull changes the display at the very end of the pipeline, after the picture
 ## Sessions
 
 <p align="center">
-  <img src="docs/assets/sessions.png" width="100%" alt="A session, in the menu bar. Five icon states in a row: at rest; a 25-minute session starts, with a thin ring and the number 25; the ring fills as it runs, 11 left; past the end the ring is orange and the count reads minus 4; away, until the call back, dimmed with 9. Below, two panels: A session, with chips 25, 45, 60 and 90 min, a slider at 35 min, Add to presets and Start 35 min; and the panel after the end: minus 4:12, That was 25 minutes, Leaving? Call me back in, chips 5, 9, 13 and 33 min, a slider at 7 min, Keep going and Leave quietly. Between them, a glow and a soft gong.">
+  <img src="docs/assets/sessions.png" width="100%" alt="A session, in the menu bar. Five icon states in a row: at rest; a 25-minute session starts, with a thin ring and the number 25; the ring fills as it runs, 11 left; past the end the ring is orange and the count reads minus 4; a break, until the call back, dimmed with 9. Below, two panels: the start panel with Session and Break at the top, chips 25, 45, 60 and 90 min, a slider at 35 min, Add to presets and Start 35 min; and the panel after the end: minus 4:12, That was 25 minutes, Taking a break? Call me back in, chips 5, 9, 13 and 33 min, Keep going and Leave quietly. Between them, a glow and a soft gong.">
 </p>
 
 <sub>Drawn in the style of the app; the panels are what the icon opens.</sub>
 
-A session is a stretch of focused work with a gentle end. Choose **Start a session…**, the first item in the menu: a small panel grows out of the icon with your lengths (25, 45, 60 and 90 minutes to begin with; change them under **Settings… → Sessions**), and folds back into the icon once you choose. Any other length: scrub the slider below the chips, the number follows, and one button starts it; tick Add to presets to keep it. A right-click on a chip removes it from the presets. The icon gains a thin ring that fills as the session runs, with the minutes left next to it.
+A session is a stretch of focused work with a gentle end. Choose **Session or break…**, the first item in the menu: a small panel grows out of the icon, with **Session | Break** at the top. A session offers your lengths (25, 45, 60 and 90 minutes to begin with; change them under **Settings… → Sessions**), and folds back into the icon once you choose. Any other length: scrub the slider below the chips, the number follows, and one button starts it; tick Add to presets to keep it. A right-click on a chip removes it from the presets. The icon gains a thin ring that fills as the session runs, with the minutes left next to it.
 
 At the end, a warm glow blooms across every display for three seconds with one line of text, and a soft gong sounds, built from pure tones on the 432 Hz reference and the solfeggio pitches, low and short. Two sound styles are tuned by ear, "Strokes" and "Chords", or none; they live with the glow switch, a preview of each sound and a volume slider under the advanced options on the Sessions tab. Nothing to dismiss: the count simply goes on past the end, −0, −1, −2 in the warm color, breathing gently to say it can be clicked, so you can see how far you have stretched. A quieter reminder can come every few minutes if you ask for one; by default it never does. Or choose "Stop quietly" under Sessions, and the session simply ends with the glow and the sound.
 
-While a session runs, a click on the icon opens a small panel under it instead of the menu; the other mouse button still opens the menu. Once the session is over, the panel asks **Leaving? Call me back in** and offers your own choices (5, 9, 13 and 33 minutes to begin with) or any time from a slider, with Add to presets, next to **Keep going**, **Leave quietly**, and a gear that opens the Sessions tab. If you would rather not be offered a call back, untick it under Sessions, and the panel keeps only those two buttons. After the call back, a warm sound of its own, and the session is over for good. You are called back once.
+While a session runs, a click on the icon opens a small panel under it instead of the menu; the other mouse button still opens the menu. Once the session is over, the panel says how long it was and asks **Taking a break? Call me back in**, with your break lengths (5, 9, 13 and 33 minutes to begin with), next to **Keep going**, **Leave quietly**, and a gear that opens the Sessions tab. If you would rather not be offered a break, untick **Offer a break when a session ends** under Sessions, and the panel keeps only those two buttons. After the call back, a warm sound of its own, and the session is over for good. You are called back once.
+
+Stepping away without a session? Choose **Break** at the top of the panel, pick a length or any time from the slider, and Less Pull calls you back once. Meanwhile the menu reads **Break · back in 9 min**.
 
 <sub>The glow never takes focus and never blocks a click. Under Reduce Motion it appears and disappears without animation.</sub>
 
@@ -173,58 +175,60 @@ More in [Night Shift and warmth](docs/NIGHT-SHIFT.md).
 
 ## Where the controls are
 
-Less Pull has two interfaces, both on the Mac: the menu and the Settings window. The browser extension only connects the browser.
+Less Pull lives in the menu bar. Click the circle for the menu, and choose **Settings…** there for everything in one place. The browser extension only connects the browser.
+
+### The menu, for quick changes
+
+The icon tells you the state: its left half fills while grayscale is showing, its right half warms as you add warmth, and it shows a pause mark while Less Pull is paused. A right-click opens the session panel; Settings → Shortcuts can give either button the menu, Grayscale or the session panel.
+
+- The first line tells you what is applied right now, with **Pause Less Pull** right below it: the plain display for 15 minutes, an hour, or until you resume.
+- **Grayscale**, the **Extra Warmth** slider and **Night Shift** change your defaults. While Grayscale or Night Shift is on, the line below it turns it off for a while, and it comes back by itself.
+- **Session or break…** begins a stretch of focused work, or a break with one call back when you step away.
+- **Exception for [current app]…** opens a small panel under the icon with the same row as in Settings, and every change applies right away. With a website in front, **Exception for [that site]…** does the same for the domain or the exact page.
 
 <p align="center">
-  <img src="docs/assets/interfaces.png" width="100%" alt="Two screenshots of Less Pull side by side. On the left, the menu-bar dropdown under its half-filled circle icon: the status line Grayscale, Warmth Off, then Grayscale with a check, Grayscale off for with a submenu, the Extra Warmth slider drawn as a ramp from neutral through amber to red at 40 percent with stops labeled Off, 25, 50, 75 and Red, Night Shift: Off with a submenu, Pause Less Pull, Exception for Finder with the Finder icon, Settings and Quit. On the right, the Settings window on its General tab, with the toolbar tabs General, Shortcuts, Apps, Websites and About: the heading Grayscale, Warmth Off, a Grayscale checkbox with a Turn Grayscale off for menu, the Extra Warmth ramp slider at 40 percent with a Reset button, Night Shift: Off with its timed-off menu, Extra Warmth follows Night Shift, and Launch at login, each with a short explanation underneath.">
+  <img src="docs/assets/exceptions.png" width="100%" alt="The Less Pull menu under its icon, with Session or break, the status line Grayscale, Warmth 40%, Pause Less Pull, Grayscale, Grayscale off for, the Extra Warmth slider at 40 percent, Night Shift, Night Shift off for, Exception for Finder, Settings and Quit. Beside it, the exception panel for Finder under the icon: Use this exception, Grayscale and Night Shift each as Default, On or Off, and Use default warmth with its slider.">
 </p>
 
-<sub>Two real screenshots of build 16, placed side by side on a plain backdrop. The menu is translucent, so it carries a tint of whatever was behind it.</sub>
+<sub>The menu and the exception panel it opens. Real screenshots of build 41 with an example rule.</sub>
 
-### The menu bar, for quick changes
+<details>
+<summary><b>See the menu beside the Settings window, and every Settings tab</b></summary>
 
-Click the circle in the menu bar (a right-click opens the session panel; Settings → Shortcuts can give either button the menu, Grayscale or the session). This is the dropdown on the left. The icon itself tells you the state: its left half fills while grayscale is showing, its right half warms as you add warmth, and it shows a pause mark while Less Pull or Night Shift is paused.
-
-- The first line tells you what is applied right now.
-- **Grayscale** and the **Extra Warmth** slider change your defaults. The slider's track shows the real ramp from neutral through amber to red. **Grayscale off for** gives you color for an hour, four hours, or until Night Shift next changes.
-- **Night Shift** holds everything about Night Shift: on or off now, off for a while, and whether Extra Warmth follows it.
-- **Pause Less Pull** shows the plain display for 15 minutes, an hour, or until you resume.
-- **Exception for [current app]** sets the rule for the app you were just using, right in the menu. With a website in front, **Exception for [that site]** does the same for the domain or the exact page.
+<br>
 
 <p align="center">
-  <img src="docs/assets/exceptions.png" width="100%" alt="Two screenshots of the menu with an exception submenu open. Left: Exception for Finder, with Use this exception, Grayscale and Night Shift each as Use default, On or Off, Use default warmth, an Extra Warmth slider for Finder on the ramp, and More in Settings. Right: with Brave in front on mubi.com, Exception for mubi.com, with Use this exception, Apply to Whole domain or This exact page, Grayscale as Use default (On), On or Off, Night Shift as Use default (Off), On or Off, Use default warmth (40 percent), an Extra Warmth slider for mubi.com, and All website exceptions.">
+  <img src="docs/assets/interfaces.png" width="100%" alt="The Less Pull menu under its icon beside the Settings window on its General tab: the heading Grayscale, Warmth 40%, Grayscale with Turn Grayscale off for, the Extra Warmth slider with Reset, Night Shift with Turn Night Shift off for, Launch at login, Language, and Show advanced options, each with a short explanation underneath.">
 </p>
 
-<sub>An app exception and a website exception, set straight from the menu. The default entries show what they resolve to.</sub>
+The Settings window has six tabs:
 
-### The settings window, for everything in one place
-
-Choose **Settings…** in the menu. This is the window on the right, with six tabs.
-
-- **General**: the same controls as the menu, with a short line under each one, plus **Launch at login**.
-- **Sessions**: session lengths, call-back choices, reminders after the end, sound and glow, and Try it.
-- **Shortcuts**: [**Peek in color**](#peek-in-color) (a shortcut you hold to see the plain display, and what it turns off), a **Toggle Grayscale** shortcut, and what a left and a right click on the menu-bar icon do. **Suggest** picks a free shortcut for you.
-- **Apps**: every app exception, one row each: the app's icon, Use this exception, Default / On / Off for Grayscale and Night Shift. **More** opens the row for warmth and, with several displays, the display choices.
+- **General**: the same controls as the menu, with a short line under each one, plus **Launch at login** and **Language**.
+- **Shortcuts**: [**Peek in color**](#peek-in-color) and what it turns off, a **Toggle Grayscale** shortcut, and what a left and a right click on the menu-bar icon do.
+- **Sessions**: session lengths, call-back times, what happens at the end, reminders, sound and glow.
+- **Apps**: every app exception, one row each, with Default / On / Off for Grayscale and Night Shift and its own warmth.
 - **Websites**: the browser extension and the saved website exceptions, in the same shape as the app rows.
-- **About**: version, links, Help, Diagnostics, licenses, and the update check.
+- **About**: version and links, the guide and the tour, support, and the update check.
 
-The window shows what is relevant and hides the rest: display options appear only with two or more displays connected, and the fine-tuning (what Peek turns off, what the mouse buttons do, display options with one display) sits behind **Show advanced options** at the bottom of General. Everything keeps working as set while it is hidden. On the very first launch this window opens by itself with a short welcome and a five-page tour: the screen, exceptions, Peek, sessions and privacy, each with its own small animation drawn in code (a pointer clicking the circle, a menu dropping, keys pressing, a ring filling), in the same card at the same size, with Skip tour always at hand. The two shortcuts are set for new users, ⌥A to peek and ⌥⌘G to toggle, each only if it is free on that Mac and keyboard; the tour shows which ones, and Shortcuts lets you change them. The tour can be opened again from About. After two weeks of use, the next time you open Settings, a small card asks whether you enjoy Less Pull and how to support the author; it never pops up on its own.
+Display options appear only with two or more displays connected, and the fine-tuning sits behind **Show advanced options**; hidden settings keep working as you set them.
 
 <p align="center">
-  <img src="docs/assets/settings-tabs.png" width="100%" alt="Four screenshots of the Settings window on a plain backdrop. Shortcuts: Peek in color with the shortcut Option-A, what peeking turns off, a Toggle Grayscale shortcut Option-Command-G, and what clicking the menu-bar icon does. Apps: three app exceptions, Music, Photos and TextEdit, each with its icon, a Use this exception checkbox, Default, On and Off segments for Grayscale and Night Shift, and a warmth slider on the ramp. Websites: the Install Browser Extension button, the extension connected in Firefox, Brave and Opera, and two saved exceptions for example.com and one exact page with the same controls. About: the app icon, version 1.4.4 build 16, the author's links, Help, Diagnostics and Licenses, and the automatic update check.">
+  <img src="docs/assets/settings-tabs.png" width="100%" alt="Five tabs of the Settings window: Shortcuts with Peek in color and the Toggle Grayscale shortcut; Sessions with lengths, call-back times and what happens at the end; Apps with example exceptions for Music, Photos and TextEdit; Websites with example exceptions for example.com and one exact page; About with the version, the author's links, Help, Support and Updates.">
 </p>
 
-<sub>Real screenshots of build 16 with example rules, placed on a plain backdrop.</sub>
+<sub>Real screenshots of build 41 with example rules.</sub>
+
+</details>
 
 ### Website exceptions, in your browser
 
-The browser extension has no buttons and no settings of its own. It only tells the Mac app which website is in front. With a website open, the Less Pull menu offers **Exception for [that site]**, just like it does for apps: choose **Whole domain** or **This exact page**, set only what you want to change, and it is saved. Saved website rules are listed under **Settings… → Websites**.
+The browser extension has no controls in the browser; everything happens in Less Pull. It only tells the Mac app which website is in front. With a website open, the Less Pull menu offers **Exception for [that site]**, just like it does for apps: choose **Whole domain** or **This exact page**, set only what you want to change, and it is saved. Saved website rules are listed under **Settings… → Websites**.
 
 The app changes the display; nothing is injected into pages, and the Mac app has to be running. Brave, Firefox, Safari and Opera are confirmed working on the author's Mac. Chrome and Edge are implemented but have not yet been through a clean install test. Several browsers can use the extension at the same time; whichever browser window is in front decides.
 
 ## Install
 
-1. Download **Less-Pull-1.4.4-40.dmg** from the [build 40 release](https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-40), open it and drag **Less Pull** onto **Applications**.
+1. Download **Less-Pull-1.4.4-41.dmg** from the [build 41 release](https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-41), open it and drag **Less Pull** onto **Applications**.
 2. Open it. The Settings window greets you once; the circle in the menu bar is where you choose Grayscale and Extra Warmth from then on. On the first launch the welcome opens right under it, the icon fades in and out for a moment, and a small animated drawing shows what to do when the menu bar is full: hold ⌘ and drag the circle toward the clock. (macOS decides where new icons start, and apps cannot choose a spot.)
 3. For website rules, open **Settings… → Websites**, choose **Install Browser Extension…**, pick a browser from the list, and follow the steps for [your browser](docs/INSTALL.md#safari-brave-chrome-firefox-opera-or-edge).
 
@@ -232,7 +236,7 @@ The app changes the display; nothing is injected into pages, and the Mac app has
 > Setting up with an AI agent? The release includes an **agent pack** (`Less-Pull-Agent-Pack.zip`): a script that installs the app and the bridge, and scripts that connect Brave, Chrome, Opera, Edge and Firefox, with the instructions an agent needs. See [tools/agent-pack](tools/agent-pack/README.md).
 
 > [!NOTE]
-> Version 1.4.4 (build 40) is a test build for Apple silicon Macs. The version number stays 1.4.4 on purpose; the build number is what changes. It is signed with a Developer ID and notarized by Apple, so it opens like any other app. It is built for macOS 13 and later and has been tested on macOS 27 only. The browser extension is loaded locally and is not in the Chrome Web Store, on addons.mozilla.org or in the App Store. See [install help](docs/INSTALL.md) and [what is still open](docs/RELEASE-PLAN.md).
+> Version 1.4.4 (build 41) is a test build for Apple silicon Macs. The version number stays 1.4.4 on purpose; the build number is what changes. It is signed with a Developer ID and notarized by Apple, so it opens like any other app. It is built for macOS 13 and later and has been tested on macOS 27 only. The browser extension is loaded locally and is not in the Chrome Web Store, on addons.mozilla.org or in the App Store. See [install help](docs/INSTALL.md) and [what is still open](docs/RELEASE-PLAN.md).
 
 ## Private by design
 

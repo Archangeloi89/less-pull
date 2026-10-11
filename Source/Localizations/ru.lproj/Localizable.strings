@@ -1,7 +1,5 @@
 /* Less Pull, русский. Ключ — английский текст. Обращение на «вы», как в macOS. Термины: Оттенки серого, Дополнительное тепло (в строках покороче — просто «тепло»), Night Shift, Взгляд в цвете (Peek), Сессия, Исключение, Сочетание клавиш, строка меню, экран, без фильтра (plain display). Экспериментальный: написан внимательно, но ещё не вычитан носителем языка. */
 
-"   Off" = "   Выкл";
-"   Use default" = "   По умолчанию";
 " (main)" = " (основной)";
 " and " = " и ";
 " Suggest picks %@, which no macOS shortcut uses." = " «Подобрать» выбирает %@: его не использует ни одно сочетание macOS.";
@@ -31,8 +29,6 @@
 "%@: what it shows" = "%@: что показывает";
 "%@\n%@\nClick for Grayscale, Extra Warmth and Night Shift." = "%@\n%@\nНажмите: оттенки серого, тепло и Night Shift.";
 "%ld min" = "%ld мин";
-"%ld minute%@" = "%ld мин%@";
-"%ld minute%@ past." = "%ld мин%@ сверх.";
 "%ld minutes" = "%ld минут";
 "%ld minutes. Right-click to remove it from the presets." = "%ld минут. Правый щелчок убирает из сохранённых.";
 "%ld of 5" = "%ld из 5";
@@ -50,7 +46,7 @@
 "A peek, when you need it" = "Взгляд в цвете, когда он нужен";
 "A quieter glow and sound while you stay past the end, until you leave or end the session." = "Более тихие свечение и звук, пока вы остаётесь сверх времени, до тех пор пока не уйдёте или не завершите сессию.";
 "A session" = "Сессия";
-"A session is a stretch of focused work with a gentle end. Start one from the menu. The icon shows the minutes left; at the end comes a soft glow and a calm sound, and the count goes on so you can finish your thought. When you leave, Less Pull can call you back once." = "Сессия — это отрезок сосредоточенной работы с мягким завершением. Запускается из меню. Значок показывает, сколько минут осталось; в конце приходят мягкое свечение и спокойный звук, а счёт идёт дальше, чтобы вы могли закончить мысль. Когда вы уходите, Less Pull может один раз позвать вас обратно.";
+"A session is a stretch of focused work with a gentle end. Start one from the menu. The icon shows the minutes left; at the end comes a soft glow and a calm sound, and the count goes on so you can finish your thought. Need a break? Less Pull calls you back once." = "Сессия — это отрезок сосредоточенной работы с мягким завершением. Запускается из меню. Значок показывает, сколько минут осталось; в конце приходят мягкое свечение и спокойный звук, а счёт идёт дальше, чтобы вы могли закончить мысль. Нужен перерыв? Less Pull один раз позовёт вас обратно.";
 "A session, with a gentle end" = "Сессия с мягким завершением";
 "A session. How long?" = "Сессия. На сколько?";
 "A short guide to Less Pull." = "Краткое руководство по Less Pull.";
@@ -77,8 +73,6 @@
 "Pointer still in color on one display? macOS draws the arrow on top there. Make the pointer one notch larger and it turns quiet too." = "Указатель на одном экране остаётся цветным? Там macOS рисует стрелку поверх. Сделайте указатель на одно деление крупнее — и он тоже успокоится.";
 "Ask GitHub now whether a newer version exists." = "Спросить GitHub прямо сейчас, есть ли версия новее.";
 "At the end" = "В конце";
-"Away · back in %@ min" = "Отошли · назад через %@ мин";
-"away, back in" = "отошли, назад через";
 "Back" = "Назад";
 "Browser Extension" = "Расширение браузера";
 "Browser Extension (Firefox)" = "Расширение браузера (Firefox)";
@@ -107,7 +101,6 @@
 "Click the circle in the menu bar. Grayscale takes the color out of everything. Warmth is the second step, and not decoration: from amber to red it takes the blue out of the light, makes the screen quieter still, and puts you back in charge of what light reaches your eyes — and through them, your mind." = "Нажмите на кружок в строке меню. Оттенки серого забирают цвет у всего. Тепло — второй шаг, и это не украшение: от янтарного до красного оно убирает из света синий, делает экран ещё спокойнее и возвращает вам право решать, какой свет попадает в ваши глаза — а через них в голову.";
 "Click, then press the keys you want. Hold them to see the plain display; let go to return." = "Нажмите, затем введите нужные клавиши. Удерживайте их, чтобы увидеть экран без фильтра; отпустите — и всё вернётся.";
 "Click, then press the keys you want. Press them anywhere to turn Grayscale on or off." = "Нажмите, затем введите нужные клавиши. Нажимайте их где угодно, чтобы включать и выключать оттенки серого.";
-"Clicking the menu-bar icon" = "Щелчок по значку в строке меню";
 "Close" = "Закрыть";
 "Close the tour." = "Закрыть знакомство.";
 "Color" = "Цвет";
@@ -132,8 +125,6 @@
 "Default Extra Warmth" = "Тепло по умолчанию";
 "Default Grayscale" = "Оттенки серого по умолчанию";
 "Default keeps what the site inherits." = "«Авто» оставляет то, что сайт наследует.";
-"Default Night Shift: Off" = "Night Shift по умолчанию: выкл";
-"Default Night Shift: On" = "Night Shift по умолчанию: вкл";
 "Diagnostics" = "Диагностика";
 "Diagnostics shows technical details you can include when asking for help. Nothing is sent anywhere." = "Диагностика показывает технические сведения, которые можно приложить к просьбе о помощи. Никуда ничего не отправляется.";
 "Diagnostics…" = "Диагностика…";
@@ -141,7 +132,6 @@
 "Display options show up by themselves when a second display is connected. Tick this to see them with one display too." = "Настройки экранов появляются сами, когда подключён второй экран. Отметьте, чтобы видеть их и с одним.";
 "Displays" = "Экраны";
 "Done" = "Готово";
-"Don’t show again" = "Больше не показывать";
 "Don’t show explanations" = "Скрыть пояснения";
 "Don’t show this again" = "Больше не показывать";
 "Each display can follow what is on it: the app you are using sets its own display, and every other display follows the app on top there. Peek has its own choice under “Shortcuts”." = "Каждый экран может следовать за тем, что на нём: приложение, которым вы пользуетесь, определяет свой экран, а каждый другой экран следует за приложением, которое там сверху. У взгляда в цвете своя настройка в «Сочетаниях».";
@@ -155,10 +145,7 @@
 "Night Shift comes back now if your schedule wants it on. The app you are using keeps its own Night Shift setting." = "Night Shift вернётся сейчас, если расписание хочет его включить. У приложения, которым вы пользуетесь, остаётся своя настройка Night Shift.";
 "Night Shift stays off for now, because your schedule has it off at this hour." = "Night Shift пока остаётся выключенным: в это время расписание держит его выключенным.";
 "English and German are read line by line. A language marked experimental is written with care but not yet checked by a native speaker. If something sounds off, “Report a Problem…” under “About” reaches me." = "Английский и немецкий вычитаны строка за строкой. Язык с пометкой «экспериментальный» написан внимательно, но носитель его ещё не читал. Если что-то звучит не так, «Отчёт…» на вкладке «О программе» дойдёт до меня.";
-"Everything else stays on this Mac: no account, no analytics, no servers. The browser extension talks only to the app." = "Всё остальное остаётся на этом Mac: ни учётной записи, ни статистики, ни серверов. Расширение браузера общается только с приложением.";
 "Exact page" = "Только эта страница";
-"Exception for %@" = "Исключение для %@";
-"Exception for Photos ›" = "Исключение для Фото ›";
 "Exceptions for apps" = "Исключения для приложений";
 "Exceptions for websites" = "Исключения для сайтов";
 "Extension connected in %@." = "Расширение подключено в %@.";
@@ -214,7 +201,6 @@
 "How loud the session sounds are. Let go to hear it." = "Громкость звуков сессии. Отпустите, чтобы услышать.";
 "Night Shift turned off for a while stays off, even for an app that turns it on. Grayscale, warmth and Night Shift all off show the plain display." = "Если выключить Night Shift на время, он останется выключенным даже для приложения, которое его включает. Оттенки серого, тепло и Night Shift, выключенные вместе, дают экран без фильтра.";
 "I’m back" = "Я вернулся";
-"in color" = "в цвете";
 "Turn Grayscale off for an hour, four hours, or until Night Shift changes next, from the menu or in Settings. It comes back by itself." = "Верните цвет на час, на четыре часа или до следующего переключения Night Shift — из меню или в Настройках. Серый вернётся сам.";
 "Install %@ first; this list notices it by itself. Then come back to Set up…" = "Сначала установите %@; список заметит его сам. Потом вернитесь к «Настроить…».";
 "Install Browser Extension" = "Установить расширение браузера";
@@ -236,7 +222,6 @@
 "Leave quietly" = "Оставить";
 "Leaving now." = "Я ухожу.";
 "Leaving now…" = "Я ухожу…";
-"Leaving? Call me back in" = "Уходите? Позвать через";
 "Left-clicking the menu-bar icon" = "Левый щелчок по значку";
 "Less" = "Меньше";
 "Less Pull" = "Less Pull";
@@ -254,15 +239,12 @@
 "Licenses" = "Лицензии";
 "Login setting needs attention" = "Настройка входа требует внимания";
 "Looks again for installed browsers. The list also checks by itself every few seconds while this window is open." = "Снова ищет установленные браузеры. Пока окно открыто, список и сам проверяет это каждые несколько секунд.";
-"Minutes, separated by commas. Offered when you leave a session; Less Pull calls you back once." = "Минуты через запятую. Предлагаются, когда вы уходите из сессии; Less Pull позовёт вас один раз.";
-"Minutes, separated by commas. They appear under “Start a session…” in the menu." = "Минуты через запятую. Они появляются в меню под «Начать сессию».";
 "More" = "Больше";
 "More in Settings…" = "Ещё в Настройках…";
 "Natural Colors" = "Естественные цвета";
 "news.example" = "news.example";
 "Next" = "Дальше";
 "Night Shift" = "Night Shift";
-"Night Shift  ›" = "Night Shift  ›";
 "Night Shift %@" = "Night Shift %@";
 "Night Shift %@ for %@ · usually %@" = "Night Shift %@ для %@ · обычно %@";
 "Night Shift cannot be read right now; your choice is kept. " = "Night Shift сейчас не читается; ваш выбор сохранён. ";
@@ -273,8 +255,6 @@
 "Night Shift off until %@" = "Night Shift выкл до %@";
 "Night Shift on" = "Night Shift вкл";
 "Night Shift unavailable" = "Night Shift недоступен";
-"Night Shift: Off" = "Night Shift: выкл";
-"Night Shift: On" = "Night Shift: вкл";
 "No account, no analytics, nothing leaves your Mac. The website in front is known to the app only for as long as it is in front, then forgotten: never sent anywhere, never written to disk. And because Less Pull changes the display, not the picture, screenshots, recordings and screen sharing keep their normal colors." = "Ни учётной записи, ни статистики — ничего не покидает ваш Mac. Какой сайт сейчас на переднем плане, приложение знает только в этот момент, а потом забывает: никуда не отправляет, на диск не пишет. А поскольку Less Pull меняет экран, а не картинку, снимки экрана, записи и общий доступ к экрану сохраняют обычные цвета.";
 "no disk" = "без диска";
 "No exceptions yet. Add an app and choose how it should look." = "Исключений пока нет. Добавьте приложение и выберите, как оно должно выглядеть.";
@@ -286,7 +266,6 @@
 "Not now" = "Не сейчас";
 "Not set up yet" = "Ещё не настроен";
 "Not today" = "Не сегодня";
-"of %@" = "из %@";
 "Off" = "Выкл";
 "off" = "выкл";
 "Off for 1 hour" = "Выкл на 1 час";
@@ -295,8 +274,6 @@
 "Off until morning · %@" = "Выкл до утра · %@";
 "Off until Night Shift changes" = "Выкл, пока Night Shift не переключится";
 "Off: when the session ends, the panel offers only Keep going and Leave quietly." = "Выкл: когда сессия заканчивается, панель предлагает только «Продолжить» и «Оставить».";
-"Offer a call back when I leave" = "Предлагать позвать, когда ухожу";
-"Offered when you choose “Leaving now…”. Less Pull calls you back once, then the session is over." = "Предлагается, когда вы выбираете «Я ухожу». Less Pull позовёт вас один раз, после этого сессия закончена.";
 "OK" = "OK";
 "On" = "Вкл";
 "on" = "вкл";
@@ -306,7 +283,6 @@
 "On: warmth comes with Night Shift in the evening and leaves with it in the morning. Off: warmth stays all day." = "Вкл: тепло приходит вместе с Night Shift вечером и уходит с ним утром. Выкл: тепло держится весь день.";
 "Once a day, Less Pull asks GitHub whether a newer build exists for your macOS. When one is ready, the icon shows a small dot and the menu offers “Install update”. Nothing about you is sent. You can turn this off under Settings → About." = "Раз в день Less Pull спрашивает GitHub, есть ли сборка новее для вашей macOS. Когда она готова, значок показывает маленькую точку, а в меню появляется «Установить обновление». О вас ничего не отправляется. Отключается в Настройках → О программе.";
 "Once a day, Less Pull asks GitHub whether a newer build exists. Nothing about you is sent." = "Раз в день Less Pull спрашивает GitHub, есть ли сборка новее. О вас ничего не отправляется.";
-"Once a day, Less Pull asks GitHub whether a newer build exists for your macOS version. Nothing about you is sent, and you can turn this off." = "Раз в день Less Pull спрашивает GitHub, есть ли сборка новее для вашей версии macOS. О вас ничего не отправляется, и это можно отключить.";
 "One display is connected. With more, each one gets its own choice here." = "Подключён один экран. Когда их больше, у каждого здесь будет своя настройка.";
 "Open a new GitHub issue with the technical details filled in." = "Открыть новое обращение на GitHub с уже заполненными техническими сведениями.";
 "Open all Less Pull settings, exceptions and help." = "Открыть все настройки, исключения и справку Less Pull.";
@@ -421,8 +397,7 @@
 "Something not working?" = "Что-то не работает?";
 "Sound" = "Звук";
 "Start %ld min" = "Начать %ld мин";
-"Start a session from the menu: a stretch of focused work with a gentle end. The icon shows the minutes left. At the end comes a warm glow and a soft gong, nothing to click away, and the count goes on so you can see how far you stretch. When you leave, it can call you back once." = "Начните сессию из меню: отрезок сосредоточенной работы с мягким завершением. Значок показывает, сколько минут осталось. В конце — тёплое свечение и мягкий гонг, ничего не нужно закрывать, а счёт идёт дальше, чтобы вы видели, насколько задержались. Когда вы уходите, она может один раз позвать вас обратно.";
-"Start a session…" = "Начать сессию…";
+"Start a session from the menu: a stretch of focused work with a gentle end. The icon shows the minutes left. At the end comes a warm glow and a soft gong, nothing to click away, and the count goes on so you can see how far you stretch. Need a break? Less Pull calls you back once." = "Начните сессию из меню: отрезок сосредоточенной работы с мягким завершением. Значок показывает, сколько минут осталось. В конце — тёплое свечение и мягкий гонг, ничего не нужно закрывать, а счёт идёт дальше, чтобы вы видели, насколько задержались. Нужен перерыв? Less Pull один раз позовёт вас обратно.";
 "Stop quietly" = "Тихо закончить";
 "Strokes: three gong strokes at the end, two rising notes for the call back. Chords: each as one soft chord. Both are tuned to 432 Hz and the solfeggio tones." = "Удары: три удара гонга в конце, две восходящие ноты для зова. Аккорды: каждый как один мягкий аккорд. Оба настроены на 432 Гц и тона сольфеджио.";
 "Strokes" = "Удары";
@@ -438,8 +413,6 @@
 "Technical details for troubleshooting." = "Технические сведения для поиска неполадок.";
 "Tell a friend" = "Рассказать";
 "This shortcut could not be set; another app may be using it. Click to choose another." = "Это сочетание не удалось задать; возможно, его использует другое приложение. Нажмите, чтобы выбрать другое.";
-"That was %@." = "Прошло %@.";
-"That was %ld minute%@." = "Прошло %ld мин%@.";
 "That was 25 minutes." = "Прошло 25 минут.";
 "That was 30 minutes." = "Прошло 30 минут.";
 "The display change could not be confirmed" = "Не удалось подтвердить изменение экрана";
@@ -455,7 +428,6 @@
 "The previous page." = "Предыдущая страница.";
 "The Safari extension is not in this build" = "В этой сборке нет расширения для Safari";
 "The screen, quieter" = "Экран спокойнее";
-"the screenshot," = "снимок экрана,";
 "The short tour from the first launch, again." = "Короткий тур с первого запуска, ещё раз.";
 "The thank-you card with the ways to support Less Pull." = "Карточка благодарности со способами поддержать Less Pull.";
 "The Toggle Grayscale shortcut" = "Сочетание для оттенков серого";
@@ -477,8 +449,6 @@
 "Turn Grayscale off for…" = "Вернуть цвет на…";
 "Turn Night Shift back on" = "Снова включить Night Shift";
 "Turn Night Shift off for…" = "Выключить Night Shift на…";
-"Turn Off" = "Выключить";
-"Turn On" = "Включить";
 "Turned off while you hold the Peek shortcut." = "Выключено, пока вы удерживаете сочетание для взгляда в цвете.";
 "Night Shift off for a while, then back on if your schedule wants it. Grayscale stays as it is. Quitting Less Pull ends it early." = "Night Shift выключен на время, потом снова включается, если расписание этого хочет. Оттенки серого остаются как есть. Выход из Less Pull заканчивает паузу раньше.";
 "Turns Night Shift on or off now. Your schedule in System Settings stays, and takes over again at its next change." = "Включает или выключает Night Shift сейчас. Расписание в Системных настройках остаётся и снова вступит в силу при следующем переключении.";
@@ -602,3 +572,36 @@
 "Default Night Shift" = "Night Shift по умолчанию";
 "Night Shift off for" = "Night Shift выключен на";
 "Night Shift off for  ›" = "Night Shift выключен на  ›";
+"Pausing" = "Пауза";
+"Quitting" = "Выход";
+"Updates" = "Обновления";
+"Pointer still in color" = "Указатель остаётся цветным";
+"On some displays, macOS draws the arrow pointer on top of the picture, so Grayscale and warmth miss it. Make the pointer one notch larger in System Settings → Accessibility → Display → Pointer size, and it turns quiet too. “Pointer Size…” in the Displays section of the General tab opens this setting." = "На некоторых экранах macOS рисует указатель поверх картинки, и оттенки серого и тепло его не затрагивают. Сделайте указатель на одно деление крупнее в Системных настройках → Универсальный доступ → Монитор → Размер указателя — и он тоже успокоится. «Размер указателя…» в разделе «Экраны» на вкладке «Основные» открывает эту настройку.";
+"Guide" = "Руководство";
+"Support" = "Поддержка";
+"Automatically" = "Автоматически";
+"Once a day, Less Pull asks GitHub whether a newer build exists for your macOS version. That is its only connection, and nothing about you is sent." = "Раз в день Less Pull спрашивает GitHub, есть ли сборка новее для вашей версии macOS. Это его единственное соединение, и о вас ничего не отправляется.";
+"Session" = "Сессия";
+"Break" = "Перерыв";
+"A break with one call back. How long?" = "Перерыв: Less Pull позовёт вас один раз. Сколько?";
+"A session is focused work with a gentle end. A break is no session: Less Pull calls you back once after the time you choose." = "Сессия — это сосредоточенная работа с мягким завершением. Перерыв — не сессия: Less Pull один раз позовёт вас обратно через выбранное время.";
+"Session or break" = "Сессия или перерыв";
+"Session or break…" = "Сессия или перерыв…";
+"Break · back in %@ min" = "Перерыв · назад через %@ мин";
+"on a break, back in" = "на перерыве, назад через";
+"Offer a break when a session ends" = "Предлагать перерыв в конце сессии";
+"Taking a break? Call me back in" = "Перерыв? Позвать меня через";
+"Exception settings" = "Настройки исключения";
+"All app exceptions, under Settings → Apps." = "Все исключения для приложений — в Настройках → Приложения.";
+"All website exceptions, under Settings → Websites." = "Все исключения для сайтов — в Настройках → Сайты.";
+"of 1 minute" = "из 1 минуты";
+"of %ld minutes" = "из %ld мин";
+"That was 1 minute." = "Это была 1 минута.";
+"That was %ld minutes." = "Это было %ld мин.";
+"1 minute past." = "1 минута сверх.";
+"%ld minutes past." = "%ld мин сверх.";
+"Changes apply right away." = "Изменения действуют сразу.";
+"the screenshot, in color" = "снимок экрана — в цвете";
+"Minutes, separated by commas. They appear when you start a session." = "Минуты через запятую. Они появляются, когда вы начинаете сессию.";
+"Minutes, separated by commas. Offered for a break and when a session ends." = "Минуты через запятую. Предлагаются для перерыва и в конце сессии.";
+"Offered for a break and when a session ends. Less Pull calls you back once." = "Предлагаются для перерыва и в конце сессии. Less Pull один раз позовёт вас обратно.";
