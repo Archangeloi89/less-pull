@@ -87,7 +87,7 @@ static GTBeat *Beat(NSString *say,NSValue *(^to)(void)) {GTBeat *b=[GTBeat new];
  if(self.running)return;self.running=YES;
  NSScreen *s=self.screen;
  self.overlay=[[NSPanel alloc]initWithContentRect:s.frame styleMask:NSWindowStyleMaskBorderless|NSWindowStyleMaskNonactivatingPanel backing:NSBackingStoreBuffered defer:NO];
- self.overlay.opaque=NO;self.overlay.backgroundColor=NSColor.clearColor;self.overlay.ignoresMouseEvents=YES;self.overlay.hasShadow=NO;self.overlay.level=NSStatusWindowLevel+1;
+ self.overlay.opaque=NO;self.overlay.backgroundColor=NSColor.clearColor;self.overlay.ignoresMouseEvents=YES;self.overlay.hasShadow=NO;self.overlay.level=NSPopUpMenuWindowLevel+1;  // above the exception and session panels, so the bubble never hides behind them
  self.overlay.collectionBehavior=NSWindowCollectionBehaviorCanJoinAllSpaces|NSWindowCollectionBehaviorFullScreenAuxiliary|NSWindowCollectionBehaviorStationary|NSWindowCollectionBehaviorIgnoresCycle;
  self.view=[[GuideView alloc]initWithFrame:(NSRect){NSZeroPoint,s.frame.size}];self.view.size=1;self.overlay.contentView=self.view;[self.overlay setFrame:s.frame display:NO];[self.overlay orderFrontRegardless];
  [self buildStrip];[self buildSteps];
@@ -118,7 +118,7 @@ static GTBeat *Beat(NSString *say,NSValue *(^to)(void)) {GTBeat *b=[GTBeat new];
  row.translatesAutoresizingMaskIntoConstraints=NO;[back addSubview:row];[row.leadingAnchor constraintEqualToAnchor:back.leadingAnchor].active=YES;[row.trailingAnchor constraintEqualToAnchor:back.trailingAnchor].active=YES;[row.topAnchor constraintEqualToAnchor:back.topAnchor].active=YES;[row.bottomAnchor constraintEqualToAnchor:back.bottomAnchor].active=YES;
  NSSize size=row.fittingSize;NSRect v=self.screen.visibleFrame;
  self.strip=[[NSPanel alloc]initWithContentRect:NSMakeRect(NSMidX(v)-size.width/2,NSMinY(v)+28,size.width,size.height) styleMask:NSWindowStyleMaskBorderless|NSWindowStyleMaskNonactivatingPanel backing:NSBackingStoreBuffered defer:NO];
- self.strip.opaque=NO;self.strip.backgroundColor=NSColor.clearColor;self.strip.hasShadow=YES;self.strip.level=NSStatusWindowLevel+2;self.strip.collectionBehavior=self.overlay.collectionBehavior;self.strip.contentView=back;self.strip.becomesKeyOnlyIfNeeded=YES;
+ self.strip.opaque=NO;self.strip.backgroundColor=NSColor.clearColor;self.strip.hasShadow=YES;self.strip.level=NSPopUpMenuWindowLevel+2;self.strip.collectionBehavior=self.overlay.collectionBehavior;self.strip.contentView=back;self.strip.becomesKeyOnlyIfNeeded=YES;
  self.strip.accessibilityLabel=L(@"Tour controls");[self.strip orderFrontRegardless];
 }
 - (void)updateStrip {self.stepLabel.stringValue=[NSString stringWithFormat:L(@"%ld of %ld"),(long)self.step+1,(long)self.steps.count];self.backButton.enabled=self.step>0;self.nextButton.title=self.step+1>=(NSInteger)self.steps.count?L(@"Done"):L(@"Next");}
