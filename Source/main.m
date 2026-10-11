@@ -334,7 +334,7 @@ static void QuietScrolling(NSScrollView *s){
 @property NSTextField *sessionPresetsField,*callBackPresetsField;
 @property NSTextField *exclusionText;
 @property NSRunningApplication *lastExternalApp;
-@property SwitchingPolicy *policy;@property NSComboBox *nightBoostPopup;@property NSTextField *nightBoostNote;@property NSDatePicker *nightStartPicker,*nightEndPicker;@property NSStackView *ownHoursRow;@property NSDate *nightPreviewUntil;@property NSTimer *nightPreviewTimer;@property BOOL nightPreviewTurnedNightShiftOn;@property NSSegmentedControl *nightModeControl;@property NSStackView *nightPauseRow;@property NSWindow *supportWindow;@property GuideTour *guide;@property NSInteger tourGray;@property double tourWarmth;@property BOOL peekKeyHeld;@property NSPopUpButton *nightHoursPopup;@property NSTextField *nightHoursNote;@property NSButton *nightLocationButton,*nightDateTimeButton;@property NSInteger lastSeenMacMode;@property NSTextField *nightModeNote;@property BOOL migrateNightShiftMode,nightModeDirty;@property NSButton *nightTryButton;@property BOOL tourSpotEmpty;@property BOOL settingsAsideForTour;@property NSDictionary *playingField;@property NSString *tourMenuMark;@property BOOL statusMenuOpen;@property NSView *menuWarmthRow,*menuNightRow;@property NSSlider *menuWarmthSlider;@property NSRect sessionPanelTarget;
+@property SwitchingPolicy *policy;@property NSComboBox *nightBoostPopup;@property NSTextField *nightBoostNote;@property NSDatePicker *nightStartPicker,*nightEndPicker;@property NSStackView *ownHoursRow;@property NSDate *nightPreviewUntil;@property NSTimer *nightPreviewTimer;@property BOOL nightPreviewTurnedNightShiftOn;@property NSSegmentedControl *nightModeControl;@property NSStackView *nightPauseRow;@property NSWindow *supportWindow;@property GuideTour *guide;@property NSInteger tourGray;@property double tourWarmth;@property BOOL peekKeyHeld;@property NSPopUpButton *nightHoursPopup;@property NSTextField *nightHoursNote;@property NSButton *nightLocationButton,*nightDateTimeButton;@property NSInteger lastSeenMacMode;@property NSTextField *nightModeNote;@property BOOL migrateNightShiftMode,nightModeDirty;@property NSButton *nightTryButton;@property BOOL tourSpotEmpty;@property BOOL settingsAsideForTour;@property NSDictionary *playingField;@property NSString *tourMenuMark;@property BOOL statusMenuOpen,tourSessionWasIdle;@property NSInteger toursThisLaunch;@property NSView *menuWarmthRow,*menuNightRow;@property NSSlider *menuWarmthSlider;@property NSRect sessionPanelTarget;
 @property WarmthEngine *warmth;
 @property NSInteger selectedMode;
 @property NSSlider *warmthSlider;
@@ -1048,7 +1048,7 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  if([NSProcessInfo.processInfo.arguments containsObject:@"--about-tour"]){[self showSettings:nil];self.settingsTabs.selectedTabViewItemIndex=self.settingsTabs.tabViewItems.count-1;dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)(1.5*NSEC_PER_SEC)),dispatch_get_main_queue(),^{[self showTour:nil];});}
  // --tour-actions "slower@3,next@9,back@14,end@24": presses the tour controls at those seconds after the tour starts (testing)
  NSUInteger tai=[NSProcessInfo.processInfo.arguments indexOfObject:@"--tour-actions"];if(tai!=NSNotFound&&tai+1<NSProcessInfo.processInfo.arguments.count)for(NSString *item in [NSProcessInfo.processInfo.arguments[tai+1] componentsSeparatedByString:@","]){NSArray *pair=[item componentsSeparatedByString:@"@"];if(pair.count!=2)continue;NSString *what=pair[0];
-  dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)((3.7+[pair[1] doubleValue])*NSEC_PER_SEC)),dispatch_get_main_queue(),^{if([what isEqual:@"next"])[self.guide next];else if([what isEqual:@"back"])[self.guide back];else if([what isEqual:@"slower"])[self.guide toggleSlow];else if([what isEqual:@"end"])[self.guide endEarly];});}
+  dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)((3.7+[pair[1] doubleValue])*NSEC_PER_SEC)),dispatch_get_main_queue(),^{if([what isEqual:@"next"])[self.guide next];else if([what isEqual:@"back"])[self.guide back];else if([what isEqual:@"slower"])[self.guide toggleSlow];else if([what isEqual:@"end"])[self.guide endEarly];else if([what hasPrefix:@"station"])[self.guide jumpTo:[[what substringFromIndex:7] integerValue]-1];});}
  if([NSProcessInfo.processInfo.arguments containsObject:@"--start-tour"])dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)(2.5*NSEC_PER_SEC)),dispatch_get_main_queue(),^{if(!self.settings.visible)[self showTour:nil];dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)(1.2*NSEC_PER_SEC)),dispatch_get_main_queue(),^{[self startGuideTour];});});
  if([NSProcessInfo.processInfo.arguments containsObject:@"--menu-test"]){[self showSettings:nil];main.itemArray.firstObject.submenu=self.statusMenu;}
 
@@ -2350,11 +2350,12 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
 // aside when it starts, in the app's own preferences, so even a crash puts them back at the next launch.
 - (void)beginPlayingField {
  NSDictionary *stored=LPStoredSettings();NSMutableDictionary *snap=[NSMutableDictionary new];for(NSString *k in LPPlayingFieldKeys())if(stored[k])snap[k]=stored[k];
- self.playingField=snap;[NSUserDefaults.standardUserDefaults setObject:snap forKey:@"tourPlayingField"];
+ self.playingField=snap;[NSUserDefaults.standardUserDefaults setObject:snap forKey:@"tourPlayingField"];self.tourSessionWasIdle=self.session.state==SessionIdle;self.toursThisLaunch++;
 }
-- (BOOL)playingFieldChanged {if(!self.playingField)return NO;NSDictionary *stored=LPStoredSettings();for(NSString *k in LPPlayingFieldKeys()){id a=self.playingField[k],b=stored[k];if(a!=b&&![a isEqual:b])return YES;}return NO;}
+- (BOOL)playingFieldChanged {if(!self.playingField)return NO;if((self.tourSessionWasIdle&&self.session.state!=SessionIdle)||[self guidePeekKept])return YES;NSDictionary *stored=LPStoredSettings();for(NSString *k in LPPlayingFieldKeys()){id a=self.playingField[k],b=stored[k];if(a!=b&&![a isEqual:b])return YES;}return NO;}
 - (void)endPlayingFieldKeeping:(BOOL)keep {
  NSDictionary *snap=self.playingField;self.playingField=nil;[NSUserDefaults.standardUserDefaults removeObjectForKey:@"tourPlayingField"];
+ if(!keep&&snap){if(self.tourSessionWasIdle&&self.session.state!=SessionIdle)[self endSession:nil];if([self guidePeekKept]){self.peekLocked=NO;[self.peekLockedDisplays removeAllObjects];self.animateAppearance=YES;[self sync];}}  // a session or a kept peek from the tour ends too
  if(keep||!snap||![self playingFieldDiffers:snap])return;
  NSUserDefaults *d=NSUserDefaults.standardUserDefaults;for(NSString *k in LPPlayingFieldKeys()){id v=snap[k];if(v)[d setObject:v forKey:k];else [d removeObjectForKey:k];}
  // and what the app keeps in memory, read again as at launch
@@ -2418,7 +2419,48 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
  if([key isEqual:@"darkMode"])return @([[NSApp.effectiveAppearance bestMatchFromAppearancesWithNames:@[NSAppearanceNameAqua,NSAppearanceNameDarkAqua]] isEqual:NSAppearanceNameDarkAqua]);
  if([key isEqual:@"displays"])return @(NSScreen.screens.count);
  if([key isEqual:@"hour"])return @([NSCalendar.currentCalendar component:NSCalendarUnitHour fromDate:NSDate.date]);
+ if([key isEqual:@"minute"])return @([NSCalendar.currentCalendar component:NSCalendarUnitMinute fromDate:NSDate.date]);
+ if([key isEqual:@"weekday"])return @([NSCalendar.currentCalendar component:NSCalendarUnitWeekday fromDate:NSDate.date]);  // 1 Sunday … 6 Friday
+ if([key isEqual:@"settingsVisible"])return @(self.settings.visible);
+ if([key isEqual:@"settingsTab"])return self.settings.visible?@(self.settingsTabs.selectedTabViewItemIndex):@(-1);
+ if([key isEqual:@"sessionRunning"])return @(self.session.state!=SessionIdle);
+ if([key isEqual:@"systemSettingsFront"])return @([NSWorkspace.sharedWorkspace.frontmostApplication.bundleIdentifier isEqual:@"com.apple.systempreferences"]);
+ if([key isEqual:@"inApplications"])return @([NSBundle.mainBundle.bundlePath hasPrefix:@"/Applications/"]);
+ if([key isEqual:@"menuBarHidden"]){NSScreen *sc=self.item.button.window.screen?:NSScreen.mainScreen;return @(NSMaxY(sc.frame)-NSMaxY(sc.visibleFrame)<1);}
+ if([key isEqual:@"dockSide"])return [[[NSUserDefaults alloc]initWithSuiteName:@"com.apple.dock"] stringForKey:@"orientation"]?:@"bottom";
+ if([key isEqual:@"dockHidden"])return @([[[NSUserDefaults alloc]initWithSuiteName:@"com.apple.dock"] boolForKey:@"autohide"]);
+ if([key isEqual:@"mainWidth"])return @(NSScreen.screens.firstObject.frame.size.width);
+ if([key isEqual:@"notch"])return @([self guideHasNotch]);
+ if([key isEqual:@"reduceMotion"])return @(NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceMotion);
+ if([key isEqual:@"isNight"])return @(!self.nightPreviewUntil&&[self nightFactor]>.5);
+ if([key isEqual:@"tours"])return @(self.toursThisLaunch);
+ if([key isEqual:@"gray"])return @(self.effectiveMode==100||self.effectiveMode==1);
+ if([key isEqual:@"leftJob"])return @([self jobOfButton:NO]);
+ if([key isEqual:@"rightJob"])return @([self jobOfButton:YES]);
+ if([key isEqual:@"appGrayOff"]){NSDictionary *r=self.exclusionRules[self.lastExternalApp.bundleIdentifier?:@""];return @(RuleEnabled(r)&&[r[@"grayMode"] integerValue]==2);}
+ if([key isEqual:@"frontBundle"])return self.lastExternalApp.bundleIdentifier;
+ if([key isEqual:@"peekKept"])return @([self guidePeekKept]);
+ if([key isEqual:@"changes"])return [self playingFieldChanges];
  return nil;
+}
+// A tab in the Settings toolbar: found by its title in the window's toolbar views; else estimated from the row of tabs.
+- (NSRect)tourTabFrame:(NSInteger)index {
+ if(!self.settings.visible||index<0||index>=(NSInteger)self.settingsTabs.tabViewItems.count)return NSZeroRect;NSString *title=self.settingsTabs.tabViewItems[index].label;
+ NSView *hit=[self findIn:self.settings.contentView.superview where:^BOOL(NSView *x){return x!=self.settings.contentView&&([x.accessibilityLabel isEqual:title]||[x.accessibilityTitle isEqual:title]);}];
+ if(hit){NSRect r=[self screenRectOf:hit];if(!NSIsEmptyRect(r)&&r.size.width<140)return r;}
+ NSRect f=self.settings.frame;double w=56,n=self.settingsTabs.tabViewItems.count;return NSMakeRect(NSMidX(f)-w*n/2+w*index,NSMaxY(f)-74,w,44);
+}
+// What changed on the playing field, one line each, in the app's own words (for the question at the end).
+- (NSArray<NSString *> *)playingFieldChanges {
+ NSDictionary *snap=self.playingField;if(!snap)return @[];NSDictionary *stored=LPStoredSettings();NSMutableArray *out=[NSMutableArray new];
+ if(![snap[@"warmth"]?:@0 isEqual:stored[@"warmth"]?:@0])[out addObject:[NSString stringWithFormat:L(@"Extra Warmth %ld%%"),lround([self currentWarmth]/3*100)]];
+ NSDictionary *oldApps=snap[@"appExclusions"]?:@{},*apps=stored[@"appExclusions"]?:@{};for(NSString *b in apps)if(![oldApps[b] isEqual:apps[b]])[out addObject:[NSString stringWithFormat:L(@"Exception for %@"),apps[b][@"name"]?:b]];
+ NSDictionary *oldSites=snap[@"websiteRules"]?:@{},*sites=stored[@"websiteRules"]?:@{};for(NSString *k in sites)if(![oldSites[k] isEqual:sites[k]])[out addObject:[NSString stringWithFormat:L(@"Exception for %@"),k]];
+ if(![snap[@"lessPullPause"] isEqual:stored[@"lessPullPause"]]&&(snap[@"lessPullPause"]||stored[@"lessPullPause"]))[out addObject:stored[@"lessPullPause"]?L(@"Less Pull paused"):L(@"Less Pull running")];
+ if(![snap[@"manualMode"]?:@0 isEqual:stored[@"manualMode"]?:@0])[out addObject:(self.selectedMode==100||self.selectedMode==1)?L(@"Grayscale on"):L(@"Grayscale off")];
+ if(self.tourSessionWasIdle&&self.session.state!=SessionIdle)[out addObject:L(@"A session is running")];
+ if([self guidePeekKept])[out addObject:L(@"Peek kept on")];
+ return out;
 }
 - (NSRect)screenRectOf:(NSView *)v {return v.window.visible?[v.window convertRectToScreen:[v convertRect:v.bounds toView:nil]]:NSZeroRect;}
 - (NSView *)findIn:(NSView *)root where:(BOOL(^)(NSView *v))test {if(!root)return nil;if(test(root))return root;for(NSView *c in root.subviews){NSView *f=[self findIn:c where:test];if(f)return f;}return nil;}
@@ -2431,6 +2473,19 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
  if([key isEqual:@"panel.gray"]||[key isEqual:@"panel.warmth"]){if(!self.exceptionPanel.visible)return NSZeroRect;BOOL gray=[key isEqual:@"panel.gray"];
   NSView *v=[self findIn:self.exceptionPanel.contentView where:^BOOL(NSView *x){return gray?([x isKindOfClass:NSSegmentedControl.class]&&x.tag==0&&((NSSegmentedControl *)x).segmentCount==3):[x isKindOfClass:NSSlider.class];}];return v?[self screenRectOf:v]:NSZeroRect;}
  if([key isEqual:@"session"])return self.sessionPanel.visible?self.sessionPanel.frame:NSZeroRect;
+ if([key isEqual:@"session.tabs"]){if(!self.sessionPanel.visible)return NSZeroRect;NSView *v=[self findIn:self.sessionPanel.contentView where:^BOOL(NSView *x){return [x isKindOfClass:NSSegmentedControl.class]&&((NSSegmentedControl *)x).segmentCount==2;}];return v?[self screenRectOf:v]:NSZeroRect;}
+ if([key isEqual:@"panel.scope"]){if(!self.exceptionPanel.visible)return NSZeroRect;NSView *v=[self findIn:self.exceptionPanel.contentView where:^BOOL(NSView *x){return [x isKindOfClass:NSSegmentedControl.class]&&((NSSegmentedControl *)x).segmentCount==2;}];return v?[self screenRectOf:v]:NSZeroRect;}
+ if([key isEqual:@"panel.gray.off"]){NSRect r=[self guideFrame:@"panel.gray"];if(NSIsEmptyRect(r))return r;r.origin.x+=r.size.width*2/3;r.size.width/=3;return r;}
+ if([key isEqual:@"settings"])return self.settings.visible?self.settings.frame:NSZeroRect;
+ if([key hasPrefix:@"settings.tab."])return [self tourTabFrame:[[key substringFromIndex:13] integerValue]];
+ if(!self.settings.visible)return NSZeroRect;
+ if([key isEqual:@"settings.nightPopup"])return [self screenRectOf:self.nightHoursPopup];
+ if([key isEqual:@"settings.hours"])return self.ownHoursRow.hidden?NSZeroRect:[self screenRectOf:self.ownHoursRow];
+ if([key isEqual:@"settings.dateTime"])return [self screenRectOf:self.nightDateTimeButton];
+ if([key isEqual:@"settings.location"])return [self screenRectOf:self.nightLocationButton];
+ if([key isEqual:@"settings.boost"])return NSUnionRect([self screenRectOf:self.nightTryButton],[self screenRectOf:self.nightBoostPopup]);
+ if([key isEqual:@"settings.login"])return [self screenRectOf:self.loginButton];
+ if([key isEqual:@"settings.suggest"]){NSView *v=[self findIn:self.settings.contentView where:^BOOL(NSView *x){return [x isKindOfClass:NSButton.class]&&[x.identifier isEqual:@"peekShortcut"]&&((NSButton *)x).action==@selector(suggestShortcut:);}];return v?[self screenRectOf:v]:NSZeroRect;}
  if([key isEqual:@"session.notnow"]){if(!self.sessionPanel.visible)return NSZeroRect;NSView *v=[self findIn:self.sessionPanel.contentView where:^BOOL(NSView *x){return [x isKindOfClass:NSButton.class]&&[((NSButton *)x).title isEqual:L(@"Not now")];}];return v?[self screenRectOf:v]:NSZeroRect;}
  return NSZeroRect;
 }
@@ -2442,8 +2497,18 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
  if([action isEqual:@"openDateTime"]){[self openDateTime:nil];return;}
  if([action isEqual:@"openLocation"]){[self openLocationServices:nil];return;}
  if([action isEqual:@"nightSchedule"]){NSInteger h=[argument isEqual:@"sunset"]?0:1;[NSUserDefaults.standardUserDefaults setInteger:h forKey:@"nightHours"];self.nightModeDirty=YES;self.animateAppearance=YES;[self sync];[self refreshNightBoostControls];return;}
- if([action isEqual:@"launchAtLogin"]){NSError *e=nil;if([argument boolValue])[SMAppService.mainAppService registerAndReturnError:&e];else [SMAppService.mainAppService unregisterAndReturnError:&e];self.loginButton.state=SMAppService.mainAppService.status==SMAppServiceStatusEnabled;return;}
+ if([action isEqual:@"launchAtLogin"]){if(LessPullHandsOff)return;NSError *e=nil;if([argument boolValue])[SMAppService.mainAppService registerAndReturnError:&e];else [SMAppService.mainAppService unregisterAndReturnError:&e];self.loginButton.state=SMAppService.mainAppService.status==SMAppServiceStatusEnabled;return;}
  if([action isEqual:@"peekShortcut"]){NSDictionary *pick=[self suggestedShortcutFor:@"peekShortcut"];if(pick){[NSUserDefaults.standardUserDefaults setObject:pick forKey:@"peekShortcut"];[self registerPeekShortcut];[self refreshPeekRecorder:nil];}return;}
+ if([action isEqual:@"openSettings"]){[self showSettings:nil];return;}
+ if([action isEqual:@"selectTab"]){[self showSettings:nil];self.settingsTabs.selectedTabViewItemIndex=[argument integerValue];return;}
+ if([action isEqual:@"openExceptionPanel"]){[self openAppExceptionPanel:nil];return;}
+ if([action isEqual:@"openSitePanel"]){[self openSiteExceptionPanel:nil];return;}
+ if([action isEqual:@"openSessionPanel"]){if(self.session.state==SessionIdle)[self showSessionPanelMode:@"start"];return;}
+ if([action isEqual:@"closeSessionPanel"]){[self closeSessionPanel];return;}
+ if([action isEqual:@"closeExceptionPanel"]){[self closeExceptionPanel];return;}
+ if([action isEqual:@"keepSetup"]){  // what an offer set up is the user's: it stays, whatever the playing field does
+  if(!self.playingField)return;NSMutableDictionary *f=[self.playingField mutableCopy];NSDictionary *stored=LPStoredSettings();for(NSString *k in argument){if(stored[k])f[k]=stored[k];else [f removeObjectForKey:k];}
+  self.playingField=f;[NSUserDefaults.standardUserDefaults setObject:f forKey:@"tourPlayingField"];return;}
  if([action isEqual:@"connectBrowser"]){NSString *bundle=argument;for(NSArray *b in [self browserCatalog])if([b[1] isEqual:bundle]){[self tourConnectBrowser:b];break;}return;}
 }
 // A browser the user chose on the tour: the same steps as Settings → Websites, with the guide explaining instead of an alert.
@@ -2580,6 +2645,7 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
 }
 - (void)login:(NSButton *)sender {
  NSError *error=nil;
+ if(LessPullHandsOff){self.loginButton.state=sender.state;return;}  // a demo copy never registers itself at login
  if(sender.state==NSControlStateValueOn)[SMAppService.mainAppService registerAndReturnError:&error];else [SMAppService.mainAppService unregisterAndReturnError:&error];
  if(error){NSAlert *a=[NSAlert new];a.messageText=L(@"Login setting needs attention");a.informativeText=error.localizedDescription;[a runModal];}
  sender.state=SMAppService.mainAppService.status==SMAppServiceStatusEnabled;if(sender.state==NSControlStateValueOn)self.loginNote.hidden=YES;
