@@ -2343,8 +2343,8 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
  NSStackView *(^way)(NSString *,NSString *,NSArray *)=^NSStackView *(NSString *name,NSString *what,NSArray *buttons){
   NSTextField *n=[NSTextField labelWithString:name];n.font=[NSFont systemFontOfSize:13 weight:NSFontWeightMedium];NSTextField *w=[NSTextField wrappingLabelWithString:what];w.font=[NSFont systemFontOfSize:11];w.textColor=NSColor.secondaryLabelColor;w.preferredMaxLayoutWidth=250;
   NSStackView *text=[self column:@[n,w]];text.spacing=2;NSStackView *r=[self row:[@[text,[self spacer]] arrayByAddingObjectsFromArray:buttons]];r.alignment=NSLayoutAttributeCenterY;return r;};
- [rows addObject:way(@"Buy Me a Coffee",L(@"Card or Apple Pay, once or monthly."),@[button(L(@"Open"),@selector(openSupportLink:),LessPullCoffee)])];
- [rows addObject:way(@"PayPal",L(@"With a PayPal account."),@[button(L(@"Open"),@selector(openSupportLink:),LessPullPayPal)])];
+ [rows addObject:way(@"Buy Me a Coffee",L(@"Card or Apple Pay, once or monthly."),@[button(L(@"QR code"),@selector(showQR:),LessPullCoffee),button(L(@"Open"),@selector(openSupportLink:),LessPullCoffee)])];
+ [rows addObject:way(@"PayPal",L(@"With a PayPal account."),@[button(L(@"QR code"),@selector(showQR:),LessPullPayPal),button(L(@"Open"),@selector(openSupportLink:),LessPullPayPal)])];
  [rows addObject:way(@"Wise",L(@"A transfer with low fees, in many currencies."),@[button(L(@"QR code"),@selector(showQR:),LessPullWise),button(L(@"Open"),@selector(openSupportLink:),LessPullWise)])];
  NSTextField *address=[NSTextField labelWithString:LessPullBitcoin];address.font=[NSFont monospacedSystemFontOfSize:10 weight:NSFontWeightRegular];address.selectable=YES;address.textColor=NSColor.secondaryLabelColor;
  NSStackView *btc=way(@"Bitcoin",L(@"One address, Native SegWit. Please send Bitcoin only."),@[button(L(@"QR code"),@selector(showQR:),[@"bitcoin:" stringByAppendingString:LessPullBitcoin]),button(L(@"Copy"),@selector(copyBitcoin:),nil)]);
