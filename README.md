@@ -278,7 +278,7 @@ The app is Objective-C on Apple frameworks. The extension is plain JavaScript on
 zsh Source/build.sh
 ```
 
-See [testing](Source/TESTING.txt), the [build 19 notes](docs/1.4.4-19-release.txt), the [build 17 notes](docs/1.4.4-17-release.txt), the [build 16 notes](docs/1.4.4-16-release.txt) and the [release plan](docs/RELEASE-PLAN.md). Less Pull relies on private macOS display interfaces, so each macOS version needs its own check.
+See [testing](Source/TESTING.txt), the [release history](docs/1.4.4-19-release.txt), which covers every build since 19, and the [release plan](docs/RELEASE-PLAN.md). Less Pull relies on private macOS display interfaces, so each macOS version needs its own check.
 
 ## Documentation
 

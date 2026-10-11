@@ -1,46 +1,30 @@
 # Release plan
 
-Less Pull 1.4.4 build 33 is a test release shared with friends (build 16 was the first public one); the repository went public on 8 October 2026 at the author's request. The version number stays 1.4.4 for good; releases are tagged `v1.4.4-<build>`.
+Less Pull 1.4.4 build 41 is the current release (11 October 2026). The version number stays 1.4.4 for good; releases are tagged `v1.4.4-<build>`, and the [release history](1.4.4-19-release.txt) describes every build since 19. The repository has been public since 8 October 2026.
 
 ## Done
 
-- Separate app and source licenses are in place. See [Licensing](LICENSING.md).
-- The project page, screenshots, illustrations, install guide and privacy document are prepared.
-- Build 16 adds the app improvements of 8 October 2026: icons, plain language, a welcome in Settings, a shorter menu, sectioned Settings, the warmth ramp slider, a state-showing menu-bar icon, better App Exceptions, website rules in the app, popup polish, Pause Less Pull, Peek in color, a daily update check, Firefox support, and the executable rename. See the [build 16 notes](1.4.4-16-release.txt).
-- Automated suites pass for build 16 and passed for build 15: policy, warmth matrix, pause and daylight-saving handling, 576 combined exception cases, fades, website rules, menu dismissal, the extension worker, and display recovery. See the [1.4.4 notes](1.4.4-release.txt).
-- Earlier live checks confirmed that Grayscale survives Night Shift turning off, that Color survives Night Shift turning on, and that saved warmth is restored.
-- Since version 1.4.2, returning from an exception fades smoothly instead of switching at once. The author confirmed that the fade works as intended.
+- **Signed and notarized.** Since 9 October 2026 every release is signed with a Developer ID and notarized by Apple: the app, the browser helper and the Safari companion app. It opens like any other app, and Safari needs no Allow Unsigned Extensions.
+- **Downloads for people and for the updater.** Each release carries a disk image, a zip for the in-app updater, `lesspull-update.json` (so the app only offers builds made for the reader's macOS), the agent pack and `SHA256SUMS.txt`.
+- **Install update in the menu.** The app downloads the zip, checks it against the release's checksums, requires the Developer ID signature and Apple's notarization, and only then replaces itself. Settings and exceptions stay.
+- **Browser extension.** Published in the Chrome Web Store (Chrome, Brave, Edge, Opera). Safari through the signed companion app. Firefox is submitted to addons.mozilla.org and loads as a temporary add-on until it is approved.
+- **Automated suites** pass for every build: Night Shift policy, the warmth matrix, pause and daylight-saving handling, 576 combined exception cases, fades, website rules, menu dismissal, the extension worker, sessions and display recovery. See [testing](../Source/TESTING.txt).
+- **13 languages.** English and German reviewed line by line; the others are marked experimental until a native speaker has read them.
+- **Licenses.** Separate app and source licenses. See [Licensing](LICENSING.md).
+- **Real screenshots** of the menu, the panels and every Settings tab, from the current build.
 
-See [Publishing safely](PUBLISHING.md) for how signing and store hosting protect the release path. Until then, the release carries an [agent pack](../tools/agent-pack/README.md) so an AI agent can install the app and connect the browsers for a user.
+## Still open
 
-## Still open before a public release
-
-1. Legal review of the custom license terms.
-2. Sign the app and helper with a Developer ID, test with the Hardened Runtime, notarize, staple, and test a clean downloaded installation.
-3. Clean installation tests in Chrome and Brave, plus reconnect, sleep and wake, and external display checks.
-4. Register a Chrome Web Store publisher, get the production extension identity, align the native allowlist, prepare disclosures and reviewer instructions, then submit.
-5. Publish versioned, notarized downloads.
-6. Real screenshots of the Settings tabs and of the popup inside Brave, for the project page.
-7. Attach `lesspull-update.json` to each release (the repository is public, so the in-app update check sees releases).
-8. Developer ID signing and notarization also unlock update phase 2 (download, verify and install from the menu; Sparkle 2 is the recommended route and would be the first third-party dependency, so it needs an explicit decision).
-10. Done 9 Oct 2026: the companion app is signed and notarized with the app, so the extension loads without Allow Unsigned Extensions. App Store distribution of the companion: not planned.
-
-Firefox, Safari, Opera and Edge are implemented but need clean-install tests.
+1. Mozilla's approval of the Firefox extension; then the install help points at the add-on page.
+2. Legal review of the custom license terms.
+3. Clean installation tests on a fresh Mac, in Edge, and after long sleep or a display reconnect.
+4. Native-speaker review of the experimental languages.
 
 ## Not verified
 
-- macOS versions other than 27.
-- Extended sleep and display reconnect behavior.
+- macOS versions other than 27. Less Pull relies on private display interfaces, so each macOS version needs its own check.
 - Optical calibration. No universal claim is made about how any display looks.
 
 ## Housekeeping
 
-Do not commit credentials, user preferences, personal browsing context, test state files or private conversation documents.
-
-
-## Store submissions (9 October 2026)
-
-- Firefox: "Less Pull Extension" 0.4.2 submitted to addons.mozilla.org, awaiting review. The add-on id is fixed; nothing in the app changes.
-- Chrome Web Store: item `lfcjadlpflfdgbgpcbkmdkmnboaakimb`, package 0.4.2, submitted for review; the app allows that id since the build 33 refresh of 9 October, and refreshes the host manifests at launch.
-- Safari: waits for the Developer ID certificate (program activation pending at Apple).
-- After approval: point the install help, the Websites tab and the agent pack at the store pages.
+Do not commit credentials, user preferences, personal browsing context, test state files or private conversation documents. See [Publishing safely](PUBLISHING.md) for how signing and store hosting protect the release path.
