@@ -263,5 +263,21 @@ int main(){@autoreleasepool{
   t.activeDisplay=22;[t peekKeyPressed:YES at:30];[t peekKeyPressed:NO at:30.1];[t peekKeyPressed:YES at:30.3];[t peekKeyPressed:NO at:30.4];check(![tw.grayOn[@11] boolValue]&&![tw.grayOn[@22] boolValue],"the other display can be kept too, later");
   t.activeDisplay=11;[t peekKeyPressed:YES at:40];check([tw.grayOn[@11] boolValue]&&![tw.grayOn[@22] boolValue]&&![t.peekLockedDisplays containsObject:@11],"a press on a kept display lets it go, the other stays");[t peekKeyPressed:NO at:40.2];check([tw.grayOn[@11] boolValue]&&![tw.grayOn[@22] boolValue],"its release changes nothing");
   [d removeObjectForKey:@"peekActiveDisplayOnly"];}
- puts("PASS: Peek latch (hold, double-press keep, press to let go), per-display peek and locks; Grayscale off for a while, Peek effects, shortcut suggestions; preference migration; update check version/build/compatibility parsing; Peek in color (plain display while held, release restores, nothing saved, shortcut rules); Pause Less Pull (plain display, rules ignored, settings kept, relaunch, expiry); inheritance, independent gray/warmth, Night Shift on/off, own versus genuine transitions, manual off, timed-off precedence/expiry, schedule cutoff, recovery, rapid rule switches.");
+ // The tour's playing field: what changes on the tour goes back, unless kept; a tour that never ended goes back at the next launch.
+ {TestApp *t=[TestApp new];FakeFilter *fe=[FakeFilter new];fe.state=(NSBlueStatus){.mode=0,.available=YES};FakeWarmth *fw=[FakeWarmth new];t.engine=fe;t.warmth=fw;t.exclusion=[ExclusionPolicy new];t.policy=[SwitchingPolicy new];t.policy.known=YES;t.browserBridge=[BrowserBridge new];
+  [d setDouble:.9 forKey:@"warmth"];[d setInteger:100 forKey:@"manualMode"];[d setObject:@{@"com.example.photos":@{@"enabled":@YES,@"grayMode":@2}} forKey:@"appExclusions"];[d removeObjectForKey:@"lessPullPause"];[d removeObjectForKey:@"websiteRules"];
+  t.exclusionRules=[[d dictionaryForKey:@"appExclusions"] mutableCopy];t.pausedUntil=nil;
+  [t beginPlayingField];check([d dictionaryForKey:@"tourPlayingField"]!=nil&&![t guideChangedSomething],"the tour keeps your settings aside; nothing changed yet");
+  [d setDouble:2.4 forKey:@"warmth"];t.exclusionRules[@"com.example.preview"]=@{@"enabled":@YES,@"grayMode":@2};[t saveExclusionRules];[t pauseLessPullForMinutes:0];
+  t.browserBridge.rules[@"news.example"]=@{@"enabled":@YES,@"customWarmth":@YES,@"warmth":@40};[d setObject:t.browserBridge.rules forKey:@"websiteRules"];
+  check([t guideChangedSomething],"changes on the tour are noticed");
+  [t endPlayingFieldKeeping:NO];
+  check([d doubleForKey:@"warmth"]==.9&&t.exclusionRules.count==1&&t.exclusionRules[@"com.example.photos"]&&!t.pausedUntil&&![d objectForKey:@"lessPullPause"]&&![d objectForKey:@"websiteRules"]&&t.browserBridge.rules.count==0&&![d objectForKey:@"tourPlayingField"],"put back: warmth, exceptions, website rules and the pause are as before");
+  [t beginPlayingField];[d setDouble:2.4 forKey:@"warmth"];[t endPlayingFieldKeeping:YES];check([d doubleForKey:@"warmth"]==2.4&&![d objectForKey:@"tourPlayingField"],"kept: the changes stay");
+  [d setDouble:.9 forKey:@"warmth"];[t beginPlayingField];[d setDouble:3 forKey:@"warmth"];[d setObject:@{@"until":@0} forKey:@"lessPullPause"];
+  LPRestoreUnfinishedTour(d);  // a crash: the next launch puts the playing field back before it reads anything
+  check([d doubleForKey:@"warmth"]==.9&&![d objectForKey:@"lessPullPause"],"after a crash the playing field goes back at the next launch");
+  [d removeObjectForKey:@"appExclusions"];
+ }
+ puts("PASS: Peek latch (hold, double-press keep, press to let go), per-display peek and locks; Grayscale off for a while, Peek effects, shortcut suggestions; preference migration; update check version/build/compatibility parsing; Peek in color (plain display while held, release restores, nothing saved, shortcut rules); Pause Less Pull (plain display, rules ignored, settings kept, relaunch, expiry); the tour's playing field (kept aside, put back or kept, back after a crash); inheritance, independent gray/warmth, Night Shift on/off, own versus genuine transitions, manual off, timed-off precedence/expiry, schedule cutoff, recovery, rapid rule switches.");
 }}

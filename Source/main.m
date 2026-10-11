@@ -19,6 +19,11 @@
 #import <Carbon/Carbon.h>
 #import "WarmthCurve.h"
 extern BOOL LessPullHandsOff,LessPullBorrowScreen;
+// The settings a tour can change: kept aside when it starts, put back unless you keep them (see beginPlayingField).
+static NSArray<NSString *> *LPPlayingFieldKeys(void){return @[@"warmth",@"warmthColor",@"warmthGrayscale",@"manualMode",@"nightMode",@"overrideMode",@"automatic",@"displayModes",@"appExclusions",@"websiteRules",@"lessPullPause",@"grayscaleOff",@"nightShiftPause",@"nightShiftMode",@"nightHours",@"nightStart",@"nightEnd",@"nightBoost",@"peekEffects",@"peekActiveDisplayOnly",@"peekShortcut",@"grayscaleShortcut"];}
+static NSDictionary *LPStoredSettings(void){NSString *bid=NSBundle.mainBundle.bundleIdentifier?:NSProcessInfo.processInfo.processName;return [NSUserDefaults.standardUserDefaults persistentDomainForName:bid]?:@{};}  // a test tool keeps its settings under its own name
+// A tour that never ended (a crash, a forced quit): its playing field goes back first, before anything reads the settings.
+static void LPRestoreUnfinishedTour(NSUserDefaults *d){NSDictionary *field=[d dictionaryForKey:@"tourPlayingField"];if(!field)return;for(NSString *k in LPPlayingFieldKeys()){id v=field[k];if(v)[d setObject:v forKey:k];else [d removeObjectForKey:k];}[d removeObjectForKey:@"tourPlayingField"];}
 // Peek in color: a global shortcut held down shows the plain display. The shortcut
 // is stored as a key code plus Carbon modifiers; there is no default binding.
 @interface PeekShortcut : NSObject
@@ -329,7 +334,7 @@ static void QuietScrolling(NSScrollView *s){
 @property NSTextField *sessionPresetsField,*callBackPresetsField;
 @property NSTextField *exclusionText;
 @property NSRunningApplication *lastExternalApp;
-@property SwitchingPolicy *policy;@property NSComboBox *nightBoostPopup;@property NSTextField *nightBoostNote;@property NSDatePicker *nightStartPicker,*nightEndPicker;@property NSStackView *ownHoursRow;@property NSDate *nightPreviewUntil;@property NSTimer *nightPreviewTimer;@property BOOL nightPreviewTurnedNightShiftOn;@property NSSegmentedControl *nightModeControl;@property NSStackView *nightPauseRow;@property NSWindow *supportWindow;@property GuideTour *guide;@property NSTextField *tourStepLabel;@property NSButton *tourSlowButton,*tourBackButton,*tourNextButton;@property NSInteger tourGray;@property double tourWarmth;@property BOOL peekKeyHeld;@property NSPopUpButton *nightHoursPopup;@property NSTextField *nightHoursNote;@property NSButton *nightLocationButton,*nightDateTimeButton;@property NSInteger lastSeenMacMode;@property NSTextField *nightModeNote;@property BOOL migrateNightShiftMode,nightModeDirty;@property NSButton *nightTryButton;@property BOOL tourSpotEmpty;@property NSRect sessionPanelTarget;
+@property SwitchingPolicy *policy;@property NSComboBox *nightBoostPopup;@property NSTextField *nightBoostNote;@property NSDatePicker *nightStartPicker,*nightEndPicker;@property NSStackView *ownHoursRow;@property NSDate *nightPreviewUntil;@property NSTimer *nightPreviewTimer;@property BOOL nightPreviewTurnedNightShiftOn;@property NSSegmentedControl *nightModeControl;@property NSStackView *nightPauseRow;@property NSWindow *supportWindow;@property GuideTour *guide;@property NSInteger tourGray;@property double tourWarmth;@property BOOL peekKeyHeld;@property NSPopUpButton *nightHoursPopup;@property NSTextField *nightHoursNote;@property NSButton *nightLocationButton,*nightDateTimeButton;@property NSInteger lastSeenMacMode;@property NSTextField *nightModeNote;@property BOOL migrateNightShiftMode,nightModeDirty;@property NSButton *nightTryButton;@property BOOL tourSpotEmpty;@property BOOL settingsAsideForTour;@property NSDictionary *playingField;@property NSString *tourMenuMark;@property NSRect sessionPanelTarget;
 @property WarmthEngine *warmth;
 @property NSInteger selectedMode;
 @property NSSlider *warmthSlider;
@@ -978,6 +983,7 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  if([NSRunningApplication runningApplicationsWithBundleIdentifier:NSBundle.mainBundle.bundleIdentifier].count>1||[NSRunningApplication runningApplicationsWithBundleIdentifier:LessPullOldBundleIdentifier].count>0){[NSApp terminate:nil];return;}
  [NSNotificationCenter.defaultCenter addObserverForName:LessPullLanguageChanged object:nil queue:NSOperationQueue.mainQueue usingBlock:^(NSNotification *n){[self languageDidChange];}];
  BOOL migrated=[NSBundle.mainBundle.bundleIdentifier isEqual:@"com.jiriarion.lesspull"]&&[PreferenceMigration migrateFromDomain:LessPullOldBundleIdentifier into:NSUserDefaults.standardUserDefaults];
+ LPRestoreUnfinishedTour(NSUserDefaults.standardUserDefaults);
  NSMenu *main=[NSMenu new],*application=[NSMenu new];NSMenuItem *root=[NSMenuItem new];root.submenu=application;[main addItem:root];NSMenuItem *quit=[[NSMenuItem alloc]initWithTitle:L(@"Quit Less Pull") action:@selector(terminate:) keyEquivalent:@"q"];quit.target=NSApp;[application addItem:quit];NSMenuItem *settingsShortcut=[[NSMenuItem alloc]initWithTitle:L(@"Settings…") action:@selector(showSettings:) keyEquivalent:@","];settingsShortcut.target=self;[application insertItem:settingsShortcut atIndex:0];NSApp.mainMenu=main;
  self.exclusionRules=[[NSUserDefaults.standardUserDefaults dictionaryForKey:@"appExclusions"] mutableCopy]?:[NSMutableDictionary new];self.exclusion=[ExclusionPolicy fromDictionary:[NSUserDefaults.standardUserDefaults dictionaryForKey:@"exclusionRecovery"]]?:[ExclusionPolicy new];
  self.forcedNightOn=[[[NSUserDefaults.standardUserDefaults dictionaryForKey:@"exclusionRecovery"] objectForKey:@"forcedNightOn"] boolValue];self.engine=[FilterEngine new];self.warmth=[WarmthEngine new];self.warmth.perDisplay=YES;[self.warmth restore];self.selectedMode=self.engine.currentMode;
@@ -2339,30 +2345,31 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
 - (void)openWebsite:(id)sender {[NSWorkspace.sharedWorkspace openURL:[NSURL URLWithString:LessPullWebsite]];}
 - (void)openSupport:(id)sender {[self showSupportWindow];}
 // ---- The tour on the real Mac (GuideTour): what is real comes from here.
-- (void)startGuideTour {if(self.guide)return;self.tourGray=-1;self.tourWarmth=-1;[self borrowScreenForTour:YES];self.guide=[[GuideTour alloc]initWithHost:self];[self showTourControls];[self.guide start];}
-// While the circle tours the screen, the welcome card holds its controls: where you already look, never over the Dock.
-- (void)showTourControls {
- NSStackView *card=self.tourCard;if(!card)return;for(NSView *v in card.arrangedSubviews.copy){[card removeArrangedSubview:v];[v removeFromSuperview];}
- NSTextField *title=[NSTextField labelWithString:L(@"The tour is on")];title.font=[NSFont systemFontOfSize:15 weight:NSFontWeightSemibold];
- NSTextField *text=[NSTextField wrappingLabelWithString:L(@"Follow the circle. It talks a little and shows things on your real screen; nothing is changed for good.")];text.preferredMaxLayoutWidth=404;text.textColor=NSColor.secondaryLabelColor;
- self.tourStepLabel=[NSTextField labelWithString:@""];self.tourStepLabel.font=[NSFont monospacedDigitSystemFontOfSize:12 weight:NSFontWeightRegular];self.tourStepLabel.textColor=NSColor.secondaryLabelColor;
- self.tourSlowButton=[NSButton buttonWithTitle:L(@"Slower") target:self action:@selector(tourSlow:)];self.tourSlowButton.buttonType=NSButtonTypePushOnPushOff;[self helpView:self.tourSlowButton text:L(@"The circle takes more time for each step.") label:L(@"Slower")];
- self.tourBackButton=[NSButton buttonWithTitle:L(@"Back") target:self action:@selector(tourGuideBack:)];
- self.tourNextButton=[NSButton buttonWithTitle:L(@"Next") target:self action:@selector(tourGuideNext:)];self.tourNextButton.keyEquivalent=@"\r";
- NSButton *end=[NSButton buttonWithTitle:L(@"End tour") target:self action:@selector(tourGuideEnd:)];end.bezelStyle=NSBezelStyleInline;
- NSView *fill=[NSView new];[fill setContentHuggingPriority:1 forOrientation:NSLayoutConstraintOrientationVertical];
- NSStackView *buttons=[self row:@[self.tourSlowButton,[self spacer],self.tourStepLabel,[self spacer],self.tourBackButton,self.tourNextButton]];
- NSStackView *column=[self column:@[title,text,fill,buttons,[self row:@[[self spacer],end]]]];column.spacing=8;
- [card addArrangedSubview:column];[column.widthAnchor constraintEqualToAnchor:card.widthAnchor constant:-28].active=YES;for(NSView *v in column.arrangedSubviews)if([v isKindOfClass:NSStackView.class])[v.widthAnchor constraintEqualToAnchor:column.widthAnchor].active=YES;
- if(self.tourHeight)[column.heightAnchor constraintEqualToConstant:self.tourHeight-26].active=YES;
- [self.settings makeFirstResponder:nil];  // no field keeps the keyboard during the tour; Return is Next
+// ---- The tour's playing field: whatever you change on the tour can be put back afterwards. The settings are kept
+// aside when it starts, in the app's own preferences, so even a crash puts them back at the next launch.
+- (void)beginPlayingField {
+ NSDictionary *stored=LPStoredSettings();NSMutableDictionary *snap=[NSMutableDictionary new];for(NSString *k in LPPlayingFieldKeys())if(stored[k])snap[k]=stored[k];
+ self.playingField=snap;[NSUserDefaults.standardUserDefaults setObject:snap forKey:@"tourPlayingField"];
 }
-- (void)tourSlow:(id)sender {[self.guide toggleSlow];}
-- (void)tourGuideBack:(id)sender {[self.guide back];}
-- (void)tourGuideNext:(id)sender {[self.guide next];}
-- (void)tourGuideEnd:(id)sender {[self.guide endEarly];}
-- (void)guideProgress:(GuideTour *)tour {self.tourStepLabel.stringValue=[NSString stringWithFormat:L(@"%ld of %ld"),(long)tour.step+1,(long)tour.stepCount];self.tourBackButton.enabled=tour.step>0;self.tourNextButton.title=tour.step+1>=tour.stepCount?L(@"Done"):L(@"Next");self.tourSlowButton.state=tour.slow;}
-- (NSRect)guideSettingsFrame {return self.settings.visible?self.settings.frame:NSZeroRect;}
+- (BOOL)playingFieldChanged {if(!self.playingField)return NO;NSDictionary *stored=LPStoredSettings();for(NSString *k in LPPlayingFieldKeys()){id a=self.playingField[k],b=stored[k];if(a!=b&&![a isEqual:b])return YES;}return NO;}
+- (void)endPlayingFieldKeeping:(BOOL)keep {
+ NSDictionary *snap=self.playingField;self.playingField=nil;[NSUserDefaults.standardUserDefaults removeObjectForKey:@"tourPlayingField"];
+ if(keep||!snap||![self playingFieldDiffers:snap])return;
+ NSUserDefaults *d=NSUserDefaults.standardUserDefaults;for(NSString *k in LPPlayingFieldKeys()){id v=snap[k];if(v)[d setObject:v forKey:k];else [d removeObjectForKey:k];}
+ // and what the app keeps in memory, read again as at launch
+ self.exclusionRules=[[d dictionaryForKey:@"appExclusions"] mutableCopy]?:[NSMutableDictionary new];self.browserBridge.rules=[[d dictionaryForKey:@"websiteRules"] mutableCopy]?:[NSMutableDictionary new];
+ [self restoreLessPullPause];[self scheduleLessPullPauseTimer];[self restoreGrayscaleOff];[self scheduleGrayscaleOffTimer];
+ self.pause=[PausePolicy fromDictionary:[d dictionaryForKey:@"nightShiftPause"]];[self schedulePauseTimer];
+ self.automatic=[d boolForKey:@"automatic"];self.policy.automatic=self.automatic;self.policy.overrideMode=[d integerForKey:@"overrideMode"];self.selectedMode=[d integerForKey:self.automatic?@"nightMode":@"manualMode"];
+ self.nightModeDirty=YES;[self registerPeekShortcut];
+ self.warmthSlider.doubleValue=[d doubleForKey:@"warmth"]/3*100;[self refreshProfiles];[self refreshNightBoostControls];[self rebuildExclusionsList];[self rebuildWebsiteRulesList];[self refreshPeekRecorder:nil];
+ self.statusImageName=nil;self.animateAppearance=YES;[self sync];
+}
+- (BOOL)playingFieldDiffers:(NSDictionary *)snap {NSDictionary *stored=LPStoredSettings();for(NSString *k in LPPlayingFieldKeys()){id a=snap[k],b=stored[k];if(a!=b&&![a isEqual:b])return YES;}return NO;}
+- (BOOL)guideChangedSomething {return [self playingFieldChanged];}
+- (void)guideKeepChanges:(BOOL)keep {[self endPlayingFieldKeeping:keep];}
+// While the circle tours the screen, the Settings window steps aside; the tour's own small bar holds the controls.
+- (void)startGuideTour {if(self.guide)return;self.tourGray=-1;self.tourWarmth=-1;[self borrowScreenForTour:YES];[self beginPlayingField];self.settingsAsideForTour=self.settings.visible;if(self.settingsAsideForTour)[self.settings orderOut:nil];self.guide=[[GuideTour alloc]initWithHost:self];[self.guide start];}
 - (NSView *)guideScene:(NSInteger)kind {TourScene *s=[[TourScene alloc]initWithFrame:NSMakeRect(0,0,420,140)];s.kind=(TourSceneKind)MAX(0,MIN(5,kind));return s;}
 - (NSRect)guideIconFrame {
  static double hiddenUntil=0;if([NSProcessInfo.processInfo.arguments containsObject:@"--tour-icon-hidden"]){if(hiddenUntil==0)hiddenUntil=CACurrentMediaTime()+45;if(CACurrentMediaTime()<hiddenUntil)return NSZeroRect;}  // test: the circle counts as hidden for the first 45 seconds
@@ -2384,7 +2391,6 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
  return self.peeking||self.peekLocked||self.peekLockedDisplays.count>0;}
 - (BOOL)guidePeekKept {return self.peekLocked||self.peekLockedDisplays.count>0;}
 - (BOOL)guideHasNotch {NSScreen *screen=self.item.button.window.screen?:self.settings.screen?:NSScreen.mainScreen;if(@available(macOS 12.0,*))return screen.safeAreaInsets.top>0;return NO;}
-- (NSRect)guideControlFrame:(NSString *)which {NSView *v=[which isEqual:@"slower"]?self.tourSlowButton:[which isEqual:@"next"]?self.tourNextButton:self.tourCard;if(!v.window.visible)return NSZeroRect;return [v.window convertRectToScreen:[v convertRect:v.bounds toView:nil]];}
 - (void)guideSpotEmpty:(BOOL)empty {if(self.tourSpotEmpty==empty)return;self.tourSpotEmpty=empty;self.statusImageName=nil;[self updateStatusIcon];}
 // The circle's spot while it is out on its tour: a dotted outline, so the menu bar keeps its place.
 - (NSImage *)tourSpotImage {
@@ -2402,10 +2408,12 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
  NSLog(@"Less Pull demo: the screen goes back (installed app running: %@)",installed?@"yes":@"no");
 }
 - (void)guideFinished:(BOOL)completed {
- self.guide=nil;self.tourGray=-1;self.tourWarmth=-1;self.animateAppearance=YES;[self sync];
+ self.guide=nil;self.tourGray=-1;self.tourWarmth=-1;self.tourMenuMark=nil;if(self.playingField)[self endPlayingFieldKeeping:NO];  // not asked (ended early, closed, quit): everything goes back
+ self.animateAppearance=YES;[self sync];
  if(LessPullBorrowScreen)dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)(.8*NSEC_PER_SEC)),dispatch_get_main_queue(),^{if(!self.guide)[self borrowScreenForTour:NO];});  // after the fade back
+ if(self.settingsAsideForTour&&self.settings){self.settingsAsideForTour=NO;[self.settings orderFrontRegardless];}
  if(!self.settings.visible||!self.tourCard)return;
- if(!completed){[self showTourPage:0 animated:YES];return;}  // ended early: the welcome is back, to start again or skip
+ if(!completed){[self showTourPage:0 animated:NO];return;}  // ended early: the welcome is back, to start again or skip
  if([self tourLastPage]==6)[self showTourPage:6 animated:YES];else [self dismissWelcome:nil];
 }
 // One door, then the choice: every way to support, each with what it suits, and the ways without money.
@@ -2657,7 +2665,7 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
 - (void)displaysChanged:(id)sender {[self pipelineChanged:sender];[self refreshDisplayRows];[self applyVisibility];[self refitSettings];}
 // A display, its scaling or the Dock changed while Settings is open: measure the tabs for the new screen, then place the window inside it again.
 - (void)refitSettings {if(!self.settings.visible)return;dispatch_async(dispatch_get_main_queue(),^{[self relayoutSettings];dispatch_async(dispatch_get_main_queue(),^{[self.settings setFrame:self.settings.frame display:YES];});});}
-- (void)applicationWillTerminate:(NSNotification *)note {self.quitting=YES;if(LessPullBorrowScreen){[self.guide stop];[self borrowScreenForTour:NO];}if(self.nightPreviewTurnedNightShiftOn)[self.engine setNightShiftEnabled:NO];  // a night preview never leaves Night Shift on
+- (void)applicationWillTerminate:(NSNotification *)note {self.quitting=YES;if(self.guide)[self.guide stop];if(self.playingField)[self endPlayingFieldKeeping:NO];if(LessPullBorrowScreen)[self borrowScreenForTour:NO];if(self.nightPreviewTurnedNightShiftOn)[self.engine setNightShiftEnabled:NO];  // a night preview never leaves Night Shift on
 if(self.peekHotKey)UnregisterEventHotKey(self.peekHotKey);if(self.grayscaleHotKey)UnregisterEventHotKey(self.grayscaleHotKey);[self.grayOffTimer invalidate];[self.pauseAllTimer invalidate];[self.eventTimer invalidate];[self.pipelineRecoveryTimer invalidate];[self.menuDismissal end];[self.browserBridge stop];[self.warmth cancelTransition];if(self.relaunching)return;[self endPauseNow:nil];self.excludeNight=NO;[self reconcileExclusion];if(self.grayOverride||self.customWarmth){self.grayOverride=0;self.customWarmth=NO;self.excludeGray=NO;self.excludeWarmth=NO;self.animateAppearance=NO;[self.warmth cancelTransition];[self applyMode:self.selectedMode];}[self.warmth restore];}
 - (void)quit:(id)sender {[NSApp terminate:nil];}
 @end
