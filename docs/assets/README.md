@@ -2,10 +2,11 @@
 
 | File | What it is |
 | :-- | :-- |
-| `interfaces.png` | Two real screenshots of Less Pull 1.4.4 build 16, the menu-bar dropdown with its icon and the Settings window on General, cropped and placed side by side on a drawn backdrop (`src/menu-figures.py`) |
-| `exceptions.png` | Two real screenshots of the menu with the Exception for Finder and Exception for mubi.com submenus open, on a drawn backdrop |
-| `settings-tabs.png` | Four window captures of build 16 (Shortcuts, Apps, Websites, About) with example rules, placed on a drawn backdrop by `src/settings-figure.py` |
-| `before-after.png` | The same drawn web page as it is and as Less Pull shows it, with captions, for the project page (`src/social-preview.py --plain`) |
+| `interfaces.png` | Two real screenshots of Less Pull 1.4.4 build 41, the menu under its icon and the Settings window on General, placed side by side on a drawn backdrop |
+| `exceptions.png` | Real screenshots of build 41: the menu, and the exception panel that Exception for Finder… opens under the icon, on a drawn backdrop |
+| `settings-tabs.png` | Five window captures of build 41 (Shortcuts, Sessions, Apps, Websites, About) with example rules, on a drawn backdrop |
+| `before-after.webp` | The same drawn web page as it is and as Less Pull shows it, the seam gliding left and right in a loop, for the project page (`src/social-preview.py --parts`, then `src/before-after-sweep.py`) |
+| `before-after.png` | The still version with captions (`src/social-preview.py --plain`), kept for places that cannot play an animation |
 | `peek.png` | Three frames of the same drawn page: quiet, in color while the Peek shortcut is held, quiet again (`src/social-preview.py --peek`) |
 | `screenshots.png` | What you see (the display, quiet) next to what you share (the screenshot, in color), drawn (`src/social-preview.py --shots`) |
 | `sessions.png` | A session in the menu bar: the icon through its states and the two panels, drawn (`src/sessions-figure.py`) |
@@ -39,6 +40,7 @@ python3 menu-figures.py raw ../exceptions.png exceptions   # the two exception s
 python3 settings-figure.py raw ../settings-tabs.png shortcuts.jpg apps.jpg websites.jpg about.jpg
 python3 social-preview.py ../social-preview.png          # the link-preview card
 python3 social-preview.py ../before-after.png --plain    # the same screen with captions
+python3 social-preview.py /tmp/screen --parts && python3 before-after-sweep.py /tmp/screen ../before-after.webp   # the moving seam
 python3 social-preview.py ../peek.png --peek             # Peek in color, three frames
 python3 privacy-figure.py ../privacy.png                 # where a website address goes
 python3 sessions-figure.py ../sessions.png               # a session in the menu bar

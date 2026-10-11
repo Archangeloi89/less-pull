@@ -41,10 +41,10 @@ Warmth is the second step: from a touch of amber all the way to red, it takes th
 Set your defaults once. Then make exceptions for the places that need something else. Whatever is in front decides how the screen looks, and the change fades in over half a second.
 
 <p align="center">
-  <img src="docs/assets/before-after.png" width="100%" alt="One busy web page shown twice, side by side: on the left as it is, with bright pictures, colored buttons, red notification badges and a loud wallpaper; on the right the same page as Less Pull shows it, in grayscale with a little warmth. A half-filled circle sits on the seam between the two.">
+  <img src="docs/assets/before-after.webp" width="100%" alt="One busy web page, the seam between its two halves gliding slowly left and right: on the left as it is, with bright pictures, colored buttons, red notification badges and a loud wallpaper; on the right the same page as Less Pull shows it, in grayscale with a little warmth. A half-filled circle sits on the seam between the two.">
 </p>
 
-<sub>Drawn, not a photograph: the right half is computed with the app's own color matrix at an everyday setting.</sub>
+<sub>Drawn, not a photograph: the quiet side is computed with the app's own color matrix at an everyday setting.</sub>
 
 <p align="center">
   <picture>
