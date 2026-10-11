@@ -398,7 +398,7 @@ static NSColor *Orange(double a){return [NSColor colorWithSRGBRed:.93 green:.55 
 static void drawCircle(NSPoint c,CGFloat r,BOOL gray,double warm,double ring,BOOL over){
  NSRect box=NSMakeRect(c.x-r,c.y-r,2*r,2*r);NSBezierPath *o=[NSBezierPath bezierPathWithOvalInRect:box];
  if(gray){[NSGraphicsContext saveGraphicsState];[[NSBezierPath bezierPathWithRect:NSMakeRect(c.x-r,c.y-r,r,2*r)] addClip];[Ink(1) setFill];[o fill];[NSGraphicsContext restoreGraphicsState];}
- if(warm>0){[NSGraphicsContext saveGraphicsState];[[NSBezierPath bezierPathWithRect:NSMakeRect(c.x,c.y-r,r,2*r)] addClip];[[NSColor colorWithSRGBRed:1 green:1-.45*warm blue:1-.88*warm alpha:1] setFill];[o fill];[NSGraphicsContext restoreGraphicsState];}
+ if(warm>0){double gains[3];WarmthGains(warm*3,gains);[NSGraphicsContext saveGraphicsState];[[NSBezierPath bezierPathWithRect:NSMakeRect(c.x,c.y-r,r,2*r)] addClip];[[NSColor colorWithSRGBRed:gains[0] green:gains[1] blue:gains[2] alpha:1] setFill];[o fill];[NSGraphicsContext restoreGraphicsState];}
  [Ink(1) setStroke];o.lineWidth=1.4;[o stroke];
  if(ring>=0){NSBezierPath *track=[NSBezierPath bezierPathWithOvalInRect:NSInsetRect(box,-5,-5)];track.lineWidth=1.2;[Ink(.25) setStroke];[track stroke];if(ring>0){NSBezierPath *arc=[NSBezierPath new];[arc appendBezierPathWithArcWithCenter:c radius:r+5 startAngle:90 endAngle:90-360*MIN(1,ring) clockwise:YES];arc.lineWidth=2;arc.lineCapStyle=NSLineCapStyleRound;[(over?Orange(1):Ink(1)) setStroke];[arc stroke];}}
 }
@@ -414,13 +414,27 @@ static void drawScreen(NSRect f,double g,double w,double alpha){
 }
 static void drawMenu(NSRect f,NSArray *rows,NSInteger hover,double alpha,NSInteger checked){
  [[NSColor.windowBackgroundColor colorWithAlphaComponent:.96*alpha] setFill];NSBezierPath *p=[NSBezierPath bezierPathWithRoundedRect:f xRadius:7 yRadius:7];[p fill];[Ink(.15*alpha) setStroke];[p stroke];
- NSDictionary *a=@{NSFontAttributeName:[NSFont systemFontOfSize:9.5],NSForegroundColorAttributeName:Ink(alpha)};CGFloat y=NSMaxY(f)-16;
+ NSDictionary *a=@{NSFontAttributeName:[NSFont systemFontOfSize:10],NSForegroundColorAttributeName:Ink(alpha)};CGFloat y=NSMaxY(f)-16;
  for(NSInteger i=0;i<(NSInteger)rows.count;i++){if(i==hover){[Ink(.1*alpha) setFill];[[NSBezierPath bezierPathWithRoundedRect:NSMakeRect(f.origin.x+4,y-4,f.size.width-8,15) xRadius:4 yRadius:4] fill];}
   if(i==checked)[L(@"✓") drawAtPoint:NSMakePoint(f.origin.x+7,y-1) withAttributes:a];[rows[i] drawAtPoint:NSMakePoint(f.origin.x+18,y-1) withAttributes:a];y-=15;}
 }
+// the Extra Warmth slider as in the app: the real ramp from neutral through amber to red, and a white knob
+static void drawRamp(NSRect track,double value,double alpha){
+ double g0[3],g1[3],g2[3];WarmthGains(0,g0);WarmthGains(1.5,g1);WarmthGains(3,g2);
+ NSGradient *ramp=[[NSGradient alloc]initWithColorsAndLocations:[NSColor colorWithSRGBRed:g0[0] green:g0[1] blue:g0[2] alpha:alpha],0.0,[NSColor colorWithSRGBRed:g1[0] green:g1[1] blue:g1[2] alpha:alpha],0.5,[NSColor colorWithSRGBRed:g2[0] green:g2[1] blue:g2[2] alpha:alpha],1.0,nil];
+ [ramp drawInBezierPath:[NSBezierPath bezierPathWithRoundedRect:track xRadius:track.size.height/2 yRadius:track.size.height/2] angle:0];
+ NSRect knob=NSMakeRect(track.origin.x+track.size.width*value-6,NSMidY(track)-6,12,12);[[NSColor colorWithWhite:1 alpha:alpha] setFill];NSBezierPath *k=[NSBezierPath bezierPathWithOvalInRect:knob];[k fill];[Ink(.35*alpha) setStroke];k.lineWidth=.8;[k stroke];
+}
+// a Default / On / Off segment like the exception rows; selected is drawn in the accent color
+static void drawSegments(NSRect f,NSArray *labels,NSInteger selected,double alpha){
+ [Ink(.1*alpha) setFill];[[NSBezierPath bezierPathWithRoundedRect:f xRadius:5 yRadius:5] fill];CGFloat w=f.size.width/labels.count;
+ NSDictionary *a=@{NSFontAttributeName:[NSFont systemFontOfSize:9.5],NSForegroundColorAttributeName:Ink(alpha)};
+ for(NSInteger i=0;i<(NSInteger)labels.count;i++){NSRect cell=NSMakeRect(f.origin.x+i*w,f.origin.y,w,f.size.height);if(i==selected){[[NSColor.controlAccentColor colorWithAlphaComponent:alpha] setFill];[[NSBezierPath bezierPathWithRoundedRect:NSInsetRect(cell,1,1) xRadius:4 yRadius:4] fill];}
+  NSDictionary *aa=i==selected?@{NSFontAttributeName:a[NSFontAttributeName],NSForegroundColorAttributeName:[NSColor colorWithWhite:1 alpha:alpha]}:a;NSSize sz=[labels[i] sizeWithAttributes:aa];[labels[i] drawAtPoint:NSMakePoint(NSMidX(cell)-sz.width/2,NSMidY(cell)-sz.height/2) withAttributes:aa];}
+}
 static void drawKey(NSRect f,NSString *label,double pressed){NSRect r=NSOffsetRect(f,0,-2*pressed);[Ink(.12+.25*pressed) setFill];[[NSBezierPath bezierPathWithRoundedRect:r xRadius:5 yRadius:5] fill];[Ink(.4) setStroke];[[NSBezierPath bezierPathWithRoundedRect:r xRadius:5 yRadius:5] stroke];NSDictionary *a=@{NSFontAttributeName:[NSFont systemFontOfSize:12 weight:NSFontWeightMedium],NSForegroundColorAttributeName:Ink(1)};NSSize s=[label sizeWithAttributes:a];[label drawAtPoint:NSMakePoint(NSMidX(r)-s.width/2,NSMidY(r)-s.height/2) withAttributes:a];}
 - (void)drawRect:(NSRect)dirty {
- NSRect b=self.bounds;double loops[]={8,7,8,8,13,9};double loop=loops[self.kind];double t=self.timer?fmod(NSProcessInfo.processInfo.systemUptime-self.start,loop)/loop:0.62;
+ NSRect b=self.bounds;double loops[]={8,7,9,8,13,9};double loop=loops[self.kind];double t=self.timer?fmod(NSProcessInfo.processInfo.systemUptime-self.start,loop)/loop:0.62;
  switch(self.kind){
  case TourSceneMenuBar:{
   NSRect bar=NSMakeRect(0,b.size.height-40,b.size.width,24);[Ink(.08) setFill];[[NSBezierPath bezierPathWithRoundedRect:bar xRadius:7 yRadius:7] fill];CGFloat y=NSMidY(bar);
@@ -445,7 +459,7 @@ static void drawKey(NSRect f,NSString *label,double pressed){NSRect r=NSOffsetRe
   double gray=seg(t,.42,.56),warm=seg(t,.7,.86)*.5;NSRect screen=NSMakeRect(20,16,170,92);drawScreen(screen,gray,warm,1);
   drawCircle(c,7,gray>.5,warm,-1,NO);
   double open=seg(t,.24,.32);NSRect menu=NSMakeRect(c.x-40,c.y-14-106*open-6,150,106*open);if(open>0)drawMenu(menu,@[L(@"Grayscale"),L(@"Grayscale off for  ›"),L(@"Extra Warmth"),@"",L(@"Night Shift"),L(@"Night Shift off for  ›")],t>.36&&t<.6?0:-1,open,gray>.5?0:-1);
-  if(open>.9){CGFloat sx=menu.origin.x+22,sy=NSMaxY(menu)-16-3*15+5;[Ink(.25) setFill];[[NSBezierPath bezierPathWithRoundedRect:NSMakeRect(sx,sy,100,3) xRadius:1.5 yRadius:1.5] fill];[Orange(1) setFill];[[NSBezierPath bezierPathWithRoundedRect:NSMakeRect(sx,sy,100*warm*2,3) xRadius:1.5 yRadius:1.5] fill];[[NSBezierPath bezierPathWithOvalInRect:NSMakeRect(sx+100*warm*2-4,sy-3,9,9)] fill];}
+  if(open>.9){CGFloat sx=menu.origin.x+22,sy=NSMaxY(menu)-16-3*15+4;drawRamp(NSMakeRect(sx,sy,100,4),warm*2,open);}
   double m1=seg(t,0,.2);NSPoint p0=NSMakePoint(120,60),p1=NSMakePoint(c.x+1,c.y-3);NSPoint pp=NSMakePoint(p0.x+(p1.x-p0.x)*m1,p0.y+(p1.y-p0.y)*m1);
   if(t>.34){double m2=seg(t,.34,.4);NSPoint q=NSMakePoint(menu.origin.x+40,NSMaxY(menu)-10);pp=NSMakePoint(p1.x+(q.x-p1.x)*m2,p1.y+(q.y-p1.y)*m2);}
   if(t>.62){double m3=seg(t,.62,.7);NSPoint q0=pp,q1=NSMakePoint(menu.origin.x+24+100*warm*2,NSMaxY(menu)-16-3*15+8);pp=NSMakePoint(q0.x+(q1.x-q0.x)*m3,q0.y+(q1.y-q0.y)*m3);}
@@ -453,15 +467,30 @@ static void drawKey(NSRect f,NSString *label,double pressed){NSRect r=NSOffsetRe
   
   break;}
  case TourSceneExceptions:{
+  // the story: click the circle, "Exception for Photos…", the panel under the icon, Grayscale Off, and Photos is in color
   NSRect bar=NSMakeRect(0,b.size.height-24,b.size.width,20);[Ink(.08) setFill];[[NSBezierPath bezierPathWithRoundedRect:bar xRadius:6 yRadius:6] fill];NSPoint c=NSMakePoint(NSMaxX(bar)-200,NSMidY(bar));
-  double color=seg(t,.66,.8);NSRect screen=NSMakeRect(20,16,160,92);drawScreen(screen,1-color,0,1);NSDictionary *tag=@{NSFontAttributeName:[NSFont systemFontOfSize:9 weight:NSFontWeightMedium],NSForegroundColorAttributeName:Ink(.6)};[L(@"Photos") drawAtPoint:NSMakePoint(screen.origin.x+8,NSMaxY(screen)-11) withAttributes:tag];
+  double color=seg(t,.62,.76);NSRect screen=NSMakeRect(20,16,150,92);drawScreen(screen,1-color,0,1);
+  [L(@"Photos") drawAtPoint:NSMakePoint(screen.origin.x+8,NSMaxY(screen)-11.5) withAttributes:@{NSFontAttributeName:[NSFont systemFontOfSize:9 weight:NSFontWeightSemibold],NSForegroundColorAttributeName:[NSColor colorWithWhite:.22 alpha:1]}];
   drawCircle(c,7,YES,0,-1,NO);
-  double open=seg(t,.22,.3);NSRect menu=NSMakeRect(c.x-20,c.y-14-62*open-6,132,62*open);if(open>0)drawMenu(menu,@[L(@"Grayscale"),L(@"Extra Warmth"),L(@"Exception for Photos ›")],t>.36?2:-1,open,0);
-  double sub=seg(t,.42,.5);NSRect subm=NSMakeRect(NSMaxX(menu)-4,menu.origin.y-20,96,78*sub);if(sub>0){drawMenu(subm,@[L(@"Use this exception"),L(@"Grayscale"),L(@"   Use default"),L(@"   Off")],t>.56?3:-1,sub,color>.5?3:(sub>.9?2:-1));if(color>.5){NSDictionary *ck=@{NSFontAttributeName:[NSFont systemFontOfSize:9.5],NSForegroundColorAttributeName:Ink(sub)};[L(@"✓") drawAtPoint:NSMakePoint(subm.origin.x+7,NSMaxY(subm)-17) withAttributes:ck];}}
-  double m1=seg(t,0,.18);NSPoint p0=NSMakePoint(110,70),p1=NSMakePoint(c.x+1,c.y-3);NSPoint pp=NSMakePoint(p0.x+(p1.x-p0.x)*m1,p0.y+(p1.y-p0.y)*m1);
-  if(t>.32){double m2=seg(t,.32,.4);NSPoint q=NSMakePoint(menu.origin.x+60,menu.origin.y+10);pp=NSMakePoint(p1.x+(q.x-p1.x)*m2,p1.y+(q.y-p1.y)*m2);if(t>.5){double m3=seg(t,.5,.58);NSPoint q1=NSMakePoint(subm.origin.x+30,subm.origin.y+10);pp=NSMakePoint(q.x+(q1.x-q.x)*m3,q.y+(q1.y-q.y)*m3);}}
-  drawRipple(p1,seg(t,.19,.27));if(sub>.9)drawRipple(NSMakePoint(subm.origin.x+30,subm.origin.y+10),seg(t,.6,.68));drawPointer(pp,1);
-  
+  double open=seg(t,.18,.24)*(1-seg(t,.38,.42));NSRect menu=NSMakeRect(c.x-20,c.y-14-68*open-4,156,68*open);
+  if(open>0){drawMenu(menu,@[L(@"Grayscale"),L(@"Extra Warmth"),@"",[NSString stringWithFormat:L(@"Exception for %@…"),L(@"Photos")]],t>.3?3:-1,open,0);
+   if(open>.9){NSRect ic=NSMakeRect(menu.origin.x+6.5,menu.origin.y+7,9,9);NSGradient *g=[[NSGradient alloc]initWithColors:@[[NSColor colorWithSRGBRed:.98 green:.55 blue:.3 alpha:open],[NSColor colorWithSRGBRed:.55 green:.45 blue:.95 alpha:open]]];[g drawInBezierPath:[NSBezierPath bezierPathWithRoundedRect:ic xRadius:2 yRadius:2] angle:45];}}
+  double pan=seg(t,.42,.5);NSRect panel=NSMakeRect(c.x-40,c.y-14-64*pan-4,224,64*pan);
+  if(pan>0){[[NSColor.windowBackgroundColor colorWithAlphaComponent:.97*pan] setFill];NSBezierPath *pp=[NSBezierPath bezierPathWithRoundedRect:panel xRadius:9 yRadius:9];[pp fill];[Ink(.16*pan) setStroke];[pp stroke];
+   if(pan>.2){double k=seg(pan,.2,1);CGFloat top=NSMaxY(panel);[NSGraphicsContext saveGraphicsState];[[NSBezierPath bezierPathWithRoundedRect:panel xRadius:9 yRadius:9] addClip];
+    NSRect ic=NSMakeRect(panel.origin.x+10,top-19,11,11);NSGradient *g=[[NSGradient alloc]initWithColors:@[[NSColor colorWithSRGBRed:.98 green:.55 blue:.3 alpha:k],[NSColor colorWithSRGBRed:.55 green:.45 blue:.95 alpha:k]]];[g drawInBezierPath:[NSBezierPath bezierPathWithRoundedRect:ic xRadius:3 yRadius:3] angle:45];
+    [L(@"Photos") drawAtPoint:NSMakePoint(panel.origin.x+26,top-20) withAttributes:@{NSFontAttributeName:[NSFont systemFontOfSize:10.5 weight:NSFontWeightSemibold],NSForegroundColorAttributeName:Ink(k)}];
+    NSDictionary *small=@{NSFontAttributeName:[NSFont systemFontOfSize:9.5],NSForegroundColorAttributeName:Ink(k)};NSString *use=L(@"Use this exception");NSSize us=[use sizeWithAttributes:small];
+    NSRect box=NSMakeRect(NSMaxX(panel)-us.width-26,top-19,10,10);[[NSColor.controlAccentColor colorWithAlphaComponent:k] setFill];[[NSBezierPath bezierPathWithRoundedRect:box xRadius:2.5 yRadius:2.5] fill];[@"✓" drawAtPoint:NSMakePoint(box.origin.x+1.5,box.origin.y-1.5) withAttributes:@{NSFontAttributeName:[NSFont systemFontOfSize:8 weight:NSFontWeightBold],NSForegroundColorAttributeName:[NSColor colorWithWhite:1 alpha:k]}];[use drawAtPoint:NSMakePoint(NSMaxX(box)+4,top-20) withAttributes:small];
+    [L(@"Grayscale") drawAtPoint:NSMakePoint(panel.origin.x+10,top-41) withAttributes:small];
+    drawSegments(NSMakeRect(NSMaxX(panel)-134,top-44,124,17),@[L(@"Default"),L(@"On"),L(@"Off")],t>.6?2:0,k);
+    [L(@"Changes apply right away.") drawAtPoint:NSMakePoint(panel.origin.x+10,panel.origin.y+4) withAttributes:@{NSFontAttributeName:[NSFont systemFontOfSize:8.5],NSForegroundColorAttributeName:Ink(.5*k)}];[NSGraphicsContext restoreGraphicsState];}}
+  // the pointer: to the circle, click; to the exception row, click; to Off, click; then it rests
+  NSPoint p0=NSMakePoint(110,70),p1=NSMakePoint(c.x+1,c.y-3),q=NSMakePoint(c.x+50,c.y-14-68+10),q1=NSMakePoint(c.x-40+224-10-124/6.0,c.y-14-64+64-44+8);
+  double m1=seg(t,0,.16);NSPoint pt=NSMakePoint(p0.x+(p1.x-p0.x)*m1,p0.y+(p1.y-p0.y)*m1);
+  if(t>.27){double m2=seg(t,.27,.34);pt=NSMakePoint(p1.x+(q.x-p1.x)*m2,p1.y+(q.y-p1.y)*m2);}
+  if(t>.5){double m3=seg(t,.5,.58);pt=NSMakePoint(q.x+(q1.x-q.x)*m3,q.y+(q1.y-q.y)*m3);}
+  drawRipple(p1,seg(t,.16,.24));drawRipple(q,seg(t,.36,.43));drawRipple(q1,seg(t,.59,.66));drawPointer(pt,1);
   break;}
  case TourScenePeek:{
   NSRect screen=NSMakeRect(20,22,200,104);
@@ -480,36 +509,39 @@ static void drawKey(NSRect f,NSString *label,double pressed){NSRect r=NSOffsetRe
   drawCircle(c,6,YES,0,started?run:-1,over);if(label.length){NSDictionary *la=@{NSFontAttributeName:[NSFont monospacedDigitSystemFontOfSize:11 weight:NSFontWeightMedium],NSForegroundColorAttributeName:over?Orange(.6+.4*fabs(sin(t*60))):Ink(1)};[label drawAtPoint:NSMakePoint(c.x+14,c.y-7) withAttributes:la];}
   NSRect screen=NSMakeRect(20,16,170,92);drawScreen(screen,1,.3,1);
   double open=seg(t,.1,.14)*(1-seg(t,.2,.22));if(open>0){NSRect menu=NSMakeRect(c.x-40,c.y-14-76*open-6,150,76*open);drawMenu(menu,@[L(@"Grayscale"),L(@"Extra Warmth"),L(@"Night Shift"),L(@"Start a session…")],t>.16?3:-1,open,0);}
-  double panel=seg(t,.22,.26)*(1-seg(t,.3,.32));if(panel>0){NSRect pr=NSMakeRect(c.x-80,c.y-14-60*panel-6,170,60*panel);[[NSColor.windowBackgroundColor colorWithAlphaComponent:.96*panel] setFill];[[NSBezierPath bezierPathWithRoundedRect:pr xRadius:8 yRadius:8] fill];[Ink(.15*panel) setStroke];[[NSBezierPath bezierPathWithRoundedRect:pr xRadius:8 yRadius:8] stroke];if(panel>.9){NSDictionary *pa=@{NSFontAttributeName:[NSFont systemFontOfSize:9.5],NSForegroundColorAttributeName:Ink(.8)};[L(@"A session. How long?") drawAtPoint:NSMakePoint(pr.origin.x+12,NSMaxY(pr)-18) withAttributes:pa];for(int i=0;i<4;i++){[Ink(i==0&&t>.27?.3:.12) setFill];[[NSBezierPath bezierPathWithRoundedRect:NSMakeRect(pr.origin.x+12+i*38,NSMaxY(pr)-44,32,16) xRadius:5 yRadius:5] fill];[@[@"25",@"45",@"60",@"90"][i] drawAtPoint:NSMakePoint(pr.origin.x+20+i*38,NSMaxY(pr)-42) withAttributes:pa];}}}
+  double panel=seg(t,.22,.25)*(1-seg(t,.33,.36));if(panel>0){NSRect pr=NSMakeRect(c.x-80,c.y-14-60*panel-6,170,60*panel);[[NSColor.windowBackgroundColor colorWithAlphaComponent:.96*panel] setFill];[[NSBezierPath bezierPathWithRoundedRect:pr xRadius:8 yRadius:8] fill];[Ink(.15*panel) setStroke];[[NSBezierPath bezierPathWithRoundedRect:pr xRadius:8 yRadius:8] stroke];if(panel>.35){[NSGraphicsContext saveGraphicsState];[[NSBezierPath bezierPathWithRoundedRect:pr xRadius:8 yRadius:8] addClip];NSDictionary *pa=@{NSFontAttributeName:[NSFont systemFontOfSize:9.5],NSForegroundColorAttributeName:Ink(.85*panel)};[L(@"A session. How long?") drawAtPoint:NSMakePoint(pr.origin.x+12,NSMaxY(pr)-18) withAttributes:pa];for(int i=0;i<4;i++){[Ink((i==0&&t>.28?.32:.12)*panel) setFill];[[NSBezierPath bezierPathWithRoundedRect:NSMakeRect(pr.origin.x+12+i*38,NSMaxY(pr)-44,32,16) xRadius:5 yRadius:5] fill];[@[@"25",@"45",@"60",@"90"][i] drawAtPoint:NSMakePoint(pr.origin.x+20+i*38,NSMaxY(pr)-42) withAttributes:pa];}[NSGraphicsContext restoreGraphicsState];}}
   double glow=seg(t,.62,.67)*(1-seg(t,.76,.84));if(glow>0){NSRect g=NSInsetRect(screen,-6,-6);[[NSColor colorWithSRGBRed:1 green:.78 blue:.52 alpha:.45*glow] setFill];[[NSBezierPath bezierPathWithRoundedRect:g xRadius:10 yRadius:10] fill];NSDictionary *gt=@{NSFontAttributeName:[NSFont systemFontOfSize:12 weight:NSFontWeightLight],NSForegroundColorAttributeName:[NSColor colorWithWhite:1 alpha:glow]};NSSize gs=[L(@"That was 25 minutes.") sizeWithAttributes:gt];[L(@"That was 25 minutes.") drawAtPoint:NSMakePoint(NSMidX(screen)-gs.width/2,NSMidY(screen)-gs.height/2) withAttributes:gt];}
-  double back=seg(t,.8,.84);if(back>0){NSRect pr=NSMakeRect(c.x-80,c.y-14-70*back-6,170,70*back);[[NSColor.windowBackgroundColor colorWithAlphaComponent:.96*back] setFill];[[NSBezierPath bezierPathWithRoundedRect:pr xRadius:8 yRadius:8] fill];[Ink(.15*back) setStroke];[[NSBezierPath bezierPathWithRoundedRect:pr xRadius:8 yRadius:8] stroke];if(back>.9){NSDictionary *pa=@{NSFontAttributeName:[NSFont systemFontOfSize:9.5],NSForegroundColorAttributeName:Ink(.8)};[L(@"Leaving? Call me back in") drawAtPoint:NSMakePoint(pr.origin.x+12,NSMaxY(pr)-18) withAttributes:pa];for(int i=0;i<4;i++){[Ink(.12) setFill];[[NSBezierPath bezierPathWithRoundedRect:NSMakeRect(pr.origin.x+12+i*38,NSMaxY(pr)-42,32,16) xRadius:5 yRadius:5] fill];[@[@"5",@"9",@"13",@"33"][i] drawAtPoint:NSMakePoint(pr.origin.x+22+i*38,NSMaxY(pr)-40) withAttributes:pa];}[L(@"Keep going        Leave quietly") drawAtPoint:NSMakePoint(pr.origin.x+12,pr.origin.y+8) withAttributes:pa];}}
+  double back=seg(t,.8,.84);if(back>0){NSRect pr=NSMakeRect(c.x-80,c.y-14-70*back-6,170,70*back);[[NSColor.windowBackgroundColor colorWithAlphaComponent:.96*back] setFill];[[NSBezierPath bezierPathWithRoundedRect:pr xRadius:8 yRadius:8] fill];[Ink(.15*back) setStroke];[[NSBezierPath bezierPathWithRoundedRect:pr xRadius:8 yRadius:8] stroke];if(back>.35){[NSGraphicsContext saveGraphicsState];[[NSBezierPath bezierPathWithRoundedRect:pr xRadius:8 yRadius:8] addClip];NSDictionary *pa=@{NSFontAttributeName:[NSFont systemFontOfSize:9.5],NSForegroundColorAttributeName:Ink(.85*back)};[L(@"Leaving? Call me back in") drawAtPoint:NSMakePoint(pr.origin.x+12,NSMaxY(pr)-18) withAttributes:pa];for(int i=0;i<4;i++){[Ink(.12) setFill];[[NSBezierPath bezierPathWithRoundedRect:NSMakeRect(pr.origin.x+12+i*38,NSMaxY(pr)-42,32,16) xRadius:5 yRadius:5] fill];[@[@"5",@"9",@"13",@"33"][i] drawAtPoint:NSMakePoint(pr.origin.x+22+i*38,NSMaxY(pr)-40) withAttributes:pa];}[L(@"Keep going        Leave quietly") drawAtPoint:NSMakePoint(pr.origin.x+12,pr.origin.y+8) withAttributes:pa];[NSGraphicsContext restoreGraphicsState];}}
   // the pointer: to the circle, click, to Start a session…, click, to 25 min, click; later to the circle again for the way back
   double m1=seg(t,0,.08);NSPoint p0=NSMakePoint(120,60),p1=NSMakePoint(c.x+1,c.y-3);NSPoint pp=NSMakePoint(p0.x+(p1.x-p0.x)*m1,p0.y+(p1.y-p0.y)*m1);
   if(t>.14){double m2=seg(t,.14,.17);NSPoint q=NSMakePoint(c.x+20,c.y-14-76+12);pp=NSMakePoint(p1.x+(q.x-p1.x)*m2,p1.y+(q.y-p1.y)*m2);if(t>.24){double m3=seg(t,.24,.27);NSPoint q1=NSMakePoint(c.x-80+28,c.y-14-60+16);pp=NSMakePoint(q.x+(q1.x-q.x)*m3,q.y+(q1.y-q.y)*m3);if(t>.34){double m4=seg(t,.34,.42);NSPoint q2=NSMakePoint(120,60);pp=NSMakePoint(q1.x+(q2.x-q1.x)*m4,q1.y+(q2.y-q1.y)*m4);if(t>.74){double m5=seg(t,.74,.8);pp=NSMakePoint(q2.x+(p1.x-q2.x)*m5,q2.y+(p1.y-q2.y)*m5);}}}}
-  drawRipple(p1,seg(t,.09,.14));drawRipple(NSMakePoint(c.x+20,c.y-14-76+12),seg(t,.18,.22));drawRipple(NSMakePoint(c.x-80+28,c.y-14-60+16),seg(t,.27,.31));drawRipple(p1,seg(t,.8,.85));drawPointer(pp,1);
+  drawRipple(p1,seg(t,.09,.14));drawRipple(NSMakePoint(c.x+20,c.y-14-76+12),seg(t,.18,.22));drawRipple(NSMakePoint(c.x-80+28,c.y-14-60+16),seg(t,.28,.32));drawRipple(p1,seg(t,.8,.85));drawPointer(pp,1);
   break;}
  case TourScenePrivacy:{
-  NSDictionary *tiny=@{NSFontAttributeName:[NSFont systemFontOfSize:9.5 weight:NSFontWeightMedium],NSForegroundColorAttributeName:Ink(.8)};NSDictionary *dim=@{NSFontAttributeName:[NSFont systemFontOfSize:9.5],NSForegroundColorAttributeName:Ink(.55)};
-  // left half: the address goes to the app on this Mac and nowhere else
-  NSRect win=NSMakeRect(6,68,118,56);[Ink(.08) setFill];[[NSBezierPath bezierPathWithRoundedRect:win xRadius:7 yRadius:7] fill];for(int i=0;i<3;i++){[Ink(.35) setFill];[[NSBezierPath bezierPathWithOvalInRect:NSMakeRect(13+i*10,NSMaxY(win)-13,5,5)] fill];}
-  NSRect field=NSMakeRect(win.origin.x+34,NSMaxY(win)-18,80,12);[Ink(.12) setFill];[[NSBezierPath bezierPathWithRoundedRect:field xRadius:4 yRadius:4] fill];[L(@"news.example") drawAtPoint:NSMakePoint(field.origin.x+5,field.origin.y+1) withAttributes:@{NSFontAttributeName:[NSFont systemFontOfSize:8.5 weight:NSFontWeightMedium],NSForegroundColorAttributeName:Ink(.8)}];
-  [L(@"the website in front") drawAtPoint:NSMakePoint(8,50) withAttributes:dim];
-  NSPoint app=NSMakePoint(176,96);drawCircle(app,11,YES,0,-1,NO);{NSString *n1=L(@"Less Pull"),*n2=L(@"on this Mac");[n1 drawAtPoint:NSMakePoint(app.x-[n1 sizeWithAttributes:tiny].width/2,app.y-27) withAttributes:tiny];{NSMutableParagraphStyle *ps=[NSMutableParagraphStyle new];ps.alignment=NSTextAlignmentCenter;NSMutableDictionary *cd=[dim mutableCopy];cd[NSParagraphStyleAttributeName]=ps;[n2 drawInRect:NSMakeRect(app.x-36,app.y-52,72,26) withAttributes:cd];}}
-  double travel=seg(t,.08,.34),gone=seg(t,.36,.46);NSPoint from=NSMakePoint(NSMaxX(field)-2,NSMidY(field)),to=NSMakePoint(app.x-12,app.y);
-  if(travel<1||gone<1){NSPoint q=NSMakePoint(from.x+(to.x-from.x)*travel,from.y+(to.y-from.y)*travel);NSRect chip=NSMakeRect(q.x-58,q.y+5,60,11);[Orange(.9*(1-gone)) setFill];[[NSBezierPath bezierPathWithRoundedRect:chip xRadius:5 yRadius:5] fill];[L(@"news.example") drawAtPoint:NSMakePoint(chip.origin.x+5,chip.origin.y+1) withAttributes:@{NSFontAttributeName:[NSFont systemFontOfSize:7 weight:NSFontWeightSemibold],NSForegroundColorAttributeName:[NSColor colorWithWhite:.1 alpha:1-gone]}];}
-  double say=seg(t,.46,.52);if(say>0){[L(@"for the look, then gone") drawInRect:NSMakeRect(104,6,106,30) withAttributes:@{NSFontAttributeName:[NSFont systemFontOfSize:9.5],NSForegroundColorAttributeName:Ink(.75*say)}];
-   // never to a server, never to disk: two small marks, crossed
-   NSPoint cl=NSMakePoint(40,22);for(int i=0;i<3;i++){CGFloat r=5+2*(i==1);[Ink(.18*say) setFill];[[NSBezierPath bezierPathWithOvalInRect:NSMakeRect(cl.x-9+i*7-r,cl.y-r+(i==1?2:0),2*r,2*r)] fill];}
-   NSRect disk=NSMakeRect(78,14,16,14);[Ink(.18*say) setFill];[[NSBezierPath bezierPathWithRoundedRect:disk xRadius:2 yRadius:2] fill];
-   for(NSValue *m in @[[NSValue valueWithPoint:cl],[NSValue valueWithPoint:NSMakePoint(86,21)]]){NSPoint cc=[m pointValue];NSBezierPath *x=[NSBezierPath new];[x moveToPoint:NSMakePoint(cc.x-9,cc.y-9)];[x lineToPoint:NSMakePoint(cc.x+9,cc.y+9)];[x moveToPoint:NSMakePoint(cc.x+9,cc.y-9)];[x lineToPoint:NSMakePoint(cc.x-9,cc.y+9)];x.lineWidth=2;[[NSColor colorWithSRGBRed:1 green:.38 blue:.34 alpha:say] setStroke];[x stroke];}
-   [L(@"no server") drawAtPoint:NSMakePoint(20,2) withAttributes:@{NSFontAttributeName:[NSFont systemFontOfSize:8.5],NSForegroundColorAttributeName:Ink(.6*say)}];[L(@"no disk") drawAtPoint:NSMakePoint(72,2) withAttributes:@{NSFontAttributeName:[NSFont systemFontOfSize:8.5],NSForegroundColorAttributeName:Ink(.6*say)}];}
-  // divider
+  // left: the address of the site in front travels to Less Pull on this Mac, and nowhere else; right: a screenshot of the quiet screen comes out in color
+  NSDictionary *tiny=@{NSFontAttributeName:[NSFont systemFontOfSize:9.5 weight:NSFontWeightMedium],NSForegroundColorAttributeName:Ink(.85)};NSDictionary *dim=@{NSFontAttributeName:[NSFont systemFontOfSize:9.5],NSForegroundColorAttributeName:Ink(.55)};
+  NSMutableParagraphStyle *mid=[NSMutableParagraphStyle new];mid.alignment=NSTextAlignmentCenter;
+  NSRect win=NSMakeRect(8,84,128,46);[Ink(.08) setFill];[[NSBezierPath bezierPathWithRoundedRect:win xRadius:7 yRadius:7] fill];for(int i=0;i<3;i++){[Ink(.35) setFill];[[NSBezierPath bezierPathWithOvalInRect:NSMakeRect(15+i*9,NSMaxY(win)-13,5,5)] fill];}
+  NSRect field=NSMakeRect(win.origin.x+42,NSMaxY(win)-17,80,12);[Ink(.12) setFill];[[NSBezierPath bezierPathWithRoundedRect:field xRadius:4 yRadius:4] fill];[L(@"news.example") drawAtPoint:NSMakePoint(field.origin.x+5,field.origin.y+1) withAttributes:@{NSFontAttributeName:[NSFont systemFontOfSize:8.5 weight:NSFontWeightMedium],NSForegroundColorAttributeName:Ink(.85)}];
+  [L(@"the website in front") drawAtPoint:NSMakePoint(10,68) withAttributes:dim];
+  NSPoint app=NSMakePoint(176,108);drawCircle(app,11,YES,0,-1,NO);
+  {NSMutableDictionary *t1=[tiny mutableCopy];t1[NSParagraphStyleAttributeName]=mid;NSMutableDictionary *t2=[dim mutableCopy];t2[NSParagraphStyleAttributeName]=mid;[L(@"Less Pull") drawInRect:NSMakeRect(app.x-40,app.y-30,80,14) withAttributes:t1];[L(@"on this Mac") drawInRect:NSMakeRect(app.x-40,app.y-43,80,14) withAttributes:t2];}
+  double travel=seg(t,.08,.32),gone=seg(t,.34,.44);
+  if(gone<1){NSPoint from=NSMakePoint(NSMaxX(field)-30,field.origin.y-10),to=NSMakePoint(app.x-48,app.y-12);NSPoint q=NSMakePoint(from.x+(to.x-from.x)*travel,from.y+(to.y-from.y)*travel);NSRect chip=NSMakeRect(q.x-30,q.y-6,60,12);double al=MIN(seg(t,.04,.08),1-gone);[Orange(.95*al) setFill];[[NSBezierPath bezierPathWithRoundedRect:chip xRadius:6 yRadius:6] fill];[L(@"news.example") drawAtPoint:NSMakePoint(chip.origin.x+6,chip.origin.y+1.5) withAttributes:@{NSFontAttributeName:[NSFont systemFontOfSize:7.5 weight:NSFontWeightSemibold],NSForegroundColorAttributeName:[NSColor colorWithWhite:.1 alpha:al]}];}
+  double say=seg(t,.46,.54);if(say>0){
+   NSPoint cl=NSMakePoint(30,34),dk=NSMakePoint(80,34);
+   for(int i=0;i<3;i++){CGFloat r=5+2*(i==1);[Ink(.2*say) setFill];[[NSBezierPath bezierPathWithOvalInRect:NSMakeRect(cl.x-7+i*7-r,cl.y-r+(i==1?2:0)-1,2*r,2*r)] fill];}
+   [Ink(.2*say) setFill];[[NSBezierPath bezierPathWithRoundedRect:NSMakeRect(dk.x-8,dk.y-7,16,14) xRadius:2.5 yRadius:2.5] fill];
+   for(NSValue *m in @[[NSValue valueWithPoint:cl],[NSValue valueWithPoint:dk]]){NSPoint cc=[m pointValue];NSBezierPath *x=[NSBezierPath new];[x moveToPoint:NSMakePoint(cc.x-10,cc.y-9)];[x lineToPoint:NSMakePoint(cc.x+10,cc.y+9)];x.lineWidth=1.8;x.lineCapStyle=NSLineCapStyleRound;[[NSColor colorWithSRGBRed:1 green:.42 blue:.36 alpha:say] setStroke];[x stroke];}
+   NSMutableDictionary *lab=[@{NSFontAttributeName:[NSFont systemFontOfSize:8.5],NSForegroundColorAttributeName:Ink(.6*say)} mutableCopy];lab[NSParagraphStyleAttributeName]=mid;
+   [L(@"no server") drawInRect:NSMakeRect(cl.x-30,8,60,12) withAttributes:lab];[L(@"no disk") drawInRect:NSMakeRect(dk.x-30,8,60,12) withAttributes:lab];
+   [L(@"for the look, then gone") drawInRect:NSMakeRect(118,18,88,30) withAttributes:@{NSFontAttributeName:[NSFont systemFontOfSize:9.5],NSForegroundColorAttributeName:Ink(.75*say)}];}
   [Ink(.12) setFill];[[NSBezierPath bezierPathWithRect:NSMakeRect(212,8,1,124)] fill];
-  // right half: a screenshot is taken of the quiet screen, and comes out in color
-  NSRect gray=NSMakeRect(220,52,98,62);drawScreen(gray,1,.3,1);[L(@"your screen") drawAtPoint:NSMakePoint(222,118) withAttributes:dim];
-  double flash=seg(t,.2,.23)*(1-seg(t,.26,.34));if(flash>0){[[NSColor colorWithWhite:1 alpha:.7*flash] setFill];[[NSBezierPath bezierPathWithRoundedRect:gray xRadius:8 yRadius:8] fill];}
-  drawKey(NSMakeRect(356,112,20,16),@"⌘",seg(t,.14,.18)*(1-seg(t,.24,.28)));drawKey(NSMakeRect(378,112,20,16),@"⇧",seg(t,.14,.18)*(1-seg(t,.24,.28)));drawKey(NSMakeRect(400,112,18,16),@"3",seg(t,.17,.2)*(1-seg(t,.24,.28)));
-  double lift=seg(t,.28,.5);if(lift>0){NSRect shot=NSMakeRect(296+24*lift,12+4*lift,66+22*lift,42+12*lift);NSRect dst=shot;drawScreen(dst,0,0,lift);[Ink(.6*lift) setStroke];NSBezierPath *frame=[NSBezierPath bezierPathWithRoundedRect:NSInsetRect(dst,-2,-2) xRadius:7 yRadius:7];frame.lineWidth=1.5;[frame stroke];if(lift>.95){[L(@"the screenshot,") drawAtPoint:NSMakePoint(222,30) withAttributes:dim];[L(@"in color") drawAtPoint:NSMakePoint(222,18) withAttributes:dim];}}
+  NSRect gray=NSMakeRect(222,62,92,54);drawScreen(gray,1,.3,1);[L(@"your screen") drawAtPoint:NSMakePoint(222,120) withAttributes:dim];
+  double press=seg(t,.12,.16)*(1-seg(t,.24,.28));drawKey(NSMakeRect(332,100,22,16),@"⌘",press);drawKey(NSMakeRect(357,100,22,16),@"⇧",press);drawKey(NSMakeRect(382,100,20,16),@"3",seg(t,.15,.18)*(1-seg(t,.24,.28)));
+  double flash=seg(t,.18,.21)*(1-seg(t,.24,.32));if(flash>0){[[NSColor colorWithWhite:1 alpha:.7*flash] setFill];[[NSBezierPath bezierPathWithRoundedRect:gray xRadius:8 yRadius:8] fill];}
+  double lift=seg(t,.26,.46);if(lift>0){NSRect dst=NSMakeRect(gray.origin.x+(326-gray.origin.x)*lift,gray.origin.y+(30-gray.origin.y)*lift,92-4*lift,54-2*lift);drawScreen(dst,0,0,MIN(1,lift*1.5));[Ink(.55*lift) setStroke];NSBezierPath *frame=[NSBezierPath bezierPathWithRoundedRect:NSInsetRect(dst,-2,-2) xRadius:8 yRadius:8];frame.lineWidth=1.4;[frame stroke];
+   if(lift>.95){NSMutableDictionary *dd=[dim mutableCopy];dd[NSParagraphStyleAttributeName]=mid;[L(@"the screenshot, in color") drawInRect:NSMakeRect(300,8,120,14) withAttributes:dd];}}
   break;}
  }
 }
