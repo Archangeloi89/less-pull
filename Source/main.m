@@ -386,11 +386,17 @@ typedef NS_ENUM(NSInteger,TourSceneKind){TourSceneMenuBar,TourSceneScreen,TourSc
 @interface TourScene : NSView
 @property TourSceneKind kind;
 @property NSTimer *timer;
+@property id link;
 @property NSTimeInterval start;
 @end
 @implementation TourScene
 - (NSSize)intrinsicContentSize {return NSMakeSize(420,140);}
-- (void)viewDidMoveToWindow {[self.timer invalidate];self.timer=nil;if(!self.window||NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceMotion)return;self.start=NSProcessInfo.processInfo.systemUptime;__weak TourScene *weak=self;self.timer=[NSTimer timerWithTimeInterval:1.0/30 repeats:YES block:^(NSTimer *t){[weak setNeedsDisplay:YES];}];[NSRunLoop.mainRunLoop addTimer:self.timer forMode:NSRunLoopCommonModes];}
+// The scenes redraw in step with the display (macOS 14 and later), so the pointer glides at the display's own rate; macOS 13 keeps a 60 Hz timer.
+- (void)viewDidMoveToWindow {[self.timer invalidate];self.timer=nil;[self.link invalidate];self.link=nil;if(!self.window||NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceMotion)return;self.start=NSProcessInfo.processInfo.systemUptime;
+ if(@available(macOS 14.0,*)){self.link=[self displayLinkWithTarget:self selector:@selector(step:)];[self.link addToRunLoop:NSRunLoop.mainRunLoop forMode:NSRunLoopCommonModes];self.timer=(NSTimer *)self.link;return;}
+ __weak TourScene *weak=self;self.timer=[NSTimer timerWithTimeInterval:1.0/60 repeats:YES block:^(NSTimer *t){[weak setNeedsDisplay:YES];}];self.timer.tolerance=0;[NSRunLoop.mainRunLoop addTimer:self.timer forMode:NSRunLoopCommonModes];}
+- (void)step:(id)link {[self setNeedsDisplay:YES];}
+- (void)removeFromSuperview {[self.link invalidate];self.link=nil;[self.timer invalidate];self.timer=nil;[super removeFromSuperview];}
 static double seg(double t,double a,double b){if(t<=a)return 0;if(t>=b)return 1;double k=(t-a)/(b-a);return k*k*(3-2*k);}
 static NSColor *Ink(double a){return [NSColor.labelColor colorWithAlphaComponent:a];}
 static NSColor *Orange(double a){return [NSColor colorWithSRGBRed:.93 green:.55 blue:.28 alpha:a];}
