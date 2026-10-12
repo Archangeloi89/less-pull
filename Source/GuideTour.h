@@ -49,5 +49,6 @@
 - (NSString *)debugState;      // for tests: where the tip, the bubble and the ring are now (screen coordinates)
 - (void)debugPark;             // for tests: goes to its waiting spot by the tour bar with a browser line
 - (void)debugTick:(NSInteger)box;  // for tests: ticks a box in the question that is up
-- (void)debugAnswer:(NSInteger)button;  // for tests: presses an answer button of the question that is up
+- (void)debugAnswer:(NSInteger)button;
+- (void)debugPoke;             // for tests: a click on the guide  // for tests: presses an answer button of the question that is up
 @end
