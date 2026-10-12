@@ -10,6 +10,12 @@
 + (NSString *)portName;
 - (void)start;
 - (void)stop;
+// The two doorways one by one: a demo or test copy keeps its own message port, and takes the shared socket only
+// while its tour borrows the browsers from the installed app.
+- (void)startPort;
+- (void)startSocket;
+- (void)stopSocket;
+@property unsigned long long boundInode;
 - (NSDictionary *)handle:(NSDictionary *)message;
 - (NSDictionary *)ruleForBrowser:(NSString *)browser base:(NSDictionary *)base site:(NSString **)site;
 // The public tab in front of a browser right now (site and url), or nil.

@@ -56,7 +56,10 @@ Simulates a display reset after a fade finishes. Checks persistent grayscale, tw
                       "warmth" changes Extra Warmth (something to keep or put back); "startTour" presses Start on the welcome, "sheet1" answers its sheet with the first button, "logStart" writes the Start button and sheet state; "poke" clicks the guide, "resumeLP" resumes Less Pull; "helperBrowser", "helperOpera", "helperFirefox" and "helperSunset" start
                       the helpers that Settings starts (Chrome's setup; Sunset to sunrise). The times run on a timer that also
                       fires while the menu is open.
---tour-no-borrow      a hands-off copy keeps its hands off the screen during its tour too (the installed app's look stays): for tests beside real work.
+--tour-no-borrow      a hands-off copy keeps its hands off the screen and the browsers during its tour too (the installed app keeps both): for tests beside real work.
+                      Without it, a copy's tour (and its browser guide) asks the installed Less Pull to quit, takes the screen and the browsers' socket,
+                      and starts the installed app again at the end; a watcher starts it if the copy crashes or is killed meanwhile.
+                      Outside its tour a copy never takes the socket, and its browser setup writes the installed app's helper into the browsers.
 Copies say which one they are: any bundle id other than com.jiriarion.lesspull adds "· Demo" (….demo) or "· Test" after the build
                       number, in the menu and under About.
 LP_TOUR_DEBUG=1       (environment) logs every bubble placement with what it keeps clear of.

@@ -284,6 +284,8 @@ static void QuietScrolling(NSScrollView *s){
 @property NSStatusItem *item;
 @property NSMenu *statusMenu;
 @property BrowserBridge *browserBridge;
+@property NSURL *installedAway;  // a copy on its tour: the installed app it asked to quit, to start again afterwards
+@property NSTask *installedWatch;
 @property MenuDismissal *menuDismissal;
 @property NSString *website;
 @property FilterEngine *engine;
@@ -1074,7 +1076,7 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  self.policy=[SwitchingPolicy new];self.policy.automatic=self.automatic;
  self.policy.overrideMode=[d integerForKey:@"overrideMode"];
  self.policy.known=[d boolForKey:@"lastNightShiftKnown"];self.policy.nightShiftOn=[d boolForKey:@"lastNightShiftOn"];
- self.browserBridge=[BrowserBridge new];__weak AppDelegate *browserOwner=self;self.browserBridge.changed=^{[browserOwner sync];[browserOwner rebuildWebsiteRulesList];[browserOwner refreshBrowserRows];};self.browserBridge.defaults=^NSDictionary *(NSString *browser){return [browserOwner browserBaseForBundle:browser];};[self.browserBridge start];
+ self.browserBridge=[BrowserBridge new];__weak AppDelegate *browserOwner=self;self.browserBridge.changed=^{[browserOwner sync];[browserOwner rebuildWebsiteRulesList];[browserOwner refreshBrowserRows];};self.browserBridge.defaults=^NSDictionary *(NSString *browser){return [browserOwner browserBaseForBundle:browser];};if(LessPullHandsOff){[self.browserBridge startPort];[self returnInstalledIfAway];}else [self.browserBridge start];  // a copy: its own port; the browsers stay the installed app's
  // The icon's place in the menu bar is macOS's: the user ⌘-drags it and macOS remembers. Builds 25 to 33 wrote a
  // "Preferred Position" value once; it is removed here so nothing of ours can pull the icon back to the left.
  // macOS writes that same key when the user drags the icon, so only the exact stale value goes, and only once.
@@ -2434,7 +2436,7 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
  NSArray *entry=nil;for(NSArray *b in [self browserCatalog])if([b[1] isEqual:identifier])entry=b;if(!entry)return;NSString *browser=entry[0];BOOL firefox=[identifier isEqual:@"org.mozilla.firefox"];
  NSURL *browserURL=[NSWorkspace.sharedWorkspace URLForApplicationWithBundleIdentifier:identifier];
  if(!browserURL){NSAlert *get=[NSAlert new];get.messageText=[NSString stringWithFormat:L(@"%@ is not installed on this Mac"),browser];get.informativeText=[NSString stringWithFormat:L(@"Install %@ first; this list notices it by itself. Then come back to Set up…"),browser];[get addButtonWithTitle:[NSString stringWithFormat:L(@"Get %@"),browser]];[get addButtonWithTitle:L(@"Not now")];NSString *page=entry[3];[get beginSheetModalForWindow:self.browserWindow completionHandler:^(NSModalResponse r){if(r==NSAlertFirstButtonReturn)[NSWorkspace.sharedWorkspace openURL:[NSURL URLWithString:page]];}];return;}
- NSTask *setup=[NSTask new];setup.executableURL=[NSBundle.mainBundle.bundleURL URLByAppendingPathComponent:@"Contents/MacOS/LessPullBrowserHost"];setup.arguments=@[@"--install"];setup.standardOutput=[NSPipe pipe];NSPipe *errPipe=[NSPipe pipe];setup.standardError=errPipe;NSError *error=nil;BOOL started=[setup launchAndReturnError:&error];NSString *reason=nil;if(started){NSData *errData=[errPipe.fileHandleForReading readDataToEndOfFile];[setup waitUntilExit];reason=[[[NSString alloc]initWithData:errData encoding:NSUTF8StringEncoding] stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];}
+ NSTask *setup=[NSTask new];setup.executableURL=[self browserHelperURL];setup.arguments=@[@"--install"];setup.standardOutput=[NSPipe pipe];NSPipe *errPipe=[NSPipe pipe];setup.standardError=errPipe;NSError *error=nil;BOOL started=[setup launchAndReturnError:&error];NSString *reason=nil;if(started){NSData *errData=[errPipe.fileHandleForReading readDataToEndOfFile];[setup waitUntilExit];reason=[[[NSString alloc]initWithData:errData encoding:NSUTF8StringEncoding] stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];}
  if(!started||setup.terminationStatus!=0){NSAlert *failed=[NSAlert new];failed.messageText=L(@"Browser setup could not finish");BOOL translocated=[NSBundle.mainBundle.bundleURL.path containsString:@"/AppTranslocation/"];if(started&&!reason.length)reason=[NSString stringWithFormat:@"LessPullBrowserHost --install: %@ %d",setup.terminationReason==NSTaskTerminationReasonUncaughtSignal?@"signal":@"status",setup.terminationStatus];NSString *why=error.localizedDescription?:(reason.length?[NSString stringWithFormat:@"%@\n%@",L(@"The local bridge could not be registered."),reason]:L(@"The local bridge could not be registered."));failed.informativeText=translocated?[NSString stringWithFormat:@"%@\n\n%@",L(@"Less Pull is running from a temporary copy that macOS makes when an app is opened where it was downloaded. Move Less Pull into the Applications folder, open it from there, and try again."),why]:why;[failed beginSheetModalForWindow:self.browserWindow completionHandler:nil];return;}
  NSURL *folder=[NSBundle.mainBundle.resourceURL URLByAppendingPathComponent:firefox?@"Browser Extension (Firefox)":@"Browser Extension"];if(firefox&&self.guide)[NSWorkspace.sharedWorkspace activateFileViewerSelectingURLs:@[folder]];  // Chrome, Brave, Edge and Opera install from the Chrome Web Store; Firefox loads the folder until Mozilla’s review is done; the folders keep their English names in every language
  [NSWorkspace.sharedWorkspace openURLs:@[[NSURL URLWithString:entry[2]]] withApplicationAtURL:browserURL configuration:NSWorkspaceOpenConfiguration.configuration completionHandler:nil];
@@ -2731,7 +2733,7 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
 - (void)tourConnectBrowser:(NSArray *)entry {
  NSString *identifier=entry[1];if([identifier isEqual:@"com.apple.Safari"]){NSURL *companion=[self safariCompanionURL];if([NSFileManager.defaultManager fileExistsAtPath:companion.path]){NSWorkspaceOpenConfiguration *c=NSWorkspaceOpenConfiguration.configuration;c.activates=YES;[NSWorkspace.sharedWorkspace openApplicationAtURL:companion configuration:c completionHandler:nil];}return;}
  NSURL *browserURL=[NSWorkspace.sharedWorkspace URLForApplicationWithBundleIdentifier:identifier];if(!browserURL)return;
- if(!LessPullHandsOff){NSTask *setup=[NSTask new];setup.executableURL=[NSBundle.mainBundle.bundleURL URLByAppendingPathComponent:@"Contents/MacOS/LessPullBrowserHost"];setup.arguments=@[@"--install"];setup.standardOutput=NSFileHandle.fileHandleWithNullDevice;setup.standardError=NSFileHandle.fileHandleWithNullDevice;if([setup launchAndReturnError:nil])[setup waitUntilExit];}  // a demo copy never takes the browsers away from the installed app
+ {NSTask *setup=[NSTask new];setup.executableURL=[self browserHelperURL];setup.arguments=@[@"--install"];setup.standardOutput=NSFileHandle.fileHandleWithNullDevice;setup.standardError=NSFileHandle.fileHandleWithNullDevice;if([setup launchAndReturnError:nil])[setup waitUntilExit];}  // a demo copy sets them up with the installed app's helper: the browsers stay the installed app's
  // Firefox: the guide shows manifest.json in a little window to drag from (Finder cannot show a folder inside the app)
  [NSWorkspace.sharedWorkspace openURLs:@[[NSURL URLWithString:entry[2]]] withApplicationAtURL:browserURL configuration:NSWorkspaceOpenConfiguration.configuration completionHandler:nil];
 }
@@ -2755,7 +2757,7 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
 - (void)guideKeepChanges:(BOOL)keep {[self endPlayingFieldKeeping:keep];}
 // While the circle tours the screen, the Settings window steps aside; the tour's own small bar holds the controls.
 // A helper outside the tour: the cursor comes for one thing (a browser's setup, Sunset to sunrise in macOS) and goes home.
-- (void)startGuideHelper:(NSString *)kind with:(id)argument {if(self.guide)return;self.guideIsHelper=YES;self.guide=[[GuideTour alloc]initWithHost:self];[self.guide startHelper:kind with:argument];}
+- (void)startGuideHelper:(NSString *)kind with:(id)argument {if(self.guide)return;if([kind isEqual:@"browser"])[self borrowScreenForTour:YES];self.guideIsHelper=YES;self.guide=[[GuideTour alloc]initWithHost:self];[self.guide startHelper:kind with:argument];}
 - (void)startGuideTour {if(self.guide)return;[NSNotificationCenter.defaultCenter removeObserver:self name:NSMenuDidSendActionNotification object:nil];[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(tourNoteMenuChoice:) name:NSMenuDidSendActionNotification object:nil];self.tourGray=-1;self.tourWarmth=-1;[self borrowScreenForTour:YES];[self beginPlayingField];self.settingsAsideForTour=self.settings.visible;self.guide=[[GuideTour alloc]initWithHost:self];[self.guide start];}
 - (NSView *)guideScene:(NSInteger)kind {TourScene *s=[[TourScene alloc]initWithFrame:NSMakeRect(0,0,420,140)];s.kind=(TourSceneKind)MAX(0,MIN(7,kind));return s;}
 - (NSRect)guideIconFrame {
@@ -2784,15 +2786,65 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
  NSImage *image=[NSImage imageWithSize:NSMakeSize(18,18) flipped:NO drawingHandler:^BOOL(NSRect rect){NSBezierPath *ring=[NSBezierPath bezierPathWithOvalInRect:NSInsetRect(rect,2.5,2.5)];ring.lineWidth=1.4;CGFloat dash[2]={.01,2.6};[ring setLineDash:dash count:2 phase:0];ring.lineCapStyle=NSLineCapStyleRound;[NSColor.blackColor setStroke];[ring stroke];return YES;}];
  image.template=YES;image.accessibilityDescription=L(@"Less Pull, out on the tour");return image;
 }
-// A demo copy (--hands-off) leaves the displays to the installed Less Pull. During its tour it borrows the screen, so the
-// tour's looks are real; afterwards it hands the screen back, and the installed app paints its own look again.
+// A demo or test copy (--hands-off) leaves the installed Less Pull alone: its screen and its browsers. During its tour (and
+// the browser guide) it borrows both, so the looks and the website steps are real. The installed app quits for those
+// minutes (its settings stay) and starts again afterwards, also if the copy quits or crashes meanwhile: two apps painting
+// one screen take turns, and that is a gray or a warmth that flickers.
 - (void)borrowScreenForTour:(BOOL)borrow {
- if(!LessPullHandsOff||LessPullBorrowScreen==borrow||[NSProcessInfo.processInfo.arguments containsObject:@"--tour-no-borrow"])return;  // --tour-no-borrow (testing): the screen's look stays the installed app's
- if(borrow){NSLog(@"Less Pull demo: borrowing the screen for the tour");LessPullBorrowScreen=YES;[self.warmth invalidate];[self sync];return;}
+ if(!LessPullHandsOff||LessPullBorrowScreen==borrow||[NSProcessInfo.processInfo.arguments containsObject:@"--tour-no-borrow"])return;  // --tour-no-borrow (testing): the installed app keeps the screen and the browsers
+ if(borrow){NSLog(@"Less Pull demo: borrowing the screen for the tour");LessPullBorrowScreen=YES;[self.warmth invalidate];[self sync];
+  NSArray<NSRunningApplication *> *installed=[NSRunningApplication runningApplicationsWithBundleIdentifier:@"com.jiriarion.lesspull"];
+  if(installed.firstObject.bundleURL){self.installedAway=installed.firstObject.bundleURL;[self watchForInstalledReturn];for(NSRunningApplication *app in installed)[app terminate];}
+  [self takeBrowsersWhenInstalledGone:0];return;}
+ [self.browserBridge stopSocket];
  BOOL installed=[NSRunningApplication runningApplicationsWithBundleIdentifier:@"com.jiriarion.lesspull"].count>0;
  [self.warmth cancelTransition];if(!installed)[self.warmth restore];  // nobody else paints the screen: back to the plain matrix
  LessPullBorrowScreen=NO;[self.warmth invalidate];LessPullAnnounceFilterChange();
  NSLog(@"Less Pull demo: the screen goes back (installed app running: %@)",installed?@"yes":@"no");
+ [self bringInstalledBack];
+}
+// The installed app takes a moment to quit (it puts its own look away first). Then the tour's look comes back, and the
+// browsers' helper reaches this copy. One that does not quit within 5 seconds keeps its browsers.
+- (void)takeBrowsersWhenInstalledGone:(int)tries {
+ if(!LessPullBorrowScreen)return;
+ if([NSRunningApplication runningApplicationsWithBundleIdentifier:@"com.jiriarion.lesspull"].count){if(tries<50)dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)(.1*NSEC_PER_SEC)),dispatch_get_main_queue(),^{[self takeBrowsersWhenInstalledGone:tries+1];});else NSLog(@"Less Pull demo: the installed app did not quit; it keeps the browsers");return;}
+ [self.browserBridge startSocket];[self.warmth invalidate];[self sync];
+}
+// The installed Less Pull for a copy: the running one, else the one in Applications, else wherever Launch Services has it.
+- (NSURL *)installedAppURL {
+ NSURL *running=[NSRunningApplication runningApplicationsWithBundleIdentifier:@"com.jiriarion.lesspull"].firstObject.bundleURL;if(running)return running;
+ NSURL *standard=[NSURL fileURLWithPath:@"/Applications/Less Pull.app"];if([[NSBundle bundleWithURL:standard].bundleIdentifier isEqual:@"com.jiriarion.lesspull"])return standard;
+ return [NSWorkspace.sharedWorkspace URLForApplicationWithBundleIdentifier:@"com.jiriarion.lesspull"];
+}
+// The helper the browsers start: the app's own. A copy sets the browsers up with the installed app's, so they stay the
+// installed app's (and reach the copy only while it borrows them).
+- (NSURL *)browserHelperURL {
+ NSURL *own=[NSBundle.mainBundle.bundleURL URLByAppendingPathComponent:@"Contents/MacOS/LessPullBrowserHost"];if(!LessPullHandsOff)return own;
+ NSURL *installed=[[self installedAppURL] URLByAppendingPathComponent:@"Contents/MacOS/LessPullBrowserHost"];
+ return installed&&[NSFileManager.defaultManager isExecutableFileAtPath:installed.path]?installed:own;
+}
+// While the installed app is away, a note says where it lives, and a tiny watcher starts it again if this copy ends
+// without bringing it back (a crash, a forced quit). Brought back normally, the note goes and the watcher with it.
+- (NSString *)installedAwayNote {return [NSTemporaryDirectory() stringByAppendingPathComponent:[NSBundle.mainBundle.bundleIdentifier stringByAppendingString:@".installed-away"]];}
+- (void)watchForInstalledReturn {
+ NSString *note=[self installedAwayNote];if(![self.installedAway.path writeToFile:note atomically:YES encoding:NSUTF8StringEncoding error:nil])return;
+ [self.installedWatch terminate];NSTask *watch=[NSTask new];watch.executableURL=[NSURL fileURLWithPath:@"/bin/sh"];
+ watch.arguments=@[@"-c",@"while kill -0 \"$1\" 2>/dev/null; do sleep 1; done; [ -f \"$2\" ] || exit 0; app=$(cat \"$2\"); rm -f \"$2\"; ps -axo comm= | grep -Fxq \"$app/Contents/MacOS/LessPull\" || /usr/bin/open -g \"$app\"",@"less-pull-watch",@(getpid()).stringValue,note];
+ watch.standardOutput=NSFileHandle.fileHandleWithNullDevice;watch.standardError=NSFileHandle.fileHandleWithNullDevice;if([watch launchAndReturnError:nil])self.installedWatch=watch;
+}
+- (void)bringInstalledBack {
+ NSURL *url=self.installedAway;self.installedAway=nil;if(!url)return;
+ if(self.quitting)return;  // quitting: the watcher starts it once this copy is gone
+ [NSFileManager.defaultManager removeItemAtPath:[self installedAwayNote] error:nil];[self.installedWatch terminate];self.installedWatch=nil;
+ if([NSRunningApplication runningApplicationsWithBundleIdentifier:@"com.jiriarion.lesspull"].count)return;  // started by hand meanwhile
+ NSWorkspaceOpenConfiguration *c=NSWorkspaceOpenConfiguration.configuration;c.activates=NO;c.addsToRecentItems=NO;
+ [NSWorkspace.sharedWorkspace openApplicationAtURL:url configuration:c completionHandler:^(NSRunningApplication *app,NSError *error){if(error)NSLog(@"Less Pull demo: the installed app did not start again: %@",error.localizedDescription);}];
+ NSLog(@"Less Pull demo: the installed app starts again");
+}
+// At launch: a note left from an earlier run whose watcher did not get to it either. The installed app comes back.
+- (void)returnInstalledIfAway {
+ NSString *note=[self installedAwayNote];NSString *path=[NSString stringWithContentsOfFile:note encoding:NSUTF8StringEncoding error:nil];if(!path.length)return;
+ [NSFileManager.defaultManager removeItemAtPath:note error:nil];self.installedAway=[NSURL fileURLWithPath:path];self.installedWatch=nil;[self bringInstalledBack];
 }
 - (void)guideFinished:(BOOL)completed {
  BOOL helper=self.guideIsHelper;self.guideIsHelper=NO;

@@ -7,14 +7,18 @@
 static BOOL bytes(int fd,void *p,size_t n,BOOL writing){while(n){ssize_t k=writing?write(fd,p,n):read(fd,p,n);if(k<=0)return NO;p+=k;n-=k;}return YES;}
 static NSString *siteName(id value){if(![value isKindOfClass:NSString.class]||[value length]>253)return nil;NSString *s=[value lowercaseString];NSCharacterSet *allowed=[NSCharacterSet characterSetWithCharactersInString:@"abcdefghijklmnopqrstuvwxyz0123456789.-"];if(!s.length||[s rangeOfCharacterFromSet:allowed.invertedSet].location!=NSNotFound||[s hasPrefix:@"."]||[s hasSuffix:@"."]||[s containsString:@".."]||[s containsString:@"/"])return nil;return s;}
 static NSString *pageURL(id value){if(![value isKindOfClass:NSString.class]||[value length]>8192)return nil;NSURLComponents *c=[NSURLComponents componentsWithString:value];if(![@[@"http",@"https"] containsObject:c.scheme.lowercaseString]||!siteName(c.host)||c.user||c.password)return nil;c.scheme=c.scheme.lowercaseString;c.host=c.host.lowercaseString;c.fragment=nil;if(!c.path.length)c.path=@"/";return c.string;}
+__attribute__((weak)) BOOL LessPullHandsOff=NO;
 @implementation BrowserBridge
 // Only the app's own browser helper may talk to the socket: the peer process must run the
 // LessPullBrowserHost executable from this app's bundle. Anything else is dropped unanswered.
+// A demo or test copy on its tour also takes the installed app's helper: that is the one the browsers start.
 + (BOOL)peerIsOurHelper:(int)client {
  pid_t pid=0;socklen_t len=sizeof(pid);if(getsockopt(client,SOL_LOCAL,LOCAL_PEERPID,&pid,&len)!=0||pid<=0)return NO;
  char path[PROC_PIDPATHINFO_MAXSIZE]={0};if(proc_pidpath(pid,path,sizeof(path))<=0)return NO;NSString *p=@(path);
  NSString *mine=[NSBundle.mainBundle.bundlePath stringByAppendingString:@"/Contents/MacOS/LessPullBrowserHost"];
- return [p isEqual:mine]||(!NSBundle.mainBundle.bundlePath.length&&[p hasSuffix:@"/LessPullBrowserHost"]);
+ if([p isEqual:mine]||(!NSBundle.mainBundle.bundlePath.length&&[p hasSuffix:@"/LessPullBrowserHost"]))return YES;
+ if(!LessPullHandsOff||![p hasSuffix:@".app/Contents/MacOS/LessPullBrowserHost"])return NO;
+ return [[NSBundle bundleWithPath:p.stringByDeletingLastPathComponent.stringByDeletingLastPathComponent.stringByDeletingLastPathComponent].bundleIdentifier isEqual:@"com.jiriarion.lesspull"];
 }
 + (NSString *)socketPath {return [NSHomeDirectory() stringByAppendingPathComponent:@"Library/Application Support/Less Pull/browser.sock"];}
 // The shipped app answers com.jiriarion.lesspull.bridge (what the Safari extension looks
@@ -61,10 +65,13 @@ static CFDataRef BridgePortCallback(CFMessagePortRef port,SInt32 msgid,CFDataRef
  if(self.port)return;CFMessagePortContext context={0,(__bridge void *)self,NULL,NULL,NULL};CFMessagePortRef port=CFMessagePortCreateLocal(NULL,(__bridge CFStringRef)BrowserBridge.portName,BridgePortCallback,&context,NULL);if(!port)return;
  CFRunLoopSourceRef source=CFMessagePortCreateRunLoopSource(NULL,port,0);CFRunLoopAddSource(CFRunLoopGetMain(),source,kCFRunLoopCommonModes);CFRelease(source);self.port=port;
 }
-- (void)start {
- [self startPort];
- NSString *path=BrowserBridge.socketPath;[NSFileManager.defaultManager createDirectoryAtPath:path.stringByDeletingLastPathComponent withIntermediateDirectories:YES attributes:@{NSFilePosixPermissions:@0700} error:nil];struct sockaddr_un address={.sun_family=AF_UNIX};if([path lengthOfBytesUsingEncoding:NSUTF8StringEncoding]>=sizeof(address.sun_path))return;strlcpy(address.sun_path,path.fileSystemRepresentation,sizeof(address.sun_path));struct stat st;if(lstat(address.sun_path,&st)==0){if(st.st_uid!=getuid()||!S_ISSOCK(st.st_mode))return;unlink(address.sun_path);}int fd=socket(AF_UNIX,SOCK_STREAM,0);if(fd<0)return;if(bind(fd,(void *)&address,sizeof(address))||chmod(address.sun_path,0600)||listen(fd,8)){close(fd);return;}self.listener=fd;
+- (void)start {[self startPort];[self startSocket];}
+- (void)startSocket {
+ if(self.listener>=0||!NSBundle.mainBundle.bundleIdentifier)return;  // a command-line test never takes the app's socket
+ NSString *path=BrowserBridge.socketPath;[NSFileManager.defaultManager createDirectoryAtPath:path.stringByDeletingLastPathComponent withIntermediateDirectories:YES attributes:@{NSFilePosixPermissions:@0700} error:nil];struct sockaddr_un address={.sun_family=AF_UNIX};if([path lengthOfBytesUsingEncoding:NSUTF8StringEncoding]>=sizeof(address.sun_path))return;strlcpy(address.sun_path,path.fileSystemRepresentation,sizeof(address.sun_path));struct stat st;if(lstat(address.sun_path,&st)==0){if(st.st_uid!=getuid()||!S_ISSOCK(st.st_mode))return;unlink(address.sun_path);}int fd=socket(AF_UNIX,SOCK_STREAM,0);if(fd<0)return;if(bind(fd,(void *)&address,sizeof(address))||chmod(address.sun_path,0600)||listen(fd,8)){close(fd);return;}self.listener=fd;if(lstat(address.sun_path,&st)==0)self.boundInode=st.st_ino;
  __weak BrowserBridge *weak=self;dispatch_async(dispatch_get_global_queue(QOS_CLASS_UTILITY,0),^{while(weak.listener==fd){int client=accept(fd,NULL,NULL);if(client<0)break;if(![BrowserBridge peerIsOurHelper:client]){close(client);continue;}int noPipe=1;setsockopt(client,SOL_SOCKET,SO_NOSIGPIPE,&noPipe,sizeof(noPipe));struct timeval timeout={.tv_sec=3};setsockopt(client,SOL_SOCKET,SO_RCVTIMEO,&timeout,sizeof(timeout));setsockopt(client,SOL_SOCKET,SO_SNDTIMEO,&timeout,sizeof(timeout));uint32_t size=0;NSDictionary *reply=@{@"ok":@NO,@"error":@"Invalid request"};if(bytes(client,&size,4,NO)&&size>0&&size<=65536){NSMutableData *data=[NSMutableData dataWithLength:size];if(bytes(client,data.mutableBytes,size,NO)){id request=[NSJSONSerialization JSONObjectWithData:data options:0 error:nil];__block NSDictionary *response;dispatch_sync(dispatch_get_main_queue(),^{response=[weak handle:request];});reply=response?:reply;}}NSData *out=[NSJSONSerialization dataWithJSONObject:reply options:0 error:nil];uint32_t n=(uint32_t)out.length;bytes(client,&n,4,YES);bytes(client,(void *)out.bytes,n,YES);close(client);}});
 }
-- (void)stop {if(self.port){CFMessagePortInvalidate(self.port);CFRelease(self.port);self.port=NULL;}int fd=self.listener;self.listener=-1;if(fd>=0){shutdown(fd,SHUT_RDWR);close(fd);unlink(BrowserBridge.socketPath.fileSystemRepresentation);}}
+- (void)stop {if(self.port){CFMessagePortInvalidate(self.port);CFRelease(self.port);self.port=NULL;}[self stopSocket];}
+// Removes the socket file only while it is still the one bound here: another Less Pull may have taken the place since.
+- (void)stopSocket {int fd=self.listener;self.listener=-1;if(fd<0)return;shutdown(fd,SHUT_RDWR);close(fd);struct stat st;const char *path=BrowserBridge.socketPath.fileSystemRepresentation;if(lstat(path,&st)==0&&st.st_ino==self.boundInode)unlink(path);}
 @end
