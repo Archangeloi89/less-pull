@@ -801,11 +801,7 @@
 "Hm. My door is behind the notch. Of all the places." = "Hm. Meine Tür ist hinter der Notch. Ausgerechnet.";
 "Hm. My door is hidden. Your menu bar is full." = "Hm. Meine Tür ist versteckt. Deine Menüleiste ist voll.";
 "Home now: lesspull.com, the little circle in the corner." = "Jetzt nach Hause: lesspull.com, der kleine Kreis in der Ecke.";
-"I can’t see inside that window, by the way. Not mine. I’ll wait out here." = "Ich kann da übrigens nicht reinschauen. Nicht mein Fenster. Ich warte hier draußen.";
-"If macOS asks about Location Services, allow it: that’s the second switch." = "Wenn macOS nach den Ortungsdiensten fragt, erlaube es: Das ist der zweite Schalter.";
-"If nothing asked: Location Services…, next to Date & Time…, opens the other switch." = "Wenn nichts gefragt hat: Ortungsdienste …, neben Datum & Uhrzeit …, öffnet den anderen Schalter.";
 "In Extensions, turn on Less Pull and allow it on all websites. I’ll notice." = "Unter Erweiterungen Less Pull einschalten und auf allen Websites erlauben. Ich merke es.";
-"In there: Set time zone automatically using your current location. Turn it on." = "Dort drin: Zeitzone automatisch anhand des aktuellen Standorts festlegen. Schalte es ein.";
 "It’s night by your schedule, so this is on already. A preview of the present." = "Nach deinem Zeitplan ist Nacht, also läuft das schon. Eine Vorschau der Gegenwart.";
 "It’s up there somewhere, hiding. Anyway: that circle is Less Pull, and my door." = "Irgendwo da oben, versteckt. Jedenfalls: Der Kreis ist Less Pull, und meine Tür.";
 "I’d drag it myself, but guest rules: I don’t touch anything here." = "Ich würde ihn selbst ziehen, aber Gastregeln: Ich fasse hier nichts an.";
@@ -844,7 +840,6 @@
 "Slower it is. Real pixels are heavier; I felt that." = "Also langsamer. Echte Pixel sind schwerer; das hab ich gemerkt.";
 "Still here. Still a tourist." = "Noch da. Immer noch Tourist.";
 "Suggest picks keys no macOS shortcut uses. One click, and they’re yours." = "Vorschlag nimmt Tasten, die kein macOS-Kurzbefehl belegt. Ein Klick, und sie gehören dir.";
-"Sunset needs one thing from macOS: the time zone set by your location." = "Sonnenuntergang braucht eins von macOS: die Zeitzone über deinen Standort.";
 "Sunset works here already. Nothing to do; the seasons take it from here." = "Sonnenuntergang funktioniert hier schon. Nichts zu tun; ab jetzt übernehmen die Jahreszeiten.";
 "Sunset’s in. Less Pull noticed by itself; I just stood here looking useful." = "Sonnenuntergang ist drin. Less Pull hat es selbst gemerkt; ich stand nur nützlich herum.";
 "Sure. The checkbox waits under Settings → General, any time." = "Klar. Das Häkchen wartet unter Einstellungen → Allgemein, jederzeit.";
@@ -873,8 +868,6 @@
 "Up top, the row of tabs: %@." = "Ganz oben, die Reihe mit den Tabs: %@.";
 "Warmer evenings on a schedule: want that? I’ll show you where it lives." = "Wärmere Abende nach Zeitplan: willst du das? Ich zeig dir, wo es wohnt.";
 "Warmer, just for %@. Every other site stays as it was." = "Wärmer, nur für %@. Jede andere Site bleibt, wie sie war.";
-"Websites can have exceptions too. Shall we connect %@? Optional." = "Websites können auch Ausnahmen haben. Sollen wir %@ verbinden? Freiwillig.";
-"Websites can have exceptions too. Shall we connect your browser? Optional." = "Websites können auch Ausnahmen haben. Sollen wir deinen Browser verbinden? Freiwillig.";
 "Whenever you like: Settings → Shortcuts. Moving on." = "Wann du willst: Einstellungen → Kurzbefehle. Weiter geht's.";
 "Which ones? One or several; each gets the same small extension." = "Welche? Einer oder mehrere; jeder bekommt dieselbe kleine Erweiterung.";
 "Yes, at login" = "Ja, bei der Anmeldung";
@@ -920,7 +913,6 @@
 "Some apps need their color. Photos, say. An exception lets one app keep it." = "Manche Apps brauchen ihre Farbe. Fotos etwa. Mit einer Ausnahme behält eine App sie.";
 "Stop %ld of %ld · %@" = "Station %ld von %ld · %@";
 "Stop %ld: %@" = "Station %ld: %@";
-"Sunset to sunrise needs one thing from macOS. I’ll show you where." = "Sonnenuntergang bis Sonnenaufgang braucht eine Sache von macOS. Ich zeig dir, wo.";
 "That little bar is the tour: seven stops. Click a number to jump there." = "Die kleine Leiste ist die Tour: sieben Stationen. Ein Klick auf eine Zahl springt hin.";
 "That’s enough for now. More browsers: Less Pull’s Settings → Websites. I’ll come and help." = "Das reicht fürs Erste. Weitere Browser: Less Pulls Einstellungen → Websites. Ich komm dann und helfe.";
 "The real panel, for %@. Change one thing; the rest carries over." = "Das echte Fenster, für %@. Eins ändern, der Rest bleibt.";
@@ -932,11 +924,9 @@
 "A short tour on your own screen, with a browser connection if you like." = "Eine kurze Tour auf deinem eigenen Bildschirm, mit Browser-Verbindung, wenn du willst.";
 "You have arrived somewhere quieter.\n\nLess Pull takes the color out of your screen, so it pulls at you less. Think of noise cancelling, for your eyes: nothing is gone, everything still works. It just stops shouting." = "Du bist an einem ruhigeren Ort angekommen.\n\nLess Pull nimmt deinem Bildschirm die Farbe, damit er weniger an dir zerrt. Wie Geräuschunterdrückung, nur für die Augen: Nichts ist weg, alles funktioniert. Es schreit nur nicht mehr.";
 "First, bring out your icon" = "Hol zuerst dein Symbol hervor";
-"The tour starts at the Less Pull circle in the menu bar, and right now it’s hidden. Show the hidden menu-bar icons, then hold ⌘ and drag the circle toward the clock. The tour begins as soon as it’s there." = "Die Tour beginnt beim Less-Pull-Kreis in der Menüleiste, und der ist gerade versteckt. Zeig die versteckten Symbole der Menüleiste an, dann halt ⌘ gedrückt und zieh den Kreis Richtung Uhr. Die Tour beginnt, sobald er da ist.";
 "Start when it’s there" = "Starten, sobald er da ist";
 "Start anyway" = "Trotzdem starten";
 "Waiting for your icon…" = "Warte auf dein Symbol …";
-"This is your icon, right above this window. Can’t see it? Show the hidden menu-bar icons, then hold ⌘ and drag the circle toward the clock." = "Das ist dein Symbol, direkt über diesem Fenster. Du siehst es nicht? Zeig die versteckten Symbole der Menüleiste an, dann halt ⌘ gedrückt und zieh den Kreis Richtung Uhr.";
 "The » shows the hidden icons; holding the Command key, the pointer drags the circle out toward the clock, and the other icons make room" = "Das » zeigt die versteckten Symbole; mit gedrückter Befehlstaste zieht der Zeiger den Kreis Richtung Uhr heraus, und die anderen Symbole machen Platz";
 "Show the hidden icons up there, then hold ⌘ and drag my circle toward the clock. Like this." = "Zeig oben die versteckten Symbole an, dann halt ⌘ und zieh meinen Kreis Richtung Uhr. So.";
 "A break instead: it calls you back once, when it’s over. I’ll end this one for the tour." = "Lieber eine Auszeit: Sie ruft dich einmal zurück, wenn sie um ist. Diese beende ich für die Tour.";
@@ -996,3 +986,18 @@
 "twice, quickly" = "zweimal schnell";
 "kept: color" = "behalten: Farbe";
 "once more: quiet" = "noch einmal: ruhig";
+"First, move your icon next to the clock" = "Zieh zuerst dein Symbol neben die Uhr";
+"The tour starts at the Less Pull circle in the menu bar, and right now it’s hidden. Show the hidden menu-bar icons, then hold ⌘ and drag the circle all the way right, next to the clock: there macOS never hides it. The tour begins as soon as it’s there." = "Die Tour beginnt beim Less-Pull-Kreis in der Menüleiste, und der ist gerade versteckt. Zeig die versteckten Symbole der Menüleiste an, dann halt ⌘ gedrückt und zieh den Kreis ganz nach rechts, neben die Uhr: dort versteckt ihn macOS nie. Die Tour beginnt, sobald er da ist.";
+"This is your icon, right above this window. Keep it far right, next to the clock: there macOS never hides it. Can’t see it? Show the hidden menu-bar icons, then hold ⌘ and drag it there." = "Das ist dein Symbol, direkt über diesem Fenster. Lass es ganz rechts, neben der Uhr: dort versteckt es macOS nie. Du siehst es nicht? Zeig die versteckten Symbole der Menüleiste an, dann halt ⌘ gedrückt und zieh es dorthin.";
+"Tip: hold ⌘ and drag me next to the clock. There macOS never hides me." = "Tipp: Halt ⌘ und zieh mich neben die Uhr. Dort versteckt mich macOS nie.";
+"All the way to Off. Fine too; Red is at the far right." = "Ganz auf Aus. Geht auch; Rot ist ganz rechts.";
+"Exceptions for websites need %@ connected: a small extension. Connect it now? Optional." = "Ausnahmen für Websites brauchen %@ verbunden: eine kleine Erweiterung. Jetzt verbinden? Freiwillig.";
+"Exceptions for websites need your browser connected: a small extension. Connect it now? Optional." = "Ausnahmen für Websites brauchen deinen Browser verbunden: eine kleine Erweiterung. Jetzt verbinden? Freiwillig.";
+"Sunset to sunrise needs your location: macOS sets the time zone from it. Shall I show you the switches?" = "Sonnenuntergang bis Sonnenaufgang braucht deinen Standort: macOS stellt daraus die Zeitzone ein. Soll ich dir die Schalter zeigen?";
+"In Date & Time, turn on “Set time zone automatically using your current location”." = "Schalte in Datum & Uhrzeit „Zeitzone automatisch anhand deines Standorts einstellen“ ein.";
+"The switch is in Date & Time, next to the time zone. I’ll wait right here." = "Der Schalter ist in Datum & Uhrzeit, bei der Zeitzone. Ich warte hier.";
+"Now Location Services, in Privacy & Security: turn it on at the top. It may ask for your password." = "Jetzt die Ortungsdienste, unter Datenschutz & Sicherheit: Schalte sie oben ein. Vielleicht fragt macOS nach deinem Passwort.";
+"System Settings, Privacy & Security, Location Services: the switch at the top." = "Systemeinstellungen, Datenschutz & Sicherheit, Ortungsdienste: der Schalter ganz oben.";
+"Last one: at the bottom, System Services, Details…. Turn on Setting time zone." = "Als Letztes: ganz unten Systemdienste, Details …. Schalte „Zeitzone einstellen“ ein.";
+"Still in Location Services: scroll down to System Services, then Details…." = "Noch bei den Ortungsdiensten: Scroll runter zu Systemdienste, dann Details ….";
+"Less Pull lives in that circle. When an app with many menus is in front, macOS hides the menu-bar icons that are furthest from the clock, and the circle with them. Hold ⌘ and drag it all the way right, next to the clock (can’t see it? show the hidden menu-bar icons first): there it always stays visible. The tour starts as soon as it’s there." = "Less Pull wohnt in diesem Kreis. Ist eine App mit vielen Menüs vorne, versteckt macOS die Symbole der Menüleiste, die am weitesten von der Uhr entfernt sind, und den Kreis mit ihnen. Halt ⌘ gedrückt und zieh ihn ganz nach rechts, neben die Uhr (du siehst ihn nicht? zeig zuerst die versteckten Symbole der Menüleiste an): dort bleibt er immer sichtbar. Die Tour beginnt, sobald er da ist.";

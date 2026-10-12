@@ -334,7 +334,7 @@ static void QuietScrolling(NSScrollView *s){
 @property NSTextField *sessionPresetsField,*callBackPresetsField;
 @property NSTextField *exclusionText;
 @property NSRunningApplication *lastExternalApp;
-@property SwitchingPolicy *policy;@property NSComboBox *nightBoostPopup;@property NSTextField *nightBoostNote;@property NSDatePicker *nightStartPicker,*nightEndPicker;@property NSStackView *ownHoursRow;@property NSDate *nightPreviewUntil;@property NSTimer *nightPreviewTimer;@property BOOL nightPreviewTurnedNightShiftOn;@property NSSegmentedControl *nightModeControl;@property NSStackView *nightPauseRow;@property NSWindow *supportWindow;@property GuideTour *guide;@property NSInteger tourGray;@property double tourWarmth;@property BOOL peekKeyHeld;@property NSPopUpButton *nightHoursPopup;@property NSTextField *nightHoursNote;@property NSButton *nightLocationButton,*nightDateTimeButton;@property NSInteger lastSeenMacMode;@property NSTextField *nightModeNote;@property BOOL migrateNightShiftMode,nightModeDirty;@property NSButton *nightTryButton;@property BOOL tourSpotEmpty;@property BOOL settingsAsideForTour;@property NSDictionary *playingField;@property NSString *tourMenuMark;@property BOOL statusMenuOpen,tourSessionWasIdle;@property NSInteger toursThisLaunch;@property NSView *menuWarmthRow,*menuNightRow;@property NSSlider *menuWarmthSlider;@property NSRect sessionPanelTarget;@property NSRect tourSettingsFrame;@property BOOL guideIsHelper,demoLaunchAtLogin;@property NSDate *tourSampleStart;@property NSTimer *tourSampleTimer;@property(copy) NSString *lastMenuChoice;@property NSDate *lastMenuChoiceAt;@property NSTimer *tourIconWait;@property NSButton *tourStartButton;@property BOOL tourArrowsWanted;@property BOOL buildSettingsHidden,tourSampleSession;@property NSMutableDictionary<NSString *,NSValue *> *tourItemFrames;
+@property SwitchingPolicy *policy;@property NSComboBox *nightBoostPopup;@property NSTextField *nightBoostNote;@property NSDatePicker *nightStartPicker,*nightEndPicker;@property NSStackView *ownHoursRow;@property NSDate *nightPreviewUntil;@property NSTimer *nightPreviewTimer;@property BOOL nightPreviewTurnedNightShiftOn;@property NSSegmentedControl *nightModeControl;@property NSStackView *nightPauseRow;@property NSWindow *supportWindow;@property GuideTour *guide;@property NSInteger tourGray;@property double tourWarmth;@property BOOL peekKeyHeld;@property NSPopUpButton *nightHoursPopup;@property NSTextField *nightHoursNote;@property NSButton *nightLocationButton,*nightDateTimeButton;@property NSInteger lastSeenMacMode;@property NSTextField *nightModeNote;@property BOOL migrateNightShiftMode,nightModeDirty;@property NSButton *nightTryButton;@property BOOL tourSpotEmpty;@property BOOL settingsAsideForTour;@property NSDictionary *playingField;@property NSString *tourMenuMark;@property BOOL statusMenuOpen,tourSessionWasIdle;@property NSInteger toursThisLaunch;@property NSView *menuWarmthRow,*menuNightRow;@property NSSlider *menuWarmthSlider;@property NSRect sessionPanelTarget;@property NSRect tourSettingsFrame;@property BOOL guideIsHelper,demoLaunchAtLogin;@property NSDate *tourSampleStart;@property NSTimer *tourSampleTimer;@property(copy) NSString *lastMenuChoice;@property NSDate *lastMenuChoiceAt;@property NSTimer *tourIconWait;@property NSButton *tourStartButton;@property BOOL tourArrowsWanted;@property NSPanel *iconBeacon;@property BOOL buildSettingsHidden,tourSampleSession;@property NSMutableDictionary<NSString *,NSValue *> *tourItemFrames;
 @property WarmthEngine *warmth;
 @property NSInteger selectedMode;
 @property NSSlider *warmthSlider;
@@ -789,7 +789,9 @@ static void drawKey(NSRect f,NSString *label,double pressed){NSRect r=NSOffsetRe
   overrides[d]=@{@"grayMode":@([rule[@"grayMode"] integerValue]),@"customWarmth":@([rule[@"customWarmth"] boolValue]),@"warmth":rule[@"warmth"]?:@0};}
  self.frontDisplays=front;self.displayOverrides=overrides;
 }
-- (void)frontmostChanged:(id)sender {[self sync];}
+- (void)frontmostChanged:(id)sender {[self sync];
+ if(LessPullBorrowScreen)dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)(.35*NSEC_PER_SEC)),dispatch_get_main_queue(),^{if(LessPullBorrowScreen){[self.warmth invalidate];[self sync];}});  // a demo on its tour: the installed app answers the switch too, so the demo's look comes last
+}
 // The base a website inherits: the global settings as they stand, then the browser's own app exception.
 - (NSDictionary *)browserBaseForBundle:(NSString *)browser {
  BOOL night=NO;[self logicalNightShift:&night];NSInteger gray=(self.selectedMode==1||self.selectedMode==100)?1:2,nightMode=night?1:2;double warmth=[self currentWarmth]/3*100;
@@ -2224,7 +2226,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  NSTextField *text=[NSTextField wrappingLabelWithString:texts[page]];text.preferredMaxLayoutWidth=page==0?404:346;text.attributedStringValue=Emphasized(texts[page],text.font?:[NSFont systemFontOfSize:13],text.textColor?:NSColor.labelColor,NSColor.labelColor,NO);text.allowsEditingTextAttributes=YES;  // next to the symbol on the tour pages
  NSMutableArray *parts=[NSMutableArray arrayWithObject:title];
  if(page==0){NSImageView *icon=[NSImageView imageViewWithImage:[self statusImageGray:YES warmth:0]];[icon.widthAnchor constraintEqualToConstant:18].active=YES;[icon.heightAnchor constraintEqualToConstant:18].active=YES;icon.accessibilityLabel=L(@"The Less Pull menu-bar icon");
-  NSTextField *where=[NSTextField wrappingLabelWithString:L(@"This is your icon, right above this window. Can’t see it? Show the hidden menu-bar icons, then hold ⌘ and drag the circle toward the clock.")];where.preferredMaxLayoutWidth=376;NSStackView *iconRow=[self row:@[icon,where]];iconRow.alignment=NSLayoutAttributeTop;TourScene *hint=[TourScene new];hint.kind=TourSceneMenuBar;hint.accessibilityLabel=L(@"The » shows the hidden icons; holding the Command key, the pointer drags the circle out toward the clock, and the other icons make room");[parts addObjectsFromArray:@[text,iconRow,hint]];}
+  NSTextField *where=[NSTextField wrappingLabelWithString:L(@"This is your icon, right above this window. Keep it far right, next to the clock: there macOS never hides it. Can’t see it? Show the hidden menu-bar icons, then hold ⌘ and drag it there.")];where.preferredMaxLayoutWidth=376;NSStackView *iconRow=[self row:@[icon,where]];iconRow.alignment=NSLayoutAttributeTop;TourScene *hint=[TourScene new];hint.kind=TourSceneMenuBar;hint.accessibilityLabel=L(@"The » shows the hidden icons; holding the Command key, the pointer drags the circle out toward the clock, and the other icons make room");[parts addObjectsFromArray:@[text,iconRow,hint]];}
  else {text.preferredMaxLayoutWidth=404;TourScene *scene=[TourScene new];scene.kind=(TourSceneKind)page;scene.accessibilityLabel=titles[page];[parts addObjectsFromArray:@[scene,text]];}
  NSView *fill=[NSView new];[fill setContentHuggingPriority:1 forOrientation:NSLayoutConstraintOrientationVertical];[parts addObject:fill];
  NSButton *skip=[NSButton buttonWithTitle:L(@"Skip tour and setup") target:self action:@selector(skipTour:)];skip.bezelStyle=NSBezelStyleInline;skip.font=[NSFont systemFontOfSize:11];[self helpView:skip text:L(@"Closes the welcome, the tour and the setup. You can open them again from the About tab.") label:L(@"Skip tour and setup")];
@@ -2253,18 +2255,50 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
 }
 - (void)tourNext:(id)sender {self.setupOnly=NO;if(self.tourPage==0){[self startTourWhenIconShows];return;}  // the tour now happens on the real screen
  if(self.tourPage<[self tourLastPage])[self showTourPage:self.tourPage+1 animated:YES];}
+// The circle far from the clock: when an app with many menus is in front, macOS hides the icons nearest to them
+// first. Next to the system icons and the clock it stays. (Other apps' icons cannot be seen from here, so it is the
+// distance that counts: within about a quarter of the menu bar, or 360 points, from the right end.)
+- (BOOL)iconFarFromClock {
+ NSRect icon=[self guideIconFrame];if(NSIsEmptyRect(icon))return NO;NSScreen *screen=self.item.button.window.screen?:NSScreen.mainScreen;
+ return NSMaxX(screen.frame)-NSMaxX(icon)>MAX(360,screen.frame.size.width*.26);
+}
 // The tour starts at the circle in the menu bar. Hidden, it asks first, and starts by itself once the circle has been
-// in view for a moment (a hidden part of the menu bar that only flashes open does not count).
+// in view for a moment (a hidden part of the menu bar that only flashes open does not count). Far from the clock, it
+// asks to move it there first: that is where it stays visible.
 - (void)startTourWhenIconShows {
- if(self.guide)return;if(!NSIsEmptyRect([self guideIconFrame])||!self.settings.visible){[self startGuideTour];return;}
- NSAlert *a=[NSAlert new];a.messageText=L(@"First, bring out your icon");a.informativeText=L(@"The tour starts at the Less Pull circle in the menu bar, and right now it’s hidden. Show the hidden menu-bar icons, then hold ⌘ and drag the circle toward the clock. The tour begins as soon as it’s there.");
+ if(self.guide)return;if(!self.settings.visible){[self startGuideTour];return;}
+ BOOL hidden=NSIsEmptyRect([self guideIconFrame]),far=!hidden&&[self iconFarFromClock];if(!hidden&&!far){[self startGuideTour];return;}
+ if(far){NSAlert *a=[NSAlert new];a.messageText=L(@"First, move your icon next to the clock");a.informativeText=L(@"Less Pull lives in that circle. When an app with many menus is in front, macOS hides the menu-bar icons that are furthest from the clock, and the circle with them. Hold ⌘ and drag it all the way right, next to the clock (can’t see it? show the hidden menu-bar icons first): there it always stays visible. The tour starts as soon as it’s there.");
+  [a addButtonWithTitle:L(@"Start when it’s there")];[a addButtonWithTitle:L(@"Not now")];[a addButtonWithTitle:L(@"Start anyway")];
+  [a beginSheetModalForWindow:self.settings completionHandler:^(NSModalResponse r){if(r==NSAlertThirdButtonReturn){[self startGuideTour];return;}if(r!=NSAlertFirstButtonReturn)return;[self waitForIconThen:YES];}];return;}
+ NSAlert *a=[NSAlert new];a.messageText=L(@"First, bring out your icon");a.informativeText=L(@"The tour starts at the Less Pull circle in the menu bar, and right now it’s hidden. Show the hidden menu-bar icons, then hold ⌘ and drag the circle all the way right, next to the clock: there macOS never hides it. The tour begins as soon as it’s there.");
  [a addButtonWithTitle:L(@"Start when it’s there")];[a addButtonWithTitle:L(@"Not now")];[a addButtonWithTitle:L(@"Start anyway")];
  [a beginSheetModalForWindow:self.settings completionHandler:^(NSModalResponse r){
-  if(r==NSAlertThirdButtonReturn){[self startGuideTour];return;}if(r!=NSAlertFirstButtonReturn)return;
-  NSString *title=self.tourStartButton.title;self.tourStartButton.title=L(@"Waiting for your icon…");[self.tourIconWait invalidate];__weak AppDelegate *weak=self;__block double seenSince=0;
-  self.tourIconWait=[NSTimer scheduledTimerWithTimeInterval:.5 repeats:YES block:^(NSTimer *t){AppDelegate *s=weak;if(!s||!s.settings.visible||s.guide){[t invalidate];if(s)s.tourStartButton.title=title;return;}
-   if(NSIsEmptyRect([s guideIconFrame])){seenSince=0;return;}double now=CACurrentMediaTime();if(!seenSince)seenSince=now;
-   if(now-seenSince>=2.5){[t invalidate];s.tourStartButton.title=title;[s startGuideTour];}}];}];
+  if(r==NSAlertThirdButtonReturn){[self startGuideTour];return;}if(r!=NSAlertFirstButtonReturn)return;[self waitForIconThen:YES];}];
+}
+// Waits until the circle is in view (and, with nearClock, next to the clock) for a moment, then starts the tour.
+// Meanwhile an amber ring pulses where the circle is (even behind an app's menus, next to the control for hidden icons).
+- (void)waitForIconThen:(BOOL)nearClock {
+ NSString *title=self.tourStartButton.title;self.tourStartButton.title=L(@"Waiting for your icon…");[self.tourIconWait invalidate];__weak AppDelegate *weak=self;__block double seenSince=0;[self showIconBeacon:YES];
+ self.tourIconWait=[NSTimer scheduledTimerWithTimeInterval:.5 repeats:YES block:^(NSTimer *t){AppDelegate *s=weak;if(!s||!s.settings.visible||s.guide){[t invalidate];[s showIconBeacon:NO];if(s)s.tourStartButton.title=title;return;}
+  [s showIconBeacon:YES];if(NSIsEmptyRect([s guideIconFrame])||(nearClock&&[s iconFarFromClock])){seenSince=0;return;}double now=CACurrentMediaTime();if(!seenSince)seenSince=now;
+  if(now-seenSince>=2.5){[t invalidate];[s showIconBeacon:NO];s.tourStartButton.title=title;[s startGuideTour];}}];
+}
+// A pulsing amber ring around where the menu-bar circle sits (it follows the circle when it is dragged).
+- (void)showIconBeacon:(BOOL)show {
+ NSRect icon=self.item.button.window.frame;BOOL onScreen=NO;for(NSScreen *sc in NSScreen.screens)if(NSIntersectsRect(sc.frame,icon))onScreen=YES;
+ if(!show||!onScreen||NSIsEmptyRect(icon)){[self.iconBeacon orderOut:nil];return;}
+ NSRect f=NSInsetRect(icon,-22,-22);
+ if(!self.iconBeacon){NSPanel *p=[[NSPanel alloc]initWithContentRect:f styleMask:NSWindowStyleMaskBorderless|NSWindowStyleMaskNonactivatingPanel backing:NSBackingStoreBuffered defer:NO];p.opaque=NO;p.backgroundColor=NSColor.clearColor;p.ignoresMouseEvents=YES;p.hasShadow=NO;p.level=NSPopUpMenuWindowLevel+1;
+  p.collectionBehavior=NSWindowCollectionBehaviorCanJoinAllSpaces|NSWindowCollectionBehaviorFullScreenAuxiliary|NSWindowCollectionBehaviorStationary|NSWindowCollectionBehaviorIgnoresCycle;
+  NSView *v=[[NSView alloc]initWithFrame:(NSRect){NSZeroPoint,f.size}];v.wantsLayer=YES;p.contentView=v;
+  for(int i=0;i<2;i++){CAShapeLayer *ring=[CAShapeLayer layer];CGRect r=CGRectInset(CGRectMake(0,0,f.size.width,f.size.height),18,18);ring.frame=CGRectMake(0,0,f.size.width,f.size.height);
+   CGPathRef path=CGPathCreateWithEllipseInRect(r,NULL);ring.path=path;CGPathRelease(path);ring.fillColor=NSColor.clearColor.CGColor;ring.strokeColor=[NSColor colorWithSRGBRed:232/255.0 green:137/255.0 blue:74/255.0 alpha:1].CGColor;ring.lineWidth=2.5;
+   CABasicAnimation *grow=[CABasicAnimation animationWithKeyPath:@"transform.scale"];grow.fromValue=@.85;grow.toValue=@1.9;CABasicAnimation *fade=[CABasicAnimation animationWithKeyPath:@"opacity"];fade.fromValue=@1;fade.toValue=@0;
+   CAAnimationGroup *g=[CAAnimationGroup animation];g.animations=@[grow,fade];g.duration=1.4;g.repeatCount=HUGE_VALF;g.beginTime=CACurrentMediaTime()+i*.7;g.timingFunction=[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut];
+   ring.anchorPoint=CGPointMake(.5,.5);ring.position=CGPointMake(f.size.width/2,f.size.height/2);ring.bounds=CGRectMake(0,0,f.size.width,f.size.height);[ring addAnimation:g forKey:@"pulse"];[v.layer addSublayer:ring];}
+  self.iconBeacon=p;}
+ if(!NSEqualRects(self.iconBeacon.frame,f))[self.iconBeacon setFrame:f display:NO];if(!self.iconBeacon.visible)[self.iconBeacon orderFrontRegardless];
 }
 - (void)setupOnly:(id)sender {self.setupOnly=YES;[self showTourPage:6 animated:YES];}
 - (void)tourBack:(id)sender {if(self.tourPage>0)[self showTourPage:self.setupOnly?0:self.tourPage-1 animated:YES];self.setupOnly=NO;}
@@ -2536,6 +2570,10 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
  if([key isEqual:@"peekKept"])return @([self guidePeekKept]);
  if([key isEqual:@"changes"])return [self playingFieldChanges];
  if([key isEqual:@"changeList"])return [self playingFieldChangeList];
+ if([key isEqual:@"tzAuto"])return @([[NSDictionary dictionaryWithContentsOfFile:@"/Library/Preferences/com.apple.timezone.auto.plist"][@"Active"] boolValue]);  // Date & Time: set the time zone from the location
+ if([key isEqual:@"locationServices"]){static Class manager=nil;if(!manager){[[NSBundle bundleWithPath:@"/System/Library/Frameworks/CoreLocation.framework"] load];manager=NSClassFromString(@"CLLocationManager");}
+  if(![manager respondsToSelector:@selector(locationServicesEnabled)])return @NO;BOOL (*enabled)(id,SEL)=(BOOL(*)(id,SEL))[manager methodForSelector:@selector(locationServicesEnabled)];return @(enabled(manager,@selector(locationServicesEnabled)));}
+ if([key isEqual:@"iconFarFromClock"])return @([self iconFarFromClock]);
  if([key isEqual:@"lastMenuChoice"])return self.lastMenuChoiceAt&&[NSDate.date timeIntervalSinceDate:self.lastMenuChoiceAt]<4?self.lastMenuChoice:@"";
  if([key isEqual:@"extensionFolder"])return [NSBundle.mainBundle.resourceURL URLByAppendingPathComponent:@"Browser Extension"].path;
  if([key isEqual:@"firefoxManifest"])return [[NSBundle.mainBundle.resourceURL URLByAppendingPathComponent:@"Browser Extension (Firefox)"] URLByAppendingPathComponent:@"manifest.json"].path;
@@ -2703,6 +2741,7 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
  else if([what hasPrefix:@"tick"])[self.guide debugTick:[[what substringFromIndex:4] integerValue]];else if([what hasPrefix:@"answer"])[self.guide debugAnswer:[[what substringFromIndex:6] integerValue]];else if([what isEqual:@"warmth"]){[NSUserDefaults.standardUserDefaults setDouble:1.8 forKey:@"warmth"];self.animateAppearance=YES;[self sync];}
  else if([what isEqual:@"startTour"])[self tourNext:nil];else if([what isEqual:@"sheet1"])[self.settings endSheet:self.settings.attachedSheet returnCode:NSAlertFirstButtonReturn];
  else if([what isEqual:@"logStart"])NSLog(@"Less Pull tour test: start button [%@], sheet %@, tour %@",self.tourStartButton.title,self.settings.attachedSheet?@"up":@"none",self.guide?@"running":@"none");
+ else if([what isEqual:@"logIcon"]){NSWindow *w=self.item.button.window;NSScreen *sc=w.screen;NSLog(@"Less Pull tour test: icon window %@ visible %d occlusion %lu screen %@ visibleFrame %@ guideIconFrame %@ far %d front %@",NSStringFromRect(w.frame),w.isVisible,(unsigned long)w.occlusionState,NSStringFromRect(sc.frame),NSStringFromRect(sc.visibleFrame),NSStringFromRect([self guideIconFrame]),[self iconFarFromClock],NSWorkspace.sharedWorkspace.frontmostApplication.localizedName);}
  else if([what isEqual:@"logRing"])NSLog(@"Less Pull tour test: ring %.2f label %@",[self sessionRing:NSDate.date],self.session.state==SessionIdle?@"-":[NSString stringWithFormat:@"0:%02ld",(long)ceil(MAX(0,[self.session remainingAt:NSDate.date]))]);
  else if([what isEqual:@"poke"])[self.guide debugPoke];else if([what isEqual:@"resumeLP"])[self resumeLessPull:nil];
  else if([what isEqual:@"helperOpera"])[self startGuideHelper:@"browser" with:@{@"id":@"com.operasoftware.Opera",@"name":@"Opera"}];else if([what isEqual:@"helperFirefox"])[self startGuideHelper:@"browser" with:@{@"id":@"org.mozilla.firefox",@"name":@"Firefox"}];
