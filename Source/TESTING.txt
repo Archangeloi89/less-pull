@@ -57,6 +57,8 @@ Simulates a display reset after a fade finishes. Checks persistent grayscale, tw
                       the helpers that Settings starts (Chrome's setup; Sunset to sunrise). The times run on a timer that also
                       fires while the menu is open.
 --tour-no-borrow      a hands-off copy keeps its hands off the screen during its tour too (the installed app's look stays): for tests beside real work.
+Copies say which one they are: any bundle id other than com.jiriarion.lesspull adds "· Demo" (….demo) or "· Test" after the build
+                      number, in the menu and under About.
 LP_TOUR_DEBUG=1       (environment) logs every bubble placement with what it keeps clear of.
 --session-start-panel opens the session panel (Session | Break) 1.5 s after launch.
 

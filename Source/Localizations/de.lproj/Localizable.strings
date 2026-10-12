@@ -1001,3 +1001,5 @@
 "Last one: at the bottom, System Services, Details…. Turn on Setting time zone." = "Als Letztes: ganz unten Systemdienste, Details …. Schalte „Zeitzone einstellen“ ein.";
 "Still in Location Services: scroll down to System Services, then Details…." = "Noch bei den Ortungsdiensten: Scroll runter zu Systemdienste, dann Details ….";
 "Less Pull lives in that circle. When an app with many menus is in front, macOS hides the menu-bar icons that are furthest from the clock, and the circle with them. Hold ⌘ and drag it all the way right, next to the clock (can’t see it? show the hidden menu-bar icons first): there it always stays visible. The tour starts as soon as it’s there." = "Less Pull wohnt in diesem Kreis. Ist eine App mit vielen Menüs vorne, versteckt macOS die Symbole der Menüleiste, die am weitesten von der Uhr entfernt sind, und den Kreis mit ihnen. Halt ⌘ gedrückt und zieh ihn ganz nach rechts, neben die Uhr (du siehst ihn nicht? zeig zuerst die versteckten Symbole der Menüleiste an): dort bleibt er immer sichtbar. Die Tour beginnt, sobald er da ist.";
+"Demo" = "Demo";
+"Test" = "Test";

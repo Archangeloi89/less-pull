@@ -19,6 +19,9 @@
 #import <Carbon/Carbon.h>
 #import "WarmthCurve.h"
 extern BOOL LessPullHandsOff,LessPullBorrowScreen;
+// A copy beside the installed app (the demo, a test build: any other bundle id) says so after its build number, so it is
+// never taken for the real Less Pull. The installed app says nothing extra.
+static NSString *LPCopyKind(void){NSString *b=NSBundle.mainBundle.bundleIdentifier?:@"";if([b isEqual:@"com.jiriarion.lesspull"])return nil;return [b hasSuffix:@".demo"]?L(@"Demo"):L(@"Test");}
 // The settings a tour can change: kept aside when it starts, put back unless you keep them (see beginPlayingField).
 static NSArray<NSString *> *LPPlayingFieldKeys(void){return @[@"warmth",@"warmthColor",@"warmthGrayscale",@"manualMode",@"nightMode",@"overrideMode",@"automatic",@"displayModes",@"appExclusions",@"websiteRules",@"lessPullPause",@"grayscaleOff",@"nightShiftPause",@"nightShiftMode",@"nightHours",@"nightStart",@"nightEnd",@"nightBoost",@"peekEffects",@"peekActiveDisplayOnly",@"peekShortcut",@"grayscaleShortcut"];}
 static NSDictionary *LPStoredSettings(void){NSString *bid=NSBundle.mainBundle.bundleIdentifier?:NSProcessInfo.processInfo.processName;return [NSUserDefaults.standardUserDefaults persistentDomainForName:bid]?:@{};}  // a test tool keeps its settings under its own name
@@ -1657,7 +1660,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  if(manual){if(update)[self showUpdate:nil];else [self showUpdateStatusAlert];}
 }
 - (NSString *)updateLabel:(NSDictionary *)update {return [update[@"build"] integerValue]?[NSString stringWithFormat:L(@"Version %@ (build %@)"),update[@"version"],[update[@"buildLabel"] length]?update[@"buildLabel"]:[NSString stringWithFormat:@"%ld",(long)[update[@"build"] integerValue]]]:[NSString stringWithFormat:L(@"Version %@"),update[@"version"]];}
-- (NSString *)runningVersionLabel {return [NSString stringWithFormat:L(@"%@ (build %@)"),[NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"],[NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleVersion"]];}
+- (NSString *)runningVersionLabel {NSString *v=[NSString stringWithFormat:L(@"%@ (build %@)"),[NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"],[NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleVersion"]],*kind=LPCopyKind();return kind?[NSString stringWithFormat:@"%@ · %@",v,kind]:v;}  // a copy: "1.4.4 (build 42) · Demo"
 - (void)showUpdateStatusAlert {NSAlert *a=[NSAlert new];a.messageText=self.updateStatus?:@"";a.informativeText=[NSString stringWithFormat:L(@"This is Less Pull %@."),[self runningVersionLabel]];[NSApp activateIgnoringOtherApps:YES];[a runModal];}
 // One click from the menu or the banner: install now, or once the running session is over. No question asked; a failure is the only dialog.
 - (void)installUpdate:(id)sender {
