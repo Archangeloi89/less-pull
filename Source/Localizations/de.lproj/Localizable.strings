@@ -718,11 +718,9 @@
 "Sometimes you need color for a second. A chart, a photo, the red button." = "Manchmal brauchst du Farbe für eine Sekunde. Ein Diagramm, ein Foto, der rote Knopf.";
 "Your turn. Hold %@. I would, but I have no hands." = "Du bist dran. Halte %@. Ich würde ja, aber ich habe keine Hände.";
 "There! Color, for exactly as long as you hold it." = "Da! Farbe, genau so lange, wie du hältst.";
-"And quiet again. Twice, quickly, keeps the color until you press again." = "Und wieder ruhig. Zweimal schnell, und die Farbe bleibt, bis du nochmal drückst.";
 "Hold, don’t tap: %@. Take your time." = "Halten, nicht tippen: %@. Lass dir Zeit.";
 "No hurry. I’m good at waiting. It’s most of my job." = "Keine Eile. Warten kann ich gut. Ist das meiste an meinem Job.";
 "No problem. Peek waits under Settings → %@. Moving on." = "Kein Problem. Der Farbblick wartet unter Einstellungen → %@. Weiter geht’s.";
-"Kept it! Press %@ once more and it’s quiet again." = "Behalten! Einmal %@ drücken, und es ist wieder ruhig.";
 "Peek has no shortcut yet. Settings → %@, whenever you like." = "Der Farbblick hat noch keinen Kurzbefehl. Einstellungen → %@, wann du willst.";
 "A session: a stretch of focused work with a gentle end." = "Eine Sitzung: ein Stück konzentrierte Arbeit mit einem sanften Ende.";
 "Here it is, under my spot. Session or Break: a break calls you back. Once." = "Hier, unter meinem Platz. Sitzung oder Auszeit: Die Auszeit holt dich zurück. Einmal.";
@@ -854,7 +852,6 @@
 "That circle is Less Pull. Also my door: I came in through it." = "Der Kreis ist Less Pull. Und meine Tür: Da bin ich reingekommen.";
 "That was my one secret per trip." = "Das war mein eines Geheimnis pro Reise.";
 "That works too. Anything in here is only for %@." = "Geht auch. Alles hier drin gilt nur für %@.";
-"That’s Warmer at night: +13 by default, up to Red. It follows your night." = "Das ist Wärmer bei Nacht: +13 als Standard, bis Rot. Es folgt deiner Nacht.";
 "The %@ tab, at the top of the window." = "Der Tab %@, oben im Fenster.";
 "The Extra Warmth slider, inside the panel. Drag it a little." = "Der Extra-Wärme-Regler, im Fenster. Zieh ihn ein Stück.";
 "The Grayscale row, inside the panel: three choices. Click Off." = "Die Zeile Graustufen im Fenster: drei Möglichkeiten. Klick auf Aus.";
@@ -985,3 +982,17 @@
 "shift" = "shift";
 "held: color" = "gehalten: Farbe";
 "hold both" = "beide halten";
+"That was Warmer at night. It comes by itself when your night begins." = "Das war Wärmer bei Nacht. Es kommt von selbst, wenn deine Nacht beginnt.";
+"Now press %@ twice, quickly. The color stays." = "Jetzt drück %@ zweimal schnell hintereinander. Die Farbe bleibt.";
+"Twice in a row, like a double-click." = "Zweimal hintereinander, wie ein Doppelklick.";
+"Kept! Press %@ once more and it’s quiet again." = "Behalten! Drück %@ noch einmal, dann ist es wieder ruhig.";
+"And quiet again. That’s Peek: color when you want it, gone when you let go." = "Und wieder ruhig. Das ist der Farbblick: Farbe, wenn du sie willst, weg, wenn du loslässt.";
+"What you set up is ticked to stay. Tick or untick the rest; whatever isn’t ticked goes back." = "Was du eingerichtet hast, ist angehakt und bleibt. Den Rest hakst du an oder ab; was nicht angehakt ist, geht zurück.";
+"Night schedule: %@ to %@" = "Nacht-Zeitplan: %@ bis %@";
+"Night schedule: Sunset to sunrise" = "Nacht-Zeitplan: Sonnenuntergang bis Sonnenaufgang";
+"Warmer at night: Red" = "Wärmer bei Nacht: Rot";
+"Peek shortcut: %@" = "Farbblick-Kurzbefehl: %@";
+"Peek shortcut: none" = "Farbblick-Kurzbefehl: keiner";
+"twice, quickly" = "zweimal schnell";
+"kept: color" = "behalten: Farbe";
+"once more: quiet" = "noch einmal: ruhig";

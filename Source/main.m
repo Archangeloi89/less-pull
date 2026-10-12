@@ -334,7 +334,7 @@ static void QuietScrolling(NSScrollView *s){
 @property NSTextField *sessionPresetsField,*callBackPresetsField;
 @property NSTextField *exclusionText;
 @property NSRunningApplication *lastExternalApp;
-@property SwitchingPolicy *policy;@property NSComboBox *nightBoostPopup;@property NSTextField *nightBoostNote;@property NSDatePicker *nightStartPicker,*nightEndPicker;@property NSStackView *ownHoursRow;@property NSDate *nightPreviewUntil;@property NSTimer *nightPreviewTimer;@property BOOL nightPreviewTurnedNightShiftOn;@property NSSegmentedControl *nightModeControl;@property NSStackView *nightPauseRow;@property NSWindow *supportWindow;@property GuideTour *guide;@property NSInteger tourGray;@property double tourWarmth;@property BOOL peekKeyHeld;@property NSPopUpButton *nightHoursPopup;@property NSTextField *nightHoursNote;@property NSButton *nightLocationButton,*nightDateTimeButton;@property NSInteger lastSeenMacMode;@property NSTextField *nightModeNote;@property BOOL migrateNightShiftMode,nightModeDirty;@property NSButton *nightTryButton;@property BOOL tourSpotEmpty;@property BOOL settingsAsideForTour;@property NSDictionary *playingField;@property NSString *tourMenuMark;@property BOOL statusMenuOpen,tourSessionWasIdle;@property NSInteger toursThisLaunch;@property NSView *menuWarmthRow,*menuNightRow;@property NSSlider *menuWarmthSlider;@property NSRect sessionPanelTarget;@property NSRect tourSettingsFrame;@property BOOL guideIsHelper,demoLaunchAtLogin;@property NSDate *tourSampleStart;@property NSTimer *tourSampleTimer;@property(copy) NSString *lastMenuChoice;@property NSDate *lastMenuChoiceAt;@property NSTimer *tourIconWait;@property NSButton *tourStartButton;@property BOOL buildSettingsHidden,tourSampleSession;@property NSMutableDictionary<NSString *,NSValue *> *tourItemFrames;
+@property SwitchingPolicy *policy;@property NSComboBox *nightBoostPopup;@property NSTextField *nightBoostNote;@property NSDatePicker *nightStartPicker,*nightEndPicker;@property NSStackView *ownHoursRow;@property NSDate *nightPreviewUntil;@property NSTimer *nightPreviewTimer;@property BOOL nightPreviewTurnedNightShiftOn;@property NSSegmentedControl *nightModeControl;@property NSStackView *nightPauseRow;@property NSWindow *supportWindow;@property GuideTour *guide;@property NSInteger tourGray;@property double tourWarmth;@property BOOL peekKeyHeld;@property NSPopUpButton *nightHoursPopup;@property NSTextField *nightHoursNote;@property NSButton *nightLocationButton,*nightDateTimeButton;@property NSInteger lastSeenMacMode;@property NSTextField *nightModeNote;@property BOOL migrateNightShiftMode,nightModeDirty;@property NSButton *nightTryButton;@property BOOL tourSpotEmpty;@property BOOL settingsAsideForTour;@property NSDictionary *playingField;@property NSString *tourMenuMark;@property BOOL statusMenuOpen,tourSessionWasIdle;@property NSInteger toursThisLaunch;@property NSView *menuWarmthRow,*menuNightRow;@property NSSlider *menuWarmthSlider;@property NSRect sessionPanelTarget;@property NSRect tourSettingsFrame;@property BOOL guideIsHelper,demoLaunchAtLogin;@property NSDate *tourSampleStart;@property NSTimer *tourSampleTimer;@property(copy) NSString *lastMenuChoice;@property NSDate *lastMenuChoiceAt;@property NSTimer *tourIconWait;@property NSButton *tourStartButton;@property BOOL tourArrowsWanted;@property BOOL buildSettingsHidden,tourSampleSession;@property NSMutableDictionary<NSString *,NSValue *> *tourItemFrames;
 @property WarmthEngine *warmth;
 @property NSInteger selectedMode;
 @property NSSlider *warmthSlider;
@@ -394,7 +394,7 @@ static void QuietScrolling(NSScrollView *s){
 // The tour's pictures: one view, six scenes, drawn in code and looping, still under Reduce Motion.
 // Each scene is a small story of a few seconds: a pointer, the menu-bar circle, a tiny screen that
 // goes gray, warm or back to color, a menu that drops, keys that press, a ring that fills.
-typedef NS_ENUM(NSInteger,TourSceneKind){TourSceneMenuBar,TourSceneScreen,TourSceneExceptions,TourScenePeek,TourSceneSession,TourScenePrivacy,TourSceneKeys};
+typedef NS_ENUM(NSInteger,TourSceneKind){TourSceneMenuBar,TourSceneScreen,TourSceneExceptions,TourScenePeek,TourSceneSession,TourScenePrivacy,TourSceneKeys,TourSceneKeysTwice};
 @interface TourScene : NSView
 @property TourSceneKind kind;
 @property NSTimer *timer;
@@ -402,7 +402,7 @@ typedef NS_ENUM(NSInteger,TourSceneKind){TourSceneMenuBar,TourSceneScreen,TourSc
 @property NSTimeInterval start;
 @end
 @implementation TourScene
-- (NSSize)intrinsicContentSize {return NSMakeSize(420,140);}
+- (NSSize)intrinsicContentSize {return NSMakeSize(420,self.kind==TourSceneMenuBar?100:140);}
 // The scenes redraw in step with the display (macOS 14 and later), so the pointer glides at the display's own rate; macOS 13 keeps a 60 Hz timer.
 - (void)viewDidMoveToWindow {[self.timer invalidate];self.timer=nil;[self.link invalidate];self.link=nil;if(!self.window||NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceMotion)return;self.start=NSProcessInfo.processInfo.systemUptime;
  if(@available(macOS 14.0,*)){self.link=[self displayLinkWithTarget:self selector:@selector(step:)];[self.link addToRunLoop:NSRunLoop.mainRunLoop forMode:NSRunLoopCommonModes];self.timer=(NSTimer *)self.link;return;}
@@ -473,19 +473,21 @@ static void drawCap(NSRect f,NSString *symbol,NSString *name,BOOL lit,double pre
 }
 static void drawKey(NSRect f,NSString *label,double pressed){NSRect r=NSOffsetRect(f,0,-2*pressed);[Ink(.12+.25*pressed) setFill];[[NSBezierPath bezierPathWithRoundedRect:r xRadius:5 yRadius:5] fill];[Ink(.4) setStroke];[[NSBezierPath bezierPathWithRoundedRect:r xRadius:5 yRadius:5] stroke];NSDictionary *a=@{NSFontAttributeName:[NSFont systemFontOfSize:12 weight:NSFontWeightMedium],NSForegroundColorAttributeName:Ink(1)};NSSize s=[label sizeWithAttributes:a];[label drawAtPoint:NSMakePoint(NSMidX(r)-s.width/2,NSMidY(r)-s.height/2) withAttributes:a];}
 - (void)drawRect:(NSRect)dirty {
- NSRect b=self.bounds;double loops[]={11,7,9,8,13,9,4.5};double loop=loops[self.kind];double t=self.timer?fmod(NSProcessInfo.processInfo.systemUptime-self.start,loop)/loop:self.kind==TourSceneMenuBar?.5:0.62;
+ NSRect b=self.bounds;double loops[]={11,7,9,8,13,9,4.5,6};double loop=loops[self.kind];double t=self.timer?fmod(NSProcessInfo.processInfo.systemUptime-self.start,loop)/loop:self.kind==TourSceneMenuBar?.5:0.62;
  switch(self.kind){
+ case TourSceneKeysTwice:
  case TourSceneKeys:{
   // the Peek shortcut on the keyboard: the bottom row's modifier keys (the ones to hold lit), and the letter; held together
   NSDictionary *pk=[NSUserDefaults.standardUserDefaults dictionaryForKey:@"peekShortcut"];NSInteger code=[pk[@"keyCode"] integerValue];NSEventModifierFlags mods=pk?(NSEventModifierFlags)[pk[@"modifiers"] integerValue]:NSEventModifierFlagOption;
-  NSString *letter=pk?[PeekShortcut labelForKeyCode:code modifiers:0]:@"A";double press=seg(t,.1,.16)*(1-seg(t,.8,.86));
+  NSString *letter=pk?[PeekShortcut labelForKeyCode:code modifiers:0]:@"A";double press=seg(t,.1,.16)*(1-seg(t,.8,.86));BOOL twice=self.kind==TourSceneKeysTwice;
+  if(twice){double tap1=seg(t,.08,.11)*(1-seg(t,.15,.18)),tap2=seg(t,.22,.25)*(1-seg(t,.29,.32)),tap3=seg(t,.7,.73)*(1-seg(t,.77,.8));press=MAX(MAX(tap1,tap2),tap3);}  // tap, tap: it stays; later, tap: quiet
   CGFloat x=14,y=50,w=52,h=44;
   if(mods&NSEventModifierFlagShift){drawCap(NSMakeRect(x,y+h+8,84,h*.8),@"⇧",L(@"shift"),YES,press);}
   for(NSArray *k in @[@[@"fn",@"",@0],@[@"⌃",L(@"control"),@(NSEventModifierFlagControl)],@[@"⌥",L(@"option"),@(NSEventModifierFlagOption)],@[@"⌘",L(@"command"),@(NSEventModifierFlagCommand)]]){
    NSUInteger flag=[k[2] unsignedIntegerValue];BOOL lit=flag&&(mods&flag);drawCap(NSMakeRect(x,y,w,h),k[0],k[1],lit,lit?press:0);x+=w+6;}
   NSDictionary *plus=@{NSFontAttributeName:[NSFont systemFontOfSize:18 weight:NSFontWeightLight],NSForegroundColorAttributeName:Ink(.55)};[@"+" drawAtPoint:NSMakePoint(x+4,y+h/2-11) withAttributes:plus];
   drawCap(NSMakeRect(x+28,y,w,h),letter,@"",YES,press);
-  NSDictionary *cap=@{NSFontAttributeName:[NSFont systemFontOfSize:10.5],NSForegroundColorAttributeName:Ink(.6)};NSString *hold=press>.5?L(@"held: color"):L(@"hold both");NSSize hs=[hold sizeWithAttributes:cap];[hold drawAtPoint:NSMakePoint(x+28+w/2-hs.width/2,y-18) withAttributes:cap];
+  NSDictionary *cap=@{NSFontAttributeName:[NSFont systemFontOfSize:10.5],NSForegroundColorAttributeName:Ink(.6)};NSString *hold=twice?(t<.07?L(@"twice, quickly"):t<.7?L(@"kept: color"):L(@"once more: quiet")):press>.5?L(@"held: color"):L(@"hold both");NSSize hs=[hold sizeWithAttributes:cap];[hold drawAtPoint:NSMakePoint(x+28+w/2-hs.width/2,y-18) withAttributes:cap];
   [L(@"On a PC keyboard: ⌥ option is Alt, ⌘ command the Windows key.") drawAtPoint:NSMakePoint(14,12) withAttributes:cap];
   break;}
  case TourSceneMenuBar:{
@@ -1482,7 +1484,7 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  [self.pausePopup removeAllItems];[self.pausePopup addItemWithTitle:L(@"Turn Night Shift off for…")];[self populatePauses:self.pausePopup.menu];
 }
 - (void)tourNoteMenuChoice:(NSNotification *)n {NSMenuItem *item=n.userInfo[@"MenuItem"];NSMenu *m=item.menu;while(m.supermenu)m=m.supermenu;if(m!=self.statusMenu||!item.title.length)return;self.lastMenuChoice=item.title;self.lastMenuChoiceAt=NSDate.date;}
-- (void)menuDidClose:(NSMenu *)menu {if(menu!=self.statusMenu)return;self.statusMenuOpen=NO;[self.tourItemFrames removeAllObjects];[self.menuDismissal end];self.item.menu=nil;}
+- (void)menuDidClose:(NSMenu *)menu {if(menu!=self.statusMenu)return;self.statusMenuOpen=NO;if(self.guide)dispatch_async(dispatch_get_main_queue(),^{[self applyTourArrows];});[self.tourItemFrames removeAllObjects];[self.menuDismissal end];self.item.menu=nil;}
 - (void)menuWillOpen:(NSMenu *)menu {
  if(menu!=self.statusMenu)return;if(!self.menuDismissal)self.menuDismissal=[MenuDismissal new];[self.menuDismissal begin:menu];
  [self sync];[menu removeAllItems];BOOL on=NO;BOOL known=[self logicalNightShift:&on];BOOL actualOn=NO;BOOL actualKnown=[self.engine nightShift:&actualOn];
@@ -1758,6 +1760,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  return [d integerForKey:secondary?@"rightClick":@"leftClick"];
 }
 - (void)statusItemClicked:(id)sender {
+ if(self.tourBackKey||self.tourForwardKey){BOOL wanted=self.tourArrowsWanted;self.tourArrowsWanted=NO;[self applyTourArrows];self.tourArrowsWanted=wanted;dispatch_async(dispatch_get_main_queue(),^{if(!self.statusMenuOpen)[self applyTourArrows];});}  // before the menu tracks: the tour's arrows let go (and come back if no menu opened)
  NSEvent *event=NSApp.currentEvent;BOOL secondary=event.type==NSEventTypeRightMouseUp||event.type==NSEventTypeRightMouseDown||(event.modifierFlags&NSEventModifierFlagControl);
  NSInteger job=[self jobOfButton:secondary],other=[self jobOfButton:!secondary];
  if(job==1){[self toggleGrayscale:nil];return;}
@@ -2553,6 +2556,13 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
 - (NSArray<NSDictionary *> *)playingFieldChangeList {
  NSDictionary *snap=self.playingField;if(!snap)return @[];NSDictionary *stored=LPStoredSettings();NSMutableArray *out=[NSMutableArray new];
  void (^add)(NSString *,NSString *)=^(NSString *what,NSString *line){[out addObject:@{@"id":what,@"label":line}];};
+ void (^addKept)(NSString *,NSString *)=^(NSString *what,NSString *line){[out addObject:@{@"id":what,@"label":line,@"keep":@YES}];};  // set up on purpose: ticked
+ BOOL (^differs)(NSString *)=^BOOL(NSString *k){id a=snap[k],b=stored[k];return !(a==b||[a isEqual:b]);};
+ if(differs(@"nightHours")||differs(@"nightStart")||differs(@"nightEnd")){NSUserDefaults *d=NSUserDefaults.standardUserDefaults;NSDateFormatter *f=[NSDateFormatter new];[f setLocalizedDateFormatFromTemplate:@"jmm"];
+  NSString *(^hm)(NSString *,NSInteger)=^NSString *(NSString *k,NSInteger fallback){NSInteger m=[d objectForKey:k]?[d integerForKey:k]:fallback;NSDateComponents *c=[NSDateComponents new];c.hour=m/60;c.minute=m%60;NSDate *t=[NSCalendar.currentCalendar dateFromComponents:c];return t?[f stringFromDate:t]:@"";};
+  addKept(@"night",[d integerForKey:@"nightHours"]==1?[NSString stringWithFormat:L(@"Night schedule: %@ to %@"),hm(@"nightStart",22*60),hm(@"nightEnd",7*60)]:L(@"Night schedule: Sunset to sunrise"));}
+ if(differs(@"nightBoost")){NSInteger b=[NSUserDefaults.standardUserDefaults integerForKey:@"nightBoost"];addKept(@"boost",b>100?L(@"Warmer at night: Red"):b>0?[NSString stringWithFormat:L(@"Warmer at night: +%ld"),(long)b]:L(@"Warmer at night: off"));}
+ if(differs(@"peekShortcut")){NSDictionary *k=[self shortcutForKey:@"peekShortcut"];addKept(@"peekKey",k?[NSString stringWithFormat:L(@"Peek shortcut: %@"),[PeekShortcut labelForKeyCode:[k[@"keyCode"] integerValue] modifiers:[k[@"modifiers"] integerValue]]]:L(@"Peek shortcut: none"));}
  if(![snap[@"warmth"]?:@0 isEqual:stored[@"warmth"]?:@0])add(@"warmth",[NSString stringWithFormat:L(@"Extra Warmth %ld%%"),lround([self currentWarmth]/3*100)]);
  NSDictionary *oldApps=snap[@"appExclusions"]?:@{},*apps=stored[@"appExclusions"]?:@{};for(NSString *b in apps)if(![oldApps[b] isEqual:apps[b]])add([@"app:" stringByAppendingString:b],[NSString stringWithFormat:L(@"Exception for %@"),apps[b][@"name"]?:b]);
  NSDictionary *oldSites=snap[@"websiteRules"]?:@{},*sites=stored[@"websiteRules"]?:@{};for(NSString *k in sites)if(![oldSites[k] isEqual:sites[k]])add([@"site:" stringByAppendingString:k],[NSString stringWithFormat:L(@"Exception for %@"),k]);
@@ -2568,6 +2578,7 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
  NSDictionary *snap=self.playingField;if(!snap)return;NSSet *keep=[NSSet setWithArray:ids?:@[]];NSDictionary *stored=LPStoredSettings();NSMutableDictionary *target=[snap mutableCopy];
  void (^take)(NSString *)=^(NSString *k){if(stored[k])target[k]=stored[k];else [target removeObjectForKey:k];};
  if([keep containsObject:@"warmth"])take(@"warmth");if([keep containsObject:@"pause"])take(@"lessPullPause");if([keep containsObject:@"gray"])take(@"manualMode");
+ if([keep containsObject:@"night"]){take(@"nightHours");take(@"nightStart");take(@"nightEnd");take(@"nightShiftMode");}if([keep containsObject:@"boost"])take(@"nightBoost");if([keep containsObject:@"peekKey"])take(@"peekShortcut");
  for(NSArray *pair in @[@[@"appExclusions",@"app:"],@[@"websiteRules",@"site:"]]){NSString *key=pair[0],*prefix=pair[1];NSMutableDictionary *rules=[snap[key]?:@{} mutableCopy];NSDictionary *now=stored[key]?:@{};BOOL any=NO;
   for(NSString *what in keep)if([what hasPrefix:prefix]){NSString *name=[what substringFromIndex:prefix.length];if(now[name])rules[name]=now[name];else [rules removeObjectForKey:name];any=YES;}
   if(any){if(rules.count||snap[key])target[key]=rules;else [target removeObjectForKey:key];}}
@@ -2651,7 +2662,8 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
  if([action isEqual:@"openExceptionPanel"]){[self openAppExceptionPanel:nil];return;}
  if([action isEqual:@"openSitePanel"]){[self openSiteExceptionPanel:nil];return;}
  if([action isEqual:@"arrowKeys"]){  // the plain ← and → keys belong to the tour only while the guide talks; while you work, they are yours
-  BOOL on=[argument boolValue];if(getenv("LP_TOUR_DEBUG"))NSLog(@"Less Pull tour test: arrow keys %@",on?@"on":@"off");if(self.tourBackKey){UnregisterEventHotKey(self.tourBackKey);self.tourBackKey=NULL;}if(self.tourForwardKey){UnregisterEventHotKey(self.tourForwardKey);self.tourForwardKey=NULL;}
+  BOOL on=[argument boolValue];self.tourArrowsWanted=on;if(self.statusMenuOpen)return;[self applyTourArrows];return;}
+ if([action isEqual:@"arrowKeysNow"]){BOOL on=self.tourArrowsWanted&&!self.statusMenuOpen;if(getenv("LP_TOUR_DEBUG"))NSLog(@"Less Pull tour test: arrow keys %@",on?@"on":@"off");if(self.tourBackKey){UnregisterEventHotKey(self.tourBackKey);self.tourBackKey=NULL;}if(self.tourForwardKey){UnregisterEventHotKey(self.tourForwardKey);self.tourForwardKey=NULL;}
   if(on){EventHotKeyID back={.signature='LsPl',.id=3},forward={.signature='LsPl',.id=4};EventHotKeyRef ref=NULL;
    if(RegisterEventHotKey(kVK_LeftArrow,0,back,GetApplicationEventTarget(),0,&ref)==noErr)self.tourBackKey=ref;ref=NULL;if(RegisterEventHotKey(kVK_RightArrow,0,forward,GetApplicationEventTarget(),0,&ref)==noErr)self.tourForwardKey=ref;}
   return;}
@@ -2697,12 +2709,13 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
  else if([what isEqual:@"helperBrowser"])[self startGuideHelper:@"browser" with:@{@"id":@"com.google.Chrome",@"name":@"Chrome"}];else if([what isEqual:@"helperSunset"])[self startGuideHelper:@"sunset" with:nil];else if([what isEqual:@"chip"]){[self startSessionMinutes:25];[self closeSessionPanel];}
  else if([what isEqual:@"log"])NSLog(@"Less Pull tour test: %@ | menu %@ | icon %@ | settings %@ (visible %d) | bar-side session %@",self.guide?[self.guide debugState]:@"(no tour)",NSStringFromRect([self guideFrame:@"menu"]),NSStringFromRect([self guideIconFrame]),NSStringFromRect(self.settings.frame),self.settings.visible,NSStringFromRect([self guideFrame:@"session"]));
 }
+- (void)applyTourArrows {[self guideDo:@"arrowKeysNow" with:nil];}
 - (void)guideKeepChanges:(BOOL)keep {[self endPlayingFieldKeeping:keep];}
 // While the circle tours the screen, the Settings window steps aside; the tour's own small bar holds the controls.
 // A helper outside the tour: the cursor comes for one thing (a browser's setup, Sunset to sunrise in macOS) and goes home.
 - (void)startGuideHelper:(NSString *)kind with:(id)argument {if(self.guide)return;self.guideIsHelper=YES;self.guide=[[GuideTour alloc]initWithHost:self];[self.guide startHelper:kind with:argument];}
 - (void)startGuideTour {if(self.guide)return;[NSNotificationCenter.defaultCenter removeObserver:self name:NSMenuDidSendActionNotification object:nil];[NSNotificationCenter.defaultCenter addObserver:self selector:@selector(tourNoteMenuChoice:) name:NSMenuDidSendActionNotification object:nil];self.tourGray=-1;self.tourWarmth=-1;[self borrowScreenForTour:YES];[self beginPlayingField];self.settingsAsideForTour=self.settings.visible;self.guide=[[GuideTour alloc]initWithHost:self];[self.guide start];}
-- (NSView *)guideScene:(NSInteger)kind {TourScene *s=[[TourScene alloc]initWithFrame:NSMakeRect(0,0,420,140)];s.kind=(TourSceneKind)MAX(0,MIN(6,kind));return s;}
+- (NSView *)guideScene:(NSInteger)kind {TourScene *s=[[TourScene alloc]initWithFrame:NSMakeRect(0,0,420,140)];s.kind=(TourSceneKind)MAX(0,MIN(7,kind));return s;}
 - (NSRect)guideIconFrame {
  static double hiddenUntil=0;if([NSProcessInfo.processInfo.arguments containsObject:@"--tour-icon-hidden"]){if(hiddenUntil==0)hiddenUntil=CACurrentMediaTime()+45;if(CACurrentMediaTime()<hiddenUntil)return NSZeroRect;}  // test: the circle counts as hidden for the first 45 seconds
  NSWindow *w=self.item.button.window;if(!w||!w.isVisible||!(w.occlusionState&NSWindowOcclusionStateVisible))return NSZeroRect;
