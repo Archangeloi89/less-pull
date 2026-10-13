@@ -1,13 +1,13 @@
 # Install
 
-Version 1.4.4 (build 41) is a test build. Read [what to expect](#what-to-expect-from-this-build) before you install. The version number stays 1.4.4 on purpose; the build number is what changes.
+Version 1.4.4 (build 41.1) is a test build. Read [what to expect](#what-to-expect-from-this-build) before you install. The version number stays 1.4.4 on purpose; the build number is what changes.
 
 ## The Mac app
 
-1. Download **Less-Pull-1.4.4-41.dmg** from the [build 41 release](https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-41).
+1. Download **Less-Pull-1.4.4-41.1.dmg** from the [build 41.1 release](https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-41.1).
 2. Open it and drag **Less Pull** onto the **Applications** shortcut next to it. (A zip of the same app is on the release page too; the in-app updater uses it.)
 3. Open it. A half-filled circle appears in the menu bar, and on the first launch the Settings window opens with a short welcome.
-4. Click the circle and choose Grayscale and Extra Warmth. Turn on **Extra Warmth follows Night Shift** if you want warmth only at night. The icon fills on the left while grayscale is showing and warms on the right as you add warmth.
+4. Click the circle and choose Grayscale and Extra Warmth. At night, **Warmer at night** adds a few points more; you set your night under **Settings… → General → Night schedule**. The icon fills on the left while grayscale is showing and warms on the right as you add warmth.
 
 The app is signed with a Developer ID and notarized by Apple, so macOS opens it without a warning. If macOS still objects, the download was altered on the way; get it again from the release page.
 
@@ -24,7 +24,7 @@ The extension is optional. It adds [website exceptions](EXCEPTIONS.md#website-ex
 3. Less Pull sets up the local connection by itself.
 4. Open a website, then click the Less Pull icon in the **menu bar**: the menu now offers **Exception for [that site]**. The extension itself shows nothing in the browser.
 
-Firefox is in review at Mozilla’s add-on site. Until that is done the steps differ: on the **about:debugging** page that opens, click **Load Temporary Add-on…** and select `manifest.json` in the **Browser Extension (Firefox)** folder. Firefox removes temporary add-ons when it quits, so load it again next time, or use Firefox Developer Edition with signing turned off.
+In Firefox the extension comes from [Mozilla’s add-ons site](https://addons.mozilla.org/firefox/addon/less-pull-firefox-extension/) (listed since 13 October 2026): choosing **Firefox** opens that page; click **Add to Firefox**, then **Add**.
 
 In Safari the extension comes as a small companion app inside Less Pull. Choosing **Safari** opens it; click **Open Safari Settings** there. Then turn on **Less Pull** under Settings → Extensions and allow it on all websites. The extension shows nothing in Safari itself; website exceptions are set from the Less Pull menu.
 
@@ -37,9 +37,9 @@ Keep the Mac app running, and keep it in the place it was installed. If you move
 - **Apple silicon only.**
 - **macOS 13 or later** is the build target. Only macOS 27 has been tested.
 - **Signed with a Developer ID and notarized by Apple** since 9 October 2026 (Team ID CT4CF9Z423).
-- **The extension is in the Chrome Web Store** (published 9 October 2026); the Firefox add-on is in review. It asks for access to tab addresses and for a connection to the local app.
+- **The extension is in the Chrome Web Store** (published 9 October 2026) and on Mozilla’s add-ons site (listed 13 October 2026). It asks for access to tab addresses and for a connection to the local app.
 - **Brave, Chrome, Firefox, Safari and Opera are confirmed working** on the author's Macs. Edge is implemented but not yet tested. The Safari companion app is in every release; if you build Less Pull yourself, it is included only when Xcode is installed.
-- **Updates are checked, not installed.** Once a day the app asks GitHub whether a newer build exists and shows a dot on its icon if one is made for your macOS. Installing is still by hand, until the app is signed and notarized.
+- **Updates in one click.** Once a day the app asks GitHub whether a newer build exists and shows a dot on its icon if one is made for your macOS. **Install update** in the menu downloads it, checks it against the release's checksums, Less Pull's signature and Apple's notarization, and replaces the app; your settings and exceptions stay.
 - Less Pull uses private macOS display interfaces. A macOS update can change how they behave.
 
 The [release plan](RELEASE-PLAN.md) lists what is still open.

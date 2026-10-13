@@ -28,7 +28,7 @@ Apps other than the supported browsers use only the first two levels.
 
 There are two ways in:
 
-- Click the Less Pull icon in the menu bar and open **Exception for [current app]**. The menu names the app you were just using and shows its icon. Choose Grayscale and Night Shift as **Use default**, **On** or **Off**, untick **Use default warmth** to move the app's own warmth slider, or choose **More in Settings…**. The first change creates the rule.
+- Click the Less Pull icon in the menu bar and choose **Exception for [current app]…**, named after the app you were just using, with its icon. A small panel opens under the icon. Set Grayscale and Night Shift to **Default**, **On** or **Off** (Default shows what it resolves to, for example **Default (On)**), or untick **Use default warmth** to give the app its own warmth. Every change applies right away; the first one creates the rule, switched on. The gear in the panel opens **Settings… → Apps**.
 - Open **Settings… → Apps**, then **Add app…**. It lists the apps running now, with their icons, and **Choose another app…** opens a file picker.
 
 For each app you can set:
@@ -54,15 +54,15 @@ Things to know:
 Website rules need the browser extension, for Safari, Brave, Chrome, Firefox, Opera or Edge. See [Install](INSTALL.md#safari-brave-chrome-firefox-opera-or-edge). The extension has no buttons and no settings of its own; it only tells the Mac app which website is in front. The Mac app has to be running.
 
 1. Open the website in your browser.
-2. Click the Less Pull icon in the menu bar and open **Exception for [that site]**.
-3. Under **Apply to**, choose **Whole domain** or **This exact page**.
-4. Set Grayscale and Night Shift to **On**, **Off** or **Use default**; the default entries show what they resolve to, for example **Use default (On)**. Untick **Use default warmth** to give the site its own Extra Warmth with the slider.
+2. Click the Less Pull icon in the menu bar and choose **Exception for [that site]…**. The same panel opens under the icon.
+3. Choose **Whole domain** or **This exact page**.
+4. Set Grayscale and Night Shift to **Default**, **On** or **Off**; Default shows what it resolves to, for example **Default (On)**. Untick **Use default warmth** to give the site its own Extra Warmth with the slider. The gear opens **Settings… → Websites**.
 
-The first change saves the rule and switches it on. **Use this exception** switches it off while keeping its settings; a change away from default switches it on again. **Remove this exception** deletes it. All saved website rules are listed under **Settings… → Websites**, with a **Remove** button, so they can be managed even without the extension.
+The first change saves the rule and switches it on. **Use this exception** switches it off while keeping its settings; a change away from default switches it on again. **Remove** deletes it. All saved website rules are listed under **Settings… → Websites**, with a **Remove** button, so they can be managed even without the extension.
 
 Things to know:
 
-- The rule applies while that tab is the active tab of the browser window in front. It changes all your displays. Nothing is added to the web page.
+- The rule applies while that tab is the active tab of the browser window in front. It changes the display that window is on, or every display if the site is marked On every display. Nothing is added to the web page.
 - A domain rule covers subdomains. `example.com` also covers `www.example.com`.
 - An exact page rule matches the whole address, including its path and query string. The part after `#` is ignored.
 - An exact page inherits from its domain, a domain inherits from the browser's app rule, and that inherits from your default settings.
@@ -70,7 +70,7 @@ Things to know:
 - Avoid saving exact pages whose address contains tokens or other secrets. Saved rules are stored on your Mac. See [Privacy](PRIVACY.md).
 - Several browsers can use the extension at once; whichever window is in front decides.
 
-Browser support: Chrome, Brave, Edge and Opera install the extension from the Chrome Web Store. Safari gets it through the Less Pull for Safari companion app, signed and notarized with Less Pull. Firefox loads it as a temporary add-on, which it keeps only until it quits, until Mozilla has approved the extension. Brave, Chrome, Firefox, Safari and Opera are confirmed working on the author's Macs; Edge is implemented but not yet tested.
+Browser support: Chrome, Brave, Edge and Opera install the extension from the Chrome Web Store. Safari gets it through the Less Pull for Safari companion app, signed and notarized with Less Pull. Firefox installs it from Mozilla’s add-ons site. Brave, Chrome, Firefox, Safari and Opera are confirmed working on the author's Macs; Edge is implemented but not yet tested.
 
 ## Examples
 

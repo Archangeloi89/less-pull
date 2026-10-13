@@ -17,7 +17,7 @@
 | `warmth-*.svg` | Illustration of Extra Warmth from Off to Red, in color and grayscale |
 | `examples-*.svg` | Three example rules: what is in front, what you set, and what the screen shows |
 | `levels-*.svg` | Three example levels, from your defaults to one website to one page, showing what each one sets and what it keeps |
-| `nightshift-*.svg` | Timeline of warmth following Night Shift |
+| `nightshift-*.svg` | Timeline of one night: Night Shift on Automatic, Extra Warmth with Warmer at night |
 
 Each illustration comes in a light and a dark version. GitHub picks one to match the reader's theme.
 
