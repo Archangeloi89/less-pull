@@ -952,10 +952,11 @@ static NSString *GTJoin(NSArray<NSString *> *names){NSListFormatter *f=[NSListFo
   s1.until=^BOOL{id f=[host guideValue:@"frontBundle"];return [f isEqual:@"com.apple.Safari"];};s1.timeout=30;s1.timeoutSay=L(@"Safari didn’t open? Open it yourself: Safari, Settings, Extensions.");s1.nextTo=nil;[out addObject:s1];
   wait=Beat(L(@"In Extensions, turn on Less Pull and allow it on all websites. I’ll notice."),GTFaceNone);
   waitNudges=[@[@[@12,L(@"No Extensions page in Safari? Choose Safari → Settings…, then Extensions."),@(GTFaceNone)]] arrayByAddingObjectsFromArray:waitNudges];}  // the button may open Safari without its Settings
- else if([bid isEqual:@"org.mozilla.firefox"]){wait=Beat(L(@"Firefox opens its add-ons page. Click Add to Firefox, then Add. I’ll notice."),GTFacePress);wait.run=connectOnce;}
- else if(opera){wait=Beat(L(@"Opera opens the store page. If it first offers its helper for the Chrome Web Store, add that. Then Add to Opera, and confirm. I’ll notice."),GTFacePress);wait.run=connectOnce;waitNudges=park;}
- else {BOOL chrome=[bid isEqual:@"com.google.Chrome"];wait=Beat([NSString stringWithFormat:chrome?L(@"%@ opens the store page. Click Add to Chrome, then Add extension. I’ll notice."):L(@"%@ opens the store page. Click its Add button, then Add extension. I’ll notice."),name],GTFacePress);wait.run=connectOnce;
-  if([bid isEqual:@"com.microsoft.edgemac"])waitNudges=[@[@[@.1,L(@"Edge asks once about extensions from other stores. Say yes to that first."),@(GTFaceNone)]] arrayByAddingObjectsFromArray:waitNudges];}
+ else {  // a store page explains itself (one Add button): one line, then quiet by the bar; help only when nothing happened for a while (Jiri, 14 Oct)
+  BOOL firefox=[bid isEqual:@"org.mozilla.firefox"];wait=Beat([NSString stringWithFormat:L(@"%@ opens the page for the extension. Add it there; I’ll notice."),name],GTFacePress);wait.run=connectOnce;
+  NSArray *lateSkip=@[@90,skipNudge[1],skipNudge[2],skipNudge[3],skipNudge[4]];
+  waitNudges=opera?@[]:@[@[@45,firefox?L(@"On the add-ons page: Add to Firefox, then Add."):L(@"Still on the store page? Its button adds the extension; then confirm."),@(GTFaceNone)],lateSkip];  // Opera asks about the other way at 45 s instead
+  if([bid isEqual:@"com.microsoft.edgemac"])waitNudges=[@[@[@20,L(@"Edge asks once about extensions from other stores. Say yes to that first."),@(GTFaceNone)]] arrayByAddingObjectsFromArray:waitNudges];}
  wait.to=nearBar;wait.until=isConnected;wait.nudges=waitNudges;wait.timeout=opera?45:150;  // Opera: helper, then Add to Opera takes a while; the other way waits
  wait.timeoutTo=opera?askId:laterId;wait.nextTo=opera?askId:laterId;wait.doneTo=connId;wait.freeKeys=YES;[out addObject:wait];
  if(opera){  // after a while: a plain question about Opera's error, and the other way if it is there

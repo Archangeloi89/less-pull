@@ -947,5 +947,8 @@
 "Come by sometime. There’s a drawn Mac to play with, and I’ll act surprised." = "そのうち遊びに来てください。描かれた Mac で遊べますし、わたしは驚いたふりをします。";
 "That’s the tour. Thank you for having me. Enjoy the quiet." = "ツアーはこれでおしまいです。お招きありがとうございました。静けさをお楽しみください。";
 "Firefox opens its add-ons page. Click Add to Firefox, then Add. I’ll notice." = "Firefox がアドオンのページを開きます。「Firefox へ追加」をクリックし、続いて「追加」を。気づいたらお知らせします。";
+"%@ opens the page for the extension. Add it there; I’ll notice." = "%@ が機能拡張のページを開きます。そこで追加してください。気づいたらお知らせします。";
+"Still on the store page? Its button adds the extension; then confirm." = "まだストアのページですか？ボタンで機能拡張を追加して、確認してください。";
+"On the add-ons page: Add to Firefox, then Add." = "アドオンのページで「Firefox へ追加」、続いて「追加」をクリックしてください。";
 "1. On the add-ons page that opened, click Add to Firefox, then Add.\n\nThe extension has no buttons: with a website in front, use “Exception for …” in the Less Pull menu. Keep Less Pull where it is installed." = "1. 開いたアドオンのページで「Firefox へ追加」、続いて「追加」をクリックします。\n\n拡張機能にボタンはありません。ウェブサイトを手前にして、Less Pull のメニューの「〜の個別設定」を使います。Less Pull はインストールした場所から動かさないでください。";
 "Choose a browser. Less Pull connects to it and opens the page where you add the extension, with the steps to finish. Chrome, Brave, Edge and Opera get it from the Chrome Web Store, Firefox from Mozilla’s add-ons site, and Safari has it built in." = "ブラウザを選びます。Less Pull がそのブラウザにつながり、拡張機能を追加するページを、仕上げの手順とともに開きます。Chrome、Brave、Edge、Opera は Chrome ウェブストアから、Firefox は Mozilla のアドオンサイトから、Safari は内蔵です。";

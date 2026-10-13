@@ -947,5 +947,8 @@
 "Come by sometime. There’s a drawn Mac to play with, and I’ll act surprised." = "언제 놀러 오세요. 그려진 Mac을 가지고 놀 수 있고, 저는 놀란 척할게요.";
 "That’s the tour. Thank you for having me. Enjoy the quiet." = "둘러보기는 여기까지예요. 불러 줘서 고마워요. 고요함을 즐기세요.";
 "Firefox opens its add-ons page. Click Add to Firefox, then Add. I’ll notice." = "Firefox가 부가 기능 페이지를 열어요. ‘Firefox에 추가’를 클릭한 다음 ‘추가’를 누르세요. 제가 알아챌게요.";
+"%@ opens the page for the extension. Add it there; I’ll notice." = "%@에서 확장 프로그램 페이지가 열려요. 거기서 추가하세요. 제가 알아챌게요.";
+"Still on the store page? Its button adds the extension; then confirm." = "아직 스토어 페이지인가요? 버튼으로 확장 프로그램을 추가하고 확인하세요.";
+"On the add-ons page: Add to Firefox, then Add." = "부가 기능 페이지에서 ‘Firefox에 추가’를 클릭한 다음 ‘추가’를 누르세요.";
 "1. On the add-ons page that opened, click Add to Firefox, then Add.\n\nThe extension has no buttons: with a website in front, use “Exception for …” in the Less Pull menu. Keep Less Pull where it is installed." = "1. 열린 부가 기능 페이지에서 ‘Firefox에 추가’를, 이어서 ‘추가’를 클릭합니다.\n\n확장 프로그램에는 버튼이 없습니다. 웹사이트를 앞에 두고 Less Pull 메뉴의 ‘… 개별 설정’을 사용하세요. Less Pull은 설치한 자리에 그대로 두세요.";
 "Choose a browser. Less Pull connects to it and opens the page where you add the extension, with the steps to finish. Chrome, Brave, Edge and Opera get it from the Chrome Web Store, Firefox from Mozilla’s add-ons site, and Safari has it built in." = "브라우저를 고르세요. Less Pull이 그 브라우저에 연결하고, 확장 프로그램을 추가하는 페이지를 마무리 단계와 함께 엽니다. Chrome, Brave, Edge, Opera는 Chrome 웹 스토어에서, Firefox는 Mozilla 부가 기능 사이트에서 받고, Safari에는 내장되어 있습니다.";

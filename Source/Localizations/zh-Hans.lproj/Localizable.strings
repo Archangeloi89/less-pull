@@ -947,5 +947,8 @@
 "Come by sometime. There’s a drawn Mac to play with, and I’ll act surprised." = "有空来坐坐。那儿有一台画出来的 Mac 可以玩，我会装作很惊讶。";
 "That’s the tour. Thank you for having me. Enjoy the quiet." = "导览到此结束。谢谢你的招待。享受这份安静吧。";
 "Firefox opens its add-ons page. Click Add to Firefox, then Add. I’ll notice." = "Firefox 会打开附加组件页面。点按“添加到 Firefox”，再点按“添加”。装好了我会知道。";
+"%@ opens the page for the extension. Add it there; I’ll notice." = "%@ 会打开扩展的页面。在那里添加它，我会注意到的。";
+"Still on the store page? Its button adds the extension; then confirm." = "还在商店页面？点那里的按钮添加扩展，然后确认。";
+"On the add-ons page: Add to Firefox, then Add." = "在附加组件页面：点按“添加到 Firefox”，再点按“添加”。";
 "1. On the add-ons page that opened, click Add to Firefox, then Add.\n\nThe extension has no buttons: with a website in front, use “Exception for …” in the Less Pull menu. Keep Less Pull where it is installed." = "1. 在打开的附加组件页面点按“添加到 Firefox”，再点按“添加”。\n\n扩展没有按钮：网站在前台时，使用 Less Pull 菜单中的“… 的单独设置”。请把 Less Pull 留在安装位置。";
 "Choose a browser. Less Pull connects to it and opens the page where you add the extension, with the steps to finish. Chrome, Brave, Edge and Opera get it from the Chrome Web Store, Firefox from Mozilla’s add-ons site, and Safari has it built in." = "选择一个浏览器。Less Pull 会连接它，并打开添加扩展的页面和收尾步骤。Chrome、Brave、Edge 和 Opera 从 Chrome 应用商店获取，Firefox 从 Mozilla 附加组件网站获取，Safari 内置。";
