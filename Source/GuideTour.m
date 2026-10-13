@@ -604,7 +604,7 @@ static NSString *GTJoin(NSArray<NSString *> *names){NSListFormatter *f=[NSListFo
 - (void)debugAnswer:(NSInteger)button {[self answer:button];}
 - (void)debugPoke {[self poked];}
 - (void)debugTick:(NSInteger)box {if(box>=0&&box<(NSInteger)self.askBoxes.count)self.askBoxes[box].state=NSControlStateValueOn;}
-- (void)debugPark {NSValue *p=[self nearBar]();if(!p)return;double t=[self moveTo:p.pointValue];[self after:t*.85 do:^{[self show:L(@"Opera opens the store page. Click Add to Opera, then confirm. I’ll notice.") scene:-1];}];}
+- (void)debugPark {NSValue *p=[self nearBar]();if(!p)return;double t=[self moveTo:p.pointValue];[self after:t*.85 do:^{[self show:[NSString stringWithFormat:L(@"%@ opens the page for the extension. Add it there; I’ll notice."),@"Opera"] scene:-1];}];}
 - (void)toggleSlow {[self choosePace:self.paceLevel==0?1:0];}  // testing ("slower"): slow, or back to normal
 - (void)choosePace:(NSInteger)level {
  level=MAX(0,MIN(2,level));if(level==self.paceLevel){[self updateBar];return;}self.paceLevel=level;self.view.pace=self.pace;[self updateBar];if(level==0)self.slowCount++;

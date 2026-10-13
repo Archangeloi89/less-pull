@@ -2,9 +2,9 @@
 
 | File | What it is |
 | :-- | :-- |
-| `interfaces.png` | Two real screenshots of Less Pull 1.4.4 build 41, the menu under its icon and the Settings window on General, placed side by side on a drawn backdrop |
-| `exceptions.png` | Real screenshots of build 41: the menu, and the exception panel that Exception for Finder… opens under the icon, on a drawn backdrop |
-| `settings-tabs.png` | Five window captures of build 41 (Shortcuts, Sessions, Apps, Websites, About) with example rules, on a drawn backdrop |
+| `interfaces.png` | Two real screenshots of Less Pull 1.4.4 build 41.2, the menu under its icon and the Settings window on General, placed side by side on a drawn backdrop |
+| `exceptions.png` | Real screenshots of build 41.2: the menu, and the exception panel that Exception for Finder… opens under the icon, on a drawn backdrop |
+| `settings-tabs.png` | Five window captures of build 41.2 (Shortcuts, Sessions, Apps, Websites, About) with example rules, on a drawn backdrop |
 | `before-after.webp` | The same drawn web page as it is and as Less Pull shows it, the seam gliding left and right in a loop, for the project page (`src/social-preview.py --parts`, then `src/before-after-sweep.py`) |
 | `before-after.png` | The still version with captions (`src/social-preview.py --plain`), kept for places that cannot play an animation |
 | `peek.png` | Three frames of the same drawn page: quiet, in color while the Peek shortcut is held, quiet again (`src/social-preview.py --peek`) |
@@ -37,7 +37,10 @@ The sources are in [`src`](src). They need Node.js, and Playwright with Chromium
 cd docs/assets/src
 npm install
 node build.mjs        # writes the SVG files
-python3 menu-figures.py raw ../interfaces.png interfaces   # menu + General tab (needs Pillow and NumPy)
+# Since build 41.2 the three screenshot figures come from window captures of a test copy started with --screenshot
+# (English, example settings and rules; see Source/TESTING.txt) and are put together by compose-screens.swift:
+swiftc -O compose-screens.swift -o /tmp/compose-screens && /tmp/compose-screens <captures folder> ..   # menu, panel, general, shortcuts, sessions, apps, websites, about (.png)
+python3 menu-figures.py raw ../interfaces.png interfaces   # the earlier way: menu + General tab (needs Pillow and NumPy)
 python3 menu-figures.py raw ../exceptions.png exceptions   # the two exception submenus
 python3 settings-figure.py raw ../settings-tabs.png shortcuts.jpg apps.jpg websites.jpg about.jpg
 python3 social-preview.py ../social-preview.png          # the link-preview card
