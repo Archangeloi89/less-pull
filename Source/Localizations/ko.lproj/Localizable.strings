@@ -621,7 +621,7 @@
 "On a PC keyboard: ⌥ option is Alt, ⌘ command the Windows key." = "PC 키보드에서는 ⌥ option이 Alt, ⌘ command가 Windows 키예요.";
 "At night, Less Pull adds this many points to your Extra Warmth, and takes them away again in the morning. The slider stays your warmth for the whole day. Off adds nothing; Red makes the night red, whatever the warmth by day." = "밤이 되면 Less Pull이 따뜻함에 이만큼의 포인트를 더하고, 아침에 다시 거둬요. 슬라이더는 하루 종일 당신의 따뜻함 그대로예요. ‘끔’은 아무것도 더하지 않고, ‘빨강’은 낮의 따뜻함과 상관없이 밤을 빨갛게 해요.";
 "Adds warmth on top of Night Shift, from none to deep red, all day. At night, “Warmer at night” adds a little more." = "Night Shift 위에 더하는 따뜻함. 없음부터 짙은 빨강까지, 하루 종일. 밤에는 ‘밤에 더 따뜻하게’가 조금 더 더해요.";
-"Automatic: on at night and off by day, on the schedule set in macOS, or on the night hours in Less Pull when there is none. On and Off hold until you change them. In the menu, a click on Automatic lasts until day and night next turn." = "자동: 밤에는 켜지고 낮에는 꺼져요. macOS의 일정을 따르고, 일정이 없으면 Less Pull의 밤 시간을 따라요. ‘켬’과 ‘끔’은 바꿀 때까지 그대로예요. 메뉴에서 ‘자동’을 클릭하면 다음에 낮과 밤이 바뀔 때까지 유지돼요.";
+"Automatic: on at night and off by day, as set under Night schedule in General. On and Off hold until you change them." = "자동: 밤에는 켜지고 낮에는 꺼져요. ‘일반’의 ‘밤 시간’에 설정한 대로요. ‘켬’과 ‘끔’은 바꿀 때까지 그대로예요.";
 "Warmer at night: off" = "밤에 더 따뜻하게: 끔";
 "Red at night: now" = "밤에 빨강: 지금";
 "Red at night" = "밤에 빨강";
@@ -677,7 +677,7 @@
 "Start anyway" = "그냥 시작";
 "First, bring out your icon" = "먼저 아이콘을 꺼내 주세요";
 "The tour starts at the Less Pull circle in the menu bar, and right now it’s hidden. Show the hidden menu-bar icons, then hold ⌘ and drag the circle all the way right, next to the clock: there macOS never hides it. The tour begins as soon as it’s there." = "둘러보기는 메뉴 막대의 Less Pull 원에서 시작하는데, 지금은 숨겨져 있어요. 메뉴 막대의 숨겨진 아이콘을 보이게 한 뒤, ⌘를 누른 채 원을 맨 오른쪽, 시계 옆으로 드래그하세요. 거기서는 macOS가 절대 숨기지 않아요. 원이 그곳에 오면 둘러보기가 시작돼요.";
-"Waiting for your icon…" = "아이콘을 기다리는 중…";
+"Drag it next to the clock…" = "시계 옆으로 드래그…";
 "Night schedule: %@ to %@" = "밤 시간: %@ ~ %@";
 "Night schedule: Sunset to sunrise" = "밤 시간: 일몰부터 일출까지";
 "Warmer at night: Red" = "밤에 더 따뜻하게: 빨강";
@@ -704,7 +704,7 @@
 "Send feedback" = "의견 보내기";
 "Without money" = "돈 없이";
 "A word to someone Less Pull might help, or feedback that makes it better." = "Less Pull이 도움이 될 만한 사람에게 건네는 한마디, 또는 더 좋게 만드는 의견.";
-"Night Shift is Automatic, On or Off. Automatic is on at night and off by day: on the schedule set in macOS, or, without one, on the night hours in Less Pull. “Warmer at night” follows the same night and adds a few points to your Extra Warmth, even with Night Shift off. At the lock screen and screensaver, where Less Pull’s warmth cannot reach, Less Pull turns Night Shift on for the night." = "Night Shift는 ‘자동’, ‘켬’, ‘끔’ 중 하나예요. ‘자동’은 밤에 켜지고 낮에 꺼져요. macOS의 일정을 따르고, 일정이 없으면 Less Pull의 밤 시간을 따라요. ‘밤에 더 따뜻하게’도 같은 밤을 따라 Night Shift가 꺼져 있어도 따뜻함에 몇 포인트를 더해요. Less Pull의 따뜻함이 닿지 않는 잠금 화면과 화면 보호기에서는 Less Pull이 밤에 Night Shift를 켜요.";
+"Night Shift is Automatic, On or Off. Automatic is on at night and off by day, as set under Night schedule in General: Sunset to sunrise, or Custom hours. “Warmer at night” follows the same night and adds a few points to your Extra Warmth, even with Night Shift off. At the lock screen and screensaver, where Less Pull’s warmth cannot reach, Night Shift takes over at full warmth while Less Pull is quieting your screen." = "Night Shift는 ‘자동’, ‘켬’, ‘끔’ 중 하나예요. ‘자동’은 밤에 켜지고 낮에 꺼져요. 밤은 ‘일반’의 ‘밤 시간’에서 정해요(‘일몰부터 일출까지’ 또는 ‘사용자 지정 시간’). ‘밤에 더 따뜻하게’도 같은 밤을 따라 Night Shift가 꺼져 있어도 따뜻함에 몇 포인트를 더해요. Less Pull의 따뜻함이 닿지 않는 잠금 화면과 화면 보호기에서는, Less Pull이 화면을 고요하게 하는 동안 Night Shift가 최대 따뜻함으로 대신해요.";
 "Less Pull %@ (%@)\n\n%@\n%@\nDisplays: %lu, each with its own matrix\nDisplay events: %lu; recoveries: %lu\nGrayscale setting: %@; grayscale showing now: %@; exception active: %@%@\n\n“Warmer at night” follows the night hours shown under General; it does not prove the display looks warmer." = "Less Pull %@ (%@)\n\n%@\n%@\n디스플레이: %lu개, 각각 고유한 행렬\n디스플레이 이벤트: %lu, 복구: %lu\n회색조 설정: %@, 지금 회색조 표시: %@, 개별 설정 적용: %@%@\n\n‘밤에 더 따뜻하게’는 ‘일반’에 표시된 밤 시간을 따라요. 디스플레이가 실제로 더 따뜻해 보인다는 증거는 아니에요.";
 "Today about %@ to %@, worked out for your time zone." = "오늘은 대략 %@ ~ %@, 당신의 시간대로 계산했어요.";
 "Every day from %@ to %@." = "매일 %@ ~ %@.";

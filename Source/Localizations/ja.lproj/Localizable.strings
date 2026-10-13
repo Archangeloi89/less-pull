@@ -621,7 +621,7 @@
 "On a PC keyboard: ⌥ option is Alt, ⌘ command the Windows key." = "PCのキーボードでは、⌥ option は Alt、⌘ command は Windows キーです。";
 "At night, Less Pull adds this many points to your Extra Warmth, and takes them away again in the morning. The slider stays your warmth for the whole day. Off adds nothing; Red makes the night red, whatever the warmth by day." = "夜になると、Less Pull はこのポイント分を暖かさに足し、朝には元に戻します。スライダーは一日中あなたの暖かさのままです。「オフ」は何も足しません。「赤」は昼の暖かさに関係なく夜を赤くします。";
 "Adds warmth on top of Night Shift, from none to deep red, all day. At night, “Warmer at night” adds a little more." = "Night Shift の上に重ねる暖かさ。なしから深い赤まで、一日中。夜は「夜はもっと暖かく」がさらに少し足します。";
-"Automatic: on at night and off by day, on the schedule set in macOS, or on the night hours in Less Pull when there is none. On and Off hold until you change them. In the menu, a click on Automatic lasts until day and night next turn." = "自動：夜はオン、昼はオフ。macOS のスケジュールに従い、なければ Less Pull の夜の時間に従います。「オン」と「オフ」は変更するまでそのままです。メニューで「自動」をクリックすると、次に昼と夜が切り替わるまで有効です。";
+"Automatic: on at night and off by day, as set under Night schedule in General. On and Off hold until you change them." = "自動：夜はオン、昼はオフ。「一般」の「夜の時間帯」の設定どおりです。「オン」と「オフ」は変更するまでそのままです。";
 "Warmer at night: off" = "夜はもっと暖かく：オフ";
 "Red at night: now" = "夜は赤：今";
 "Red at night" = "夜は赤";
@@ -677,7 +677,7 @@
 "Start anyway" = "このまま始める";
 "First, bring out your icon" = "まず、アイコンを出してください";
 "The tour starts at the Less Pull circle in the menu bar, and right now it’s hidden. Show the hidden menu-bar icons, then hold ⌘ and drag the circle all the way right, next to the clock: there macOS never hides it. The tour begins as soon as it’s there." = "ツアーはメニューバーの Less Pull の円から始まりますが、今は隠れています。メニューバーの隠れたアイコンを表示してから、⌘ を押したまま円を時計の隣、いちばん右までドラッグしてください。そこなら macOS が隠すことはありません。そこに来たらツアーが始まります。";
-"Waiting for your icon…" = "アイコンを待っています…";
+"Drag it next to the clock…" = "時計の隣へドラッグ…";
 "Night schedule: %@ to %@" = "夜の時間帯：%@〜%@";
 "Night schedule: Sunset to sunrise" = "夜の時間帯：日の入から日の出まで";
 "Warmer at night: Red" = "夜はもっと暖かく：赤";
@@ -704,7 +704,7 @@
 "Send feedback" = "フィードバックを送る";
 "Without money" = "お金を使わずに";
 "A word to someone Less Pull might help, or feedback that makes it better." = "Less Pull が役に立ちそうな人へのひとこと、またはよりよくするためのフィードバック。";
-"Night Shift is Automatic, On or Off. Automatic is on at night and off by day: on the schedule set in macOS, or, without one, on the night hours in Less Pull. “Warmer at night” follows the same night and adds a few points to your Extra Warmth, even with Night Shift off. At the lock screen and screensaver, where Less Pull’s warmth cannot reach, Less Pull turns Night Shift on for the night." = "Night Shift は「自動」「オン」「オフ」のいずれかです。「自動」は夜にオン、昼にオフになります。macOS のスケジュールに従い、なければ Less Pull の夜の時間に従います。「夜はもっと暖かく」も同じ夜に従い、Night Shift がオフでも暖かさに数ポイント足します。Less Pull の暖かさが届かないロック画面とスクリーンセーバーでは、Less Pull が夜に Night Shift をオンにします。";
+"Night Shift is Automatic, On or Off. Automatic is on at night and off by day, as set under Night schedule in General: Sunset to sunrise, or Custom hours. “Warmer at night” follows the same night and adds a few points to your Extra Warmth, even with Night Shift off. At the lock screen and screensaver, where Less Pull’s warmth cannot reach, Night Shift takes over at full warmth while Less Pull is quieting your screen." = "Night Shift は「自動」「オン」「オフ」のいずれかです。「自動」は夜にオン、昼にオフになります。夜は「一般」の「夜の時間帯」で決まります（「日の入から日の出まで」または「カスタム時間」）。「夜はもっと暖かく」も同じ夜に従い、Night Shift がオフでも暖かさに数ポイント足します。Less Pull の暖かさが届かないロック画面とスクリーンセーバーでは、Less Pull が画面を落ち着かせている間、Night Shift が最大の暖かさで代わりを務めます。";
 "Less Pull %@ (%@)\n\n%@\n%@\nDisplays: %lu, each with its own matrix\nDisplay events: %lu; recoveries: %lu\nGrayscale setting: %@; grayscale showing now: %@; exception active: %@%@\n\n“Warmer at night” follows the night hours shown under General; it does not prove the display looks warmer." = "Less Pull %@ (%@)\n\n%@\n%@\nディスプレイ: %lu 台、それぞれ独自のマトリクス\nディスプレイのイベント: %lu、復旧: %lu\nグレイスケールの設定: %@、現在のグレイスケール表示: %@、個別設定の適用: %@%@\n\n「夜はもっと暖かく」は「一般」に表示された夜の時間に従います。ディスプレイが実際に暖かく見えることの証明ではありません。";
 "Today about %@ to %@, worked out for your time zone." = "今日はおよそ %@〜%@。あなたの時間帯で計算しています。";
 "Every day from %@ to %@." = "毎日 %@〜%@。";

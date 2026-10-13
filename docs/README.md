@@ -6,7 +6,7 @@ Start with the [project page](../README.md) for an overview and pictures.
 | :-- | :-- |
 | [Install](INSTALL.md) | Installing the Mac app and the browser extension, and troubleshooting |
 | [App and website exceptions](EXCEPTIONS.md) | Giving an app, a website or one page its own settings |
-| [Night Shift and warmth](NIGHT-SHIFT.md) | How warmth can follow Night Shift, overrides and timed pauses |
+| [Night Shift and warmth](NIGHT-SHIFT.md) | Warmer at night, the night schedule, Night Shift Automatic, On or Off, and timed pauses |
 | [Privacy](PRIVACY.md) | What the app and extension read, store and log |
 | [Chrome Web Store listing](STORE-CHROME.md) | The package, the texts, the privacy answers and the steps |
 | [Firefox Add-ons listing](STORE-FIREFOX.md) | The package, the texts and the steps for addons.mozilla.org |

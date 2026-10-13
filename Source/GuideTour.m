@@ -255,7 +255,7 @@ static NSDictionary *GTTextAttributes(BOOL card){NSMutableParagraphStyle *ps=[NS
  NSMutableDictionary *ga=[a mutableCopy];if(!self.live&&press<=0)ga[NSForegroundColorAttributeName]=[NSColor.labelColor colorWithAlphaComponent:.45];[self.glyph drawAtPoint:NSMakePoint(NSMidX(r)-s.width/2,NSMidY(r)-s.height/2+.5) withAttributes:ga];
 }
 @end
-// A file or folder to drag somewhere (Firefox's file window, Opera's extensions page): its icon, its name and a line;
+// A file or folder to drag somewhere (Opera's extensions page): its icon, its name and a line;
 // drag it from here. Copy path puts the path on the clipboard (only when clicked).
 @interface GTShelfView : NSView <NSDraggingSource>
 @property NSURL *url;@property(copy) NSString *caption;
@@ -334,6 +334,7 @@ static GTPanel *GTMakePanel(NSRect frame,NSInteger level){
 @property GTBeat *currentBeat;
 @property(copy) NSString *jumpTarget,*pickedName;
 @property BOOL ringOnCircle,peering,tourPaused,saidWebPriv;
+@property(copy) void (^leaveRed)(void);  // stop 2: leaving it while the slider is still in the red puts your warmth back
 @property NSInteger slowCount;
 @property NSMutableSet<NSString *> *eggs;
 @property double lastEggCheck,colleagueAt,hoverSince;
@@ -1062,31 +1063,37 @@ static GTPanel *GTMakePanel(NSRect frame,NSInteger level){
   GTBeat *g3=Beat(L(@"Nothing is gone. It just pulls at you less."),GTFaceNone);
   GTBeat *w1=Beat(L(@"Again, please: click the circle. In the menu, Extra Warmth has a slider."),GTFacePress);w1.to=weak.underCircle;w1.ringIsCircle=YES;
   w1.ring=^NSValue *{return [[host guideValue:@"menuOpen"] boolValue]?[weak frameOf:@"menu.warmth"]():weak.circleRing();};w1.until=[weak isOn:@"menuOpen"];w1.nudges=[weak circleNudges];w1.nextTo=@"lp.rest";
+  // Red is a place to visit, not to stay. Whatever way the slider gets there in this stop (let go in the red, → while
+  // dragging, a pause halfway and then on to Red), the next line asks to slide it back, chevrons turned around.
+  __block double peak=-1,backLast=-1,backSince=0;__block BOOL wentBack=NO,askedRed=NO;
+  double (^comfortable)(void)=^double{return warmStart<0?40:warmStart>=85?50:warmStart;};  // where it was before Red (a red start: halfway)
   GTBeat *w2=Beat(L(@"Drag it toward Red. I’ll go with it; watch my tag."),GTFaceNone);w2.lean=YES;w2.to=menuSide;w2.pointAt=[weak midOf:@"menu.warmth"];w2.ring=[weak frameOf:@"menu.warmth"];
-  w2.run=^{warmStart=[[host guideValue:@"warmth"] doubleValue];warmLast=warmStart;warmSince=CACurrentMediaTime();};
+  w2.run=^{warmStart=[[host guideValue:@"warmth"] doubleValue];warmLast=warmStart;warmSince=CACurrentMediaTime();askedRed=YES;
+   weak.leaveRed=^{if(!wentBack&&[[host guideValue:@"warmth"] doubleValue]>=85)[host guideDo:@"setWarmth" with:@(comfortable())];};};  // leaving the stop still red: your warmth comes back
   __block BOOL saidWay=NO;w2.hint=[weak frameOf:@"menu.warmth"];w2.hintDir=1;
   w2.until=^BOOL{double now=CACurrentMediaTime(),w=[[host guideValue:@"warmth"] doubleValue];if(w!=warmLast){warmLast=w;warmSince=now;}
    if(!saidWay&&w<warmStart-4){saidWay=YES;[weak interject:L(@"Other way: toward Red, to the right. Either works, though.") face:GTFaceTilt];}  // the wrong way: a word, not silence
    BOOL up=!(NSEvent.pressedMouseButtons&1);if(w>=85&&up&&now-warmSince>.6)return YES;  // in the red, and let go
-   return w!=warmStart&&up&&now-warmSince>2;};  // or let go somewhere else, for two seconds
+   return w!=warmStart&&up&&now-warmSince>3;};  // or let go somewhere else, for three seconds
   w2.nudges=[weak nudge:10 say:L(@"The slider, next to Extra Warmth. Drag it, any direction.")];w2.nextTo=@"lp.rest";
-  // Red is a place to visit, not to stay: back to where it feels right, the chevrons turned around.
-  __block double peak=-1,backLast=-1,backSince=0;__block BOOL wentBack=NO;
-  GTBeat *red=Beat(L(@"Red. Everything’s a sunset, me included. Now slide it back to where it feels right."),GTFaceTilt);red.onlyIf=^BOOL{return [[host guideValue:@"warmth"] doubleValue]>=85;};red.lean=YES;red.to=menuSide;
+  __weak GTBeat *weakW2=w2;w2.onNext=^{weakW2.nextTo=[[host guideValue:@"warmth"] doubleValue]>=85?nil:@"lp.rest";};  // → while in the red: on to the way back, not past it
+  GTBeat *red=Beat(L(@"Red. Everything’s a sunset, me included. Now slide it back to where it feels right."),GTFaceTilt);red.ident=@"lp.red";red.onlyIf=^BOOL{return [[host guideValue:@"warmth"] doubleValue]>=85;};red.lean=YES;red.to=menuSide;
   red.ringIsCircle=YES;red.ring=^NSValue *{return [[host guideValue:@"menuOpen"] boolValue]?[weak frameOf:@"menu.warmth"]():weak.circleRing();};red.hint=[weak frameOf:@"menu.warmth"];red.hintDir=-1;
   red.pointAt=^NSValue *{return [[host guideValue:@"menuOpen"] boolValue]?[weak midOf:@"menu.warmth"]():weak.circleAim();};
   red.run=^{peak=[[host guideValue:@"warmth"] doubleValue];backLast=peak;backSince=CACurrentMediaTime();};
   red.until=^BOOL{double now=CACurrentMediaTime(),w=[[host guideValue:@"warmth"] doubleValue];if(w!=backLast){backLast=w;backSince=now;}
    if(w<=peak-10&&!(NSEvent.pressedMouseButtons&1)&&now-backSince>.8)wentBack=YES;return wentBack;};  // well below the red, and let go
-  red.nudges=[weak nudge:10 say:L(@"To the left, until it feels right. The slider is in the menu, under the circle.")];red.nextTo=@"lp.rest";
+  red.nudges=[weak nudge:10 say:L(@"To the left, until it feels right. The slider is in the menu, under the circle.")];
+  red.onNext=^{[host guideDo:@"setWarmth" with:@(comfortable())];wentBack=YES;};  // → does it itself: the warmth from before Red
   GTBeat *mine=Beat(L(@"There. That warmth is yours."),GTFaceHop);mine.onlyIf=^BOOL{return wentBack;};
   GTBeat *off=Beat(L(@"All the way to Off. Fine too; Red is at the far right."),GTFaceTilt);off.onlyIf=^BOOL{return !wentBack&&[[host guideValue:@"warmth"] doubleValue]<12;};off.hint=[weak frameOf:@"menu.warmth"];off.hintDir=1;off.ring=[weak frameOf:@"menu.warmth"];
   GTBeat *some=Beat(L(@"A touch of amber. Far right is Red; far left is Off. Your call."),GTFaceNone);some.onlyIf=^BOOL{double w=[[host guideValue:@"warmth"] doubleValue];return !wentBack&&w>=12&&w<85;};
+  GTBeat *late=Beat(nil,GTFaceNone);late.onlyIf=^BOOL{return askedRed&&!wentBack&&[[host guideValue:@"warmth"] doubleValue]>=85;};late.until=^BOOL{return YES;};late.doneTo=@"lp.red";  // on to Red after all: the way back too
   GTBeat *skip=Beat(L(@"I’ll ask Less Pull to resume, then. Quietly."),GTFaceNone);skip.ident=@"lp.skip";skip.jumpOnly=YES;skip.run=^{[host guideDo:@"resume" with:nil];weak.tourPaused=NO;};
   GTBeat *rest=Beat(L(@"Everything else lives in this menu too: pausing, Night Shift, Settings…"),GTFaceNone);rest.ident=@"lp.rest";rest.lean=YES;
   rest.pointAt=^NSValue *{return [[host guideValue:@"menuOpen"] boolValue]?[weak midOf:@"menu.night"]():weak.circleAim();};
-  return @[stage,hid,drag,found,lp1,near,lp1h,card,dot,on,onw,g3,w1,w2,red,mine,off,some,skip,rest];}];
- [cleanups addObject:^{if(weak.tourPaused){[host guideDo:@"resume" with:nil];weak.tourPaused=NO;}}];
+  return @[stage,hid,drag,found,lp1,near,lp1h,card,dot,on,onw,g3,w1,w2,red,mine,off,some,late,skip,rest];}];
+ [cleanups addObject:^{if(weak.tourPaused){[host guideDo:@"resume" with:nil];weak.tourPaused=NO;}void (^back)(void)=weak.leaveRed;weak.leaveRed=nil;if(back)back();}];
 
  // 3 Apps: an exception for the app in front, made by the user, right from the menu
  [steps addObject:^NSArray *{

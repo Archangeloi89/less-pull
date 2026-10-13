@@ -621,7 +621,7 @@
 "On a PC keyboard: ⌥ option is Alt, ⌘ command the Windows key." = "На клавіатурі ПК: ⌥ option — це Alt, ⌘ command — клавіша Windows.";
 "At night, Less Pull adds this many points to your Extra Warmth, and takes them away again in the morning. The slider stays your warmth for the whole day. Off adds nothing; Red makes the night red, whatever the warmth by day." = "Уночі Less Pull додає стільки одиниць до вашого тепла, а вранці прибирає їх. Повзунок лишається вашим теплом на весь день. «Вимк» нічого не додає; «Червоний» робить ніч червоною, хай яким є тепло вдень.";
 "Adds warmth on top of Night Shift, from none to deep red, all day. At night, “Warmer at night” adds a little more." = "Тепло поверх Night Shift, від нуля до глибокого червоного, увесь день. Уночі «Тепліше вночі» додає ще трохи.";
-"Automatic: on at night and off by day, on the schedule set in macOS, or on the night hours in Less Pull when there is none. On and Off hold until you change them. In the menu, a click on Automatic lasts until day and night next turn." = "Автоматично: уночі ввімкнено, вдень вимкнено — за розкладом macOS або, якщо його немає, за нічними годинами Less Pull. «Увімк» і «Вимк» діють, доки ви їх не зміните. У меню натискання «Автоматично» діє до наступної зміни дня і ночі.";
+"Automatic: on at night and off by day, as set under Night schedule in General. On and Off hold until you change them." = "Автоматично: уночі ввімкнено, вдень вимкнено — як задано в «Нічному розкладі» на вкладці «Основні». «Увімк» і «Вимк» діють, доки ви їх не зміните.";
 "Warmer at night: off" = "Тепліше вночі: вимк";
 "Red at night: now" = "Червоний уночі: зараз";
 "Red at night" = "Червоний уночі";
@@ -677,7 +677,7 @@
 "Start anyway" = "Однаково почати";
 "First, bring out your icon" = "Спершу покажіть свій значок";
 "The tour starts at the Less Pull circle in the menu bar, and right now it’s hidden. Show the hidden menu-bar icons, then hold ⌘ and drag the circle all the way right, next to the clock: there macOS never hides it. The tour begins as soon as it’s there." = "Тур починається з кола Less Pull на смузі меню, а зараз воно приховане. Покажіть приховані значки на смузі меню, утримуйте ⌘ і перетягніть коло до кінця праворуч, до годинника: там macOS ніколи його не ховає. Тур почнеться, щойно воно буде там.";
-"Waiting for your icon…" = "Чекаємо на ваш значок…";
+"Drag it next to the clock…" = "Перетягніть до годинника…";
 "Night schedule: %@ to %@" = "Нічний розклад: з %@ до %@";
 "Night schedule: Sunset to sunrise" = "Нічний розклад: з ночі до ранку";
 "Warmer at night: Red" = "Тепліше вночі: червоний";
@@ -704,7 +704,7 @@
 "Send feedback" = "Надіслати відгук";
 "Without money" = "Без грошей";
 "A word to someone Less Pull might help, or feedback that makes it better." = "Слово тому, кому Less Pull міг би допомогти, або відгук, який зробить його кращим.";
-"Night Shift is Automatic, On or Off. Automatic is on at night and off by day: on the schedule set in macOS, or, without one, on the night hours in Less Pull. “Warmer at night” follows the same night and adds a few points to your Extra Warmth, even with Night Shift off. At the lock screen and screensaver, where Less Pull’s warmth cannot reach, Less Pull turns Night Shift on for the night." = "Night Shift стоїть на «Автоматично», «Увімк» або «Вимк». «Автоматично» вмикає його вночі й вимикає вдень: за розкладом macOS або, якщо його немає, за нічними годинами Less Pull. «Тепліше вночі» йде за тією самою ніччю і додає кілька одиниць до вашого тепла, навіть коли Night Shift вимкнено. На екрані блокування і при заставці, куди тепло Less Pull не дістає, Less Pull уночі вмикає Night Shift.";
+"Night Shift is Automatic, On or Off. Automatic is on at night and off by day, as set under Night schedule in General: Sunset to sunrise, or Custom hours. “Warmer at night” follows the same night and adds a few points to your Extra Warmth, even with Night Shift off. At the lock screen and screensaver, where Less Pull’s warmth cannot reach, Night Shift takes over at full warmth while Less Pull is quieting your screen." = "Night Shift стоїть на «Автоматично», «Увімк» або «Вимк». «Автоматично» вмикає його вночі й вимикає вдень — як задано в «Нічному розкладі» на вкладці «Основні»: «З ночі до ранку» або «Власні години». «Тепліше вночі» йде за тією самою ніччю і додає кілька одиниць до вашого тепла, навіть коли Night Shift вимкнено. На екрані блокування і при заставці, куди тепло Less Pull не дістає, Night Shift бере це на себе на повному теплі, поки Less Pull заспокоює ваш екран.";
 "Less Pull %@ (%@)\n\n%@\n%@\nDisplays: %lu, each with its own matrix\nDisplay events: %lu; recoveries: %lu\nGrayscale setting: %@; grayscale showing now: %@; exception active: %@%@\n\n“Warmer at night” follows the night hours shown under General; it does not prove the display looks warmer." = "Less Pull %@ (%@)\n\n%@\n%@\nДисплеї: %lu, кожен із власною матрицею\nПодії дисплеїв: %lu; відновлення: %lu\nВідтінки сірого ввімкнено: %@; відтінки сірого видно зараз: %@; виняток активний: %@%@\n\n«Тепліше вночі» йде за нічними годинами, вказаними в «Основних»; це не доводить, що дисплей виглядає теплішим.";
 "Today about %@ to %@, worked out for your time zone." = "Сьогодні приблизно з %@ до %@, розраховано для вашого часового поясу.";
 "Every day from %@ to %@." = "Щодня з %@ до %@.";

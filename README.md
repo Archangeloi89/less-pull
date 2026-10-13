@@ -6,17 +6,18 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-41"><b>Download build 41</b></a>
+  <a href="https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-41.1"><b>Download build 41.1</b></a>
+  &nbsp;·&nbsp; <a href="https://lesspull.com"><b>lesspull.com</b></a>
   &nbsp;·&nbsp; <a href="#install">Install</a>
   &nbsp;·&nbsp; <a href="docs/EXCEPTIONS.md">App and website exceptions</a>
   &nbsp;·&nbsp; <a href="docs/README.md">All docs</a>
 </p>
 
 <p align="center">
-  <a href="https://buymeacoffee.com/HsERf62fiZ"><img src="https://img.buymeacoffee.com/button-api/?text=Support%20my%20work&emoji=%F0%9F%A7%A1&slug=HsERf62fiZ&button_colour=E8894A&font_colour=1b1b1b&font_family=Inter&outline_colour=1b1b1b&coffee_colour=FFDD00" height="44" alt="Support my work on Buy Me a Coffee"></a>
+  <a href="https://lesspull.com/#support"><img src="https://img.buymeacoffee.com/button-api/?text=Support%20my%20work&emoji=%F0%9F%A7%A1&slug=HsERf62fiZ&button_colour=E8894A&font_colour=1b1b1b&font_family=Inter&outline_colour=1b1b1b&coffee_colour=FFDD00" height="44" alt="Support my work: the ways to support, on lesspull.com"></a>
 </p>
 
-**A quieter screen.** Less Pull is a small menu-bar app for macOS by [Jiri Arion Rose](https://jiriarion.com). It takes the color out of your screen, so it pulls at you less — a little like stepping out of a loud room into a still one. What matters is still there; it just stops shouting.
+**A quieter screen.** Less Pull is a small menu-bar app for macOS by [Jiri Arion Rose](https://jiriarion.com). Its website is [lesspull.com](https://lesspull.com). It takes the color out of your screen, so it pulls at you less — a little like stepping out of a loud room into a still one. What matters is still there; it just stops shouting.
 
 Warmth is the second step: from a touch of amber all the way to red, it takes the blue out of the light and puts you back in charge of how your screen speaks to you. And because a few things truly need color, every app and every website can have its own settings.
 
@@ -30,7 +31,7 @@ Warmth is the second step: from a touch of amber all the way to red, it takes th
 - **[Sessions](#sessions)**: a stretch of focused work with a gentle end: a glow, a gong, a count past the end, and one call back after you leave.
 - **[Exceptions](#every-app-and-website-can-have-its-own-settings)** for any app, any website or one exact page, set right in the menu.
 - **Time off**: Grayscale off for an hour, four hours, or until Night Shift changes; Pause Less Pull for a while.
-- **[Night Shift](#night-shift-can-set-the-rhythm)** can set the rhythm, so warmth comes only at night.
+- **[Warmer at night](#warmer-at-night)**: a few points more warmth when your night begins, with Night Shift on the same schedule.
 - **A menu-bar icon that shows the state**: its left half fills while grayscale is on, its right half warms with the warmth.
 - **[Every display on its own](#every-display-on-its-own)**: an exception applies on the display where its window is; the others keep your defaults. Any number of displays.
 - **[Screenshots keep their colors](#screenshots-keep-their-colors)**: the display changes, the picture does not.
@@ -152,24 +153,25 @@ Stepping away without a session? Choose **Break** at the top of the panel, pick 
 
 <sub>The glow never takes focus and never blocks a click. Under Reduce Motion it appears and disappears without animation.</sub>
 
-## Night Shift can set the rhythm
+## Warmer at night
 
-Turn on **Extra Warmth follows Night Shift** if you want warmth only at night. While Night Shift is off, the warmth you inherit from your defaults is removed. When Night Shift turns on, your saved amount comes back.
+Extra Warmth is your warmth for the whole day. **Warmer at night** adds a few points on top when your night begins and takes them away again in the morning, each time over half an hour. Night Shift, on **Automatic**, keeps the same night.
 
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="docs/assets/nightshift-dark.svg">
-    <img src="docs/assets/nightshift-light.svg" width="100%" alt="Timeline of one example day. Night Shift is on from 22:00 to 07:00. Extra Warmth, when it follows Night Shift, is 0 percent by day and returns to your saved amount at night. Grayscale stays as you set it, day and night.">
+    <img src="docs/assets/nightshift-light.svg" width="100%" alt="Timeline of one example day with the night from 22:00 to 07:00. Night Shift on Automatic is on for the night. Extra Warmth is 20 percent all day, and Warmer at night adds 13 points for the night, 33 percent, rising and falling over half an hour. Grayscale stays as you set it, day and night.">
   </picture>
 </p>
 
-<sub>Example schedule. Night Shift keeps the schedule you set in macOS.</sub>
+<sub>An example: the night from 22:00 to 07:00, Extra Warmth at 20%, Warmer at night at +13.</sub>
 
-- **Following controls warmth only.** Grayscale stays the way you set it, day and night.
-- **You can still change the moment.** Moving the slider overrides following until Night Shift next switches, or until you choose **Resume Following**. The new amount is saved for the night.
-- **Following is optional.** Leave it off and warmth stays wherever you put it.
-- **Night Shift itself is in the menu too.** Turn it on or off, or off for an hour, four hours, or until morning.
-- **Following, in one sentence.** On: Extra Warmth only while Night Shift is on, none in the daytime. Off: Extra Warmth stays on all day.
+- **You set the night once.** Under **Settings… → General → Night schedule**: **Sunset to sunrise**, or **Custom hours** (22:00 to 07:00 to begin with). It is the same schedule macOS keeps for Night Shift, so a change in System Settings shows up here too.
+- **Sunset to sunrise needs your location in macOS.** macOS keeps it only with Location Services on and **Set time zone automatically** under General → Date & Time. Until then, Less Pull works out sunset from your time zone and switches Night Shift itself; the note under Night schedule has a button for each setting.
+- **How much warmer is up to you.** Off, a few points (new installs start at +13), or **Red** for a red night whatever the warmth by day. **Try it** shows the night look for a minute.
+- **Night Shift is Automatic, On or Off.** Automatic is on at night and off by day; On and Off hold until you change them. The menu has the same three beside Night Shift, and **Night Shift off for** an hour, four hours, or until morning.
+- **Grayscale stays as you set it**, day and night.
+- **Apps and websites with their own warmth keep it**, at night too.
 
 More in [Night Shift and warmth](docs/NIGHT-SHIFT.md).
 
@@ -203,7 +205,7 @@ The icon tells you the state: its left half fills while grayscale is showing, it
 
 The Settings window has six tabs:
 
-- **General**: the same controls as the menu, with a short line under each one, plus **Launch at login** and **Language**.
+- **General**: the same controls as the menu, with a short line under each one, plus [**Night schedule** and **Warmer at night**](#warmer-at-night), **Launch at login** and **Language**.
 - **Shortcuts**: [**Peek in color**](#peek-in-color) and what it turns off, a **Toggle Grayscale** shortcut, and what a left and a right click on the menu-bar icon do.
 - **Sessions**: session lengths, call-back times, what happens at the end, reminders, sound and glow.
 - **Apps**: every app exception, one row each, with Default / On / Off for Grayscale and Night Shift and its own warmth.
@@ -228,7 +230,7 @@ The app changes the display; nothing is injected into pages, and the Mac app has
 
 ## Install
 
-1. Download **Less-Pull-1.4.4-41.dmg** from the [build 41 release](https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-41), open it and drag **Less Pull** onto **Applications**.
+1. Download **Less-Pull-1.4.4-41.1.dmg** from the [build 41.1 release](https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-41.1), open it and drag **Less Pull** onto **Applications**.
 2. Open it. The Settings window greets you once; the circle in the menu bar is where you choose Grayscale and Extra Warmth from then on. On the first launch the welcome opens right under it, the icon fades in and out for a moment, and a small animated drawing shows what to do when the menu bar is full: hold ⌘ and drag the circle toward the clock. (macOS decides where new icons start, and apps cannot choose a spot.)
 3. For website rules, open **Settings… → Websites**, choose **Install Browser Extension…**, pick a browser from the list, and follow the steps for [your browser](docs/INSTALL.md#safari-brave-chrome-firefox-opera-or-edge).
 
@@ -236,7 +238,7 @@ The app changes the display; nothing is injected into pages, and the Mac app has
 > Setting up with an AI agent? The release includes an **agent pack** (`Less-Pull-Agent-Pack.zip`): a script that installs the app and the bridge, and scripts that connect Brave, Chrome, Opera, Edge and Firefox, with the instructions an agent needs. See [tools/agent-pack](tools/agent-pack/README.md).
 
 > [!NOTE]
-> Version 1.4.4 (build 41) is a test build for Apple silicon Macs. The version number stays 1.4.4 on purpose; the build number is what changes. It is signed with a Developer ID and notarized by Apple, so it opens like any other app. It is built for macOS 13 and later and has been tested on macOS 27 only. The browser extension is loaded locally and is not in the Chrome Web Store, on addons.mozilla.org or in the App Store. See [install help](docs/INSTALL.md) and [what is still open](docs/RELEASE-PLAN.md).
+> Version 1.4.4 (build 41.1) is a test build for Apple silicon Macs. The version number stays 1.4.4 on purpose; the build number is what changes. It is signed with a Developer ID and notarized by Apple, so it opens like any other app. It is built for macOS 13 and later and has been tested on macOS 27 only. The browser extension comes from the Chrome Web Store (Chrome, Brave, Edge, Opera) and from addons.mozilla.org (Firefox); Safari’s comes with the app. See [install help](docs/INSTALL.md) and [what is still open](docs/RELEASE-PLAN.md).
 
 ## Private by design
 
@@ -248,11 +250,11 @@ No account, no analytics, no cloud sync. The extension reads the address of the 
 
 ## Support my work
 
-Less Pull is free, and it stays free. If it makes your days a little quieter, a coffee keeps the work going: the app, the browser extensions, the signed builds and what comes next.
+Less Pull is free, and it stays free. If it makes your days a little quieter, your support keeps the work going: the app, the browser extensions, the signed builds and what comes next. The ways to support are on [lesspull.com](https://lesspull.com/#support).
 
 <p align="center">
-  <a href="https://buymeacoffee.com/HsERf62fiZ"><img src="https://img.buymeacoffee.com/button-api/?text=Support%20my%20work&emoji=%F0%9F%A7%A1&slug=HsERf62fiZ&button_colour=E8894A&font_colour=1b1b1b&font_family=Inter&outline_colour=1b1b1b&coffee_colour=FFDD00" height="44" alt="Support my work on Buy Me a Coffee"></a><br>
-  <a href="https://buymeacoffee.com/HsERf62fiZ"><img src="docs/assets/support-qr.png" width="160" alt="QR code for buymeacoffee.com/HsERf62fiZ"></a><br>
+  <a href="https://lesspull.com/#support"><img src="https://img.buymeacoffee.com/button-api/?text=Support%20my%20work&emoji=%F0%9F%A7%A1&slug=HsERf62fiZ&button_colour=E8894A&font_colour=1b1b1b&font_family=Inter&outline_colour=1b1b1b&coffee_colour=FFDD00" height="44" alt="Support my work: the ways to support, on lesspull.com"></a><br>
+  <a href="https://lesspull.com/#support"><img src="docs/assets/support-qr.png" width="160" alt="QR code for lesspull.com/#support"></a><br>
   <sub>The same page, as a code for your phone. In the app: About → Support my work.</sub>
 </p>
 
@@ -286,7 +288,7 @@ See [testing](Source/TESTING.txt), the [release history](docs/1.4.4-19-release.t
 | :-- | :-- |
 | [Install](docs/INSTALL.md) | The Mac app, the browser extension, and troubleshooting |
 | [App and website exceptions](docs/EXCEPTIONS.md) | Scopes, inheritance, examples and limits |
-| [Night Shift and warmth](docs/NIGHT-SHIFT.md) | Following, overrides and timed pauses |
+| [Night Shift and warmth](docs/NIGHT-SHIFT.md) | Warmer at night, the night schedule and timed pauses |
 | [Privacy](docs/PRIVACY.md) | What is read, stored and logged |
 | [Licensing](docs/LICENSING.md) | What you may do, in a table |
 | [Customizing](docs/CUSTOMIZING.md) | Changing your copy, and what survives updates |
@@ -295,6 +297,6 @@ See [testing](Source/TESTING.txt), the [release history](docs/1.4.4-19-release.t
 ---
 
 <p align="center">
-  Made by <a href="https://jiriarion.com">Jiri Arion Rose</a>. If Less Pull helps you, you can <a href="https://buymeacoffee.com/HsERf62fiZ">buy me a coffee</a>.<br>
+  Made by <a href="https://jiriarion.com">Jiri Arion Rose</a> · <a href="https://lesspull.com">lesspull.com</a>. If Less Pull helps you, you can <a href="https://lesspull.com/#support">support my work</a>.<br>
   <sub>© 2026 Jiri Arion Rose</sub>
 </p>

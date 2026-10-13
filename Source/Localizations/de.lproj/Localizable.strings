@@ -636,8 +636,8 @@
 "Off, day and night. “Warmer at night” still warms the night without it." = "Aus, Tag und Nacht. „Wärmer bei Nacht“ wärmt die Nacht auch ohne Night Shift.";
 "On at night and off by day, on the schedule set in macOS." = "Nachts an und tagsüber aus, nach dem Zeitplan in macOS.";
 "On from %@ to %@, the night hours below, and off by day." = "An von %@ bis %@, den Nachtstunden unten, und tagsüber aus.";
-"Automatic: on at night and off by day, on the schedule set in macOS, or on the night hours in Less Pull when there is none. On and Off hold until you change them. In the menu, a click on Automatic lasts until day and night next turn." = "Automatisch: nachts an und tagsüber aus, nach dem Zeitplan in macOS oder, ohne Zeitplan, nach den Nachtstunden in Less Pull. Ein und Aus gelten, bis du sie änderst. Im Menü gilt ein Klick bei „Automatisch“ bis zum nächsten Wechsel von Tag und Nacht.";
-"Night Shift is Automatic, On or Off. Automatic is on at night and off by day: on the schedule set in macOS, or, without one, on the night hours in Less Pull. “Warmer at night” follows the same night and adds a few points to your Extra Warmth, even with Night Shift off. At the lock screen and screensaver, where Less Pull’s warmth cannot reach, Less Pull turns Night Shift on for the night." = "Night Shift steht auf Automatisch, Ein oder Aus. Automatisch ist nachts an und tagsüber aus: nach dem Zeitplan in macOS oder, ohne Zeitplan, nach den Nachtstunden in Less Pull. „Wärmer bei Nacht“ folgt derselben Nacht und legt ein paar Punkte auf deine Extra-Wärme, auch wenn Night Shift aus ist. Auf dem Sperrbildschirm und beim Bildschirmschoner, wo die Wärme von Less Pull nicht hinkommt, schaltet Less Pull nachts Night Shift ein.";
+"Automatic: on at night and off by day, as set under Night schedule in General. On and Off hold until you change them." = "Automatisch: nachts an und tagsüber aus, wie unter „Nacht-Zeitplan“ in „Allgemein“ eingestellt. Ein und Aus gelten, bis du sie änderst.";
+"Night Shift is Automatic, On or Off. Automatic is on at night and off by day, as set under Night schedule in General: Sunset to sunrise, or Custom hours. “Warmer at night” follows the same night and adds a few points to your Extra Warmth, even with Night Shift off. At the lock screen and screensaver, where Less Pull’s warmth cannot reach, Night Shift takes over at full warmth while Less Pull is quieting your screen." = "Night Shift steht auf Automatisch, Ein oder Aus. Automatisch ist nachts an und tagsüber aus, wie unter „Nacht-Zeitplan“ in „Allgemein“ eingestellt: „Sonnenuntergang bis Sonnenaufgang“ oder „Eigene Uhrzeiten“. „Wärmer bei Nacht“ folgt derselben Nacht und legt ein paar Punkte auf deine Extra-Wärme, auch wenn Night Shift aus ist. Auf dem Sperrbildschirm und beim Bildschirmschoner, wo die Wärme von Less Pull nicht hinkommt, übernimmt Night Shift mit voller Wärme, solange Less Pull deinen Bildschirm beruhigt.";
 "Skip" = "Überspringen";
 "Setup only" = "Nur Einrichtung";
 "Skips the tour and goes straight to connecting a browser for website exceptions." = "Überspringt die Tour und führt direkt zum Verbinden eines Browsers für Website-Ausnahmen.";
@@ -785,8 +785,8 @@
 "Find Grayscale and click Off. That’s color, for this app only." = "Such Graustufen und klick auf Aus. Das ist Farbe, nur für diese App.";
 "Fine by me. It waits under Settings → General, Night schedule." = "Mir recht. Es wartet unter Einstellungen → Allgemein, Nacht-Zeitplan.";
 "Firefox, for now: a temporary add-on. On that page, click Load Temporary Add-on…" = "Firefox, vorerst: ein temporäres Add-on. Klick auf der Seite auf Temporäres Add-on laden …";
-"First, the pull. Less Pull pauses for a moment: your screen without it." = "Zuerst der Sog. Less Pull pausiert kurz: dein Bildschirm ohne Less Pull.";
-"Full color. Everything on it wants a look. That’s the pull; I feel it too." = "Volle Farbe. Alles darauf will angeschaut werden. Das ist der Sog; ich spüre ihn auch.";
+"First, the pull. Less Pull pauses for a moment: your screen without it." = "Zuerst der Pull. Less Pull pausiert kurz: dein Bildschirm ohne Less Pull.";
+"Full color. Everything on it wants a look. That’s the pull; I feel it too." = "Volle Farbe. Alles darauf will angeschaut werden. Das ist der Pull; ich spüre ihn auch.";
 "Full screen. Big of you. The menu bar is hiding; the pointer at the top edge brings it back." = "Vollbild. Großzügig. Die Menüleiste versteckt sich oben; der Zeiger am oberen Rand holt sie zurück.";
 "General, near the bottom: Launch at login. Tick it." = "Allgemein, weiter unten: Bei der Anmeldung öffnen. Setz das Häkchen.";
 "Give it some Extra Warmth: drag the slider. Only this site gets it." = "Gib ihr etwas Extra-Wärme: Zieh den Regler. Nur diese Site bekommt sie.";
@@ -821,7 +821,7 @@
 "One to go." = "Noch einer.";
 "Only the address goes to Less Pull, never the page. Private tabs: not even that." = "Nur die Adresse geht an Less Pull, nie die Seite. Private Tabs: nicht mal die.";
 "Open any website in %@ and bring it to the front." = "Öffne irgendeine Website in %@ und hol sie nach vorne.";
-"Paused already? Handy. We start from the pull anyway." = "Schon pausiert? Praktisch. Wir fangen sowieso beim Sog an.";
+"Paused already? Handy. We start from the pull anyway." = "Schon pausiert? Praktisch. Wir fangen sowieso beim Pull an.";
 "Peek" = "Farbblick";
 "Peek has no shortcut yet. Want one? Less Pull can suggest keys nobody uses." = "Der Farbblick hat noch keinen Kurzbefehl. Willst du einen? Less Pull schlägt freie Tasten vor.";
 "Peek in color shortcut: click Suggest, or click the field and press your keys." = "Farbblick-Kurzbefehl: Klick auf Vorschlag, oder klick ins Feld und drück deine Tasten.";
@@ -851,12 +851,12 @@
 "The checkbox at the bottom of General: Launch at login." = "Das Häkchen unten unter Allgemein: Bei der Anmeldung öffnen.";
 "The circle, up in the menu bar. One click opens the menu." = "Der Kreis, oben in der Menüleiste. Ein Klick öffnet das Menü.";
 "The menu closed. Click the circle again, then %@." = "Das Menü ist zu. Klick nochmal auf den Kreis, dann %@.";
-"The pull" = "Der Sog";
+"The pull" = "Der Pull";
 "The real panel. Session or Break: a break calls you back. Once." = "Das echte Fenster. Sitzung oder Auszeit: Eine Auszeit holt dich zurück. Einmal.";
 "The slider, next to Extra Warmth. Drag it, any direction." = "Der Regler neben Extra-Wärme. Zieh ihn, egal wohin.";
 "The small button under Night schedule: Date & Time…" = "Der kleine Knopf unter Nacht-Zeitplan: Datum & Uhrzeit …";
-"There it goes. The color steps back, and the pull with it." = "Da geht er. Die Farbe tritt zurück, und der Sog mit ihr.";
-"There it goes. The screen warms up, and the pull eases." = "Da geht er. Der Bildschirm wird wärmer, und der Sog lässt nach.";
+"There it goes. The color steps back, and the pull with it." = "Da geht er. Die Farbe tritt zurück, und der Pull mit ihr.";
+"There it goes. The screen warms up, and the pull eases." = "Da geht er. Der Bildschirm wird wärmer, und der Pull lässt nach.";
 "There it is! Thank you. A door I can see: luxury." = "Da ist sie! Danke. Eine Tür, die ich sehen kann: Luxus.";
 "There. %@ in color, for as long as it’s in front." = "So. %@ in Farbe, solange die App vorne ist.";
 "Third poke. You’re thorough. I respect thorough." = "Dritter Stups. Du bist gründlich. Ich respektiere gründlich.";
@@ -922,7 +922,7 @@
 "First, bring out your icon" = "Hol zuerst dein Symbol hervor";
 "Start when it’s there" = "Starten, sobald er da ist";
 "Start anyway" = "Trotzdem starten";
-"Waiting for your icon…" = "Warte auf dein Symbol …";
+"Drag it next to the clock…" = "Neben die Uhr ziehen …";
 "The » shows the hidden icons; holding the Command key, the pointer drags the circle out toward the clock, and the other icons make room" = "Das » zeigt die versteckten Symbole; mit gedrückter Befehlstaste zieht der Zeiger den Kreis Richtung Uhr heraus, und die anderen Symbole machen Platz";
 "Show the hidden icons up there, then hold ⌘ and drag my circle toward the clock. Like this." = "Zeig oben die versteckten Symbole an, dann halt ⌘ und zieh meinen Kreis Richtung Uhr. So.";
 "A break instead: it calls you back once, when it’s over. I’ll end this one for the tour." = "Lieber eine Auszeit: Sie ruft dich einmal zurück, wenn sie um ist. Diese beende ich für die Tour.";

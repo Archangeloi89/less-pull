@@ -61,7 +61,7 @@ Simulates a display reset after a fade finishes. Checks persistent grayscale, tw
                       closes it, "closeSettings" closes Settings, "chip" starts a 25-minute session (on the tour: the five-second sample), and for
                       checking: "log" writes where the tip, the bubble, the ring, the menu and Settings are; "park" sends the guide to its spot by
                       the tour bar; "left" and "right" press ← and →; "tick0" ticks the first box of the question that is up, "answer0" presses its first button;
-                      "warmth" changes Extra Warmth (something to keep or put back); "startTour" presses Start on the welcome, "sheet1" answers its sheet with the first button, "logStart" writes the Start button and sheet state; "poke" clicks the guide, "resumeLP" resumes Less Pull; "helperBrowser", "helperOpera", "helperFirefox" and "helperSunset" start
+                      "warmth" changes Extra Warmth (something to keep or put back); "startTour" presses Start on the welcome, "sheet1" answers its sheet with the first button, "logStart" writes the Start button and sheet state; "poke" clicks the guide, "resumeLP" resumes Less Pull, "fakeMenu" makes the tour see the menu as open (or closed again) without opening it; "helperBrowser", "helperOpera", "helperFirefox" and "helperSunset" start
                       the helpers that Settings starts (Chrome's setup; Sunset to sunrise). The times run on a timer that also
                       fires while the menu is open.
 --test-quiet          the copy never takes the keyboard: it does not activate itself, nothing it shows becomes key, no global keys.

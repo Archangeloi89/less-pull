@@ -621,7 +621,7 @@
 "On a PC keyboard: ⌥ option is Alt, ⌘ command the Windows key." = "在 PC 键盘上：⌥ option 是 Alt，⌘ command 是 Windows 键。";
 "At night, Less Pull adds this many points to your Extra Warmth, and takes them away again in the morning. The slider stays your warmth for the whole day. Off adds nothing; Red makes the night red, whatever the warmth by day." = "到了夜里，Less Pull 在你的暖色上加这么多点，早上再撤掉。滑块始终是你一整天的暖色。“关”不加任何东西；“红”让夜晚变红，不管白天的暖色是多少。";
 "Adds warmth on top of Night Shift, from none to deep red, all day. At night, “Warmer at night” adds a little more." = "叠加在夜览之上的暖色，从无到深红，整天有效。夜里，“夜间更暖”再加一点。";
-"Automatic: on at night and off by day, on the schedule set in macOS, or on the night hours in Less Pull when there is none. On and Off hold until you change them. In the menu, a click on Automatic lasts until day and night next turn." = "自动：夜里开、白天关，按 macOS 中设定的时间表；没有时间表时，按 Less Pull 的夜间时段。“开”和“关”会一直保持到你更改。在菜单中点按“自动”，会一直有效到下一次昼夜交替。";
+"Automatic: on at night and off by day, as set under Night schedule in General. On and Off hold until you change them." = "自动：夜里开、白天关，按“通用”中“夜间时段”的设置。“开”和“关”会一直保持到你更改。";
 "Warmer at night: off" = "夜间更暖：关";
 "Red at night: now" = "夜间变红：现在";
 "Red at night" = "夜间变红";
@@ -677,7 +677,7 @@
 "Start anyway" = "仍然开始";
 "First, bring out your icon" = "先把图标找出来";
 "The tour starts at the Less Pull circle in the menu bar, and right now it’s hidden. Show the hidden menu-bar icons, then hold ⌘ and drag the circle all the way right, next to the clock: there macOS never hides it. The tour begins as soon as it’s there." = "导览从菜单栏中的 Less Pull 圆圈开始，而它现在被隐藏了。先显示菜单栏中隐藏的图标，再按住 ⌘ 把圆圈拖到最右边、时钟旁：在那里 macOS 从不隐藏它。它一到那里，导览就开始。";
-"Waiting for your icon…" = "正在等你的图标…";
+"Drag it next to the clock…" = "拖到时钟旁…";
 "Night schedule: %@ to %@" = "夜间时段：%@ 到 %@";
 "Night schedule: Sunset to sunrise" = "夜间时段：日落到日出";
 "Warmer at night: Red" = "夜间更暖：红";
@@ -704,7 +704,7 @@
 "Send feedback" = "发送反馈";
 "Without money" = "不花钱的方式";
 "A word to someone Less Pull might help, or feedback that makes it better." = "对可能用得上 Less Pull 的人说一句话，或给出让它更好的反馈。";
-"Night Shift is Automatic, On or Off. Automatic is on at night and off by day: on the schedule set in macOS, or, without one, on the night hours in Less Pull. “Warmer at night” follows the same night and adds a few points to your Extra Warmth, even with Night Shift off. At the lock screen and screensaver, where Less Pull’s warmth cannot reach, Less Pull turns Night Shift on for the night." = "夜览设为“自动”“开”或“关”。“自动”夜里开、白天关：按 macOS 中设定的时间表；没有时间表时，按 Less Pull 的夜间时段。“夜间更暖”跟随同一个夜晚，即使夜览关着，也会在你的暖色上加几点。在锁定屏幕和屏幕保护程序上，Less Pull 的暖色到不了，Less Pull 会在夜里打开夜览。";
+"Night Shift is Automatic, On or Off. Automatic is on at night and off by day, as set under Night schedule in General: Sunset to sunrise, or Custom hours. “Warmer at night” follows the same night and adds a few points to your Extra Warmth, even with Night Shift off. At the lock screen and screensaver, where Less Pull’s warmth cannot reach, Night Shift takes over at full warmth while Less Pull is quieting your screen." = "夜览设为“自动”“开”或“关”。“自动”夜里开、白天关，按“通用”中“夜间时段”的设置：“日落到日出”或“自定义时段”。“夜间更暖”跟随同一个夜晚，即使夜览关着，也会在你的暖色上加几点。在锁定屏幕和屏幕保护程序上，Less Pull 的暖色到不了；Less Pull 正在让屏幕安静时，由夜览接替，调到最暖。";
 "Less Pull %@ (%@)\n\n%@\n%@\nDisplays: %lu, each with its own matrix\nDisplay events: %lu; recoveries: %lu\nGrayscale setting: %@; grayscale showing now: %@; exception active: %@%@\n\n“Warmer at night” follows the night hours shown under General; it does not prove the display looks warmer." = "Less Pull %@ (%@)\n\n%@\n%@\n显示器：%lu 台，各有自己的矩阵\n显示器事件：%lu；恢复：%lu\n灰度设置：%@；当前显示灰度：%@；单独设置生效：%@%@\n\n“夜间更暖”跟随“通用”中显示的夜间时段；这并不证明显示器看起来更暖。";
 "Today about %@ to %@, worked out for your time zone." = "今天大约 %@ 到 %@，按你的时区算出。";
 "Every day from %@ to %@." = "每天 %@ 到 %@。";
