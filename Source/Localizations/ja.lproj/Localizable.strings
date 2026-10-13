@@ -719,7 +719,7 @@
 "Extra Warmth · +%ld at night" = "暖かさ · 夜は +%ld";
 "At night, Less Pull adds this much warmth on top of yours. Night Shift itself can stay off." = "夜になると、Less Pull はこの分の暖かさをあなたの暖かさに足します。Night Shift 自体はオフのままでもかまいません。";
 "+%ld points" = "+%ld ポイント";
-"The pull" = "引き寄せる力";
+"The pull" = "Pull";
 "Peek" = "ひと目";
 "Sessions & nights" = "セッションと夜";
 "Your turn" = "あなたの番";
@@ -820,9 +820,9 @@
 "← and → go one line back or on: here, or on your keyboard. Handy if I’m too quick." = "← と → でひとこと戻ったり進んだり。ここでも、キーボードでも。わたしが速すぎるときに便利です。";
 "End tour sends me home at once." = "「ツアーを終わる」で、わたしはすぐ家に帰ります。";
 "One promise: this is a playing field. At the end, you pick what stays; the rest goes back." = "ひとつ約束します。ここは遊び場です。最後に残すものをあなたが選び、ほかは元に戻ります。";
-"Paused already? Handy. We start from the pull anyway." = "もう一時停止中ですか？ちょうどいい。どのみち、引き寄せる力から始めます。";
-"First, the pull. Less Pull pauses for a moment: your screen without it." = "まずは、引き寄せる力。Less Pull を少しだけ止めます。Less Pull のない、あなたの画面です。";
-"Full color. Everything on it wants a look. That’s the pull; I feel it too." = "フルカラー。どれもが見てほしがっています。これが引き寄せる力。わたしも感じます。";
+"Paused already? Handy. We start from the pull anyway." = "もう一時停止中ですか？ちょうどいい。どのみち、Pull から始めます。";
+"First, the pull. Less Pull pauses for a moment: your screen without it." = "まずは、Pull。Less Pull を少しだけ止めます。Less Pull のない、あなたの画面です。";
+"Full color. Everything on it wants a look. That’s the pull; I feel it too." = "フルカラー。どれもが見てほしがっています。これが Pull。わたしも感じます。";
 "Hm. My door is behind the notch. Of all the places." = "うーん。わたしのドアはノッチの裏です。よりによって。";
 "Hm. My door is hidden. Your menu bar is full." = "うーん。わたしのドアが隠れています。メニューバーがいっぱいです。";
 "Show the hidden icons up there, then hold ⌘ and drag my circle toward the clock. Like this." = "上で隠れたアイコンを表示して、⌘ を押したまま、わたしの円を時計のほうへドラッグしてください。こんなふうに。";
@@ -835,9 +835,9 @@
 "It’s up there somewhere, hiding. Anyway: that circle is Less Pull, and my door." = "上のどこかに隠れています。とにかく、あの円が Less Pull で、わたしのドアです。";
 "Your turn: click the circle. The menu drops out of it." = "あなたの番です：円をクリックしてください。メニューがそこから出てきます。";
 "The amber dot is mine: it marks what to pick. Here: Resume Less Pull." = "琥珀色の点はわたしのものです。選ぶものの目印です。ここでは「Less Pull を再開」。";
-"There it goes. The color steps back, and the pull with it." = "ほら。色が一歩下がり、引き寄せる力も一緒に下がります。";
-"There it goes. The screen warms up, and the pull eases." = "ほら。画面が暖かくなり、引き寄せる力がゆるみます。";
-"Nothing is gone. It just pulls at you less." = "何もなくなっていません。ただ、引き寄せる力が弱くなっただけです。";
+"There it goes. The color steps back, and the pull with it." = "ほら。色が一歩下がり、Pull も一緒に下がります。";
+"There it goes. The screen warms up, and the pull eases." = "ほら。画面が暖かくなり、Pull がゆるみます。";
+"Nothing is gone. Just less pull." = "何もなくなっていません。Pull が少なくなっただけです。";
 "Again, please: click the circle. In the menu, Extra Warmth has a slider." = "もう一度、お願いします：円をクリック。メニューの「暖かさ」にスライダーがあります。";
 "Drag it toward Red. I’ll go with it; watch my tag." = "「赤」のほうへドラッグしてください。一緒に行きます。わたしの名札を見ていてください。";
 "Other way: toward Red, to the right. Either works, though." = "逆です：「赤」は右のほう。でも、どちらでもかまいません。";

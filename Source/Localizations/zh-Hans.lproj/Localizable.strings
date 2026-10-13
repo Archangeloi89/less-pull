@@ -719,7 +719,7 @@
 "Extra Warmth · +%ld at night" = "暖色 · 夜间 +%ld";
 "At night, Less Pull adds this much warmth on top of yours. Night Shift itself can stay off." = "到了夜里，Less Pull 会在你的暖色上再加这么多。夜览本身可以一直关着。";
 "+%ld points" = "+%ld 点";
-"The pull" = "吸引力";
+"The pull" = "Pull";
 "Peek" = "一瞥";
 "Sessions & nights" = "专注与夜晚";
 "Your turn" = "轮到你了";
@@ -820,9 +820,9 @@
 "← and → go one line back or on: here, or on your keyboard. Handy if I’m too quick." = "← 和 → 退回或前进一句：在这里，或者用你的键盘。我说太快时很方便。";
 "End tour sends me home at once." = "“结束导览”会让我马上回家。";
 "One promise: this is a playing field. At the end, you pick what stays; the rest goes back." = "先说好一件事：这是一片游乐场。到最后，由你决定留下什么；其余的都会恢复原样。";
-"Paused already? Handy. We start from the pull anyway." = "已经暂停了？正好。反正我们从吸引力开始。";
-"First, the pull. Less Pull pauses for a moment: your screen without it." = "先来看吸引力。Less Pull 暂停一会儿：这是没有它的你的屏幕。";
-"Full color. Everything on it wants a look. That’s the pull; I feel it too." = "满满的颜色。上面的一切都想被看一眼。这就是吸引力；我也感觉到了。";
+"Paused already? Handy. We start from the pull anyway." = "已经暂停了？正好。反正我们从 Pull 开始。";
+"First, the pull. Less Pull pauses for a moment: your screen without it." = "先来看 Pull。Less Pull 暂停一会儿：这是没有它的你的屏幕。";
+"Full color. Everything on it wants a look. That’s the pull; I feel it too." = "满满的颜色。上面的一切都想被看一眼。这就是 Pull；我也感觉到了。";
 "Hm. My door is behind the notch. Of all the places." = "嗯。我的门在刘海后面。偏偏在那儿。";
 "Hm. My door is hidden. Your menu bar is full." = "嗯。我的门被藏起来了。你的菜单栏满了。";
 "Show the hidden icons up there, then hold ⌘ and drag my circle toward the clock. Like this." = "先在上面显示隐藏的图标，再按住 ⌘ 把我的圆圈拖向时钟。像这样。";
@@ -835,9 +835,9 @@
 "It’s up there somewhere, hiding. Anyway: that circle is Less Pull, and my door." = "它就躲在上面某个地方。总之：那个圆圈就是 Less Pull，也是我的门。";
 "Your turn: click the circle. The menu drops out of it." = "轮到你了：点按圆圈。菜单会从里面落下来。";
 "The amber dot is mine: it marks what to pick. Here: Resume Less Pull." = "那个琥珀色圆点是我的：它标出要选的项目。这里是：继续 Less Pull。";
-"There it goes. The color steps back, and the pull with it." = "看，颜色退开了，吸引力也跟着退开。";
-"There it goes. The screen warms up, and the pull eases." = "看，屏幕变暖了，吸引力也松开了。";
-"Nothing is gone. It just pulls at you less." = "什么都没少。只是它不那么拉扯你了。";
+"There it goes. The color steps back, and the pull with it." = "看，颜色退开了，Pull 也跟着退开。";
+"There it goes. The screen warms up, and the pull eases." = "看，屏幕变暖了，Pull 也松开了。";
+"Nothing is gone. Just less pull." = "什么都没少。只是 Pull 少了。";
 "Again, please: click the circle. In the menu, Extra Warmth has a slider." = "请再来一次：点按圆圈。菜单里的“暖色”有一个滑块。";
 "Drag it toward Red. I’ll go with it; watch my tag." = "把它往“红”那边拖。我跟着走；看我的名牌。";
 "Other way: toward Red, to the right. Either works, though." = "反方向：往“红”，向右。不过两边都行。";

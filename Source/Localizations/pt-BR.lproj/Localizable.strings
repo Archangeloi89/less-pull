@@ -719,7 +719,7 @@
 "Extra Warmth · +%ld at night" = "Calor extra · +%ld à noite";
 "At night, Less Pull adds this much warmth on top of yours. Night Shift itself can stay off." = "À noite, o Less Pull soma este calor ao seu. O próprio Night Shift pode ficar desligado.";
 "+%ld points" = "+%ld pontos";
-"The pull" = "A atração";
+"The pull" = "O Pull";
 "Peek" = "Olhada";
 "Sessions & nights" = "Sessões e noites";
 "Your turn" = "Sua vez";
@@ -820,9 +820,9 @@
 "← and → go one line back or on: here, or on your keyboard. Handy if I’m too quick." = "← e → voltam ou avançam uma frase: aqui ou no seu teclado. Útil se eu for rápido demais.";
 "End tour sends me home at once." = "Encerrar o tour me manda para casa na hora.";
 "One promise: this is a playing field. At the end, you pick what stays; the rest goes back." = "Uma promessa: isto é um campo de testes. No fim, você escolhe o que fica; o resto volta ao que era.";
-"Paused already? Handy. We start from the pull anyway." = "Já pausado? Ótimo. Começamos pela atração mesmo.";
-"First, the pull. Less Pull pauses for a moment: your screen without it." = "Primeiro, a atração. O Less Pull pausa por um momento: sua tela sem ele.";
-"Full color. Everything on it wants a look. That’s the pull; I feel it too." = "Cor total. Tudo nela quer um olhar. Essa é a atração; eu também sinto.";
+"Paused already? Handy. We start from the pull anyway." = "Já pausado? Ótimo. Começamos pelo Pull mesmo.";
+"First, the pull. Less Pull pauses for a moment: your screen without it." = "Primeiro, o Pull. O Less Pull pausa por um momento: sua tela sem ele.";
+"Full color. Everything on it wants a look. That’s the pull; I feel it too." = "Cor total. Tudo nela quer um olhar. Esse é o Pull; eu também sinto.";
 "Hm. My door is behind the notch. Of all the places." = "Hum. Minha porta está atrás do entalhe. Logo ali.";
 "Hm. My door is hidden. Your menu bar is full." = "Hum. Minha porta está escondida. Sua barra de menus está cheia.";
 "Show the hidden icons up there, then hold ⌘ and drag my circle toward the clock. Like this." = "Mostre lá em cima os ícones ocultos, depois segure ⌘ e arraste meu círculo para o relógio. Assim.";
@@ -835,9 +835,9 @@
 "It’s up there somewhere, hiding. Anyway: that circle is Less Pull, and my door." = "Está lá em cima em algum lugar, escondido. Enfim: esse círculo é o Less Pull, e a minha porta.";
 "Your turn: click the circle. The menu drops out of it." = "Sua vez: clique no círculo. O menu sai dele.";
 "The amber dot is mine: it marks what to pick. Here: Resume Less Pull." = "O ponto âmbar é meu: ele marca o que escolher. Aqui: Retomar o Less Pull.";
-"There it goes. The color steps back, and the pull with it." = "Lá vai. A cor dá um passo atrás, e a atração junto.";
-"There it goes. The screen warms up, and the pull eases." = "Lá vai. A tela esquenta, e a atração afrouxa.";
-"Nothing is gone. It just pulls at you less." = "Nada sumiu. Só puxa menos você.";
+"There it goes. The color steps back, and the pull with it." = "Lá vai. A cor dá um passo atrás, e o Pull junto.";
+"There it goes. The screen warms up, and the pull eases." = "Lá vai. A tela esquenta, e o Pull afrouxa.";
+"Nothing is gone. Just less pull." = "Nada sumiu. Só menos Pull.";
 "Again, please: click the circle. In the menu, Extra Warmth has a slider." = "De novo, por favor: clique no círculo. No menu, Calor extra tem um controle deslizante.";
 "Drag it toward Red. I’ll go with it; watch my tag." = "Arraste para o Vermelho. Eu vou junto; olhe minha etiqueta.";
 "Other way: toward Red, to the right. Either works, though." = "Para o outro lado: rumo ao Vermelho, à direita. Mas os dois funcionam.";

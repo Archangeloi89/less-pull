@@ -492,11 +492,12 @@ static void drawKey(NSRect f,NSString *label,double pressed){NSRect r=NSOffsetRe
   // the Peek shortcut on the keyboard: the bottom row's modifier keys (the ones to hold lit), and the letter; held together
   NSDictionary *pk=[NSUserDefaults.standardUserDefaults dictionaryForKey:@"peekShortcut"];NSInteger code=[pk[@"keyCode"] integerValue];NSEventModifierFlags mods=pk?(NSEventModifierFlags)[pk[@"modifiers"] integerValue]:NSEventModifierFlagOption;
   NSString *letter=pk?[PeekShortcut labelForKeyCode:code modifiers:0]:@"A";double press=seg(t,.1,.16)*(1-seg(t,.8,.86));BOOL twice=self.kind==TourSceneKeysTwice;
-  if(twice){double tap1=seg(t,.08,.11)*(1-seg(t,.15,.18)),tap2=seg(t,.22,.25)*(1-seg(t,.29,.32)),tap3=seg(t,.7,.73)*(1-seg(t,.77,.8));press=MAX(MAX(tap1,tap2),tap3);}  // tap, tap: it stays; later, tap: quiet
+  double held=press;if(twice){double tap1=seg(t,.08,.11)*(1-seg(t,.15,.18)),tap2=seg(t,.22,.25)*(1-seg(t,.29,.32)),tap3=seg(t,.7,.73)*(1-seg(t,.77,.8));press=MAX(MAX(tap1,tap2),tap3);
+   held=MAX(seg(t,.03,.06)*(1-seg(t,.36,.39)),seg(t,.65,.68)*(1-seg(t,.83,.86)));}  // twice: the modifier stays held, only the letter taps (tap, tap: it stays; later, tap: quiet)
   CGFloat x=14,y=50,w=52,h=44;
-  if(mods&NSEventModifierFlagShift){drawCap(NSMakeRect(x,y+h+8,84,h*.8),@"⇧",L(@"shift"),YES,press);}
+  if(mods&NSEventModifierFlagShift){drawCap(NSMakeRect(x,y+h+8,84,h*.8),@"⇧",L(@"shift"),YES,held);}
   for(NSArray *k in @[@[@"fn",@"",@0],@[@"⌃",L(@"control"),@(NSEventModifierFlagControl)],@[@"⌥",L(@"option"),@(NSEventModifierFlagOption)],@[@"⌘",L(@"command"),@(NSEventModifierFlagCommand)]]){
-   NSUInteger flag=[k[2] unsignedIntegerValue];BOOL lit=flag&&(mods&flag);drawCap(NSMakeRect(x,y,w,h),k[0],k[1],lit,lit?press:0);x+=w+6;}
+   NSUInteger flag=[k[2] unsignedIntegerValue];BOOL lit=flag&&(mods&flag);drawCap(NSMakeRect(x,y,w,h),k[0],k[1],lit,lit?held:0);x+=w+6;}
   NSDictionary *plus=@{NSFontAttributeName:[NSFont systemFontOfSize:18 weight:NSFontWeightLight],NSForegroundColorAttributeName:Ink(.55)};[@"+" drawAtPoint:NSMakePoint(x+4,y+h/2-11) withAttributes:plus];
   drawCap(NSMakeRect(x+28,y,w,h),letter,@"",YES,press);
   NSDictionary *cap=@{NSFontAttributeName:[NSFont systemFontOfSize:10.5],NSForegroundColorAttributeName:Ink(.6)};NSString *hold=twice?(t<.07?L(@"twice, quickly"):t<.7?L(@"kept: color"):L(@"once more: quiet")):press>.5?L(@"held: color"):L(@"hold both");NSSize hs=[hold sizeWithAttributes:cap];[hold drawAtPoint:NSMakePoint(x+28+w/2-hs.width/2,y-18) withAttributes:cap];
@@ -2743,6 +2744,7 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
 - (void)guideDo:(NSString *)action with:(id)argument {
  if([action isEqual:@"pause"]){if(!self.pausedUntil)[self pauseLessPullForMinutes:0];return;}
  if([action isEqual:@"resume"]){if(self.pausedUntil)[self resumeLessPull:nil];return;}
+ if([action isEqual:@"settingsToFront"]){if(self.settings.visible){LPActivate();[self.settings orderFrontRegardless];}return;}  // the guide asks for a click in Settings: it comes forward once, not for good
  if([action isEqual:@"iconArrow"]){[self showIconArrow:[argument boolValue]&&[self iconFarFromClock]];return;}  // the way to the clock, while the guide says it
  if([action isEqual:@"setWarmth"]){double v=MAX(0,MIN(100,[argument doubleValue]));NSSlider *s=[NSSlider sliderWithValue:v minValue:0 maxValue:100 target:nil action:nil];self.menuWarmthSlider.doubleValue=v;[self warmthChanged:s];return;}  // the tour brings the warmth back from Red, as the slider would
  if([action isEqual:@"mark"]){NSString *mark=[argument isKindOfClass:NSString.class]?argument:nil;if(mark==self.tourMenuMark||[mark isEqual:self.tourMenuMark])return;self.tourMenuMark=mark;if(self.statusMenuOpen)[self markTourItemIn:self.statusMenu];return;}  // an open menu shows it at once

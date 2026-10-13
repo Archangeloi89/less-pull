@@ -719,7 +719,7 @@
 "Extra Warmth · +%ld at night" = "Тепло · уночі +%ld";
 "At night, Less Pull adds this much warmth on top of yours. Night Shift itself can stay off." = "Уночі Less Pull додає стільки тепла до вашого. Сам Night Shift може лишатися вимкненим.";
 "+%ld points" = "+%ld";
-"The pull" = "Притягання";
+"The pull" = "Pull";
 "Peek" = "Погляд";
 "Sessions & nights" = "Сесії й ночі";
 "Your turn" = "Ваш хід";
@@ -820,9 +820,9 @@
 "← and → go one line back or on: here, or on your keyboard. Handy if I’m too quick." = "← і → переходять на фразу назад або вперед: тут або на клавіатурі. Зручно, якщо я надто швидкий.";
 "End tour sends me home at once." = "«Завершити тур» одразу відправляє мене додому.";
 "One promise: this is a playing field. At the end, you pick what stays; the rest goes back." = "Одна обіцянка: це ігровий майданчик. Наприкінці ви вибираєте, що залишиться; решта повернеться як було.";
-"Paused already? Handy. We start from the pull anyway." = "Уже на паузі? Зручно. Ми однаково починаємо з притягання.";
-"First, the pull. Less Pull pauses for a moment: your screen without it." = "Спершу притягання. Less Pull ненадовго призупиняється: ваш екран без нього.";
-"Full color. Everything on it wants a look. That’s the pull; I feel it too." = "Повний колір. Усе на ньому просить погляду. Це і є притягання; я його теж відчуваю.";
+"Paused already? Handy. We start from the pull anyway." = "Уже на паузі? Зручно. Ми однаково починаємо з Pull.";
+"First, the pull. Less Pull pauses for a moment: your screen without it." = "Спершу Pull. Less Pull ненадовго призупиняється: ваш екран без нього.";
+"Full color. Everything on it wants a look. That’s the pull; I feel it too." = "Повний колір. Усе на ньому просить погляду. Це і є Pull; я його теж відчуваю.";
 "Hm. My door is behind the notch. Of all the places." = "Гм. Мої двері за вирізом. Саме там.";
 "Hm. My door is hidden. Your menu bar is full." = "Гм. Мої двері приховані. Ваша смуга меню переповнена.";
 "Show the hidden icons up there, then hold ⌘ and drag my circle toward the clock. Like this." = "Покажіть угорі приховані значки, утримуйте ⌘ і перетягніть моє коло до годинника. Ось так.";
@@ -835,9 +835,9 @@
 "It’s up there somewhere, hiding. Anyway: that circle is Less Pull, and my door." = "Воно десь там угорі, ховається. Загалом: це коло — Less Pull і мої двері.";
 "Your turn: click the circle. The menu drops out of it." = "Ваш хід: натисніть на коло. З нього випадає меню.";
 "The amber dot is mine: it marks what to pick. Here: Resume Less Pull." = "Бурштинова крапка — моя: вона позначає, що вибрати. Тут: «Продовжити Less Pull».";
-"There it goes. The color steps back, and the pull with it." = "Ось так. Колір відступає, а з ним і притягання.";
-"There it goes. The screen warms up, and the pull eases." = "Ось так. Екран теплішає, і притягання слабшає.";
-"Nothing is gone. It just pulls at you less." = "Нічого не зникло. Просто він менше вас притягує.";
+"There it goes. The color steps back, and the pull with it." = "Ось так. Колір відступає, а з ним і Pull.";
+"There it goes. The screen warms up, and the pull eases." = "Ось так. Екран теплішає, і Pull слабшає.";
+"Nothing is gone. Just less pull." = "Нічого не зникло. Просто менше Pull.";
 "Again, please: click the circle. In the menu, Extra Warmth has a slider." = "Ще раз, будь ласка: натисніть на коло. У меню в «Тепла» є повзунок.";
 "Drag it toward Red. I’ll go with it; watch my tag." = "Тягніть його до «Червоного». Я піду з ним; стежте за моєю табличкою.";
 "Other way: toward Red, to the right. Either works, though." = "В інший бік: до «Червоного», праворуч. Хоча годиться і так, і так.";

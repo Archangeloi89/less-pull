@@ -719,7 +719,7 @@
 "Extra Warmth · +%ld at night" = "Extra warmte · ’s nachts +%ld";
 "At night, Less Pull adds this much warmth on top of yours. Night Shift itself can stay off." = "’s Nachts telt Less Pull zoveel warmte op bij die van jou. Night Shift zelf mag uit blijven.";
 "+%ld points" = "+%ld punten";
-"The pull" = "De aantrekkingskracht";
+"The pull" = "De Pull";
 "Peek" = "Kleurblik";
 "Sessions & nights" = "Sessies en nachten";
 "Your turn" = "Jouw beurt";
@@ -820,9 +820,9 @@
 "← and → go one line back or on: here, or on your keyboard. Handy if I’m too quick." = "← en → gaan een zin terug of verder: hier, of op je toetsenbord. Handig als ik te snel ga.";
 "End tour sends me home at once." = "Stop de tour stuurt me meteen naar huis.";
 "One promise: this is a playing field. At the end, you pick what stays; the rest goes back." = "Eén belofte: dit is een speelveld. Aan het eind kies jij wat blijft; de rest gaat terug.";
-"Paused already? Handy. We start from the pull anyway." = "Al gepauzeerd? Handig. We beginnen toch bij de aantrekkingskracht.";
-"First, the pull. Less Pull pauses for a moment: your screen without it." = "Eerst de aantrekkingskracht. Less Pull pauzeert even: je scherm zonder.";
-"Full color. Everything on it wants a look. That’s the pull; I feel it too." = "Volle kleur. Alles erop wil bekeken worden. Dat is de aantrekkingskracht; ik voel hem ook.";
+"Paused already? Handy. We start from the pull anyway." = "Al gepauzeerd? Handig. We beginnen toch bij de Pull.";
+"First, the pull. Less Pull pauses for a moment: your screen without it." = "Eerst de Pull. Less Pull pauzeert even: je scherm zonder.";
+"Full color. Everything on it wants a look. That’s the pull; I feel it too." = "Volle kleur. Alles erop wil bekeken worden. Dat is de Pull; ik voel hem ook.";
 "Hm. My door is behind the notch. Of all the places." = "Hm. Mijn deur zit achter de inkeping. Uitgerekend daar.";
 "Hm. My door is hidden. Your menu bar is full." = "Hm. Mijn deur is verborgen. Je menubalk is vol.";
 "Show the hidden icons up there, then hold ⌘ and drag my circle toward the clock. Like this." = "Toon daarboven de verborgen symbolen, houd ⌘ ingedrukt en sleep mijn cirkel naar de klok. Zo.";
@@ -835,9 +835,9 @@
 "It’s up there somewhere, hiding. Anyway: that circle is Less Pull, and my door." = "Hij zit daarboven ergens verstopt. Hoe dan ook: die cirkel is Less Pull, en mijn deur.";
 "Your turn: click the circle. The menu drops out of it." = "Jouw beurt: klik op de cirkel. Het menu komt eruit.";
 "The amber dot is mine: it marks what to pick. Here: Resume Less Pull." = "De amberkleurige stip is van mij: hij wijst aan wat je kiest. Hier: Less Pull hervatten.";
-"There it goes. The color steps back, and the pull with it." = "Daar gaat hij. De kleur doet een stap terug, en de aantrekkingskracht mee.";
-"There it goes. The screen warms up, and the pull eases." = "Daar gaat hij. Het scherm wordt warmer, en de aantrekkingskracht zakt.";
-"Nothing is gone. It just pulls at you less." = "Er is niets weg. Het trekt alleen minder aan je.";
+"There it goes. The color steps back, and the pull with it." = "Daar gaat hij. De kleur doet een stap terug, en de Pull mee.";
+"There it goes. The screen warms up, and the pull eases." = "Daar gaat hij. Het scherm wordt warmer, en de Pull zakt.";
+"Nothing is gone. Just less pull." = "Er is niets weg. Alleen minder Pull.";
 "Again, please: click the circle. In the menu, Extra Warmth has a slider." = "Nog eens, alsjeblieft: klik op de cirkel. In het menu heeft Extra warmte een schuifknop.";
 "Drag it toward Red. I’ll go with it; watch my tag." = "Sleep hem naar Rood. Ik ga mee; let op mijn label.";
 "Other way: toward Red, to the right. Either works, though." = "Andersom: naar Rood, naar rechts. Al werkt het allebei.";
