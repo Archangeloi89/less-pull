@@ -53,6 +53,8 @@ Simulates a display reset after a fade finishes. Checks persistent grayscale, tw
                       Without --start-tour too: "appPanel" / "sitePanel" open the exception panel for the app or site in front, "logPanel" writes
                       where its Extra Warmth slider is (top-left coordinates, for a CGEvent drag) and the rule's warmth, "frame:KEY" writes guideFrame:KEY,
                       "warmthTo:N" sets Extra Warmth to N percent, "rebuild" rebuilds the exception lists and the panel (it waits while a mouse button is down).
+                      "fakeSitePanel" opens a website panel for example.com from a made-up Brave tab (no browser needed); "fakeContext" sends
+                      that tab's heartbeat, as a browser does every few seconds (each one used to rebuild the panel).
                       (a jump during the knock waits until the cursor is out). Also what a user would do: "menu" opens the status menu, "menuclose"
                       closes it, "closeSettings" closes Settings, "chip" starts a 25-minute session (on the tour: the five-second sample), and for
                       checking: "log" writes where the tip, the bubble, the ring, the menu and Settings are; "park" sends the guide to its spot by
@@ -60,6 +62,8 @@ Simulates a display reset after a fade finishes. Checks persistent grayscale, tw
                       "warmth" changes Extra Warmth (something to keep or put back); "startTour" presses Start on the welcome, "sheet1" answers its sheet with the first button, "logStart" writes the Start button and sheet state; "poke" clicks the guide, "resumeLP" resumes Less Pull; "helperBrowser", "helperOpera", "helperFirefox" and "helperSunset" start
                       the helpers that Settings starts (Chrome's setup; Sunset to sunrise). The times run on a timer that also
                       fires while the menu is open.
+--test-quiet          the copy never takes the keyboard: it does not activate itself, nothing it shows becomes key, no global keys.
+                      Use it for every automated run while someone works at the Mac (a copy with the keyboard beeps at each key typed).
 --tour-no-borrow      a hands-off copy keeps its hands off the screen and the browsers during its tour too (the installed app keeps both): for tests beside real work.
                       Without it, a copy's tour (and its browser guide) asks the installed Less Pull to quit, takes the screen and the browsers' socket,
                       and starts the installed app again at the end; a watcher starts it if the copy crashes or is killed meanwhile.

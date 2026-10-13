@@ -22,6 +22,12 @@ extern BOOL LessPullHandsOff,LessPullBorrowScreen;
 // A copy beside the installed app (the demo, a test build: any other bundle id) says so after its build number, so it is
 // never taken for the real Less Pull. The installed app says nothing extra.
 static NSString *LPCopyKind(void){NSString *b=NSBundle.mainBundle.bundleIdentifier?:@"";if([b isEqual:@"com.jiriarion.lesspull"])return nil;return [b hasSuffix:@".demo"]?L(@"Demo"):L(@"Test");}
+// --test-quiet: an automated test beside real work never takes the keyboard. It does not activate itself, nothing it shows
+// becomes key, and it registers no global keys, so what you type keeps going where you type it. (A test copy that took
+// the keyboard answered every key you typed with the alert sound.)
+static BOOL LPQuiet(void){static BOOL q;static dispatch_once_t once;dispatch_once(&once,^{q=[NSProcessInfo.processInfo.arguments containsObject:@"--test-quiet"];});return q;}
+static void LPActivate(void){if(!LPQuiet())[NSApp activateIgnoringOtherApps:YES];}
+static void LPShowWindow(NSWindow *w){if(LPQuiet())[w orderFrontRegardless];else [w makeKeyAndOrderFront:nil];}
 // The settings a tour can change: kept aside when it starts, put back unless you keep them (see beginPlayingField).
 static NSArray<NSString *> *LPPlayingFieldKeys(void){return @[@"warmth",@"warmthColor",@"warmthGrayscale",@"manualMode",@"nightMode",@"overrideMode",@"automatic",@"displayModes",@"appExclusions",@"websiteRules",@"lessPullPause",@"grayscaleOff",@"nightShiftPause",@"nightShiftMode",@"nightHours",@"nightStart",@"nightEnd",@"nightBoost",@"peekEffects",@"peekActiveDisplayOnly",@"peekShortcut",@"grayscaleShortcut"];}
 static NSDictionary *LPStoredSettings(void){NSString *bid=NSBundle.mainBundle.bundleIdentifier?:NSProcessInfo.processInfo.processName;return [NSUserDefaults.standardUserDefaults persistentDomainForName:bid]?:@{};}  // a test tool keeps its settings under its own name
@@ -930,7 +936,7 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  NSRect anchor=self.item.button.window.frame;NSRect frame=NSMakeRect(NSMidX(anchor)-size.width/2,anchor.origin.y-size.height-6,size.width,size.height);NSScreen *screen=self.item.button.window.screen?:NSScreen.mainScreen;if(NSMaxX(frame)>NSMaxX(screen.visibleFrame)-8)frame.origin.x=NSMaxX(screen.visibleFrame)-8-size.width;if(frame.origin.x<screen.visibleFrame.origin.x+8)frame.origin.x=screen.visibleFrame.origin.x+8;
  BOOL reduce=NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceMotion;BOOL wasVisible=self.exceptionPanel.visible;
  [self.exceptionPanel setFrame:frame display:YES];
- if(!wasVisible){self.exceptionPanel.alphaValue=reduce?1:0;[self.exceptionPanel makeKeyAndOrderFront:nil];if(!reduce)[NSAnimationContext runAnimationGroup:^(NSAnimationContext *c){c.duration=.2;self.exceptionPanel.animator.alphaValue=1;} completionHandler:nil];
+ if(!wasVisible){self.exceptionPanel.alphaValue=reduce?1:0;LPShowWindow(self.exceptionPanel);if(!reduce)[NSAnimationContext runAnimationGroup:^(NSAnimationContext *c){c.duration=.2;self.exceptionPanel.animator.alphaValue=1;} completionHandler:nil];
   __weak AppDelegate *weak=self;self.exceptionClickMonitor=[NSEvent addGlobalMonitorForEventsMatchingMask:NSEventMaskLeftMouseDown|NSEventMaskRightMouseDown handler:^(NSEvent *e){[weak closeExceptionPanel];}];
   self.exceptionKeyMonitor=[NSEvent addLocalMonitorForEventsMatchingMask:NSEventMaskKeyDown handler:^NSEvent *(NSEvent *e){if(e.keyCode==53){[weak closeExceptionPanel];return nil;}return e;}];}
 }
@@ -1602,7 +1608,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
 // Tolerates numbers stored as strings (hand-edited preferences) by reading through integerValue.
 - (NSDictionary *)shortcutForKey:(NSString *)key {NSDictionary *s=[NSUserDefaults.standardUserDefaults dictionaryForKey:key];if(![s[@"keyCode"] respondsToSelector:@selector(integerValue)]||![s[@"modifiers"] respondsToSelector:@selector(integerValue)])return nil;NSInteger code=[s[@"keyCode"] integerValue];NSEventModifierFlags mods=(NSEventModifierFlags)[s[@"modifiers"] integerValue];return [PeekShortcut isValidKeyCode:code modifiers:mods]?@{@"keyCode":@(code),@"modifiers":@(mods)}:nil;}
 - (NSDictionary *)peekShortcut {return [self shortcutForKey:@"peekShortcut"];}
-- (EventHotKeyRef)registerShortcut:(NSDictionary *)s identifier:(UInt32)identifier {if(!s)return NULL;EventHotKeyID hotKeyID={.signature='LsPl',.id=identifier};EventHotKeyRef ref=NULL;return RegisterEventHotKey((UInt32)[s[@"keyCode"] integerValue],[PeekShortcut carbonModifiers:[s[@"modifiers"] integerValue]],hotKeyID,GetApplicationEventTarget(),0,&ref)==noErr?ref:NULL;}
+- (EventHotKeyRef)registerShortcut:(NSDictionary *)s identifier:(UInt32)identifier {if(!s||LPQuiet())return NULL;EventHotKeyID hotKeyID={.signature='LsPl',.id=identifier};EventHotKeyRef ref=NULL;return RegisterEventHotKey((UInt32)[s[@"keyCode"] integerValue],[PeekShortcut carbonModifiers:[s[@"modifiers"] integerValue]],hotKeyID,GetApplicationEventTarget(),0,&ref)==noErr?ref:NULL;}
 - (void)registerPeekShortcut {
  static BOOL installed=NO;if(!installed){installed=YES;EventTypeSpec kinds[2]={{kEventClassKeyboard,kEventHotKeyPressed},{kEventClassKeyboard,kEventHotKeyReleased}};InstallApplicationEventHandler(PeekHotKeyHandler,2,kinds,(__bridge void *)self,NULL);}
  if(self.peekHotKey){UnregisterEventHotKey(self.peekHotKey);self.peekHotKey=NULL;}if(self.grayscaleHotKey){UnregisterEventHotKey(self.grayscaleHotKey);self.grayscaleHotKey=NULL;}self.peekLocked=NO;self.peekIgnoreRelease=NO;self.peeking=NO;
@@ -1672,7 +1678,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
 }
 - (NSString *)updateLabel:(NSDictionary *)update {return [update[@"build"] integerValue]?[NSString stringWithFormat:L(@"Version %@ (build %@)"),update[@"version"],[update[@"buildLabel"] length]?update[@"buildLabel"]:[NSString stringWithFormat:@"%ld",(long)[update[@"build"] integerValue]]]:[NSString stringWithFormat:L(@"Version %@"),update[@"version"]];}
 - (NSString *)runningVersionLabel {NSString *v=[NSString stringWithFormat:L(@"%@ (build %@)"),[NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"],[NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleVersion"]],*kind=LPCopyKind();return kind?[NSString stringWithFormat:@"%@ · %@",v,kind]:v;}  // a copy: "1.4.4 (build 42) · Demo"
-- (void)showUpdateStatusAlert {NSAlert *a=[NSAlert new];a.messageText=self.updateStatus?:@"";a.informativeText=[NSString stringWithFormat:L(@"This is Less Pull %@."),[self runningVersionLabel]];[NSApp activateIgnoringOtherApps:YES];[a runModal];}
+- (void)showUpdateStatusAlert {NSAlert *a=[NSAlert new];a.messageText=self.updateStatus?:@"";a.informativeText=[NSString stringWithFormat:L(@"This is Less Pull %@."),[self runningVersionLabel]];LPActivate();[a runModal];}
 // One click from the menu or the banner: install now, or once the running session is over. No question asked; a failure is the only dialog.
 - (void)installUpdate:(id)sender {
  NSDictionary *update=self.availableUpdate;if(!update||self.installingUpdate||self.pendingUpdateInstall)return;
@@ -1686,7 +1692,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  a.informativeText=L(@"Downloads the update, checks its signature and reopens Less Pull. Your settings and exceptions stay.");
  if(!canInstall){a.informativeText=[NSString stringWithFormat:L(@"You have %@.\n\n%@\n\nThis update is installed by hand: download it, quit Less Pull, and replace the app in Applications. Your settings and exceptions stay."),[self runningVersionLabel],[update[@"notes"] length]?update[@"notes"]:L(@"No release notes were provided.")];[a addButtonWithTitle:L(@"Open Download Page")];}
  else [a addButtonWithTitle:inSession?L(@"Install when the session ends"):L(@"Install and reopen")];
- [a addButtonWithTitle:L(@"Later")];[a addButtonWithTitle:L(@"What’s new")];[NSApp activateIgnoringOtherApps:YES];
+ [a addButtonWithTitle:L(@"Later")];[a addButtonWithTitle:L(@"What’s new")];LPActivate();
  void (^chosen)(NSModalResponse)=^(NSModalResponse r){if(r==NSAlertThirdButtonReturn){[NSWorkspace.sharedWorkspace openURL:[NSURL URLWithString:update[@"url"]]];return;}if(r!=NSAlertFirstButtonReturn)return;if(!canInstall){[NSWorkspace.sharedWorkspace openURL:[NSURL URLWithString:update[@"url"]]];return;}if(inSession){self.pendingUpdateInstall=YES;self.updateStatus=L(@"The update installs when the session ends.");[self refreshUpdateControls];}else [self performUpdateInstall];};
  if(self.settings.visible)[a beginSheetModalForWindow:self.settings completionHandler:chosen];else chosen([a runModal]);
 }
@@ -1711,7 +1717,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
    else {NSString *script=[NSString stringWithFormat:@"do shell script \"mv %@ %@ && mv %@ %@\" with administrator privileges",[AppDelegate shellQuote:dest.path],[AppDelegate shellQuote:old],[AppDelegate shellQuote:newApp],[AppDelegate shellQuote:dest.path]];NSTask *osa=[NSTask new];osa.executableURL=[NSURL fileURLWithPath:@"/usr/bin/osascript"];osa.arguments=@[@"-e",script];osa.standardOutput=NSFileHandle.fileHandleWithNullDevice;osa.standardError=NSFileHandle.fileHandleWithNullDevice;[osa launchAndReturnError:nil];[osa waitUntilExit];if(osa.terminationStatus!=0)failure=L(@"The app could not be replaced.");}}
   {NSString *line=[NSString stringWithFormat:@"%@ update: zip=%@ newApp=%@ failure=%@\n",NSDate.date,zipPath,newApp,failure?:@"none"];NSString *logDir=[NSHomeDirectory() stringByAppendingPathComponent:@"Library/Logs/Less Pull"];[NSFileManager.defaultManager createDirectoryAtPath:logDir withIntermediateDirectories:YES attributes:nil error:nil];FILE *f=fopen([logDir stringByAppendingPathComponent:@"update.log"].fileSystemRepresentation,"a");if(f){fputs(line.UTF8String,f);fclose(f);}}
   dispatch_async(dispatch_get_main_queue(),^{AppDelegate *me=weak;if(!me)return;me.installingUpdate=NO;
-   if(failure){[NSFileManager.defaultManager removeItemAtPath:work error:nil];me.updateStatus=[NSString stringWithFormat:L(@"The update could not be installed: %@"),failure];[me refreshUpdateControls];NSAlert *a=[NSAlert new];a.messageText=L(@"The update could not be installed");a.informativeText=[NSString stringWithFormat:@"%@\n\n%@",failure,L(@"Nothing was changed. The download page offers the update by hand.")];[a addButtonWithTitle:L(@"OK")];[a addButtonWithTitle:L(@"Open Download Page")];[NSApp activateIgnoringOtherApps:YES];if([a runModal]==NSAlertSecondButtonReturn)[NSWorkspace.sharedWorkspace openURL:[NSURL URLWithString:update[@"url"]]];return;}
+   if(failure){[NSFileManager.defaultManager removeItemAtPath:work error:nil];me.updateStatus=[NSString stringWithFormat:L(@"The update could not be installed: %@"),failure];[me refreshUpdateControls];NSAlert *a=[NSAlert new];a.messageText=L(@"The update could not be installed");a.informativeText=[NSString stringWithFormat:@"%@\n\n%@",failure,L(@"Nothing was changed. The download page offers the update by hand.")];[a addButtonWithTitle:L(@"OK")];[a addButtonWithTitle:L(@"Open Download Page")];LPActivate();if([a runModal]==NSAlertSecondButtonReturn)[NSWorkspace.sharedWorkspace openURL:[NSURL URLWithString:update[@"url"]]];return;}
    // Reopen: a detached shell waits for this process to end, opens the new copy with the same arguments, and removes the previous copy.
    NSMutableArray *args=[NSMutableArray new];for(NSString *a in [NSProcessInfo.processInfo.arguments subarrayWithRange:NSMakeRange(1,NSProcessInfo.processInfo.arguments.count-1)])if(![a isEqual:@"--test-update"])[args addObject:[AppDelegate shellQuote:a]];
    NSString *cmd=[NSString stringWithFormat:@"while kill -0 %d 2>/dev/null; do sleep 0.2; done; open -n %@%@%@; sleep 5; rm -rf %@",getpid(),[AppDelegate shellQuote:dest.path],args.count?@" --args ":@"",[args componentsJoinedByString:@" "],[AppDelegate shellQuote:work]];
@@ -1855,7 +1861,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
 }
 - (void)nightShiftFailure {
  NSAlert *alert=[NSAlert new];alert.messageText=L(@"Night Shift could not be changed");
- alert.informativeText=L(@"Check System Settings → Displays → Night Shift. This display, HDR or another display app may be in the way. Your schedule and settings were not changed.");[NSApp activateIgnoringOtherApps:YES];[alert runModal];
+ alert.informativeText=L(@"Check System Settings → Displays → Night Shift. This display, HDR or another display app may be in the way. Your schedule and settings were not changed.");LPActivate();[alert runModal];
 }
 - (void)enableAutomatic:(BOOL)value {self.automatic=value;self.policy.automatic=value;[self.policy resume];[self savePolicy];[NSUserDefaults.standardUserDefaults setBool:value forKey:@"automatic"];[self sync];}
 - (BOOL)validateMenuItem:(NSMenuItem *)item {if(item.action==@selector(toggleAuto:)){BOOL on=NO;return [self.engine nightShift:&on];}return YES;}
@@ -2380,8 +2386,8 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  if(self.buildSettingsHidden)return;  // built for the end of the tour: the tour shows it, growing out of its bar
  BOOL firstWelcome=self.welcomeWanted&&self.welcomeCard&&!self.welcomePlaced,placedNow=firstWelcome&&[self moveSettingsUnderIcon];
  if(firstWelcome&&!placedNow){self.welcomePlaced=YES;  // the circle is not in place yet: show the welcome a moment later, already where it belongs
-  dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)(0.45*NSEC_PER_SEC)),dispatch_get_main_queue(),^{[self placeSettingsUnderIcon];[NSApp activateIgnoringOtherApps:YES];[self.settings makeKeyAndOrderFront:nil];});return;}
- [NSApp activateIgnoringOtherApps:YES];[self.settings makeKeyAndOrderFront:nil];if([self.settings.firstResponder isKindOfClass:NSTextView.class]||[self.settings.firstResponder isKindOfClass:NSDatePicker.class])[self.settings makeFirstResponder:nil];  // the night hours must not open selected
+  dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)(0.45*NSEC_PER_SEC)),dispatch_get_main_queue(),^{[self placeSettingsUnderIcon];LPActivate();LPShowWindow(self.settings);});return;}
+ LPActivate();LPShowWindow(self.settings);if([self.settings.firstResponder isKindOfClass:NSTextView.class]||[self.settings.firstResponder isKindOfClass:NSDatePicker.class])[self.settings makeFirstResponder:nil];  // the night hours must not open selected
 if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.welcomePlaced=YES;if(first){dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)(0.45*NSEC_PER_SEC)),dispatch_get_main_queue(),^{[self placeSettingsUnderIcon];});}}  // already in place: this only adds the circle's gentle pulse
 }
 // Before anything is installed: what the extension can see, in plain words.
@@ -2389,7 +2395,7 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
  NSAlert *a=[NSAlert new];a.messageText=L(@"What the browser extension can see");
  a.informativeText=L(@"The extension reads the address and title of your tabs, so Less Pull knows which website is in front. Your browser will call this “browsing history”.\n\nIt cannot read or change what is on a page, see what you type, or reach your passwords, cookies or forms. It has no buttons and no network connection of its own; it talks only to the Less Pull app on this Mac. Private tabs are never reported.\n\nWhat is kept: only the website exceptions you save, on this Mac. The address of the site in front is held in memory, never written to disk, overwritten by the next one, and dropped when the browser disconnects or stops reporting.");
  if([NSUserDefaults.standardUserDefaults boolForKey:@"extensionNoticeSeen"])return YES;
- [a addButtonWithTitle:L(@"Continue")];[a addButtonWithTitle:L(@"Cancel")];[a addButtonWithTitle:L(@"Read the Privacy Page")];a.showsSuppressionButton=YES;a.suppressionButton.title=L(@"Don’t show this again");[NSApp activateIgnoringOtherApps:YES];NSModalResponse r=[a runModal];if(a.suppressionButton.state==NSControlStateValueOn&&r==NSAlertFirstButtonReturn)[NSUserDefaults.standardUserDefaults setBool:YES forKey:@"extensionNoticeSeen"];
+ [a addButtonWithTitle:L(@"Continue")];[a addButtonWithTitle:L(@"Cancel")];[a addButtonWithTitle:L(@"Read the Privacy Page")];a.showsSuppressionButton=YES;a.suppressionButton.title=L(@"Don’t show this again");LPActivate();NSModalResponse r=[a runModal];if(a.suppressionButton.state==NSControlStateValueOn&&r==NSAlertFirstButtonReturn)[NSUserDefaults.standardUserDefaults setBool:YES forKey:@"extensionNoticeSeen"];
  if(r==NSAlertThirdButtonReturn){[NSWorkspace.sharedWorkspace openURL:[NSURL URLWithString:@"https://github.com/Archangeloi89/less-pull/blob/main/docs/PRIVACY.md"]];return NO;}
  return r==NSAlertFirstButtonReturn;
 }
@@ -2399,7 +2405,7 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
 - (NSArray *)browserCatalog {return @[@[@"Safari",@"com.apple.Safari",@"",@""],@[@"Chrome",@"com.google.Chrome",@"https://chromewebstore.google.com/detail/lfcjadlpflfdgbgpcbkmdkmnboaakimb",@"https://www.google.com/chrome/"],@[@"Firefox",@"org.mozilla.firefox",@"about:debugging#/runtime/this-firefox",@"https://www.mozilla.org/firefox/"],@[@"Brave",@"com.brave.Browser",@"https://chromewebstore.google.com/detail/lfcjadlpflfdgbgpcbkmdkmnboaakimb",@"https://brave.com/download/"],@[@"Edge",@"com.microsoft.edgemac",@"https://chromewebstore.google.com/detail/lfcjadlpflfdgbgpcbkmdkmnboaakimb",@"https://www.microsoft.com/edge"],@[@"Opera",@"com.operasoftware.Opera",@"https://chromewebstore.google.com/detail/lfcjadlpflfdgbgpcbkmdkmnboaakimb",@"https://www.opera.com/download"]];}
 - (NSString *)defaultBrowserIdentifier {NSURL *u=[NSWorkspace.sharedWorkspace URLForApplicationToOpenURL:[NSURL URLWithString:@"https://example.com"]];return u?[NSBundle bundleWithURL:u].bundleIdentifier:nil;}
 - (void)installBrowserExtension:(id)sender {
- if(self.browserWindow){[self.browserWindow makeKeyAndOrderFront:nil];[NSApp activateIgnoringOtherApps:YES];return;}
+ if(self.browserWindow){LPShowWindow(self.browserWindow);LPActivate();return;}
  if(![self confirmExtensionData])return;
  NSTextField *intro=[NSTextField wrappingLabelWithString:L(@"Choose a browser. Less Pull connects to it and opens the page where you add the extension, with the steps to finish. Chrome, Brave, Edge and Opera get it from the Chrome Web Store, Safari has it built in, and Firefox loads it from inside the app until Mozilla’s review is done.")];intro.preferredMaxLayoutWidth=420;
  self.browserRows=[self column:@[]];self.browserRows.spacing=8;[self refreshBrowserRows];
@@ -2409,7 +2415,7 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
  NSWindow *w=[[NSWindow alloc]initWithContentRect:NSMakeRect(0,0,460,100) styleMask:NSWindowStyleMaskTitled|NSWindowStyleMaskClosable backing:NSBackingStoreBuffered defer:NO];w.title=L(@"Browser Extension");w.contentView=column;[w setContentSize:column.fittingSize];w.releasedWhenClosed=NO;[w center];self.browserWindow=w;
  [NSNotificationCenter.defaultCenter addObserverForName:NSWindowWillCloseNotification object:w queue:nil usingBlock:^(NSNotification *n){[self.browserWatch invalidate];self.browserWatch=nil;self.browserWindow=nil;self.browserRows=nil;}];
  self.browserWatch=[NSTimer scheduledTimerWithTimeInterval:3 repeats:YES block:^(NSTimer *t){[self refreshBrowserRows];}];
- [NSApp activateIgnoringOtherApps:YES];[w makeKeyAndOrderFront:nil];
+ LPActivate();LPShowWindow(w);
 }
 - (void)closeBrowserWindow:(id)sender {[self.browserWindow close];}
 - (void)refreshBrowserRows {
@@ -2453,7 +2459,7 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
  if(!self.guide){[self startGuideHelper:@"browser" with:@{@"id":identifier,@"name":browser}];[self refreshBrowserRows];return;}  // the cursor comes along and shows the steps
  NSAlert *guide=[NSAlert new];guide.messageText=[NSString stringWithFormat:L(@"Finish in %@"),browser];
  guide.informativeText=firefox?L(@"1. On the page that opened, click Load Temporary Add-on….\n2. Select manifest.json in the Browser Extension (Firefox) folder shown in Finder.\n\nFirefox removes temporary add-ons when it quits; load it again next time, or use Firefox Developer Edition with signing turned off. The extension has no buttons: with a website in front, use “Exception for …” in the Less Pull menu. Keep Less Pull where it is installed; run this setup again if you move it."):L(@"1. On the store page that opened, click Add to Chrome, then Add extension. Edge asks once to allow extensions from other stores; Opera may first offer its helper for the Chrome Web Store.\n\nThe extension has no buttons: with a website in front, use “Exception for …” in the Less Pull menu. Keep Less Pull where it is installed.");
- [guide addButtonWithTitle:L(@"OK")];if(firefox)[guide addButtonWithTitle:L(@"Copy folder path")];[NSApp activateIgnoringOtherApps:YES];
+ [guide addButtonWithTitle:L(@"OK")];if(firefox)[guide addButtonWithTitle:L(@"Copy folder path")];LPActivate();
  [guide beginSheetModalForWindow:self.browserWindow completionHandler:^(NSModalResponse r){if(r==NSAlertSecondButtonReturn){[NSPasteboard.generalPasteboard clearContents];[NSPasteboard.generalPasteboard setString:folder.path forType:NSPasteboardTypeString];}[self refreshBrowserRows];}];
 }
 // Safari: the extension lives in a small companion app inside Less Pull. Opening it
@@ -2461,7 +2467,7 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
 - (void)installSafariExtension {
  NSURL *companion=[self safariCompanionURL];
  if(![NSFileManager.defaultManager fileExistsAtPath:companion.path]){NSAlert *missing=[NSAlert new];missing.messageText=L(@"The Safari extension is not in this build");missing.informativeText=L(@"This copy of Less Pull was built without Xcode, so the Safari companion app is missing. A build with Xcode includes it.");if(self.browserWindow)[missing beginSheetModalForWindow:self.browserWindow completionHandler:nil];else [missing runModal];return;}
- NSAlert *guide=[NSAlert new];guide.messageText=L(@"Finish installation in Safari");guide.informativeText=L(@"1. The Less Pull for Safari app opens; click its Open Safari Settings button.\n2. Turn on Less Pull in Settings → Extensions and allow it on all websites.\n\nThe extension has no buttons: with a website in front, use “Exception for …” in the Less Pull menu. Keep Less Pull where it is installed.");[guide addButtonWithTitle:L(@"OK")];[NSApp activateIgnoringOtherApps:YES];
+ NSAlert *guide=[NSAlert new];guide.messageText=L(@"Finish installation in Safari");guide.informativeText=L(@"1. The Less Pull for Safari app opens; click its Open Safari Settings button.\n2. Turn on Less Pull in Settings → Extensions and allow it on all websites.\n\nThe extension has no buttons: with a website in front, use “Exception for …” in the Less Pull menu. Keep Less Pull where it is installed.");[guide addButtonWithTitle:L(@"OK")];LPActivate();
  void (^openCompanion)(void)=^{NSWorkspaceOpenConfiguration *c=NSWorkspaceOpenConfiguration.configuration;c.activates=YES;[NSWorkspace.sharedWorkspace openApplicationAtURL:companion configuration:c completionHandler:nil];[self refreshBrowserRows];};
  if(!self.guide){openCompanion();[self startGuideHelper:@"browser" with:@{@"id":@"com.apple.Safari",@"name":@"Safari"}];return;}  // the cursor comes along and shows the steps
  if(self.browserWindow)[guide beginSheetModalForWindow:self.browserWindow completionHandler:^(NSModalResponse r){openCompanion();}];else {[guide runModal];openCompanion();}
@@ -2717,7 +2723,7 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
  if([action isEqual:@"openSitePanel"]){[self openSiteExceptionPanel:nil];return;}
  if([action isEqual:@"arrowKeys"]){  // the plain ← and → keys belong to the tour only while the guide talks; while you work, they are yours
   BOOL on=[argument boolValue];self.tourArrowsWanted=on;if(self.statusMenuOpen)return;[self applyTourArrows];return;}
- if([action isEqual:@"arrowKeysNow"]){BOOL on=self.tourArrowsWanted&&!self.statusMenuOpen;if(getenv("LP_TOUR_DEBUG"))NSLog(@"Less Pull tour test: arrow keys %@",on?@"on":@"off");if(self.tourBackKey){UnregisterEventHotKey(self.tourBackKey);self.tourBackKey=NULL;}if(self.tourForwardKey){UnregisterEventHotKey(self.tourForwardKey);self.tourForwardKey=NULL;}
+ if([action isEqual:@"arrowKeysNow"]){BOOL on=self.tourArrowsWanted&&!self.statusMenuOpen&&!LPQuiet();if(getenv("LP_TOUR_DEBUG"))NSLog(@"Less Pull tour test: arrow keys %@",on?@"on":@"off");if(self.tourBackKey){UnregisterEventHotKey(self.tourBackKey);self.tourBackKey=NULL;}if(self.tourForwardKey){UnregisterEventHotKey(self.tourForwardKey);self.tourForwardKey=NULL;}
   if(on){EventHotKeyID back={.signature='LsPl',.id=3},forward={.signature='LsPl',.id=4};EventHotKeyRef ref=NULL;
    if(RegisterEventHotKey(kVK_LeftArrow,0,back,GetApplicationEventTarget(),0,&ref)==noErr)self.tourBackKey=ref;ref=NULL;if(RegisterEventHotKey(kVK_RightArrow,0,forward,GetApplicationEventTarget(),0,&ref)==noErr)self.tourForwardKey=ref;}
   return;}
@@ -2756,6 +2762,8 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
  else if([what hasPrefix:@"warmthTo:"]){double v=[[what substringFromIndex:9] doubleValue];[NSUserDefaults.standardUserDefaults setDouble:v/100*3 forKey:[self warmthKey]];self.menuWarmthSlider.doubleValue=v;self.animateAppearance=YES;[self sync];}
  else if([what isEqual:@"rebuild"]){[self rebuildExclusionsList];[self rebuildWebsiteRulesList];}
  else if([what hasPrefix:@"frame:"]){NSString *k=[what substringFromIndex:6];NSLog(@"Less Pull tour test: frame %@ %@",k,NSStringFromRect([self guideFrame:k]));}
+ else if([what isEqual:@"fakeSitePanel"]){NSDictionary *c=@{@"type":@"context",@"browser":@"com.brave.Browser",@"session":@"lp-test",@"site":@"example.com",@"url":@"https://example.com/",@"focused":@YES};[self.browserBridge handle:c];self.panelTab=[self.browserBridge activeContextForBrowser:@"com.brave.Browser"];self.panelBundle=nil;self.websiteScopeExact=NO;if(self.panelTab){[self ensurePanelWebsiteRule];[self showExceptionPanel];}}  // a website panel without a browser: a context as one would send it
+ else if([what isEqual:@"fakeContext"])[self.browserBridge handle:@{@"type":@"context",@"browser":@"com.brave.Browser",@"session":@"lp-test",@"site":@"example.com",@"url":@"https://example.com/",@"focused":@YES}];  // what a browser sends every few seconds
  else if([what isEqual:@"appPanel"])[self openAppExceptionPanel:nil];else if([what isEqual:@"sitePanel"])[self openSiteExceptionPanel:nil];
  else if([what isEqual:@"logPanel"]){NSRect r=[self guideFrame:@"panel.warmth"];CGFloat top=NSMaxY(NSScreen.screens.firstObject.frame);NSDictionary *rule=self.panelBundle?self.exclusionRules[self.panelBundle]:self.browserBridge.rules[[self websiteKeyForTab:self.panelTab]];NSLog(@"Less Pull tour test: panel slider cg %@ warmth %@",NSStringFromRect(NSMakeRect(r.origin.x,top-NSMaxY(r),r.size.width,r.size.height)),rule[@"warmth"]);}
  else if([what isEqual:@"closeSettings"])[self.settings performClose:nil];else if([what isEqual:@"park"])[self.guide debugPark];else if([what isEqual:@"left"])[self.guide arrowKey:-1];else if([what isEqual:@"right"])[self.guide arrowKey:1];
@@ -2888,7 +2896,7 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
 - (void)openSupportLink:(NSButton *)sender {[NSWorkspace.sharedWorkspace openURL:[NSURL URLWithString:sender.identifier]];}
 - (void)copyBitcoin:(NSButton *)sender {[NSPasteboard.generalPasteboard clearContents];[NSPasteboard.generalPasteboard setString:LessPullBitcoin forType:NSPasteboardTypeString];NSString *t=sender.title;sender.title=L(@"Copied");dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)(1.6*NSEC_PER_SEC)),dispatch_get_main_queue(),^{sender.title=t;});}
 - (void)showSupportWindow {
- if(self.supportWindow){[NSApp activateIgnoringOtherApps:YES];[self.supportWindow makeKeyAndOrderFront:nil];return;}
+ if(self.supportWindow){LPActivate();LPShowWindow(self.supportWindow);return;}
  NSTextField *title=[NSTextField labelWithString:L(@"Ways to support my work")];title.font=[NSFont systemFontOfSize:17 weight:NSFontWeightSemibold];
  NSTextField *intro=[NSTextField wrappingLabelWithString:L(@"Whichever is easiest for you. Every way reaches me directly, and every one is welcome.")];intro.preferredMaxLayoutWidth=420;intro.textColor=NSColor.secondaryLabelColor;
  NSMutableArray *rows=[NSMutableArray arrayWithArray:@[title,intro,[self separator]]];
@@ -2908,7 +2916,7 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
  NSStackView *column=[self column:rows];column.spacing=12;column.edgeInsets=NSEdgeInsetsMake(20,22,20,22);
  for(NSView *v in column.arrangedSubviews)if([v isKindOfClass:NSStackView.class]||[v isKindOfClass:NSBox.class])[v.widthAnchor constraintEqualToAnchor:column.widthAnchor constant:-44].active=YES;
  NSWindow *w=[[NSWindow alloc]initWithContentRect:NSMakeRect(0,0,480,100) styleMask:NSWindowStyleMaskTitled|NSWindowStyleMaskClosable backing:NSBackingStoreBuffered defer:NO];w.title=L(@"Support my work");w.contentView=column;[w setContentSize:column.fittingSize];w.releasedWhenClosed=NO;[w center];self.supportWindow=w;
- [NSApp activateIgnoringOtherApps:YES];[w makeKeyAndOrderFront:nil];
+ LPActivate();LPShowWindow(w);
 }
 - (void)openLink:(NSButton *)sender {if(sender.identifier.length)[NSWorkspace.sharedWorkspace openURL:[NSURL URLWithString:sender.identifier]];}
 // Link buttons for the About tab and the thanks window; empty addresses are skipped.
@@ -2946,7 +2954,7 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
   [NSLayoutConstraint activateConstraints:@[[scroll.topAnchor constraintEqualToAnchor:content.topAnchor],[scroll.leadingAnchor constraintEqualToAnchor:content.leadingAnchor],[scroll.trailingAnchor constraintEqualToAnchor:content.trailingAnchor],[scroll.bottomAnchor constraintEqualToAnchor:diagnostics.topAnchor constant:-12],[diagnostics.trailingAnchor constraintEqualToAnchor:content.trailingAnchor constant:-20],[diagnostics.bottomAnchor constraintEqualToAnchor:content.bottomAnchor constant:-16]]];
   [self.helpWindow center];
  }
- [NSApp activateIgnoringOtherApps:YES];[self.helpWindow makeKeyAndOrderFront:nil];
+ LPActivate();LPShowWindow(self.helpWindow);
 }
 - (void)login:(NSButton *)sender {
  NSError *error=nil;
@@ -2956,7 +2964,7 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
  sender.state=SMAppService.mainAppService.status==SMAppServiceStatusEnabled;if(sender.state==NSControlStateValueOn)self.loginNote.hidden=YES;
 }
 - (void)resetWarmth:(id)sender {NSSlider *slider=[NSSlider new];slider.doubleValue=0;[self warmthChanged:slider];}
-- (void)diagnostics:(id)sender {NSAlert *a=[NSAlert new];a.messageText=L(@"Diagnostics");NSString *betterDisplay=[NSRunningApplication runningApplicationsWithBundleIdentifier:@"pro.betterdisplay.BetterDisplay"].count?L(@"\nBetterDisplay is running; it can change how displays look. HDR state is not read."):@"";a.informativeText=[NSString stringWithFormat:L(@"Less Pull %@ (%@)\n\n%@\n%@\nDisplays: %lu, each with its own matrix\nDisplay events: %lu; recoveries: %lu\nGrayscale setting: %@; grayscale showing now: %@; exception active: %@%@\n\n“Warmer at night” follows the night hours shown under General; it does not prove the display looks warmer."),[NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"],[NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleVersion"],self.engine.diagnostics,self.warmth.diagnostics,(unsigned long)[self.warmth displays].count,(unsigned long)self.pipelineEvents,(unsigned long)self.pipelineRestorations,(self.selectedMode==100||self.selectedMode==1)?L(@"On"):L(@"Off"),(self.effectiveMode==100||self.effectiveMode==1)?L(@"On"):L(@"Off"),(self.grayOverride||self.customWarmth)?@"yes":@"no",betterDisplay];[NSApp activateIgnoringOtherApps:YES];[a runModal];}
+- (void)diagnostics:(id)sender {NSAlert *a=[NSAlert new];a.messageText=L(@"Diagnostics");NSString *betterDisplay=[NSRunningApplication runningApplicationsWithBundleIdentifier:@"pro.betterdisplay.BetterDisplay"].count?L(@"\nBetterDisplay is running; it can change how displays look. HDR state is not read."):@"";a.informativeText=[NSString stringWithFormat:L(@"Less Pull %@ (%@)\n\n%@\n%@\nDisplays: %lu, each with its own matrix\nDisplay events: %lu; recoveries: %lu\nGrayscale setting: %@; grayscale showing now: %@; exception active: %@%@\n\n“Warmer at night” follows the night hours shown under General; it does not prove the display looks warmer."),[NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"],[NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleVersion"],self.engine.diagnostics,self.warmth.diagnostics,(unsigned long)[self.warmth displays].count,(unsigned long)self.pipelineEvents,(unsigned long)self.pipelineRestorations,(self.selectedMode==100||self.selectedMode==1)?L(@"On"):L(@"Off"),(self.effectiveMode==100||self.effectiveMode==1)?L(@"On"):L(@"Off"),(self.grayOverride||self.customWarmth)?@"yes":@"no",betterDisplay];LPActivate();[a runModal];}
 - (NSString *)warmthKey {return @"warmth";}
 - (double)currentWarmth {return [NSUserDefaults.standardUserDefaults doubleForKey:[self warmthKey]];}
 // The night, one setting for Night Shift on Automatic and for "Warmer at night": sunset to sunrise (worked out from the
