@@ -774,6 +774,7 @@
 "A small companion app opens. Click its button: Open Safari Settings." = "작은 도우미 앱이 열려요. 그 앱의 버튼 ‘Safari 설정 열기’를 클릭하세요.";
 "Safari didn’t open? Open it yourself: Safari, Settings, Extensions." = "Safari가 안 열렸나요? 직접 여세요: Safari, 설정, 확장 프로그램.";
 "In Extensions, turn on Less Pull and allow it on all websites. I’ll notice." = "확장 프로그램에서 Less Pull을 켜고 모든 웹사이트에서 허용하세요. 제가 알아챌게요.";
+"No Extensions page in Safari? Choose Safari → Settings…, then Extensions." = "Safari에 확장 프로그램 페이지가 안 보이나요? Safari → 설정… → 확장 프로그램을 선택하세요.";
 "%@ opens the store page. Click Add to Chrome, then Add extension. I’ll notice." = "%@이(가) 스토어 페이지를 열어요. ‘Chrome에 추가’를 클릭한 다음 ‘확장 프로그램 추가’를 클릭하세요. 제가 알아챌게요.";
 "%@ opens the store page. Click its Add button, then Add extension. I’ll notice." = "%@이(가) 스토어 페이지를 열어요. 추가 버튼을 클릭한 다음 ‘확장 프로그램 추가’를 클릭하세요. 제가 알아챌게요.";
 "Edge asks once about extensions from other stores. Say yes to that first." = "Edge는 다른 스토어의 확장 프로그램에 대해 한 번 물어요. 먼저 그걸 허용하세요.";
@@ -862,8 +863,10 @@
 "Any other app will do. Or click the desktop." = "다른 앱이면 아무거나 돼요. 데스크탑을 클릭해도 돼요.";
 "Quiet again. The exception stays with %@, waiting. Like me, but with a purpose." = "다시 조용해졌어요. 개별 설정은 %@ 곁에서 기다려요. 저처럼요. 다만 목적이 있어요.";
 "%@ is already connected. Good: websites get exceptions too." = "%@은(는) 이미 연결돼 있어요. 좋아요. 웹사이트도 개별 설정을 가질 수 있어요.";
+"%@ are already connected. Good: websites get exceptions too." = "%@은(는) 이미 연결돼 있어요. 좋아요. 웹사이트도 개별 설정을 가질 수 있어요.";
 "Exceptions for websites need %@ connected: a small extension. Connect it now? Optional." = "웹사이트 개별 설정에는 %@ 연결이 필요해요. 작은 확장 프로그램이에요. 지금 연결할까요? 선택 사항이에요.";
 "Exceptions for websites need your browser connected: a small extension. Connect it now? Optional." = "웹사이트 개별 설정에는 브라우저 연결이 필요해요. 작은 확장 프로그램이에요. 지금 연결할까요? 선택 사항이에요.";
+"Connect another browser too? Optional." = "다른 브라우저도 연결할까요? 선택 사항이에요.";
 "Connect" = "연결";
 "Which ones? One or several; each gets the same small extension." = "어느 것을요? 하나든 여럿이든요. 모두 같은 작은 확장 프로그램을 받아요.";
 "That’s enough for now. More browsers: Less Pull’s Settings → Websites. I’ll come and help." = "지금은 이걸로 충분해요. 다른 브라우저는 Less Pull 설정 → 웹사이트에서. 도우러 올게요.";

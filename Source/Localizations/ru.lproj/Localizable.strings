@@ -774,6 +774,7 @@
 "A small companion app opens. Click its button: Open Safari Settings." = "Открывается небольшое приложение-помощник. Нажмите его кнопку: «Открыть настройки Safari».";
 "Safari didn’t open? Open it yourself: Safari, Settings, Extensions." = "Safari не открылся? Откройте его сами: Safari, Настройки, Расширения.";
 "In Extensions, turn on Less Pull and allow it on all websites. I’ll notice." = "В «Расширениях» включите Less Pull и разрешите его на всех сайтах. Я замечу.";
+"No Extensions page in Safari? Choose Safari → Settings…, then Extensions." = "Нет страницы «Расширения» в Safari? Выберите Safari → Настройки…, затем «Расширения».";
 "%@ opens the store page. Click Add to Chrome, then Add extension. I’ll notice." = "%@ открывает страницу магазина. Нажмите «Установить», затем «Установить расширение». Я замечу.";
 "%@ opens the store page. Click its Add button, then Add extension. I’ll notice." = "%@ открывает страницу магазина. Нажмите кнопку добавления, затем «Установить расширение». Я замечу.";
 "Edge asks once about extensions from other stores. Say yes to that first." = "Edge один раз спрашивает о расширениях из других магазинов. Сначала ответьте на это «да».";
@@ -862,8 +863,10 @@
 "Any other app will do. Or click the desktop." = "Подойдёт любое другое приложение. Или нажмите на рабочий стол.";
 "Quiet again. The exception stays with %@, waiting. Like me, but with a purpose." = "Снова тихо. Исключение остаётся с %@ и ждёт. Как я, только с целью.";
 "%@ is already connected. Good: websites get exceptions too." = "%@ уже подключён. Хорошо: исключения бывают и для сайтов.";
+"%@ are already connected. Good: websites get exceptions too." = "%@ уже подключены. Хорошо: исключения бывают и для сайтов.";
 "Exceptions for websites need %@ connected: a small extension. Connect it now? Optional." = "Исключениям для сайтов нужен подключённый %@: небольшое расширение. Подключить сейчас? По желанию.";
 "Exceptions for websites need your browser connected: a small extension. Connect it now? Optional." = "Исключениям для сайтов нужен подключённый браузер: небольшое расширение. Подключить сейчас? По желанию.";
+"Connect another browser too? Optional." = "Подключить ещё один браузер? По желанию.";
 "Connect" = "Подключить";
 "Which ones? One or several; each gets the same small extension." = "Какие? Один или несколько; каждый получит одно и то же небольшое расширение.";
 "That’s enough for now. More browsers: Less Pull’s Settings → Websites. I’ll come and help." = "Пока достаточно. Другие браузеры: настройки Less Pull → Сайты. Я приду помочь.";

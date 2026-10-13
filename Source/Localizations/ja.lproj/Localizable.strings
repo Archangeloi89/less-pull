@@ -774,6 +774,7 @@
 "A small companion app opens. Click its button: Open Safari Settings." = "小さなお供のアプリが開きます。そのボタン「Safari の設定を開く」をクリックしてください。";
 "Safari didn’t open? Open it yourself: Safari, Settings, Extensions." = "Safari が開きませんか？ご自分で開いてください：Safari、設定、機能拡張。";
 "In Extensions, turn on Less Pull and allow it on all websites. I’ll notice." = "「機能拡張」で Less Pull をオンにして、すべてのWebサイトで許可してください。気づいたらお知らせします。";
+"No Extensions page in Safari? Choose Safari → Settings…, then Extensions." = "Safari に「機能拡張」が出ませんか？ Safari →「設定…」→「機能拡張」を選んでください。";
 "%@ opens the store page. Click Add to Chrome, then Add extension. I’ll notice." = "%@ がストアのページを開きます。「Chrome に追加」をクリックし、続いて「拡張機能を追加」を。気づいたらお知らせします。";
 "%@ opens the store page. Click its Add button, then Add extension. I’ll notice." = "%@ がストアのページを開きます。追加のボタンをクリックし、続いて「拡張機能を追加」を。気づいたらお知らせします。";
 "Edge asks once about extensions from other stores. Say yes to that first." = "Edge はほかのストアの拡張機能について一度だけ尋ねてきます。先にそれを許可してください。";
@@ -862,8 +863,10 @@
 "Any other app will do. Or click the desktop." = "ほかのアプリならどれでも。デスクトップのクリックでもかまいません。";
 "Quiet again. The exception stays with %@, waiting. Like me, but with a purpose." = "また静かになりました。個別設定は %@ のそばで待っています。わたしと同じ、でも目的があります。";
 "%@ is already connected. Good: websites get exceptions too." = "%@ はもうつながっています。よかった。ウェブサイトにも個別設定ができます。";
+"%@ are already connected. Good: websites get exceptions too." = "%@ はもうつながっています。よかった。ウェブサイトにも個別設定ができます。";
 "Exceptions for websites need %@ connected: a small extension. Connect it now? Optional." = "ウェブサイトの個別設定には %@ の接続が必要です。小さな機能拡張です。今つなぎますか？任意です。";
 "Exceptions for websites need your browser connected: a small extension. Connect it now? Optional." = "ウェブサイトの個別設定にはブラウザの接続が必要です。小さな機能拡張です。今つなぎますか？任意です。";
+"Connect another browser too? Optional." = "ほかのブラウザもつなぎますか？任意です。";
 "Connect" = "接続";
 "Which ones? One or several; each gets the same small extension." = "どれにしますか？ひとつでも複数でも。どれにも同じ小さな機能拡張が入ります。";
 "That’s enough for now. More browsers: Less Pull’s Settings → Websites. I’ll come and help." = "今はこれで十分です。ほかのブラウザは Less Pull の設定 → ウェブサイトから。手伝いに来ます。";

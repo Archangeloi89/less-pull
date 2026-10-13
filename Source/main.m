@@ -1,3 +1,4 @@
+#import <libproc.h>
 #import <Cocoa/Cocoa.h>
 #import <Security/Security.h>
 #import <CommonCrypto/CommonDigest.h>
@@ -346,7 +347,7 @@ static void QuietScrolling(NSScrollView *s){
 @property NSTextField *sessionPresetsField,*callBackPresetsField;
 @property NSTextField *exclusionText;
 @property NSRunningApplication *lastExternalApp;
-@property SwitchingPolicy *policy;@property NSComboBox *nightBoostPopup;@property NSTextField *nightBoostNote;@property NSDatePicker *nightStartPicker,*nightEndPicker;@property NSStackView *ownHoursRow;@property NSDate *nightPreviewUntil;@property NSTimer *nightPreviewTimer;@property BOOL nightPreviewTurnedNightShiftOn;@property NSSegmentedControl *nightModeControl;@property NSStackView *nightPauseRow;@property NSWindow *supportWindow;@property GuideTour *guide;@property NSInteger tourGray;@property double tourWarmth;@property BOOL peekKeyHeld;@property NSPopUpButton *nightHoursPopup;@property NSTextField *nightHoursNote;@property NSButton *nightLocationButton,*nightDateTimeButton;@property NSInteger lastSeenMacMode;@property NSTextField *nightModeNote;@property BOOL migrateNightShiftMode,nightModeDirty;@property NSButton *nightTryButton;@property BOOL tourSpotEmpty;@property BOOL settingsAsideForTour;@property NSDictionary *playingField;@property NSString *tourMenuMark;@property BOOL statusMenuOpen,tourSessionWasIdle,fakeMenuOpen;@property NSInteger toursThisLaunch;@property NSView *menuWarmthRow,*menuNightRow;@property NSSlider *menuWarmthSlider;@property NSRect sessionPanelTarget;@property NSRect tourSettingsFrame;@property BOOL guideIsHelper,demoLaunchAtLogin;@property NSDate *tourSampleStart;@property NSTimer *tourSampleTimer;@property(copy) NSString *lastMenuChoice;@property NSDate *lastMenuChoiceAt;@property NSTimer *tourIconWait;@property NSButton *tourStartButton;@property BOOL tourArrowsWanted;@property NSPanel *iconBeacon,*iconArrow;@property BOOL buildSettingsHidden,tourSampleSession;@property NSMutableDictionary<NSString *,NSValue *> *tourItemFrames;
+@property SwitchingPolicy *policy;@property NSComboBox *nightBoostPopup;@property NSTextField *nightBoostNote;@property NSDatePicker *nightStartPicker,*nightEndPicker;@property NSStackView *ownHoursRow;@property NSDate *nightPreviewUntil;@property NSTimer *nightPreviewTimer;@property BOOL nightPreviewTurnedNightShiftOn;@property NSSegmentedControl *nightModeControl;@property NSStackView *nightPauseRow;@property NSWindow *supportWindow;@property GuideTour *guide;@property NSInteger tourGray;@property double tourWarmth;@property BOOL peekKeyHeld;@property NSPopUpButton *nightHoursPopup;@property NSTextField *nightHoursNote;@property NSButton *nightLocationButton,*nightDateTimeButton;@property NSInteger lastSeenMacMode;@property NSTextField *nightModeNote;@property BOOL migrateNightShiftMode,nightModeDirty;@property NSButton *nightTryButton;@property BOOL tourSpotEmpty;@property BOOL settingsAsideForTour;@property NSDictionary *playingField;@property NSString *tourMenuMark;@property BOOL statusMenuOpen,tourSessionWasIdle,fakeMenuOpen;@property NSMutableSet<NSString *> *seenBrowsers;@property NSInteger toursThisLaunch;@property NSView *menuWarmthRow,*menuNightRow;@property NSSlider *menuWarmthSlider;@property NSRect sessionPanelTarget;@property NSRect tourSettingsFrame;@property BOOL guideIsHelper,demoLaunchAtLogin;@property NSDate *tourSampleStart;@property NSTimer *tourSampleTimer;@property(copy) NSString *lastMenuChoice;@property NSDate *lastMenuChoiceAt;@property NSTimer *tourIconWait;@property NSButton *tourStartButton;@property BOOL tourArrowsWanted;@property NSPanel *iconBeacon,*iconArrow;@property BOOL buildSettingsHidden,tourSampleSession;@property NSMutableDictionary<NSString *,NSValue *> *tourItemFrames;
 @property WarmthEngine *warmth;
 @property NSInteger selectedMode;
 @property NSSlider *warmthSlider;
@@ -1092,7 +1093,7 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  self.policy=[SwitchingPolicy new];self.policy.automatic=self.automatic;
  self.policy.overrideMode=[d integerForKey:@"overrideMode"];
  self.policy.known=[d boolForKey:@"lastNightShiftKnown"];self.policy.nightShiftOn=[d boolForKey:@"lastNightShiftOn"];
- self.browserBridge=[BrowserBridge new];__weak AppDelegate *browserOwner=self;self.browserBridge.changed=^{[browserOwner sync];[browserOwner rebuildWebsiteRulesList];[browserOwner refreshBrowserRows];};self.browserBridge.defaults=^NSDictionary *(NSString *browser){return [browserOwner browserBaseForBundle:browser];};if(LessPullHandsOff){[self.browserBridge startPort];[self returnInstalledIfAway];}else [self.browserBridge start];  // a copy: its own port; the browsers stay the installed app's
+ self.browserBridge=[BrowserBridge new];__weak AppDelegate *browserOwner=self;self.browserBridge.changed=^{[browserOwner noteBrowsersSeen];[browserOwner sync];[browserOwner rebuildWebsiteRulesList];[browserOwner refreshBrowserRows];};self.browserBridge.defaults=^NSDictionary *(NSString *browser){return [browserOwner browserBaseForBundle:browser];};if(LessPullHandsOff){[self.browserBridge startPort];[self returnInstalledIfAway];}else [self.browserBridge start];  // a copy: its own port; the browsers stay the installed app's
  // The icon's place in the menu bar is macOS's: the user ⌘-drags it and macOS remembers. Builds 25 to 33 wrote a
  // "Preferred Position" value once; it is removed here so nothing of ours can pull the icon back to the left.
  // macOS writes that same key when the user drags the icon, so only the exact stale value goes, and only once.
@@ -2571,10 +2572,25 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
  NSMutableAttributedString *t=[[NSMutableAttributedString alloc]initWithString:i.title attributes:@{NSFontAttributeName:[NSFont menuFontOfSize:0]}];
  [t appendAttributedString:[[NSAttributedString alloc]initWithString:@"  ●" attributes:@{NSFontAttributeName:[NSFont menuFontOfSize:0],NSForegroundColorAttributeName:[NSColor colorWithSRGBRed:232/255.0 green:137/255.0 blue:74/255.0 alpha:1]}]];i.attributedTitle=t;
 }
+// Which browsers have the extension on: one that spoke a minute ago, one that spoke since Less Pull started (Safari
+// speaks only while in front), and one that runs our helper right now (a browser starts it for its extension).
 - (NSArray *)tourBrowsers {
+ [self noteBrowsersSeen];NSSet *helpers=[self browsersWithHelper];
  NSMutableArray *out=[NSMutableArray new];for(NSArray *b in [self browserCatalog]){NSURL *url=[NSWorkspace.sharedWorkspace URLForApplicationWithBundleIdentifier:b[1]];if(!url)continue;
-  NSDictionary *c=self.browserBridge.contexts[b[1]];BOOL connected=c&&[NSDate.date timeIntervalSinceDate:c[@"time"]?:NSDate.distantPast]<65;[out addObject:@{@"name":b[0],@"id":b[1],@"connected":@(connected)}];}
+  NSDictionary *c=self.browserBridge.contexts[b[1]];BOOL connected=(c&&[NSDate.date timeIntervalSinceDate:c[@"time"]?:NSDate.distantPast]<65)||[helpers containsObject:b[1]]||[self.seenBrowsers containsObject:b[1]];[out addObject:@{@"name":b[0],@"id":b[1],@"connected":@(connected)}];}
  return out;
+}
+- (void)noteBrowsersSeen {if(!self.seenBrowsers)self.seenBrowsers=[NSMutableSet new];for(NSString *k in self.browserBridge.contexts)[self.seenBrowsers addObject:k];}
+// A browser whose Less Pull extension is on runs LessPullBrowserHost as its child. Checked at most once a second.
+- (NSSet<NSString *> *)browsersWithHelper {
+ static NSSet *cached;static CFTimeInterval at;if(cached&&CACurrentMediaTime()-at<1)return cached;
+ NSMutableSet *found=[NSMutableSet new];int n=proc_listallpids(NULL,0);
+ if(n>0){size_t cap=(size_t)n+64;pid_t *pids=calloc(cap,sizeof(pid_t));n=proc_listallpids(pids,(int)(cap*sizeof(pid_t)));
+  for(int i=0;i<n;i++){char path[PROC_PIDPATHINFO_MAXSIZE];if(proc_pidpath(pids[i],path,sizeof path)<=0||!strstr(path,"/Contents/MacOS/LessPullBrowserHost"))continue;
+   struct proc_bsdinfo info;if(proc_pidinfo(pids[i],PROC_PIDTBSDINFO,0,&info,sizeof info)!=(int)sizeof info)continue;
+   NSString *bid=[NSRunningApplication runningApplicationWithProcessIdentifier:(pid_t)info.pbi_ppid].bundleIdentifier;if(bid)[found addObject:bid];}
+  free(pids);}
+ cached=found;at=CACurrentMediaTime();return found;
 }
 - (id)guideValue:(NSString *)key {
  NSUserDefaults *d=NSUserDefaults.standardUserDefaults;
@@ -2788,7 +2804,6 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
  NSString *identifier=entry[1];if([identifier isEqual:@"com.apple.Safari"]){NSURL *companion=[self safariCompanionURL];if([NSFileManager.defaultManager fileExistsAtPath:companion.path]){NSWorkspaceOpenConfiguration *c=NSWorkspaceOpenConfiguration.configuration;c.activates=YES;[NSWorkspace.sharedWorkspace openApplicationAtURL:companion configuration:c completionHandler:nil];}return;}
  NSURL *browserURL=[NSWorkspace.sharedWorkspace URLForApplicationWithBundleIdentifier:identifier];if(!browserURL)return;
  {NSTask *setup=[NSTask new];setup.executableURL=[self browserHelperURL];setup.arguments=@[@"--install"];setup.standardOutput=NSFileHandle.fileHandleWithNullDevice;setup.standardError=NSFileHandle.fileHandleWithNullDevice;if([setup launchAndReturnError:nil])[setup waitUntilExit];}  // a demo copy sets them up with the installed app's helper: the browsers stay the installed app's
- // Firefox: the guide shows manifest.json in a little window to drag from (Finder cannot show a folder inside the app)
  [NSWorkspace.sharedWorkspace openURLs:@[[NSURL URLWithString:entry[2]]] withApplicationAtURL:browserURL configuration:NSWorkspaceOpenConfiguration.configuration completionHandler:nil];
 }
 // Testing (--tour-actions): the tour's controls, and the few things a user would do (open or close the menu, close Settings, pick a session length), plus a log of where everything is.
@@ -2817,7 +2832,7 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
  else if([what isEqual:@"logStart"])NSLog(@"Less Pull tour test: start button [%@], sheet %@, tour %@",self.tourStartButton.title,self.settings.attachedSheet?@"up":@"none",self.guide?@"running":@"none");
  else if([what isEqual:@"logIcon"]){NSWindow *w=self.item.button.window;NSScreen *sc=w.screen;NSLog(@"Less Pull tour test: icon window %@ visible %d occlusion %lu screen %@ visibleFrame %@ guideIconFrame %@ far %d front %@",NSStringFromRect(w.frame),w.isVisible,(unsigned long)w.occlusionState,NSStringFromRect(sc.frame),NSStringFromRect(sc.visibleFrame),NSStringFromRect([self guideIconFrame]),[self iconFarFromClock],NSWorkspace.sharedWorkspace.frontmostApplication.localizedName);}
  else if([what isEqual:@"logRing"])NSLog(@"Less Pull tour test: ring %.2f label %@",[self sessionRing:NSDate.date],self.session.state==SessionIdle?@"-":[NSString stringWithFormat:@"0:%02ld",(long)ceil(MAX(0,[self.session remainingAt:NSDate.date]))]);
- else if([what isEqual:@"poke"])[self.guide debugPoke];else if([what isEqual:@"resumeLP"])[self resumeLessPull:nil];else if([what isEqual:@"fakeMenu"])self.fakeMenuOpen=!self.fakeMenuOpen;
+ else if([what isEqual:@"poke"])[self.guide debugPoke];else if([what isEqual:@"resumeLP"])[self resumeLessPull:nil];else if([what isEqual:@"fakeMenu"])self.fakeMenuOpen=!self.fakeMenuOpen;else if([what isEqual:@"logBrowsers"])NSLog(@"Less Pull tour test: browsers %@ helpers %@",[[self tourBrowsers] valueForKey:@"description"],[self browsersWithHelper]);
  else if([what isEqual:@"helperOpera"])[self startGuideHelper:@"browser" with:@{@"id":@"com.operasoftware.Opera",@"name":@"Opera"}];else if([what isEqual:@"helperFirefox"])[self startGuideHelper:@"browser" with:@{@"id":@"org.mozilla.firefox",@"name":@"Firefox"}];
  else if([what isEqual:@"helperBrowser"])[self startGuideHelper:@"browser" with:@{@"id":@"com.google.Chrome",@"name":@"Chrome"}];else if([what isEqual:@"helperSunset"])[self startGuideHelper:@"sunset" with:nil];else if([what isEqual:@"chip"]){[self startSessionMinutes:25];[self closeSessionPanel];}
  else if([what isEqual:@"log"])NSLog(@"Less Pull tour test: %@ | menu %@ | icon %@ | settings %@ (visible %d) | bar-side session %@",self.guide?[self.guide debugState]:@"(no tour)",NSStringFromRect([self guideFrame:@"menu"]),NSStringFromRect([self guideIconFrame]),NSStringFromRect(self.settings.frame),self.settings.visible,NSStringFromRect([self guideFrame:@"session"]));
@@ -2865,7 +2880,7 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
   NSArray<NSRunningApplication *> *installed=[NSRunningApplication runningApplicationsWithBundleIdentifier:@"com.jiriarion.lesspull"];
   if(installed.firstObject.bundleURL){self.installedAway=installed.firstObject.bundleURL;[self watchForInstalledReturn];for(NSRunningApplication *app in installed)[app terminate];}
   [self takeBrowsersWhenInstalledGone:0];return;}
- [self.browserBridge stopSocket];
+ [self.browserBridge stopSocket];[self.browserBridge stopSafariPort];
  BOOL installed=[NSRunningApplication runningApplicationsWithBundleIdentifier:@"com.jiriarion.lesspull"].count>0;
  [self.warmth cancelTransition];if(!installed)[self.warmth restore];  // nobody else paints the screen: back to the plain matrix
  LessPullBorrowScreen=NO;[self.warmth invalidate];LessPullAnnounceFilterChange();
@@ -2877,7 +2892,7 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
 - (void)takeBrowsersWhenInstalledGone:(int)tries {
  if(!LessPullBorrowScreen)return;
  if([NSRunningApplication runningApplicationsWithBundleIdentifier:@"com.jiriarion.lesspull"].count){if(tries<50)dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)(.1*NSEC_PER_SEC)),dispatch_get_main_queue(),^{[self takeBrowsersWhenInstalledGone:tries+1];});else NSLog(@"Less Pull demo: the installed app did not quit; it keeps the browsers");return;}
- [self.browserBridge startSocket];[self.warmth invalidate];[self sync];
+ [self.browserBridge startSocket];[self.browserBridge startSafariPort];[self.warmth invalidate];[self sync];
 }
 // The installed Less Pull for a copy: the running one, else the one in Applications, else wherever Launch Services has it.
 - (NSURL *)installedAppURL {

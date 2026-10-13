@@ -15,6 +15,11 @@
 - (void)startPort;
 - (void)startSocket;
 - (void)stopSocket;
+// Safari's extension can only reach com.jiriarion.lesspull.bridge. While a copy's tour borrows the browsers (the
+// installed app has quit), the copy answers there too, and lets go before the installed app comes back.
+@property CFMessagePortRef safariPort;
+- (void)startSafariPort;
+- (void)stopSafariPort;
 @property unsigned long long boundInode;
 - (NSDictionary *)handle:(NSDictionary *)message;
 - (NSDictionary *)ruleForBrowser:(NSString *)browser base:(NSDictionary *)base site:(NSString **)site;

@@ -774,6 +774,7 @@
 "A small companion app opens. Click its button: Open Safari Settings." = "Er opent een kleine hulpapp. Klik op de knop ervan: Open Safari-instellingen.";
 "Safari didn’t open? Open it yourself: Safari, Settings, Extensions." = "Is Safari niet opengegaan? Open het zelf: Safari, Instellingen, Extensies.";
 "In Extensions, turn on Less Pull and allow it on all websites. I’ll notice." = "Zet bij Extensies Less Pull aan en sta het toe op alle websites. Ik merk het.";
+"No Extensions page in Safari? Choose Safari → Settings…, then Extensions." = "Geen Extensies-pagina in Safari? Kies Safari → Instellingen…, dan Extensies.";
 "%@ opens the store page. Click Add to Chrome, then Add extension. I’ll notice." = "%@ opent de winkelpagina. Klik op Toevoegen aan Chrome en dan op Extensie toevoegen. Ik merk het.";
 "%@ opens the store page. Click its Add button, then Add extension. I’ll notice." = "%@ opent de winkelpagina. Klik op de knop om toe te voegen en dan op Extensie toevoegen. Ik merk het.";
 "Edge asks once about extensions from other stores. Say yes to that first." = "Edge vraagt één keer naar extensies uit andere winkels. Zeg daar eerst ja op.";
@@ -862,8 +863,10 @@
 "Any other app will do. Or click the desktop." = "Elke andere app is goed. Of klik op het bureaublad.";
 "Quiet again. The exception stays with %@, waiting. Like me, but with a purpose." = "Weer rustig. De uitzondering blijft bij %@ en wacht. Net als ik, maar met een doel.";
 "%@ is already connected. Good: websites get exceptions too." = "%@ is al verbonden. Mooi: dan krijgen websites ook uitzonderingen.";
+"%@ are already connected. Good: websites get exceptions too." = "%@ zijn al verbonden. Mooi: dan krijgen websites ook uitzonderingen.";
 "Exceptions for websites need %@ connected: a small extension. Connect it now? Optional." = "Uitzonderingen voor websites hebben %@ nodig, verbonden via een kleine extensie. Nu verbinden? Het hoeft niet.";
 "Exceptions for websites need your browser connected: a small extension. Connect it now? Optional." = "Uitzonderingen voor websites hebben je browser nodig, verbonden via een kleine extensie. Nu verbinden? Het hoeft niet.";
+"Connect another browser too? Optional." = "Nog een browser verbinden? Het hoeft niet.";
 "Connect" = "Verbind";
 "Which ones? One or several; each gets the same small extension." = "Welke? Eén of meer; elke krijgt dezelfde kleine extensie.";
 "That’s enough for now. More browsers: Less Pull’s Settings → Websites. I’ll come and help." = "Dat is genoeg voor nu. Meer browsers: instellingen van Less Pull → Websites. Ik kom helpen.";

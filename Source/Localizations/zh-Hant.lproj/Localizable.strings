@@ -774,6 +774,7 @@
 "A small companion app opens. Click its button: Open Safari Settings." = "一個小小的配套 App 會打開。按一下它的按鈕：「打開 Safari 設定」。";
 "Safari didn’t open? Open it yourself: Safari, Settings, Extensions." = "Safari 沒有打開？那就自己打開：Safari、設定、延伸功能。";
 "In Extensions, turn on Less Pull and allow it on all websites. I’ll notice." = "在「延伸功能」裡打開 Less Pull，並允許它用於所有網站。我會注意到的。";
+"No Extensions page in Safari? Choose Safari → Settings…, then Extensions." = "Safari 裡沒有「延伸功能」頁面？選擇 Safari →「設定⋯」，再點「延伸功能」。";
 "%@ opens the store page. Click Add to Chrome, then Add extension. I’ll notice." = "%@ 會打開商店頁面。按一下「加到 Chrome」，再按「新增擴充功能」。我會注意到的。";
 "%@ opens the store page. Click its Add button, then Add extension. I’ll notice." = "%@ 會打開商店頁面。按一下它的新增按鈕，再按「新增擴充功能」。我會注意到的。";
 "Edge asks once about extensions from other stores. Say yes to that first." = "Edge 會詢問一次是否允許其他商店的擴充功能。先在那裡同意。";
@@ -862,8 +863,10 @@
 "Any other app will do. Or click the desktop." = "隨便哪個別的 App 都行。或者按一下桌面。";
 "Quiet again. The exception stays with %@, waiting. Like me, but with a purpose." = "又安靜了。個別設定留在 %@ 那裡等著。和我一樣，只不過它有目的。";
 "%@ is already connected. Good: websites get exceptions too." = "%@ 已經連接好了。很好：網站也能有個別設定。";
+"%@ are already connected. Good: websites get exceptions too." = "%@ 已經連接好了。很好：網站也能有個別設定。";
 "Exceptions for websites need %@ connected: a small extension. Connect it now? Optional." = "網站的個別設定需要連接 %@：一個小小的延伸功能。現在連接嗎？可選。";
 "Exceptions for websites need your browser connected: a small extension. Connect it now? Optional." = "網站的個別設定需要連接你的瀏覽器：一個小小的延伸功能。現在連接嗎？可選。";
+"Connect another browser too? Optional." = "也連接另一個瀏覽器嗎？可選。";
 "Connect" = "連接";
 "Which ones? One or several; each gets the same small extension." = "哪些？一個或多個；每個都裝同一個小延伸功能。";
 "That’s enough for now. More browsers: Less Pull’s Settings → Websites. I’ll come and help." = "先這樣就夠了。更多瀏覽器：Less Pull 設定 → 網站。我會來幫忙。";

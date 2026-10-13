@@ -774,6 +774,7 @@
 "A small companion app opens. Click its button: Open Safari Settings." = "Otwiera się mała aplikacja pomocnicza. Kliknij jej przycisk: Otwórz ustawienia Safari.";
 "Safari didn’t open? Open it yourself: Safari, Settings, Extensions." = "Safari się nie otworzyło? Otwórz je sam: Safari, Ustawienia, Rozszerzenia.";
 "In Extensions, turn on Less Pull and allow it on all websites. I’ll notice." = "W Rozszerzeniach włącz Less Pull i zezwól na wszystkich stronach. Zauważę.";
+"No Extensions page in Safari? Choose Safari → Settings…, then Extensions." = "Nie ma strony Rozszerzeń w Safari? Wybierz Safari → Ustawienia…, potem Rozszerzenia.";
 "%@ opens the store page. Click Add to Chrome, then Add extension. I’ll notice." = "%@ otwiera stronę sklepu. Kliknij Dodaj do Chrome, potem Dodaj rozszerzenie. Zauważę.";
 "%@ opens the store page. Click its Add button, then Add extension. I’ll notice." = "%@ otwiera stronę sklepu. Kliknij jego przycisk dodawania, potem Dodaj rozszerzenie. Zauważę.";
 "Edge asks once about extensions from other stores. Say yes to that first." = "Edge raz zapyta o rozszerzenia z innych sklepów. Najpierw się na to zgódź.";
@@ -862,8 +863,10 @@
 "Any other app will do. Or click the desktop." = "Każda inna aplikacja się nada. Albo kliknij biurko.";
 "Quiet again. The exception stays with %@, waiting. Like me, but with a purpose." = "Znowu cicho. Wyjątek zostaje przy %@ i czeka. Jak ja, tylko z celem.";
 "%@ is already connected. Good: websites get exceptions too." = "%@ jest już połączony. Dobrze: strony też dostają wyjątki.";
+"%@ are already connected. Good: websites get exceptions too." = "%@ są już połączone. Dobrze: strony też dostają wyjątki.";
 "Exceptions for websites need %@ connected: a small extension. Connect it now? Optional." = "Wyjątki dla stron potrzebują połączonego %@: małe rozszerzenie. Połączyć teraz? To opcjonalne.";
 "Exceptions for websites need your browser connected: a small extension. Connect it now? Optional." = "Wyjątki dla stron potrzebują połączonej przeglądarki: małe rozszerzenie. Połączyć teraz? To opcjonalne.";
+"Connect another browser too? Optional." = "Połączyć też inną przeglądarkę? To opcjonalne.";
 "Connect" = "Połącz";
 "Which ones? One or several; each gets the same small extension." = "Które? Jedną lub kilka; każda dostanie to samo małe rozszerzenie.";
 "That’s enough for now. More browsers: Less Pull’s Settings → Websites. I’ll come and help." = "Na razie wystarczy. Więcej przeglądarek: ustawienia Less Pull → Strony. Przyjdę pomóc.";

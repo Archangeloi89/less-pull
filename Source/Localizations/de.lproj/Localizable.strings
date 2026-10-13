@@ -749,6 +749,7 @@
 "Short tour. I like short. See you in the menu bar." = "Kurze Tour. Kurz ist gut. Wir sehen uns in der Menüleiste.";
 /* Die Tour v3: der Cursor von der Website besucht den Mac (Drehbuch TOUR-SCRIPT-v3, Fable). */
 "%@ is already connected. Good: websites get exceptions too." = "%@ ist schon verbunden. Gut: Dann bekommen auch Websites Ausnahmen.";
+"%@ are already connected. Good: websites get exceptions too." = "%@ sind schon verbunden. Gut: Dann bekommen auch Websites Ausnahmen.";
 "%@ is connected. That was the hard part; the rest is one slider." = "%@ ist verbunden. Das war der schwere Teil; der Rest ist ein Regler.";
 "%@ opens the store page. Click Add to Chrome, then Add extension. I’ll notice." = "%@ öffnet die Store-Seite. Klick auf Hinzufügen, dann auf Erweiterung hinzufügen. Ich merke es.";
 "%@ opens the store page. Click its Add button, then Add extension. I’ll notice." = "%@ öffnet die Store-Seite. Klick auf Hinzufügen, dann auf Erweiterung hinzufügen. Ich merke es.";
@@ -800,6 +801,7 @@
 "Hm. My door is hidden. Your menu bar is full." = "Hm. Meine Tür ist versteckt. Deine Menüleiste ist voll.";
 "Home now: lesspull.com, the little circle in the corner." = "Jetzt nach Hause: lesspull.com, der kleine Kreis in der Ecke.";
 "In Extensions, turn on Less Pull and allow it on all websites. I’ll notice." = "Unter Erweiterungen Less Pull einschalten und auf allen Websites erlauben. Ich merke es.";
+"No Extensions page in Safari? Choose Safari → Settings…, then Extensions." = "Keine Erweiterungen-Seite in Safari? Wähle Safari → Einstellungen …, dann Erweiterungen.";
 "It’s night by your schedule, so this is on already. A preview of the present." = "Nach deinem Zeitplan ist Nacht, also läuft das schon. Eine Vorschau der Gegenwart.";
 "It’s up there somewhere, hiding. Anyway: that circle is Less Pull, and my door." = "Irgendwo da oben, versteckt. Jedenfalls: Der Kreis ist Less Pull, und meine Tür.";
 "I’d drag it myself, but guest rules: I don’t touch anything here." = "Ich würde ihn selbst ziehen, aber Gastregeln: Ich fasse hier nichts an.";
@@ -989,6 +991,7 @@
 "All the way to Off. Fine too; Red is at the far right." = "Ganz auf Aus. Geht auch; Rot ist ganz rechts.";
 "Exceptions for websites need %@ connected: a small extension. Connect it now? Optional." = "Ausnahmen für Websites brauchen %@ verbunden: eine kleine Erweiterung. Jetzt verbinden? Freiwillig.";
 "Exceptions for websites need your browser connected: a small extension. Connect it now? Optional." = "Ausnahmen für Websites brauchen deinen Browser verbunden: eine kleine Erweiterung. Jetzt verbinden? Freiwillig.";
+"Connect another browser too? Optional." = "Noch einen Browser verbinden? Freiwillig.";
 "Sunset to sunrise needs your location: macOS sets the time zone from it. Shall I show you the switches?" = "Sonnenuntergang bis Sonnenaufgang braucht deinen Standort: macOS stellt daraus die Zeitzone ein. Soll ich dir die Schalter zeigen?";
 "In Date & Time, turn on “Set time zone automatically using your current location”." = "Schalte in Datum & Uhrzeit „Zeitzone automatisch anhand deines Standorts einstellen“ ein.";
 "The switch is in Date & Time, next to the time zone. I’ll wait right here." = "Der Schalter ist in Datum & Uhrzeit, bei der Zeitzone. Ich warte hier.";

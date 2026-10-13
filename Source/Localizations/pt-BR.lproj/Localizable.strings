@@ -774,6 +774,7 @@
 "A small companion app opens. Click its button: Open Safari Settings." = "Um pequeno app de apoio se abre. Clique no botão dele: Abrir Ajustes do Safari.";
 "Safari didn’t open? Open it yourself: Safari, Settings, Extensions." = "O Safari não abriu? Abra você mesmo: Safari, Ajustes, Extensões.";
 "In Extensions, turn on Less Pull and allow it on all websites. I’ll notice." = "Em Extensões, ative o Less Pull e permita em todos os sites. Eu vou perceber.";
+"No Extensions page in Safari? Choose Safari → Settings…, then Extensions." = "Não apareceu a página Extensões no Safari? Escolha Safari → Ajustes…, depois Extensões.";
 "%@ opens the store page. Click Add to Chrome, then Add extension. I’ll notice." = "O %@ abre a página da loja. Clique em Usar no Chrome e depois em Adicionar extensão. Eu vou perceber.";
 "%@ opens the store page. Click its Add button, then Add extension. I’ll notice." = "O %@ abre a página da loja. Clique no botão de adicionar e depois em Adicionar extensão. Eu vou perceber.";
 "Edge asks once about extensions from other stores. Say yes to that first." = "O Edge pergunta uma vez sobre extensões de outras lojas. Diga sim a isso primeiro.";
@@ -862,8 +863,10 @@
 "Any other app will do. Or click the desktop." = "Qualquer outro app serve. Ou clique na mesa.";
 "Quiet again. The exception stays with %@, waiting. Like me, but with a purpose." = "Calma de novo. A exceção fica com %@, esperando. Como eu, mas com um propósito.";
 "%@ is already connected. Good: websites get exceptions too." = "O %@ já está conectado. Ótimo: os sites também ganham exceções.";
+"%@ are already connected. Good: websites get exceptions too." = "%@ já estão conectados. Ótimo: os sites também ganham exceções.";
 "Exceptions for websites need %@ connected: a small extension. Connect it now? Optional." = "Exceções para sites precisam do %@ conectado: uma pequena extensão. Conectar agora? É opcional.";
 "Exceptions for websites need your browser connected: a small extension. Connect it now? Optional." = "Exceções para sites precisam do seu navegador conectado: uma pequena extensão. Conectar agora? É opcional.";
+"Connect another browser too? Optional." = "Conectar outro navegador também? É opcional.";
 "Connect" = "Conectar";
 "Which ones? One or several; each gets the same small extension." = "Quais? Um ou vários; cada um recebe a mesma pequena extensão.";
 "That’s enough for now. More browsers: Less Pull’s Settings → Websites. I’ll come and help." = "Por enquanto basta. Mais navegadores: Ajustes do Less Pull → Sites. Eu venho ajudar.";

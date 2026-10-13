@@ -774,6 +774,7 @@
 "A small companion app opens. Click its button: Open Safari Settings." = "Відкривається невелика програма-помічник. Натисніть її кнопку: «Відкрити параметри Safari».";
 "Safari didn’t open? Open it yourself: Safari, Settings, Extensions." = "Safari не відкрився? Відкрийте його самі: Safari, Параметри, Розширення.";
 "In Extensions, turn on Less Pull and allow it on all websites. I’ll notice." = "У «Розширеннях» увімкніть Less Pull і дозвольте його на всіх сайтах. Я помічу.";
+"No Extensions page in Safari? Choose Safari → Settings…, then Extensions." = "Немає сторінки «Розширення» в Safari? Виберіть Safari → Параметри…, потім «Розширення».";
 "%@ opens the store page. Click Add to Chrome, then Add extension. I’ll notice." = "%@ відкриває сторінку магазину. Натисніть «Додати в Chrome», потім «Додати розширення». Я помічу.";
 "%@ opens the store page. Click its Add button, then Add extension. I’ll notice." = "%@ відкриває сторінку магазину. Натисніть кнопку додавання, потім «Додати розширення». Я помічу.";
 "Edge asks once about extensions from other stores. Say yes to that first." = "Edge один раз питає про розширення з інших магазинів. Спершу дайте на це згоду.";
@@ -862,8 +863,10 @@
 "Any other app will do. Or click the desktop." = "Підійде будь-яка інша програма. Або натисніть на робочий стіл.";
 "Quiet again. The exception stays with %@, waiting. Like me, but with a purpose." = "Знову тихо. Виняток лишається з %@ і чекає. Як я, тільки з метою.";
 "%@ is already connected. Good: websites get exceptions too." = "%@ уже підключено. Добре: винятки бувають і для сайтів.";
+"%@ are already connected. Good: websites get exceptions too." = "%@ уже підключено. Добре: винятки бувають і для сайтів.";
 "Exceptions for websites need %@ connected: a small extension. Connect it now? Optional." = "Винятки для сайтів потребують підключеного %@: невелике розширення. Підключити зараз? За бажанням.";
 "Exceptions for websites need your browser connected: a small extension. Connect it now? Optional." = "Винятки для сайтів потребують підключеного браузера: невелике розширення. Підключити зараз? За бажанням.";
+"Connect another browser too? Optional." = "Підключити ще один браузер? За бажанням.";
 "Connect" = "Підключити";
 "Which ones? One or several; each gets the same small extension." = "Які? Один або кілька; кожен отримає те саме невелике розширення.";
 "That’s enough for now. More browsers: Less Pull’s Settings → Websites. I’ll come and help." = "Поки що досить. Інші браузери: параметри Less Pull → Сайти. Я прийду допомогти.";

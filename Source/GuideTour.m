@@ -365,6 +365,9 @@ static GTPanel *GTMakePanel(NSRect frame,NSInteger level){
 - (NSRect)barFrame {return self.bar.visible?self.bar.frame:NSZeroRect;}
 - (NSRect)screenFrameOf:(NSView *)v {return v.window?[v.window convertRectToScreen:[v convertRect:v.bounds toView:nil]]:NSZeroRect;}
 
+// Names as a list in the tour's language: "Brave, Firefox und Opera".
+static NSString *GTJoin(NSArray<NSString *> *names){NSListFormatter *f=[NSListFormatter new];f.locale=[NSLocale localeWithLocaleIdentifier:LessPullLanguage.current?:@"en"];return [f stringFromItems:names]?:[names componentsJoinedByString:L(@" and ")];}
+
 #pragma mark the tour bar
 - (void)makeBar {
  self.stationNames=@[L(@"The pull"),L(@"Less Pull"),L(@"Apps"),L(@"Websites"),L(@"Peek"),L(@"Sessions & nights"),L(@"Your turn")];
@@ -863,7 +866,7 @@ static GTPanel *GTMakePanel(NSRect frame,NSInteger level){
  NSInteger g=self.generation;__weak GuideTour *weak=self;[self.waitTimer invalidate];__block NSUInteger nudged=0;__block BOOL menuWasOpen=NO,said180=NO;double base=[self readingTime:say];id<GuideTourHost> host=self.host;
  [self after:travel*.6+.4+(again?base:0) do:^{GuideTour *s=weak;s.waiting=YES;s.waitStart=CACurrentMediaTime();
   s.waitTimer=[NSTimer timerWithTimeInterval:.15 repeats:YES block:^(NSTimer *t){GuideTour *w=weak;if(!w||g!=w.generation||!w.running){[t invalidate];return;}if(w.paused)return;
-   if(b.until()){[t invalidate];w.waiting=NO;[w after:.1 do:advance];return;}
+   if(b.until()){if(say.length&&CACurrentMediaTime()-w.view.talkAt<base*.75)return;[t invalidate];w.waiting=NO;[w after:.1 do:advance];return;}  // done already: it still reads out first
    double waited=CACurrentMediaTime()-w.waitStart,since=waited-base;
    if(nudged<b.nudges.count&&since>=[b.nudges[nudged][0] doubleValue]*w.pace){NSArray *n=b.nudges[nudged++];[w face:[n[2] integerValue]];if(b.toFront)[host guideDo:@"settingsToFront" with:nil];
     if(n.count>3){NSValue *(^na)(void)=n[3];NSValue *p=na();if(p){w.view.pointAt=[w local:p.pointValue];w.aimFollowsRing=NO;}}[w show:n[1] scene:w.sceneKind];
@@ -942,7 +945,8 @@ static GTPanel *GTMakePanel(NSRect frame,NSInteger level){
  NSArray *waitNudges=[park arrayByAddingObjectsFromArray:@[@[@20,[NSString stringWithFormat:L(@"No rush. The page is in %@; I’m out here, admiring the real pixels."),name],@(GTFaceNone)],skipNudge]];
  if([bid isEqual:@"com.apple.Safari"]){GTBeat *s1=Beat(L(@"A small companion app opens. Click its button: Open Safari Settings."),GTFacePress);s1.to=nearBar;s1.run=connectOnce;s1.freeKeys=YES;
   s1.until=^BOOL{id f=[host guideValue:@"frontBundle"];return [f isEqual:@"com.apple.Safari"];};s1.timeout=30;s1.timeoutSay=L(@"Safari didn’t open? Open it yourself: Safari, Settings, Extensions.");s1.nextTo=nil;[out addObject:s1];
-  wait=Beat(L(@"In Extensions, turn on Less Pull and allow it on all websites. I’ll notice."),GTFaceNone);}
+  wait=Beat(L(@"In Extensions, turn on Less Pull and allow it on all websites. I’ll notice."),GTFaceNone);
+  waitNudges=[@[@[@12,L(@"No Extensions page in Safari? Choose Safari → Settings…, then Extensions."),@(GTFaceNone)]] arrayByAddingObjectsFromArray:waitNudges];}  // the button may open Safari without its Settings
  else if([bid isEqual:@"org.mozilla.firefox"]){wait=Beat(L(@"Firefox opens its add-ons page. Click Add to Firefox, then Add. I’ll notice."),GTFacePress);wait.run=connectOnce;}
  else if(opera){wait=Beat(L(@"Opera opens the store page. Click Add to Opera, then confirm. I’ll notice."),GTFacePress);wait.run=connectOnce;waitNudges=park;}
  else {BOOL chrome=[bid isEqual:@"com.google.Chrome"];wait=Beat([NSString stringWithFormat:chrome?L(@"%@ opens the store page. Click Add to Chrome, then Add extension. I’ll notice."):L(@"%@ opens the store page. Click its Add button, then Add extension. I’ll notice."),name],GTFacePress);wait.run=connectOnce;
@@ -1121,23 +1125,24 @@ static GTPanel *GTMakePanel(NSRect frame,NSInteger level){
 
  // 4 Websites: connect a browser (an offer), then an exception for a website
  [steps addObject:^NSArray *{
-  NSArray *browsers=[host guideValue:@"browsers"]?:@[];NSDictionary *connected=nil;for(NSDictionary *b in browsers)if([b[@"connected"] boolValue]){connected=b;break;}
+  NSArray *browsers=[host guideValue:@"browsers"]?:@[];NSMutableArray *haveList=[NSMutableArray new],*rest=[NSMutableArray new];for(NSDictionary *b in browsers)[([b[@"connected"] boolValue]?haveList:rest) addObject:b];
+  NSDictionary *connected=haveList.firstObject;NSMutableArray *haveNames=[NSMutableArray new];for(NSDictionary *b in haveList)[haveNames addObject:b[@"name"]];  // all of them, not only the one used a minute ago
   __block BOOL siteFlow=NO;__block NSArray *chosen=@[];NSString *(^connectedName)(void)=^NSString *{for(NSDictionary *b in [host guideValue:@"browsers"])if([b[@"connected"] boolValue])return b[@"name"];return @"";};
   BOOL (^anyConnected)(void)=^BOOL{return [[host guideValue:@"browserConnected"] boolValue];};
   NSArray *(^walkAll)(void)=^NSArray *{NSMutableArray *all=[NSMutableArray new];for(NSDictionary *b in chosen)[all addObjectsFromArray:[weak walkFor:b first:b==chosen.firstObject connect:YES]];return all;};
-  GTBeat *have=Beat([NSString stringWithFormat:L(@"%@ is already connected. Good: websites get exceptions too."),connected[@"name"]?:@""],GTFaceNone);have.free=YES;have.onlyIf=^BOOL{return connected!=nil;};
-  GTBeat *offer=Beat(browsers.count==1?[NSString stringWithFormat:L(@"Exceptions for websites need %@ connected: a small extension. Connect it now? Optional."),browsers.firstObject[@"name"]]:L(@"Exceptions for websites need your browser connected: a small extension. Connect it now? Optional."),GTFaceTilt);
-  offer.free=YES;offer.onlyIf=^BOOL{return !connected&&browsers.count>0;};offer.ask=@[L(@"Connect"),L(@"Not now")];
-  __weak GTBeat *weakOffer=offer;offer.answered=^(NSInteger i){if(i!=0){weakOffer.doneTo=@"web.no";return;}if(browsers.count==1){chosen=browsers;weakOffer.doneTo=@"walk";}};
-  GTBeat *pick=Beat(L(@"Which ones? One or several; each gets the same small extension."),GTFaceNone);pick.onlyIf=^BOOL{return !connected&&browsers.count>1;};pick.ask=@[L(@"Connect"),L(@"Not now")];
-  pick.choices=^NSArray *{NSMutableArray *names=[NSMutableArray new];for(NSDictionary *b in browsers)[names addObject:b[@"name"]];return names;};
-  __weak GTBeat *weakPick=pick;pick.chosen=^(NSArray<NSNumber *> *ticked){NSMutableArray *c=[NSMutableArray new];for(NSNumber *n in ticked)[c addObject:browsers[n.integerValue]];chosen=c;};
-  pick.answered=^(NSInteger i){if(i!=0||!chosen.count)weakPick.doneTo=@"web.no";};
+  GTBeat *have=Beat(haveList.count>1?[NSString stringWithFormat:L(@"%@ are already connected. Good: websites get exceptions too."),GTJoin(haveNames)]:[NSString stringWithFormat:L(@"%@ is already connected. Good: websites get exceptions too."),connected[@"name"]?:@""],GTFaceNone);have.free=YES;have.onlyIf=^BOOL{return connected!=nil;};
+  GTBeat *offer=Beat(connected?L(@"Connect another browser too? Optional."):rest.count==1?[NSString stringWithFormat:L(@"Exceptions for websites need %@ connected: a small extension. Connect it now? Optional."),rest.firstObject[@"name"]]:L(@"Exceptions for websites need your browser connected: a small extension. Connect it now? Optional."),GTFaceTilt);
+  offer.free=YES;offer.onlyIf=^BOOL{return rest.count>0;};offer.ask=@[L(@"Connect"),L(@"Not now")];
+  __weak GTBeat *weakOffer=offer;offer.answered=^(NSInteger i){if(i!=0){weakOffer.doneTo=connected?@"web.open":@"web.no";return;}if(rest.count==1){chosen=rest;weakOffer.doneTo=@"walk";}};
+  GTBeat *pick=Beat(L(@"Which ones? One or several; each gets the same small extension."),GTFaceNone);pick.onlyIf=^BOOL{return rest.count>1;};pick.ask=@[L(@"Connect"),L(@"Not now")];
+  pick.choices=^NSArray *{NSMutableArray *names=[NSMutableArray new];for(NSDictionary *b in rest)[names addObject:b[@"name"]];return names;};
+  __weak GTBeat *weakPick=pick;pick.chosen=^(NSArray<NSNumber *> *ticked){NSMutableArray *c=[NSMutableArray new];for(NSNumber *n in ticked)[c addObject:rest[n.integerValue]];chosen=c;};
+  pick.answered=^(NSInteger i){if(i!=0||!chosen.count)weakPick.doneTo=connected?@"web.open":@"web.no";};
   GTBeat *walkHere=Beat(nil,GTFaceNone);walkHere.ident=@"walk";walkHere.then=walkAll;  // the chosen browsers, one after another
   GTBeat *more=Beat(L(@"That’s enough for now. More browsers: Less Pull’s Settings → Websites. I’ll come and help."),GTFaceNone);more.ring=weak.circleRing;more.ringIsCircle=YES;more.lean=YES;more.pointAt=weak.circleAim;
   more.onlyIf=^BOOL{if(!chosen.count||!anyConnected())return NO;NSInteger open=0;for(NSDictionary *b in [host guideValue:@"browsers"])if(![b[@"connected"] boolValue])open++;return open>0;};
   GTBeat *open=Beat(nil,GTFaceNone);open.sayBlock=^NSString *{return [NSString stringWithFormat:L(@"Open any website in %@ and bring it to the front."),connectedName()];};open.to=nearBar;
-  open.onlyIf=anyConnected;open.freeKeys=YES;open.until=^BOOL{return str(@"site").length>0;};open.nudges=[weak nudge:10 say:L(@"Any page at all; the first tab you have is fine.")];open.nextTo=@"web.skip";open.done=^{siteFlow=str(@"site").length>0;};
+  open.ident=@"web.open";open.onlyIf=anyConnected;open.freeKeys=YES;open.until=^BOOL{return str(@"site").length>0;};open.nudges=[weak nudge:10 say:L(@"Any page at all; the first tab you have is fine.")];open.nextTo=@"web.skip";open.done=^{siteFlow=str(@"site").length>0;};
   GTBeat *skip=Beat(L(@"Another time, then. With a website in front, the menu offers it."),GTFaceNone);skip.ident=@"web.skip";skip.jumpOnly=YES;skip.doneTo=@"next-station";
   GTBeat *spot=Beat(L(@"Click the circle. The menu has a new line now."),GTFacePress);spot.onlyIf=^BOOL{return siteFlow;};spot.to=weak.underCircle;spot.ring=weak.circleRing;spot.ringIsCircle=YES;spot.lean=YES;spot.pointAt=weak.circleAim;
   spot.mark=@"site-exception";spot.until=^BOOL{return [[host guideValue:@"menuOpen"] boolValue]||[[host guideValue:@"exceptionPanel"] boolValue];};spot.nudges=[weak circleNudges];spot.onNext=^{[host guideDo:@"openSitePanel" with:nil];};spot.nextTo=@"web.panel";
