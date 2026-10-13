@@ -286,6 +286,7 @@ static void QuietScrolling(NSScrollView *s){
 @property BrowserBridge *browserBridge;
 @property NSURL *installedAway;  // a copy on its tour: the installed app it asked to quit, to start again afterwards
 @property NSTask *installedWatch;
+@property BOOL rebuildAfterMouseUp;  // a list or the exception panel waits for the mouse button to come up
 @property MenuDismissal *menuDismissal;
 @property NSString *website;
 @property FilterEngine *engine;
@@ -1024,7 +1025,15 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  NSMenuItem *other=[[NSMenuItem alloc]initWithTitle:L(@"Choose another app…") action:@selector(addExclusionApp:) keyEquivalent:@""];other.target=self;[menu addItem:other];
 }
 - (void)addRunningApp:(NSMenuItem *)sender {if(sender.representedObject)[self addAppURL:sender.representedObject];}
+// Never under a held mouse button: a rebuild replaces every control, and a slider being dragged would lose its knob.
+// (Every change, and every word from a browser, rebuilds these.) The rebuild waits until the button comes up.
+- (BOOL)deferRebuildWhileMouseDown {
+ if(!(NSEvent.pressedMouseButtons&1))return NO;if(self.rebuildAfterMouseUp)return YES;self.rebuildAfterMouseUp=YES;__weak AppDelegate *weak=self;
+ NSTimer *t=[NSTimer timerWithTimeInterval:.1 repeats:YES block:^(NSTimer *x){AppDelegate *s=weak;if(!s){[x invalidate];return;}if(NSEvent.pressedMouseButtons&1)return;[x invalidate];s.rebuildAfterMouseUp=NO;[s rebuildExclusionsList];[s rebuildWebsiteRulesList];}];
+ [NSRunLoop.mainRunLoop addTimer:t forMode:NSRunLoopCommonModes];return YES;
+}
 - (void)rebuildExclusionsList {
+ if([self deferRebuildWhileMouseDown])return;
  if(self.panelBundle)[self refreshExceptionPanel];
  if(!self.exclusionsList)return;for(NSView *v in self.exclusionsList.arrangedSubviews.copy){[self.exclusionsList removeArrangedSubview:v];[v removeFromSuperview];}
  NSArray *keys=[self.exclusionRules.allKeys sortedArrayUsingComparator:^NSComparisonResult(NSString *a,NSString *b){return [self.exclusionRules[a][@"name"] localizedCaseInsensitiveCompare:self.exclusionRules[b][@"name"]];}];
@@ -2077,6 +2086,7 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
  return row;
 }
 - (void)rebuildWebsiteRulesList {
+ if([self deferRebuildWhileMouseDown])return;
  if(self.panelTab)[self refreshExceptionPanel];
  if(!self.websiteRulesList)return;for(NSView *v in self.websiteRulesList.arrangedSubviews.copy){[self.websiteRulesList removeArrangedSubview:v];[v removeFromSuperview];}
  NSArray *keys=[self.browserBridge.rules.allKeys sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
@@ -2677,6 +2687,10 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
  if([key isEqual:@"panel.gray.off"]){NSRect r=[self guideFrame:@"panel.gray"];if(NSIsEmptyRect(r))return r;r.origin.x+=r.size.width*2/3;r.size.width/=3;return r;}
  if([key isEqual:@"settings"])return self.settings.visible?self.settings.frame:NSZeroRect;
  if([key hasPrefix:@"settings.tab."])return [self tourTabFrame:[[key substringFromIndex:13] integerValue]];
+ // the session panel's parts come before the Settings check: on the tour, Settings is the tour bar and not visible
+ if([key isEqual:@"session.chips"]){if(!self.sessionPanel.visible)return NSZeroRect;NSMutableArray *chips=[NSMutableArray new];[self collectIn:self.sessionPanel.contentView into:chips where:^BOOL(NSView *x){return [x isKindOfClass:NSButton.class]&&((NSButton *)x).action==@selector(startSession:);}];
+  NSRect u=NSZeroRect;for(NSView *c in chips)u=NSIsEmptyRect(u)?[self screenRectOf:c]:NSUnionRect(u,[self screenRectOf:c]);return u;}
+ if([key isEqual:@"session.notnow"]){if(!self.sessionPanel.visible)return NSZeroRect;NSView *v=[self findIn:self.sessionPanel.contentView where:^BOOL(NSView *x){return [x isKindOfClass:NSButton.class]&&[((NSButton *)x).title isEqual:L(@"Not now")];}];return v?[self screenRectOf:v]:NSZeroRect;}
  if(!self.settings.visible)return NSZeroRect;
  if([key isEqual:@"settings.nightPopup"])return [self screenRectOf:self.nightHoursPopup];
  if([key isEqual:@"settings.hours"])return self.ownHoursRow.hidden?NSZeroRect:[self screenRectOf:self.ownHoursRow];
@@ -2685,9 +2699,6 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
  if([key isEqual:@"settings.boost"])return NSUnionRect([self screenRectOf:self.nightTryButton],[self screenRectOf:self.nightBoostPopup]);
  if([key isEqual:@"settings.login"])return [self screenRectOf:self.loginButton];
  if([key isEqual:@"settings.suggest"]){NSView *v=[self findIn:self.settings.contentView where:^BOOL(NSView *x){return [x isKindOfClass:NSButton.class]&&[x.identifier isEqual:@"peekShortcut"]&&((NSButton *)x).action==@selector(suggestShortcut:);}];return v?[self screenRectOf:v]:NSZeroRect;}
- if([key isEqual:@"session.chips"]){if(!self.sessionPanel.visible)return NSZeroRect;NSMutableArray *chips=[NSMutableArray new];[self collectIn:self.sessionPanel.contentView into:chips where:^BOOL(NSView *x){return [x isKindOfClass:NSButton.class]&&((NSButton *)x).action==@selector(startSession:);}];
-  NSRect u=NSZeroRect;for(NSView *c in chips)u=NSIsEmptyRect(u)?[self screenRectOf:c]:NSUnionRect(u,[self screenRectOf:c]);return u;}
- if([key isEqual:@"session.notnow"]){if(!self.sessionPanel.visible)return NSZeroRect;NSView *v=[self findIn:self.sessionPanel.contentView where:^BOOL(NSView *x){return [x isKindOfClass:NSButton.class]&&[((NSButton *)x).title isEqual:L(@"Not now")];}];return v?[self screenRectOf:v]:NSZeroRect;}
  return NSZeroRect;
 }
 - (void)guideDo:(NSString *)action with:(id)argument {
@@ -2742,6 +2753,11 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
  if([what isEqual:@"next"])[self.guide next];else if([what isEqual:@"back"])[self.guide back];else if([what isEqual:@"slower"])[self.guide toggleSlow];else if([what isEqual:@"end"])[self.guide endEarly];
  else if([what hasPrefix:@"station"])[self.guide jumpTo:[[what substringFromIndex:7] integerValue]-1];
  else if([what isEqual:@"menu"])[self.item.button performClick:nil];else if([what isEqual:@"menuclose"])[self.statusMenu cancelTracking];
+ else if([what hasPrefix:@"warmthTo:"]){double v=[[what substringFromIndex:9] doubleValue];[NSUserDefaults.standardUserDefaults setDouble:v/100*3 forKey:[self warmthKey]];self.menuWarmthSlider.doubleValue=v;self.animateAppearance=YES;[self sync];}
+ else if([what isEqual:@"rebuild"]){[self rebuildExclusionsList];[self rebuildWebsiteRulesList];}
+ else if([what hasPrefix:@"frame:"]){NSString *k=[what substringFromIndex:6];NSLog(@"Less Pull tour test: frame %@ %@",k,NSStringFromRect([self guideFrame:k]));}
+ else if([what isEqual:@"appPanel"])[self openAppExceptionPanel:nil];else if([what isEqual:@"sitePanel"])[self openSiteExceptionPanel:nil];
+ else if([what isEqual:@"logPanel"]){NSRect r=[self guideFrame:@"panel.warmth"];CGFloat top=NSMaxY(NSScreen.screens.firstObject.frame);NSDictionary *rule=self.panelBundle?self.exclusionRules[self.panelBundle]:self.browserBridge.rules[[self websiteKeyForTab:self.panelTab]];NSLog(@"Less Pull tour test: panel slider cg %@ warmth %@",NSStringFromRect(NSMakeRect(r.origin.x,top-NSMaxY(r),r.size.width,r.size.height)),rule[@"warmth"]);}
  else if([what isEqual:@"closeSettings"])[self.settings performClose:nil];else if([what isEqual:@"park"])[self.guide debugPark];else if([what isEqual:@"left"])[self.guide arrowKey:-1];else if([what isEqual:@"right"])[self.guide arrowKey:1];
  else if([what hasPrefix:@"tick"])[self.guide debugTick:[[what substringFromIndex:4] integerValue]];else if([what hasPrefix:@"answer"])[self.guide debugAnswer:[[what substringFromIndex:6] integerValue]];else if([what isEqual:@"warmth"]){[NSUserDefaults.standardUserDefaults setDouble:1.8 forKey:@"warmth"];self.animateAppearance=YES;[self sync];}
  else if([what isEqual:@"startTour"])[self tourNext:nil];else if([what isEqual:@"sheet1"])[self.settings endSheet:self.settings.attachedSheet returnCode:NSAlertFirstButtonReturn];

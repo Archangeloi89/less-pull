@@ -695,7 +695,6 @@
 "%ld of %ld" = "%ld von %ld";
 "The tour is on" = "Die Tour läuft";
 "Follow the circle. It talks a little and shows things on your real screen; nothing is changed for good." = "Folge dem Kreis. Er redet ein wenig und zeigt Dinge auf deinem echten Bildschirm; nichts wird dauerhaft verändert.";
-"Slower" = "Langsamer";
 "The circle takes more time for each step." = "Der Kreis nimmt sich für jeden Schritt mehr Zeit.";
 "End tour" = "Tour beenden";
 "Less Pull tour" = "Less-Pull-Tour";
@@ -789,7 +788,6 @@
 "First, the pull. Less Pull pauses for a moment: your screen without it." = "Zuerst der Sog. Less Pull pausiert kurz: dein Bildschirm ohne Less Pull.";
 "Full color. Everything on it wants a look. That’s the pull; I feel it too." = "Volle Farbe. Alles darauf will angeschaut werden. Das ist der Sog; ich spüre ihn auch.";
 "Full screen. Big of you. The menu bar is hiding; the pointer at the top edge brings it back." = "Vollbild. Großzügig. Die Menüleiste versteckt sich oben; der Zeiger am oberen Rand holt sie zurück.";
-"Full speed again. I’ll try not to blur." = "Wieder volles Tempo. Ich versuche, nicht zu verwischen.";
 "General, near the bottom: Launch at login. Tick it." = "Allgemein, weiter unten: Bei der Anmeldung öffnen. Setz das Häkchen.";
 "Give it some Extra Warmth: drag the slider. Only this site gets it." = "Gib ihr etwas Extra-Wärme: Zieh den Regler. Nur diese Site bekommt sie.";
 "Go on; we have a tour to finish." = "Na los; wir haben eine Tour zu Ende zu bringen.";
@@ -829,7 +827,6 @@
 "Peek in color shortcut: click Suggest, or click the field and press your keys." = "Farbblick-Kurzbefehl: Klick auf Vorschlag, oder klick ins Feld und drück deine Tasten.";
 "Peek kept on" = "Farbblick bleibt an";
 "Quiet again. The exception stays with %@, waiting. Like me, but with a purpose." = "Wieder ruhig. Die Ausnahme bleibt bei %@ und wartet. Wie ich, nur mit Sinn.";
-"Red. Everything’s a sunset, me included. Dial it back whenever." = "Rot. Alles ein Sonnenuntergang, ich auch. Dreh zurück, wann du willst.";
 "Reduce Motion is on. Understood: no hopping, no spinning. I’ll walk." = "Bewegung reduzieren ist an. Verstanden: kein Hüpfen, kein Drehen. Ich gehe zu Fuß.";
 "Same panel, for a website. Whole domain, or This exact page: your call." = "Dasselbe Fenster, für eine Website. Ganze Domain oder Genau diese Seite: deine Wahl.";
 "Second visit! I’m touched. Same jokes, though; I only packed the one set." = "Zweiter Besuch! Ich bin gerührt. Dieselben Witze aber; ich hab nur den einen Satz dabei.";
@@ -898,7 +895,6 @@
 "Help: Sunset to sunrise" = "Hilfe: Sonnenuntergang bis Sonnenaufgang";
 "I’ll walk you through %@. It takes a minute." = "Ich führ dich durch %@. Das dauert eine Minute.";
 "Let’s leave it for now. Set up… tries again whenever you like." = "Lassen wir es für jetzt. „Einrichten …“ versucht es jederzeit wieder.";
-"More time for each line." = "Mehr Zeit für jeden Satz.";
 "Now click another app, or the desktop: it goes quiet again." = "Jetzt klick auf eine andere App oder auf den Schreibtisch: Es wird wieder ruhig.";
 "One line back" = "Einen Satz zurück";
 "One line back. The ← key works too while I talk." = "Einen Satz zurück. Solange ich rede, geht auch die Taste ←.";
@@ -1003,3 +999,13 @@
 "Less Pull lives in that circle. When an app with many menus is in front, macOS hides the menu-bar icons that are furthest from the clock, and the circle with them. Hold ⌘ and drag it all the way right, next to the clock (can’t see it? show the hidden menu-bar icons first): there it always stays visible. The tour starts as soon as it’s there." = "Less Pull wohnt in diesem Kreis. Ist eine App mit vielen Menüs vorne, versteckt macOS die Symbole der Menüleiste, die am weitesten von der Uhr entfernt sind, und den Kreis mit ihnen. Halt ⌘ gedrückt und zieh ihn ganz nach rechts, neben die Uhr (du siehst ihn nicht? zeig zuerst die versteckten Symbole der Menüleiste an): dort bleibt er immer sichtbar. Die Tour beginnt, sobald er da ist.";
 "Demo" = "Demo";
 "Test" = "Test";
+"Fast" = "Schnell";
+"Faster, then. I’ll try not to blur." = "Also schneller. Ich versuche, nicht zu verwischen.";
+"How much time each line gets." = "Wie viel Zeit jeder Satz bekommt.";
+"Normal" = "Normal";
+"Normal speed again." = "Wieder normales Tempo.";
+"Red. Everything’s a sunset, me included. Now slide it back to where it feels right." = "Rot. Alles ein Sonnenuntergang, ich auch. Jetzt schieb ihn zurück, bis es sich gut anfühlt.";
+"Slow" = "Langsam";
+"There. That warmth is yours." = "So. Diese Wärme gehört dir.";
+"To the left, until it feels right. The slider is in the menu, under the circle." = "Nach links, bis es sich gut anfühlt. Der Regler ist im Menü, unter dem Kreis.";
+"Tour speed" = "Tempo der Tour";
