@@ -6,7 +6,7 @@ Version 1.4.4 (build 41.1) is a test build. Read [what to expect](#what-to-expec
 
 1. Download **Less-Pull-1.4.4-41.1.dmg** from the [build 41.1 release](https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-41.1).
 2. Open it and drag **Less Pull** onto the **Applications** shortcut next to it. (A zip of the same app is on the release page too; the in-app updater uses it.)
-3. Open it. A half-filled circle appears in the menu bar, and on the first launch the Settings window opens with a short welcome.
+3. Open it. A half-filled circle appears in the menu bar, and on the first launch a short welcome opens under it and offers a tour on your own screen: a guide shows you around while you try each step.
 4. Click the circle and choose Grayscale and Extra Warmth. At night, **Warmer at night** adds a few points more; you set your night under **Settings… → General → Night schedule**. The icon fills on the left while grayscale is showing and warms on the right as you add warmth.
 
 The app is signed with a Developer ID and notarized by Apple, so macOS opens it without a warning. If macOS still objects, the download was altered on the way; get it again from the release page.
