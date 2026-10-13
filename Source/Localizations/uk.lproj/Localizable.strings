@@ -747,7 +747,7 @@
 "That’s the start of this stop. The numbers on the bar go further back." = "Тут починається цей етап. Номери на панелі ведуть далі назад.";
 "Once more, then." = "Тоді ще раз.";
 "Everything back as it was." = "Усе знову як було.";
-"Opera opens the store page. Click Add to Opera, then confirm. I’ll notice." = "Opera відкриває сторінку магазину. Натисніть «Додати в Opera» і підтвердьте. Я помічу.";
+"Opera opens the store page. If it first offers its helper for the Chrome Web Store, add that. Then Add to Opera, and confirm. I’ll notice." = "Opera відкриває сторінку магазину. Якщо спершу запропонує свій помічник для Chrome Web Store, додайте його. Потім «Додати в Opera» і підтвердьте. Я помічу.";
 "Slower again? No rush; I’m on holiday." = "Ще повільніше? Не поспішайте; я у відпустці.";
 "Slower it is. Real pixels are heavier; I felt that." = "Отже, повільніше. Справжні пікселі важчі; я це відчув.";
 "Faster, then. I’ll try not to blur." = "Отже, швидше. Постараюся не розмитися.";

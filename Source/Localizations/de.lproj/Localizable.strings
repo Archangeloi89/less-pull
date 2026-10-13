@@ -876,7 +876,7 @@
 "Your turn. Hold %@." = "Du bist dran. Halte %@.";
 "Your turn: click the circle, then the first item, Session or break…" = "Du bist dran: Klick auf den Kreis, dann der erste Eintrag, Sitzung oder Auszeit …";
 "I’ll wait up by the bar, out of your way. Guest rules." = "Ich geh dir aus dem Weg und warte oben bei der Leiste. Gastregeln.";
-"Opera opens the store page. Click Add to Opera, then confirm. I’ll notice." = "Opera öffnet die Store-Seite. Klick auf Zu Opera hinzufügen, dann bestätigen. Ich merke es.";
+"Opera opens the store page. If it first offers its helper for the Chrome Web Store, add that. Then Add to Opera, and confirm. I’ll notice." = "Opera öffnet die Store-Seite. Bietet es zuerst seinen Helfer für den Chrome Web Store an, füge ihn hinzu. Dann Zu Opera hinzufügen, und bestätigen. Ich merke es.";
 "Let’s leave it. The setup waits in Less Pull’s own Settings, the Websites tab. On we go." = "Lassen wir es. Die Einrichtung wartet in Less Pulls eigenen Einstellungen, Tab Websites. Weiter geht's.";
 "No problem. Websites wait in Less Pull’s own Settings, the Websites tab, whenever you like." = "Kein Problem. Websites warten in Less Pulls eigenen Einstellungen, Tab Websites, wann du willst.";
 "The numbers in the panel: 25 will do. Or Not now, and we go on without it." = "Die Zahlen im Fenster: 25 reicht. Oder Jetzt nicht, dann machen wir ohne weiter.";
