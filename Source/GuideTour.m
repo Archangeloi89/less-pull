@@ -35,6 +35,7 @@ static NSColor *GTInk(double a){return [NSColor colorWithSRGBRed:36/255.0 green:
 @property(copy) NSArray *nudges;                // @[@seconds,line,@face(,pointAt block)] while it waits, in order
 @property(copy) NSArray *ramp;                  // @[@from,@to,@seconds]: real warmth rising, the right half blushing with it
 @property(copy) NSArray<NSString *> *ask;       // answer buttons in the card; the beat waits for one (Next picks the last)
+@property(copy) BOOL (^watch)(void);@property(copy) NSString *watchTo;  // while the question is up: once this is true, it goes there without an answer
 @property(copy) void (^answered)(NSInteger index);
 @property(copy) NSArray *(^choices)(void);      // check boxes before the buttons (e.g. the installed browsers); their names
 @property(copy) void (^chosen)(NSArray<NSNumber *> *picked);  // which boxes were ticked when a button was pressed
@@ -857,6 +858,10 @@ static NSString *GTJoin(NSArray<NSString *> *names){NSListFormatter *f=[NSListFo
   NSArray *choices=b.choices?b.choices():nil;self.askPreset=nil;
   self.askPreset=b.tickedSet?b.tickedSet():nil;NSInteger idx=self.beatIndex;void (^speak)(void)=^{[self noteShown:idx];self.view.talkAt=CACurrentMediaTime();[self showAsk:b.ask choices:choices ticked:b.ticked answered:^(NSInteger i){NSInteger pick=i<0?(NSInteger)b.ask.count-1:i;NSArray *ticked=i<0?@[]:[self tickedBoxes];if(b.chosen)b.chosen(ticked);if(b.answered)b.answered(pick);[self after:.25 do:advance];}];[self show:say scene:b.scene];};
   if(travel>0)[self after:travel*.6 do:speak];else speak();
+  if(b.watch){NSInteger g=self.generation;__weak GuideTour *weak=self;[self.waitTimer invalidate];  // what it asks about can happen meanwhile (a browser connects): then the answer is not needed
+   self.waitTimer=[NSTimer timerWithTimeInterval:.3 repeats:YES block:^(NSTimer *t){GuideTour *w=weak;if(!w||g!=w.generation||!w.running){[t invalidate];return;}if(w.paused||!b.watch())return;
+    [t invalidate];w.asking=NO;w.askAnswered=nil;[w hideAsk];w.generation++;[w endBeat:b to:b.watchTo];}];
+   [NSRunLoop.mainRunLoop addTimer:self.waitTimer forMode:NSRunLoopCommonModes];}
   return;}
  NSInteger idx=self.beatIndex;void (^speak)(void)=^{if(say.length){[self noteShown:idx];self.view.talkAt=CACurrentMediaTime();}[self show:say scene:b.scene];if(say.length&&b.pointAt&&b.lean)self.view.pressAt=CACurrentMediaTime()+.35;};  // it says the line (and taps at what it means)
  if(travel>0)[self after:travel*.6 do:speak];else speak();
@@ -951,11 +956,11 @@ static NSString *GTJoin(NSArray<NSString *> *names){NSListFormatter *f=[NSListFo
  else if(opera){wait=Beat(L(@"Opera opens the store page. If it first offers its helper for the Chrome Web Store, add that. Then Add to Opera, and confirm. I’ll notice."),GTFacePress);wait.run=connectOnce;waitNudges=park;}
  else {BOOL chrome=[bid isEqual:@"com.google.Chrome"];wait=Beat([NSString stringWithFormat:chrome?L(@"%@ opens the store page. Click Add to Chrome, then Add extension. I’ll notice."):L(@"%@ opens the store page. Click its Add button, then Add extension. I’ll notice."),name],GTFacePress);wait.run=connectOnce;
   if([bid isEqual:@"com.microsoft.edgemac"])waitNudges=[@[@[@.1,L(@"Edge asks once about extensions from other stores. Say yes to that first."),@(GTFaceNone)]] arrayByAddingObjectsFromArray:waitNudges];}
- wait.to=nearBar;wait.until=isConnected;wait.nudges=waitNudges;wait.timeout=opera?12:150;  // Opera: the other way is offered sooner
+ wait.to=nearBar;wait.until=isConnected;wait.nudges=waitNudges;wait.timeout=opera?45:150;  // Opera: helper, then Add to Opera takes a while; the other way waits
  wait.timeoutTo=opera?askId:laterId;wait.nextTo=opera?askId:laterId;wait.doneTo=connId;wait.freeKeys=YES;[out addObject:wait];
  if(opera){  // after a while: a plain question about Opera's error, and the other way if it is there
   GTBeat *ask=Beat(L(@"Still loading? Or does Opera say “Download error: Installation is not enabled”? Then there’s another way."),GTFaceTilt);ask.ident=askId;ask.jumpOnly=YES;ask.to=nearBar;
-  ask.ask=@[L(@"Show me the other way"),L(@"Still trying"),L(@"Skip")];__weak GTBeat *weakAsk=ask;ask.answered=^(NSInteger i){weakAsk.doneTo=i==0?sideId:i==1?wait2Id:laterId;};[out addObject:ask];
+  ask.ask=@[L(@"Show me the other way"),L(@"Still trying"),L(@"Skip")];__weak GTBeat *weakAsk=ask;ask.answered=^(NSInteger i){weakAsk.doneTo=i==0?sideId:i==1?wait2Id:laterId;};ask.watch=isConnected;ask.watchTo=connId;[out addObject:ask];
   GTBeat *wait2=Beat(L(@"Take your time. I’ll notice when it’s in."),GTFaceNone);wait2.ident=wait2Id;wait2.jumpOnly=YES;wait2.to=nearBar;wait2.until=isConnected;wait2.timeout=25;wait2.timeoutTo=askId;wait2.nextTo=askId;wait2.doneTo=connId;wait2.freeKeys=YES;[out addObject:wait2];}
  GTBeat *ok=Beat([NSString stringWithFormat:helper?L(@"%@ is connected. With a website in front, the menu now offers its exception."):L(@"%@ is connected. That was the hard part; the rest is one slider."),name],GTFaceHop);ok.ident=connId;ok.jumpOnly=YES;ok.faces=@[@[@.7,@(GTFaceWiggle)]];ok.doneTo=[@"end-" stringByAppendingString:bid];[out addObject:ok];
  GTBeat *later=Beat(helper?L(@"Let’s leave it for now. Set up… tries again whenever you like."):L(@"Let’s leave it. The setup waits in Less Pull’s own Settings, the Websites tab. On we go."),GTFaceNone);later.ident=laterId;later.jumpOnly=YES;
@@ -963,9 +968,9 @@ static NSString *GTJoin(NSArray<NSString *> *names){NSListFormatter *f=[NSListFo
  if(opera){  // Opera's side door: its own extensions page, Developer mode, and the extension folder from Less Pull dropped onto it (the same extension)
   NSValue *(^toggle)(void)=^NSValue *{NSRect w=[host guideFrame:@"window:com.operasoftware.Opera"];return NSIsEmptyRect(w)?nil:[NSValue valueWithPoint:NSMakePoint(NSMaxX(w)-78,NSMaxY(w)-118)];};  // about where the switch is: the top right of the page
   GTBeat *d1=Beat(L(@"First, Opera’s extensions page. Copy its address here, then in Opera: ⌘L, ⌘V, Return."),GTFacePress);d1.ident=sideId;d1.jumpOnly=YES;d1.to=nearBar;d1.freeKeys=YES;
-  d1.ask=@[L(@"Copy opera://extensions"),L(@"The page is open")];d1.askKeep=[NSIndexSet indexSetWithIndex:0];d1.answered=^(NSInteger i){if(i==0)[host guideDo:@"copyText" with:@"opera://extensions"];};d1.doneTo=side2Id;[out addObject:d1];
+  d1.ask=@[L(@"Copy opera://extensions"),L(@"The page is open")];d1.askKeep=[NSIndexSet indexSetWithIndex:0];d1.answered=^(NSInteger i){if(i==0)[host guideDo:@"copyText" with:@"opera://extensions"];};d1.doneTo=side2Id;d1.watch=isConnected;d1.watchTo=connId;[out addObject:d1];
   GTBeat *d2=Beat(L(@"Top right of that page: Developer mode. Switch it on."),GTFacePress);d2.ident=side2Id;d2.jumpOnly=YES;d2.to=^NSValue *{return toggle()?:nearBar();};d2.pointAt=toggle;d2.lean=YES;d2.freeKeys=YES;
-  d2.ask=@[L(@"It’s on")];d2.doneTo=side3Id;[out addObject:d2];
+  d2.ask=@[L(@"It’s on")];d2.doneTo=side3Id;d2.watch=isConnected;d2.watchTo=connId;[out addObject:d2];
   GTBeat *d3=Beat(L(@"Now drag the folder from the little window onto Opera’s extensions page. I’ll notice."),GTFaceNone);d3.ident=side3Id;d3.jumpOnly=YES;d3.to=nearBar;d3.freeKeys=YES;
   d3.shelf=^NSArray *{return @[[host guideValue:@"extensionFolder"]?:@"",L(@"Drag it onto Opera’s extensions page.")];};d3.until=isConnected;
   d3.nudges=@[@[@30,L(@"Hold the folder, drop it anywhere on the extensions page. It loads by itself."),@(GTFaceNone)],skipNudge];d3.timeout=180;d3.timeoutTo=laterId;d3.nextTo=laterId;d3.doneTo=connId;[out addObject:d3];}
