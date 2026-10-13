@@ -14,17 +14,20 @@
 </p>
 
 <p align="center">
-  <a href="https://lesspull.com/#support"><img src="https://img.buymeacoffee.com/button-api/?text=Support%20my%20work&emoji=%F0%9F%A7%A1&slug=HsERf62fiZ&button_colour=E8894A&font_colour=1b1b1b&font_family=Inter&outline_colour=1b1b1b&coffee_colour=FFDD00" height="44" alt="Support my work: the ways to support, on lesspull.com"></a>
+  <a href="https://lesspull.com/#support"><img src="docs/assets/support-button.svg" height="44" alt="Support my work"></a>
 </p>
 
-**A quieter screen.** Less Pull is a small menu-bar app for macOS by [Jiri Arion Rose](https://jiriarion.com). Its website is [lesspull.com](https://lesspull.com). It takes the color out of your screen, so it pulls at you less — a little like stepping out of a loud room into a still one. What matters is still there; it just stops shouting.
+**A quieter screen.** Less Pull is a small menu-bar app for macOS by [Jiri Arion Rose](https://jiriarion.com). It takes the color out of your screen, so it pulls at you less — a little like stepping out of a loud room into a still one. What matters is still there; it just stops shouting.
 
 Warmth is the second step: from a touch of amber all the way to red, it takes the blue out of the light and puts you back in charge of how your screen speaks to you. And because a few things truly need color, every app and every website can have its own settings.
+
+**Try it before you install:** [lesspull.com](https://lesspull.com) has a drawn Mac where everything works, shown around by the same guide that later visits your own screen.
 
 <sub>The picture above is an illustration, not a screen recording. Its three looks are calculated with the same color matrix the app uses. The apps and the site are examples, not presets.</sub>
 
 ## At a glance
 
+- **[A tour on your own screen](#a-tour-on-your-own-screen)**: a guide visits your Mac and shows you around while you try each step yourself.
 - **Grayscale**, on or off, from the menu bar or a shortcut; either mouse button on the icon can do it too.
 - **Extra Warmth**, a slider from a touch of amber to red, with or without grayscale.
 - **[Peek in color](#peek-in-color)**: hold a shortcut and the screen is in color for exactly as long as you hold it. Press it twice to keep it.
@@ -36,6 +39,7 @@ Warmth is the second step: from a touch of amber all the way to red, it takes th
 - **[Every display on its own](#every-display-on-its-own)**: an exception applies on the display where its window is; the others keep your defaults. Any number of displays.
 - **[Screenshots keep their colors](#screenshots-keep-their-colors)**: the display changes, the picture does not.
 - **[Private by design](#private-by-design)**: no account, no analytics, nothing leaves your Mac except an optional daily update check.
+- **[In your language](#in-your-language)**: 13 languages, switched in Settings without a restart.
 
 ## Every app and website can have its own settings
 
@@ -175,6 +179,29 @@ Extra Warmth is your warmth for the whole day. **Warmer at night** adds a few po
 
 More in [Night Shift and warmth](docs/NIGHT-SHIFT.md).
 
+## A tour on your own screen
+
+The first time you open Less Pull, the welcome offers a tour, and a guide comes to visit: the cursor from [lesspull.com](https://lesspull.com) knocks, comes in through the circle in your menu bar, and shows you around your own Mac. You do each step yourself, with your real apps and settings. The guide waits, notices what you did, and never clicks for you.
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/tour-dark.svg">
+    <img src="docs/assets/tour-light.svg" width="100%" alt="The tour on your own screen: the guide, the cursor from lesspull.com, sits below the Less Pull circle in the menu bar and says: Your turn: click the circle. The menu drops out of it. Below, the tour bar shows Stop 2 of 7, Less Pull, with seven stops, End tour, the speed switch Slow, Normal, Fast and the keys for one line back or on. Beside it the seven stops: The Pull, Less Pull, Apps, Websites, Peek, Sessions and nights, Your turn.">
+  </picture>
+</p>
+
+<sub>Drawn after the real tour; the line in the bubble is one the guide says at stop 2.</sub>
+
+1. **The Pull**: your screen without Less Pull, for a moment.
+2. **Less Pull**: the circle and its menu, Grayscale, and Extra Warmth all the way to Red, then back to where it feels right.
+3. **Apps**: an exception for the app in front, right from the menu.
+4. **Websites**: your browsers connected, if you like, then an exception for a website.
+5. **Peek**: hold the shortcut for color, press it twice to keep it.
+6. **Sessions & nights**: a five-second session to see and hear how one ends, and warmer evenings on a schedule.
+7. **Your turn**: what stays private, and Launch at login if you want it.
+
+The bar at the top left shows where you are: **← →** go one line back or on, **Slow | Normal | Fast** sets the pace, and **End tour** ends it at once. The looks along the way are only borrowed; what you set yourself stays. Take the tour again any time under **Settings… → About**. If no browser is set up yet, **Setup only** on the welcome goes straight to connecting one.
+
 ## Where the controls are
 
 Less Pull lives in the menu bar. Click the circle for the menu, and choose **Settings…** there for everything in one place. The browser extension only connects the browser.
@@ -231,7 +258,7 @@ The app changes the display; nothing is injected into pages, and the Mac app has
 ## Install
 
 1. Download **Less-Pull-1.4.4-41.1.dmg** from the [build 41.1 release](https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-41.1), open it and drag **Less Pull** onto **Applications**.
-2. Open it. The Settings window greets you once; the circle in the menu bar is where you choose Grayscale and Extra Warmth from then on. On the first launch the welcome opens right under it, the icon fades in and out for a moment, and a small animated drawing shows what to do when the menu bar is full: hold ⌘ and drag the circle toward the clock. (macOS decides where new icons start, and apps cannot choose a spot.)
+2. Open it. The welcome opens right under the circle in your menu bar, where you choose Grayscale and Extra Warmth from then on, and offers [the tour](#a-tour-on-your-own-screen). If the menu bar is full and the circle is hidden, a small animated drawing shows what to do: hold ⌘ and drag the circle toward the clock. (macOS decides where new icons start, and apps cannot choose a spot.)
 3. For website rules, open **Settings… → Websites**, choose **Install Browser Extension…**, pick a browser from the list, and follow the steps for [your browser](docs/INSTALL.md#safari-brave-chrome-firefox-opera-or-edge).
 
 > [!TIP]
@@ -250,12 +277,11 @@ No account, no analytics, no cloud sync. The extension reads the address of the 
 
 ## Support my work
 
-Less Pull is free, and it stays free. If it makes your days a little quieter, your support keeps the work going: the app, the browser extensions, the signed builds and what comes next. The ways to support are on [lesspull.com](https://lesspull.com/#support).
+Less Pull is free, and it stays free. If it makes your days a little quieter, your support keeps the work going: the app, the browser extensions, the signed builds and what comes next. The ways to support are on [lesspull.com](https://lesspull.com/#support), next to [what I’m building and how it’s funded](https://lesspull.com/funding/).
 
 <p align="center">
-  <a href="https://lesspull.com/#support"><img src="https://img.buymeacoffee.com/button-api/?text=Support%20my%20work&emoji=%F0%9F%A7%A1&slug=HsERf62fiZ&button_colour=E8894A&font_colour=1b1b1b&font_family=Inter&outline_colour=1b1b1b&coffee_colour=FFDD00" height="44" alt="Support my work: the ways to support, on lesspull.com"></a><br>
-  <a href="https://lesspull.com/#support"><img src="docs/assets/support-qr.png" width="160" alt="QR code for lesspull.com/#support"></a><br>
-  <sub>The same page, as a code for your phone. In the app: About → Support my work.</sub>
+  <a href="https://lesspull.com/#support"><img src="docs/assets/support-button.svg" height="44" alt="Support my work"></a><br>
+  <sub>In the app: Settings… → About → Support my work.</sub>
 </p>
 
 ## Free to use, including at work
