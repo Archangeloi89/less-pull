@@ -28,9 +28,9 @@ Warmth is the second step: from a touch of amber all the way to red, it takes th
 - **Grayscale**, on or off, from the menu bar or a shortcut; either mouse button on the icon can do it too.
 - **Extra Warmth**, a slider from a touch of amber to red, with or without grayscale.
 - **[Peek in color](#peek-in-color)**: hold a shortcut and the screen is in color for exactly as long as you hold it. Press it twice to keep it.
-- **[Sessions](#sessions)**: a stretch of focused work with a gentle end: a glow, a gong, a count past the end, and one call back after you leave.
+- **[Sessions](#sessions)**: a stretch of focused work with a gentle end: a glow, a gong, a count past the end. Or a break, with one call back when you step away.
 - **[Exceptions](#every-app-and-website-can-have-its-own-settings)** for any app, any website or one exact page, set right in the menu.
-- **Time off**: Grayscale off for an hour, four hours, or until Night Shift changes; Pause Less Pull for a while.
+- **Time off**: Grayscale off for an hour, four hours, or until Night Shift changes; Night Shift off for an hour, four hours, or until morning; Pause Less Pull for a while.
 - **[Warmer at night](#warmer-at-night)**: a few points more warmth when your night begins, with Night Shift on the same schedule.
 - **A menu-bar icon that shows the state**: its left half fills while grayscale is on, its right half warms with the warmth.
 - **[Every display on its own](#every-display-on-its-own)**: an exception applies on the display where its window is; the others keep your defaults. Any number of displays.
@@ -183,7 +183,7 @@ Less Pull lives in the menu bar. Click the circle for the menu, and choose **Set
 
 The icon tells you the state: its left half fills while grayscale is showing, its right half warms as you add warmth, and it shows a pause mark while Less Pull is paused. A right-click opens the session panel; Settings → Shortcuts can give either button the menu, Grayscale or the session panel.
 
-- The first line tells you what is applied right now, with **Pause Less Pull** right below it: the plain display for 15 minutes, an hour, or until you resume.
+- The status line under **Session or break…** tells you what is applied right now, with **Pause Less Pull** right below it: the plain display for 15 minutes, an hour, or until you resume.
 - **Grayscale**, the **Extra Warmth** slider and **Night Shift** change your defaults. While Grayscale or Night Shift is on, the line below it turns it off for a while, and it comes back by itself.
 - **Session or break…** begins a stretch of focused work, or a break with one call back when you step away.
 - **Exception for [current app]…** opens a small panel under the icon with the same row as in Settings, and every change applies right away. With a website in front, **Exception for [that site]…** does the same for the domain or the exact page.
@@ -207,7 +207,7 @@ The Settings window has six tabs:
 
 - **General**: the same controls as the menu, with a short line under each one, plus [**Night schedule** and **Warmer at night**](#warmer-at-night), **Launch at login** and **Language**.
 - **Shortcuts**: [**Peek in color**](#peek-in-color) and what it turns off, a **Toggle Grayscale** shortcut, and what a left and a right click on the menu-bar icon do.
-- **Sessions**: session lengths, call-back times, what happens at the end, reminders, sound and glow.
+- **Sessions**: session and break lengths, what happens at the end, the break offer, reminders, sound and glow.
 - **Apps**: every app exception, one row each, with Default / On / Off for Grayscale and Night Shift and its own warmth.
 - **Websites**: the browser extension and the saved website exceptions, in the same shape as the app rows.
 - **About**: version and links, the guide and the tour, support, and the update check.
@@ -226,7 +226,7 @@ Display options appear only with two or more displays connected, and the fine-tu
 
 The browser extension has no controls in the browser; everything happens in Less Pull. It only tells the Mac app which website is in front. With a website open, the Less Pull menu offers **Exception for [that site]**, just like it does for apps: choose **Whole domain** or **This exact page**, set only what you want to change, and it is saved. Saved website rules are listed under **Settings… → Websites**.
 
-The app changes the display; nothing is injected into pages, and the Mac app has to be running. Brave, Firefox, Safari and Opera are confirmed working on the author's Mac. Chrome and Edge are implemented but have not yet been through a clean install test. Several browsers can use the extension at the same time; whichever browser window is in front decides.
+The app changes the display; nothing is injected into pages, and the Mac app has to be running. Chrome, Brave, Edge and Opera install it from the Chrome Web Store, Firefox from addons.mozilla.org, and Safari through the signed companion app. Brave, Chrome, Firefox, Safari and Opera are confirmed working; Edge is implemented but not yet tested. Several browsers can use the extension at the same time; whichever browser window is in front decides.
 
 ## Install
 
