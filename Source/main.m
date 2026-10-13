@@ -346,7 +346,7 @@ static void QuietScrolling(NSScrollView *s){
 @property NSTextField *sessionPresetsField,*callBackPresetsField;
 @property NSTextField *exclusionText;
 @property NSRunningApplication *lastExternalApp;
-@property SwitchingPolicy *policy;@property NSComboBox *nightBoostPopup;@property NSTextField *nightBoostNote;@property NSDatePicker *nightStartPicker,*nightEndPicker;@property NSStackView *ownHoursRow;@property NSDate *nightPreviewUntil;@property NSTimer *nightPreviewTimer;@property BOOL nightPreviewTurnedNightShiftOn;@property NSSegmentedControl *nightModeControl;@property NSStackView *nightPauseRow;@property NSWindow *supportWindow;@property GuideTour *guide;@property NSInteger tourGray;@property double tourWarmth;@property BOOL peekKeyHeld;@property NSPopUpButton *nightHoursPopup;@property NSTextField *nightHoursNote;@property NSButton *nightLocationButton,*nightDateTimeButton;@property NSInteger lastSeenMacMode;@property NSTextField *nightModeNote;@property BOOL migrateNightShiftMode,nightModeDirty;@property NSButton *nightTryButton;@property BOOL tourSpotEmpty;@property BOOL settingsAsideForTour;@property NSDictionary *playingField;@property NSString *tourMenuMark;@property BOOL statusMenuOpen,tourSessionWasIdle,fakeMenuOpen;@property NSInteger toursThisLaunch;@property NSView *menuWarmthRow,*menuNightRow;@property NSSlider *menuWarmthSlider;@property NSRect sessionPanelTarget;@property NSRect tourSettingsFrame;@property BOOL guideIsHelper,demoLaunchAtLogin;@property NSDate *tourSampleStart;@property NSTimer *tourSampleTimer;@property(copy) NSString *lastMenuChoice;@property NSDate *lastMenuChoiceAt;@property NSTimer *tourIconWait;@property NSButton *tourStartButton;@property BOOL tourArrowsWanted;@property NSPanel *iconBeacon;@property BOOL buildSettingsHidden,tourSampleSession;@property NSMutableDictionary<NSString *,NSValue *> *tourItemFrames;
+@property SwitchingPolicy *policy;@property NSComboBox *nightBoostPopup;@property NSTextField *nightBoostNote;@property NSDatePicker *nightStartPicker,*nightEndPicker;@property NSStackView *ownHoursRow;@property NSDate *nightPreviewUntil;@property NSTimer *nightPreviewTimer;@property BOOL nightPreviewTurnedNightShiftOn;@property NSSegmentedControl *nightModeControl;@property NSStackView *nightPauseRow;@property NSWindow *supportWindow;@property GuideTour *guide;@property NSInteger tourGray;@property double tourWarmth;@property BOOL peekKeyHeld;@property NSPopUpButton *nightHoursPopup;@property NSTextField *nightHoursNote;@property NSButton *nightLocationButton,*nightDateTimeButton;@property NSInteger lastSeenMacMode;@property NSTextField *nightModeNote;@property BOOL migrateNightShiftMode,nightModeDirty;@property NSButton *nightTryButton;@property BOOL tourSpotEmpty;@property BOOL settingsAsideForTour;@property NSDictionary *playingField;@property NSString *tourMenuMark;@property BOOL statusMenuOpen,tourSessionWasIdle,fakeMenuOpen;@property NSInteger toursThisLaunch;@property NSView *menuWarmthRow,*menuNightRow;@property NSSlider *menuWarmthSlider;@property NSRect sessionPanelTarget;@property NSRect tourSettingsFrame;@property BOOL guideIsHelper,demoLaunchAtLogin;@property NSDate *tourSampleStart;@property NSTimer *tourSampleTimer;@property(copy) NSString *lastMenuChoice;@property NSDate *lastMenuChoiceAt;@property NSTimer *tourIconWait;@property NSButton *tourStartButton;@property BOOL tourArrowsWanted;@property NSPanel *iconBeacon,*iconArrow;@property BOOL buildSettingsHidden,tourSampleSession;@property NSMutableDictionary<NSString *,NSValue *> *tourItemFrames;
 @property WarmthEngine *warmth;
 @property NSInteger selectedMode;
 @property NSSlider *warmthSlider;
@@ -2279,9 +2279,43 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
 // The circle far from the clock: when an app with many menus is in front, macOS hides the icons nearest to them
 // first. Next to the system icons and the clock it stays. (Other apps' icons cannot be seen from here, so it is the
 // distance that counts: within about a quarter of the menu bar, or 360 points, from the right end.)
+// Can an app with many menus cover the circle? macOS fills the menu bar from both ends, the app's menus from the
+// left and the icons from the clock leftward, and where they meet it hides the icons furthest from the clock. Which
+// app comes next is unknown (the desktop's short Finder menus say nothing), so the circle needs room for wide menus:
+// LPWideMenus, about the widest common apps (Xcode or Photoshop in German, ~870 pt) with room to spare. Every display
+// with a menu bar counts (the icons keep their distance from the clock on each), a notch too: menus that do not fit
+// left of it continue right of it. A display too narrow for that much room is fine once the circle is by the clock.
+static CGFloat LPWideMenus(void){NSUInteger i=[NSProcessInfo.processInfo.arguments indexOfObject:@"--tour-menu-room"];return i!=NSNotFound&&i+1<NSProcessInfo.processInfo.arguments.count?[NSProcessInfo.processInfo.arguments[i+1] doubleValue]:1100;}  // the flag: tests
 - (BOOL)iconFarFromClock {
- NSRect icon=[self guideIconFrame];if(NSIsEmptyRect(icon))return NO;NSScreen *screen=self.item.button.window.screen?:NSScreen.mainScreen;
- return NSMaxX(screen.frame)-NSMaxX(icon)>MAX(360,screen.frame.size.width*.26);
+ NSRect icon=[self guideIconFrame];if(NSIsEmptyRect(icon))return NO;NSScreen *home=self.item.button.window.screen?:NSScreen.mainScreen;
+ CGFloat fromRight=NSMaxX(home.frame)-NSMaxX(icon),width=NSWidth(icon);
+ NSArray<NSScreen *> *bars=NSScreen.screensHaveSeparateSpaces?NSScreen.screens:@[NSScreen.screens.firstObject?:home];
+ for(NSScreen *s in bars){
+  CGFloat minX=NSMaxX(s.frame)-fromRight-width,room=minX-NSMinX(s.frame);
+  if(@available(macOS 12.0,*)){NSRect left=s.auxiliaryTopLeftArea,right=s.auxiliaryTopRightArea;
+   if(s.safeAreaInsets.top>0&&!NSIsEmptyRect(right)){if(minX<NSMinX(right))return YES;room=NSWidth(left)+minX-NSMinX(right);}}  // under the notch there; or menus that jump the notch
+  if(room<LPWideMenus()&&fromRight>MAX(360,NSWidth(s.frame)*.2))return YES;}
+ return NO;
+}
+// The way to the clock, under the menu bar: chevrons running from the circle to the clock, and ⌘ to hold.
+- (void)showIconArrow:(BOOL)show {
+ NSRect icon=self.item.button.window.frame;NSScreen *screen=nil;for(NSScreen *s in NSScreen.screens)if(NSContainsRect(s.frame,icon))screen=s;
+ CGFloat x0=NSMaxX(icon)+16,x1=screen?NSMaxX(screen.frame)-110:0;
+ if(!show||!screen||x1-x0<120){[self.iconArrow orderOut:nil];return;}
+ NSRect f=NSMakeRect(x0,NSMinY(icon)-40,x1-x0,34);BOOL reduce=NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceMotion;
+ if(!self.iconArrow||!NSEqualSizes(self.iconArrow.frame.size,f.size)){[self.iconArrow orderOut:nil];
+  NSPanel *p=[[NSPanel alloc]initWithContentRect:f styleMask:NSWindowStyleMaskBorderless|NSWindowStyleMaskNonactivatingPanel backing:NSBackingStoreBuffered defer:NO];p.opaque=NO;p.backgroundColor=NSColor.clearColor;p.ignoresMouseEvents=YES;p.hasShadow=NO;p.level=NSPopUpMenuWindowLevel+1;
+  p.collectionBehavior=NSWindowCollectionBehaviorCanJoinAllSpaces|NSWindowCollectionBehaviorFullScreenAuxiliary|NSWindowCollectionBehaviorStationary|NSWindowCollectionBehaviorIgnoresCycle;p.accessibilityLabel=L(@"Drag it next to the clock…");
+  NSView *v=[[NSView alloc]initWithFrame:(NSRect){NSZeroPoint,f.size}];v.wantsLayer=YES;p.contentView=v;CGColorRef amber=[NSColor colorWithSRGBRed:232/255.0 green:137/255.0 blue:74/255.0 alpha:1].CGColor;
+  CATextLayer *key=[CATextLayer layer];key.string=@"⌘";key.fontSize=15;key.alignmentMode=kCAAlignmentCenter;key.foregroundColor=[NSColor colorWithSRGBRed:29/255.0 green:18/255.0 blue:8/255.0 alpha:1].CGColor;key.backgroundColor=amber;key.cornerRadius=6;key.frame=CGRectMake(0,6,26,22);key.contentsScale=4;[v.layer addSublayer:key];
+  CGFloat lineY=17,from=36,to=f.size.width-14;CAShapeLayer *line=[CAShapeLayer layer];CGMutablePathRef lp=CGPathCreateMutable();CGPathMoveToPoint(lp,NULL,from,lineY);CGPathAddLineToPoint(lp,NULL,to,lineY);
+  CGPathMoveToPoint(lp,NULL,to-9,lineY+8);CGPathAddLineToPoint(lp,NULL,to,lineY);CGPathAddLineToPoint(lp,NULL,to-9,lineY-8);line.path=lp;CGPathRelease(lp);line.strokeColor=amber;line.fillColor=NSColor.clearColor.CGColor;line.lineWidth=2.5;line.lineCap=kCALineCapRound;line.lineJoin=kCALineJoinRound;line.opacity=.55;[v.layer addSublayer:line];
+  NSInteger n=MAX(3,(NSInteger)((to-from)/90));for(NSInteger i=0;i<n;i++){CAShapeLayer *c=[CAShapeLayer layer];CGMutablePathRef cp=CGPathCreateMutable();CGPathMoveToPoint(cp,NULL,-6,8);CGPathAddLineToPoint(cp,NULL,2,0);CGPathAddLineToPoint(cp,NULL,-6,-8);c.path=cp;CGPathRelease(cp);
+   c.strokeColor=amber;c.fillColor=NSColor.clearColor.CGColor;c.lineWidth=3;c.lineCap=kCALineCapRound;c.lineJoin=kCALineJoinRound;c.position=CGPointMake(from+(to-from)*(i+.5)/n,lineY);[v.layer addSublayer:c];
+   if(!reduce){CABasicAnimation *run=[CABasicAnimation animationWithKeyPath:@"position.x"];run.fromValue=@(from+8);run.toValue=@(to-12);run.duration=2.2;run.repeatCount=HUGE_VALF;run.timeOffset=2.2*i/n;
+    CAKeyframeAnimation *fade=[CAKeyframeAnimation animationWithKeyPath:@"opacity"];fade.values=@[@0,@1,@1,@0];fade.keyTimes=@[@0,@.15,@.8,@1];fade.duration=2.2;fade.repeatCount=HUGE_VALF;fade.timeOffset=run.timeOffset;[c addAnimation:run forKey:@"run"];[c addAnimation:fade forKey:@"fade"];}}
+  self.iconArrow=p;}
+ if(!NSEqualRects(self.iconArrow.frame,f))[self.iconArrow setFrame:f display:NO];if(!self.iconArrow.visible)[self.iconArrow orderFrontRegardless];
 }
 // The tour starts at the circle in the menu bar. Hidden, it asks first, and starts by itself once the circle has been
 // in view for a moment (a hidden part of the menu bar that only flashes open does not count). Far from the clock, it
@@ -2301,9 +2335,9 @@ static OSStatus PeekHotKeyHandler(EventHandlerCallRef next,EventRef event,void *
 // Meanwhile an amber ring pulses where the circle is (even behind an app's menus, next to the control for hidden icons).
 - (void)waitForIconThen:(BOOL)nearClock {
  NSString *title=self.tourStartButton.title;self.tourStartButton.title=L(@"Drag it next to the clock…");[self.tourIconWait invalidate];__weak AppDelegate *weak=self;__block double seenSince=0;[self showIconBeacon:YES];
- self.tourIconWait=[NSTimer scheduledTimerWithTimeInterval:.5 repeats:YES block:^(NSTimer *t){AppDelegate *s=weak;if(!s||!s.settings.visible||s.guide){[t invalidate];[s showIconBeacon:NO];if(s)s.tourStartButton.title=title;return;}
-  [s showIconBeacon:YES];if(NSIsEmptyRect([s guideIconFrame])||(nearClock&&[s iconFarFromClock])){seenSince=0;return;}double now=CACurrentMediaTime();if(!seenSince)seenSince=now;
-  if(now-seenSince>=2.5){[t invalidate];[s showIconBeacon:NO];s.tourStartButton.title=title;[s startGuideTour];}}];
+ self.tourIconWait=[NSTimer scheduledTimerWithTimeInterval:.5 repeats:YES block:^(NSTimer *t){AppDelegate *s=weak;if(!s||!s.settings.visible||s.guide){[t invalidate];[s showIconBeacon:NO];[s showIconArrow:NO];if(s)s.tourStartButton.title=title;return;}
+  [s showIconBeacon:YES];BOOL far=nearClock&&[s iconFarFromClock];[s showIconArrow:far];if(NSIsEmptyRect([s guideIconFrame])||far){seenSince=0;return;}double now=CACurrentMediaTime();if(!seenSince)seenSince=now;
+  if(now-seenSince>=2.5){[t invalidate];[s showIconBeacon:NO];[s showIconArrow:NO];s.tourStartButton.title=title;[s startGuideTour];}}];
 }
 // A pulsing amber ring around where the menu-bar circle sits (it follows the circle when it is dragged).
 - (void)showIconBeacon:(BOOL)show {
@@ -2709,6 +2743,7 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
 - (void)guideDo:(NSString *)action with:(id)argument {
  if([action isEqual:@"pause"]){if(!self.pausedUntil)[self pauseLessPullForMinutes:0];return;}
  if([action isEqual:@"resume"]){if(self.pausedUntil)[self resumeLessPull:nil];return;}
+ if([action isEqual:@"iconArrow"]){[self showIconArrow:[argument boolValue]&&[self iconFarFromClock]];return;}  // the way to the clock, while the guide says it
  if([action isEqual:@"setWarmth"]){double v=MAX(0,MIN(100,[argument doubleValue]));NSSlider *s=[NSSlider sliderWithValue:v minValue:0 maxValue:100 target:nil action:nil];self.menuWarmthSlider.doubleValue=v;[self warmthChanged:s];return;}  // the tour brings the warmth back from Red, as the slider would
  if([action isEqual:@"mark"]){NSString *mark=[argument isKindOfClass:NSString.class]?argument:nil;if(mark==self.tourMenuMark||[mark isEqual:self.tourMenuMark])return;self.tourMenuMark=mark;if(self.statusMenuOpen)[self markTourItemIn:self.statusMenu];return;}  // an open menu shows it at once
  if([action isEqual:@"closePanels"]){[self closeExceptionPanel];[self closeSessionPanel];[self.statusMenu cancelTracking];return;}

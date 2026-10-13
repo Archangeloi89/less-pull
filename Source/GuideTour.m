@@ -1052,7 +1052,7 @@ static GTPanel *GTMakePanel(NSRect frame,NSInteger level){
   GTBeat *found=Beat(L(@"There it is! Thank you. A door I can see: luxury."),GTFaceSpin);found.to=weak.underCircle;found.pointAt=weak.circleAim;found.faces=@[@[@.9,@(GTFaceHop)]];
   found.onlyIf=^BOOL{if(!(wasHidden&&iconShown()))return NO;weak.iconFoundSaid=YES;return YES;};
   GTBeat *lp1=Beat(L(@"That circle is Less Pull. Also my door: I came in through it."),GTFaceTilt);lp1.to=weak.underCircle;lp1.pointAt=weak.circleAim;lp1.ring=weak.circleRing;lp1.ringIsCircle=YES;lp1.onlyIf=iconShown;
-  GTBeat *near=Beat(L(@"Tip: hold ⌘ and drag me next to the clock. There macOS never hides me."),GTFaceTilt);near.onlyIf=^BOOL{return iconShown()&&[[host guideValue:@"iconFarFromClock"] boolValue];};near.scene=0;near.hold=1;
+  GTBeat *near=Beat(L(@"Tip: hold ⌘ and drag me next to the clock. There macOS never hides me."),GTFaceTilt);near.onlyIf=^BOOL{return iconShown()&&[[host guideValue:@"iconFarFromClock"] boolValue];};near.scene=0;near.hold=1;near.run=^{[host guideDo:@"iconArrow" with:@YES];};near.done=^{[host guideDo:@"iconArrow" with:@NO];};
   GTBeat *lp1h=Beat(L(@"It’s up there somewhere, hiding. Anyway: that circle is Less Pull, and my door."),GTFaceTilt);lp1h.ident=@"lp.1h";lp1h.to=weak.underCircle;lp1h.onlyIf=^BOOL{return !iconShown();};
   GTBeat *card=Beat(L(@"Your turn: click the circle. The menu drops out of it."),GTFacePress);card.to=here;card.ringIsCircle=YES;card.lean=YES;card.pointAt=weak.circleAim;  // the ring: the circle, then Resume Less Pull the moment the menu opens
   card.mark=@"resume";card.until=[weak isOn:@"menuOpen"];card.nudges=[weak circleNudges];card.onNext=^{[host guideDo:@"resume" with:nil];weak.tourPaused=NO;};card.nextTo=@"lp.skip";
@@ -1093,7 +1093,7 @@ static GTPanel *GTMakePanel(NSRect frame,NSInteger level){
   GTBeat *rest=Beat(L(@"Everything else lives in this menu too: pausing, Night Shift, Settings…"),GTFaceNone);rest.ident=@"lp.rest";rest.lean=YES;
   rest.pointAt=^NSValue *{return [[host guideValue:@"menuOpen"] boolValue]?[weak midOf:@"menu.night"]():weak.circleAim();};
   return @[stage,hid,drag,found,lp1,near,lp1h,card,dot,on,onw,g3,w1,w2,red,mine,off,some,late,skip,rest];}];
- [cleanups addObject:^{if(weak.tourPaused){[host guideDo:@"resume" with:nil];weak.tourPaused=NO;}void (^back)(void)=weak.leaveRed;weak.leaveRed=nil;if(back)back();}];
+ [cleanups addObject:^{[host guideDo:@"iconArrow" with:@NO];if(weak.tourPaused){[host guideDo:@"resume" with:nil];weak.tourPaused=NO;}void (^back)(void)=weak.leaveRed;weak.leaveRed=nil;if(back)back();}];
 
  // 3 Apps: an exception for the app in front, made by the user, right from the menu
  [steps addObject:^NSArray *{

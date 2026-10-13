@@ -46,6 +46,8 @@ Simulates a display reset after a fade finishes. Checks persistent grayscale, tw
 --session-panel       opens the session panel under the icon 1.5 s after launch (needs a session).
 --session-soon        starts a 1-minute session that ends about 6 s after launch.
 --tour-icon-hidden    the menu-bar circle counts as hidden for the first 45 s, to try the tour's "bring it out" step.
+--tour-menu-room N    the room the circle needs left of it for wide app menus, in points (default 1100), on every display with a menu bar;
+                      a large N (1600) makes a roomy screen ask to move the circle, to see the arrow to the clock.
 --start-tour          opens the welcome and starts the tour on the real screen, as "Start tour and setup" does.
 --tour-peek-test      the tour's Peek step sees a short tap 2 s after it asks, then a hold from 4 to 6 s.
 --tour-actions LIST   with --start-tour: presses the tour controls at given seconds, e.g. "slower@3,next@9,back@14,end@24"; "station4@20" jumps to a station
