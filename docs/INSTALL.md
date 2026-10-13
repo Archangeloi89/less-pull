@@ -24,7 +24,7 @@ The extension is optional. It adds [website exceptions](EXCEPTIONS.md#website-ex
 3. Less Pull sets up the local connection by itself.
 4. Open a website, then click the Less Pull icon in the **menu bar**: the menu now offers **Exception for [that site]**. The extension itself shows nothing in the browser.
 
-Firefox is in review at Mozilla’s add-on site. Until that is done the steps differ: on the **about:debugging** page that opens, click **Load Temporary Add-on…** and select `manifest.json` in the **Browser Extension (Firefox)** folder. Firefox removes temporary add-ons when it quits, so load it again next time, or use Firefox Developer Edition with signing turned off.
+In Firefox the extension comes from [Mozilla’s add-ons site](https://addons.mozilla.org/firefox/addon/less-pull-firefox-extension/) (listed since 13 October 2026): choosing **Firefox** opens that page; click **Add to Firefox**, then **Add**.
 
 In Safari the extension comes as a small companion app inside Less Pull. Choosing **Safari** opens it; click **Open Safari Settings** there. Then turn on **Less Pull** under Settings → Extensions and allow it on all websites. The extension shows nothing in Safari itself; website exceptions are set from the Less Pull menu.
 
@@ -37,7 +37,7 @@ Keep the Mac app running, and keep it in the place it was installed. If you move
 - **Apple silicon only.**
 - **macOS 13 or later** is the build target. Only macOS 27 has been tested.
 - **Signed with a Developer ID and notarized by Apple** since 9 October 2026 (Team ID CT4CF9Z423).
-- **The extension is in the Chrome Web Store** (published 9 October 2026); the Firefox add-on is in review. It asks for access to tab addresses and for a connection to the local app.
+- **The extension is in the Chrome Web Store** (published 9 October 2026) and on Mozilla’s add-ons site (listed 13 October 2026). It asks for access to tab addresses and for a connection to the local app.
 - **Brave, Chrome, Firefox, Safari and Opera are confirmed working** on the author's Macs. Edge is implemented but not yet tested. The Safari companion app is in every release; if you build Less Pull yourself, it is included only when Xcode is installed.
 - **Updates are checked, not installed.** Once a day the app asks GitHub whether a newer build exists and shows a dot on its icon if one is made for your macOS. Installing is still by hand, until the app is signed and notarized.
 - Less Pull uses private macOS display interfaces. A macOS update can change how they behave.

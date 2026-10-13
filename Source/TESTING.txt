@@ -55,6 +55,8 @@ Simulates a display reset after a fade finishes. Checks persistent grayscale, tw
                       "warmthTo:N" sets Extra Warmth to N percent, "rebuild" rebuilds the exception lists and the panel (it waits while a mouse button is down).
                       "fakeSitePanel" opens a website panel for example.com from a made-up Brave tab (no browser needed); "fakeContext" sends
                       that tab's heartbeat, as a browser does every few seconds (each one used to rebuild the panel).
+                      "clipCheck" walks every Settings tab and writes each control whose text needs more room than it has (CLIP) or that ends
+                      past the window (OUT); run it once per language (defaults write local.nightshiftfilters.test language fr).
                       (a jump during the knock waits until the cursor is out). Also what a user would do: "menu" opens the status menu, "menuclose"
                       closes it, "closeSettings" closes Settings, "chip" starts a 25-minute session (on the tour: the five-second sample), and for
                       checking: "log" writes where the tip, the bubble, the ring, the menu and Settings are; "park" sends the guide to its spot by

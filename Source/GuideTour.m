@@ -925,8 +925,8 @@ static GTPanel *GTMakePanel(NSRect frame,NSInteger level){
  b.nudges=@[@[@10,[NSString stringWithFormat:L(@"Up top, the row of tabs: %@."),name],@(GTFaceNone)],@[@30,L(@"Take your time. I’m not going anywhere; I only just got here."),@(GTFaceNone)]];b.onNext=^{[h guideDo:@"selectTab" with:@(tab)];};
  (void)weak;return @[a,b];
 }
-// One browser's walk-through: its page opens (the store, the companion app for Safari, Firefox's add-on page with
-// the folder in Finder), the user adds the extension, Less Pull notices. Stop 4 of the tour uses it, and so does the
+// One browser's walk-through: its page opens (the store, the companion app for Safari, Mozilla's add-ons page for
+// Firefox), the user adds the extension, Less Pull notices. Stop 4 of the tour uses it, and so does the
 // helper that comes along from Settings → Websites (where the page is already open: connect NO).
 - (NSArray<GTBeat *> *)walkFor:(NSDictionary *)br first:(BOOL)first connect:(BOOL)connect {
  __weak GuideTour *weak=self;id<GuideTourHost> host=self.host;NSValue *(^nearBar)(void)=[self nearBar];BOOL helper=self.helperTitle!=nil;
@@ -941,9 +941,7 @@ static GTPanel *GTMakePanel(NSRect frame,NSInteger level){
  if([bid isEqual:@"com.apple.Safari"]){GTBeat *s1=Beat(L(@"A small companion app opens. Click its button: Open Safari Settings."),GTFacePress);s1.to=nearBar;s1.run=connectOnce;s1.freeKeys=YES;
   s1.until=^BOOL{id f=[host guideValue:@"frontBundle"];return [f isEqual:@"com.apple.Safari"];};s1.timeout=30;s1.timeoutSay=L(@"Safari didn’t open? Open it yourself: Safari, Settings, Extensions.");s1.nextTo=nil;[out addObject:s1];
   wait=Beat(L(@"In Extensions, turn on Less Pull and allow it on all websites. I’ll notice."),GTFaceNone);}
- else if([bid isEqual:@"org.mozilla.firefox"]){GTBeat *f1=Beat(L(@"Firefox, for now: a temporary add-on. On that page, click Load Temporary Add-on…"),GTFacePress);f1.to=nearBar;f1.run=connectOnce;[out addObject:f1];
-  wait=Beat(L(@"In the file window, pick manifest.json: drag it in from the little window, then click Open."),GTFaceNone);
-  wait.shelf=^NSArray *{return @[[host guideValue:@"firefoxManifest"]?:@"",L(@"Drag it into Firefox’s file window.")];};}
+ else if([bid isEqual:@"org.mozilla.firefox"]){wait=Beat(L(@"Firefox opens its add-ons page. Click Add to Firefox, then Add. I’ll notice."),GTFacePress);wait.run=connectOnce;}
  else if(opera){wait=Beat(L(@"Opera opens the store page. Click Add to Opera, then confirm. I’ll notice."),GTFacePress);wait.run=connectOnce;waitNudges=park;}
  else {BOOL chrome=[bid isEqual:@"com.google.Chrome"];wait=Beat([NSString stringWithFormat:chrome?L(@"%@ opens the store page. Click Add to Chrome, then Add extension. I’ll notice."):L(@"%@ opens the store page. Click its Add button, then Add extension. I’ll notice."),name],GTFacePress);wait.run=connectOnce;
   if([bid isEqual:@"com.microsoft.edgemac"])waitNudges=[@[@[@.1,L(@"Edge asks once about extensions from other stores. Say yes to that first."),@(GTFaceNone)]] arrayByAddingObjectsFromArray:waitNudges];}

@@ -22,12 +22,12 @@ The extension has no buttons. It only tells Less Pull which website is in front;
   node chromium-load.mjs 9333 "/Applications/Less Pull.app/Contents/Resources/Browser Extension"
   ```
   Developer mode must be on in the browser's extensions page (the script says so if it is not). Chrome 137+ ignores `--load-extension`, which is why the drop is used. Unpacked extensions stay installed across restarts.
-- **Firefox**: relaunch with its remote port, then install the unpacked extension through WebDriver BiDi:
+- **Firefox**: the signed add-on is on Mozilla's add-ons site since 13 October 2026. Open https://addons.mozilla.org/firefox/addon/less-pull-firefox-extension/ in Firefox and have the user click **Add to Firefox**, then **Add** (Firefox asks the person to confirm). Without a person at hand, the unpacked copy can still be loaded through WebDriver BiDi:
   ```sh
   open -a Firefox --args --remote-debugging-port 9222
   node firefox-load.mjs "/Applications/Less Pull.app/Contents/Resources/Browser Extension (Firefox)"
   ```
-  Firefox keeps a temporary add-on only until it quits; repeat after a restart (or use Firefox Developer Edition with `xpinstall.signatures.required` off). Once the extension is signed on addons.mozilla.org this step goes away.
+  That copy is temporary: Firefox drops it when it quits. The add-on from Mozilla's site stays.
 - **Safari**: `install.sh` already placed `/Applications/Less Pull for Safari.app` and opened it once. The user then turns the extension on in Safari → Settings → Extensions. Until the companion app is Apple-signed, Safari needs *Allow Unsigned Extensions* from the Develop menu (Settings → Advanced → Show features for web developers first); that choice lasts until Safari quits.
 
 Check: `pgrep -fl LessPullBrowserHost` lists one helper per connected Chromium/Firefox browser. Less Pull → Settings → Websites shows "Extension connected in …".
