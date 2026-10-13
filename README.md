@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">
-  <a href="https://lesspull.com/#support"><img src="https://img.buymeacoffee.com/button-api/?text=Support%20my%20work&emoji=%F0%9F%A7%A1&slug=HsERf62fiZ&button_colour=E8894A&font_colour=1b1b1b&font_family=Inter&outline_colour=1b1b1b&coffee_colour=FFDD00" height="44" alt="Support my work: the ways to support, on lesspull.com"></a>
+  <a href="https://lesspull.com/#support"><img src="docs/assets/support-button.svg" height="44" alt="Support my work"></a>
 </p>
 
 **A quieter screen.** Less Pull is a small menu-bar app for macOS by [Jiri Arion Rose](https://jiriarion.com). Its website is [lesspull.com](https://lesspull.com). It takes the color out of your screen, so it pulls at you less — a little like stepping out of a loud room into a still one. What matters is still there; it just stops shouting.
@@ -250,10 +250,10 @@ No account, no analytics, no cloud sync. The extension reads the address of the 
 
 ## Support my work
 
-Less Pull is free, and it stays free. If it makes your days a little quieter, your support keeps the work going: the app, the browser extensions, the signed builds and what comes next. The ways to support are on [lesspull.com](https://lesspull.com/#support).
+Less Pull is free, and it stays free. If it makes your days a little quieter, your support keeps the work going: the app, the browser extensions, the signed builds and what comes next. The ways to support are on [lesspull.com](https://lesspull.com/#support), next to [what I’m building and how it’s funded](https://lesspull.com/funding/).
 
 <p align="center">
-  <a href="https://lesspull.com/#support"><img src="https://img.buymeacoffee.com/button-api/?text=Support%20my%20work&emoji=%F0%9F%A7%A1&slug=HsERf62fiZ&button_colour=E8894A&font_colour=1b1b1b&font_family=Inter&outline_colour=1b1b1b&coffee_colour=FFDD00" height="44" alt="Support my work: the ways to support, on lesspull.com"></a><br>
+  <a href="https://lesspull.com/#support"><img src="docs/assets/support-button.svg" height="44" alt="Support my work"></a><br>
   <a href="https://lesspull.com/#support"><img src="docs/assets/support-qr.png" width="160" alt="QR code for lesspull.com/#support"></a><br>
   <sub>The same page, as a code for your phone. In the app: About → Support my work.</sub>
 </p>

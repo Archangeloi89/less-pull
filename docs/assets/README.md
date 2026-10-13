@@ -18,6 +18,8 @@
 | `examples-*.svg` | Three example rules: what is in front, what you set, and what the screen shows |
 | `levels-*.svg` | Three example levels, from your defaults to one website to one page, showing what each one sets and what it keeps |
 | `nightshift-*.svg` | Timeline of one night: Night Shift on Automatic, Extra Warmth with Warmer at night |
+| `support-button.svg` | The README's Support my work button in the website's colors, one version for both themes (`src/support-button.mjs`) |
+| `support-qr.png` | A code for lesspull.com/#support, for phones |
 
 Each illustration comes in a light and a dark version. GitHub picks one to match the reader's theme.
 
