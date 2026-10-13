@@ -45,7 +45,10 @@ Simulates a display reset after a fade finishes. Checks persistent grayscale, tw
 --session <minutes>   starts a session at launch (for trying the end, the glow and the sound; 1 minute is handy).
 --session-panel       opens the session panel under the icon 1.5 s after launch (needs a session).
 --session-soon        starts a 1-minute session that ends about 6 s after launch.
+--screenshot          a demo or test copy leaves out "· Demo"/"· Test" after the build number (for README screenshots).
 --tour-icon-hidden    the menu-bar circle counts as hidden for the first 45 s, to try the tour's "bring it out" step.
+--tour-menu-room N    the room the circle needs left of it for wide app menus, in points (default 1100), on every display with a menu bar;
+                      a large N (1600) makes a roomy screen ask to move the circle, to see the arrow to the clock.
 --start-tour          opens the welcome and starts the tour on the real screen, as "Start tour and setup" does.
 --tour-peek-test      the tour's Peek step sees a short tap 2 s after it asks, then a hold from 4 to 6 s.
 --tour-actions LIST   with --start-tour: presses the tour controls at given seconds, e.g. "slower@3,next@9,back@14,end@24"; "station4@20" jumps to a station
@@ -61,7 +64,7 @@ Simulates a display reset after a fade finishes. Checks persistent grayscale, tw
                       closes it, "closeSettings" closes Settings, "chip" starts a 25-minute session (on the tour: the five-second sample), and for
                       checking: "log" writes where the tip, the bubble, the ring, the menu and Settings are; "park" sends the guide to its spot by
                       the tour bar; "left" and "right" press ← and →; "tick0" ticks the first box of the question that is up, "answer0" presses its first button;
-                      "warmth" changes Extra Warmth (something to keep or put back); "startTour" presses Start on the welcome, "sheet1" answers its sheet with the first button, "logStart" writes the Start button and sheet state; "poke" clicks the guide, "resumeLP" resumes Less Pull, "fakeMenu" makes the tour see the menu as open (or closed again) without opening it; "helperBrowser", "helperOpera", "helperFirefox" and "helperSunset" start
+                      "warmth" changes Extra Warmth (something to keep or put back); "startTour" presses Start on the welcome, "sheet1" answers its sheet with the first button, "logStart" writes the Start button and sheet state; "poke" clicks the guide, "resumeLP" resumes Less Pull, "fakeMenu" makes the tour see the menu as open (or closed again) without opening it, "logBrowsers" writes which browsers count as connected (and whose helper runs), "tab:N" opens Settings on tab N (0 General … 5 About, for screenshots); "helperBrowser", "helperOpera", "helperFirefox" and "helperSunset" start
                       the helpers that Settings starts (Chrome's setup; Sunset to sunrise). The times run on a timer that also
                       fires while the menu is open.
 --test-quiet          the copy never takes the keyboard: it does not activate itself, nothing it shows becomes key, no global keys.

@@ -719,7 +719,7 @@
 "Extra Warmth · +%ld at night" = "Calidez extra · +%ld de noche";
 "At night, Less Pull adds this much warmth on top of yours. Night Shift itself can stay off." = "De noche, Less Pull suma esta calidez a la tuya. Night Shift puede quedarse desactivado.";
 "+%ld points" = "+%ld puntos";
-"The pull" = "La atracción";
+"The pull" = "El Pull";
 "Peek" = "Vistazo";
 "Sessions & nights" = "Sesiones y noches";
 "Your turn" = "Te toca";
@@ -747,7 +747,7 @@
 "That’s the start of this stop. The numbers on the bar go further back." = "Aquí empieza esta parada. Los números de la barra van más atrás.";
 "Once more, then." = "Otra vez, entonces.";
 "Everything back as it was." = "Todo como estaba.";
-"Opera opens the store page. Click Add to Opera, then confirm. I’ll notice." = "Opera abre la página de la tienda. Haz clic en Añadir a Opera y confirma. Me daré cuenta.";
+"Opera opens the store page. If it first offers its helper for the Chrome Web Store, add that. Then Add to Opera, and confirm. I’ll notice." = "Opera abre la página de la tienda. Si primero ofrece su ayudante para la Chrome Web Store, añádelo. Luego Añadir a Opera, y confirma. Me daré cuenta.";
 "Slower again? No rush; I’m on holiday." = "¿Más lento todavía? Sin prisa; estoy de vacaciones.";
 "Slower it is. Real pixels are heavier; I felt that." = "Más lento, pues. Los píxeles de verdad pesan más; lo he notado.";
 "Faster, then. I’ll try not to blur." = "Más rápido, pues. Intentaré no salir borroso.";
@@ -774,6 +774,7 @@
 "A small companion app opens. Click its button: Open Safari Settings." = "Se abre una pequeña app de ayuda. Haz clic en su botón: Abrir ajustes de Safari.";
 "Safari didn’t open? Open it yourself: Safari, Settings, Extensions." = "¿No se ha abierto Safari? Ábrelo tú: Safari, Ajustes, Extensiones.";
 "In Extensions, turn on Less Pull and allow it on all websites. I’ll notice." = "En Extensiones, activa Less Pull y permítelo en todos los sitios web. Me daré cuenta.";
+"No Extensions page in Safari? Choose Safari → Settings…, then Extensions." = "¿No ves la página de Extensiones en Safari? Elige Safari → Ajustes…, y luego Extensiones.";
 "%@ opens the store page. Click Add to Chrome, then Add extension. I’ll notice." = "%@ abre la página de la tienda. Haz clic en Añadir a Chrome y luego en Añadir extensión. Me daré cuenta.";
 "%@ opens the store page. Click its Add button, then Add extension. I’ll notice." = "%@ abre la página de la tienda. Haz clic en su botón Añadir y luego en Añadir extensión. Me daré cuenta.";
 "Edge asks once about extensions from other stores. Say yes to that first." = "Edge pregunta una vez por extensiones de otras tiendas. Primero di que sí a eso.";
@@ -820,9 +821,9 @@
 "← and → go one line back or on: here, or on your keyboard. Handy if I’m too quick." = "← y → van una frase atrás o adelante: aquí o en tu teclado. Útil si voy demasiado rápido.";
 "End tour sends me home at once." = "Terminar el tour me manda a casa al instante.";
 "One promise: this is a playing field. At the end, you pick what stays; the rest goes back." = "Una promesa: esto es un campo de juego. Al final, tú eliges lo que se queda; lo demás vuelve atrás.";
-"Paused already? Handy. We start from the pull anyway." = "¿Ya en pausa? Mejor. De todos modos empezamos por la atracción.";
-"First, the pull. Less Pull pauses for a moment: your screen without it." = "Primero, la atracción. Less Pull se pausa un momento: tu pantalla sin él.";
-"Full color. Everything on it wants a look. That’s the pull; I feel it too." = "Color a tope. Todo lo que hay en ella pide que lo mires. Esa es la atracción; yo también la siento.";
+"Paused already? Handy. We start from the pull anyway." = "¿Ya en pausa? Mejor. De todos modos empezamos por el Pull.";
+"First, the pull. Less Pull pauses for a moment: your screen without it." = "Primero, el Pull. Less Pull se pausa un momento: tu pantalla sin él.";
+"Full color. Everything on it wants a look. That’s the pull; I feel it too." = "Color a tope. Todo lo que hay en ella pide que lo mires. Ese es el Pull; yo también lo siento.";
 "Hm. My door is behind the notch. Of all the places." = "Mmm. Mi puerta está detrás de la muesca. Precisamente ahí.";
 "Hm. My door is hidden. Your menu bar is full." = "Mmm. Mi puerta está oculta. Tu barra de menús está llena.";
 "Show the hidden icons up there, then hold ⌘ and drag my circle toward the clock. Like this." = "Muestra arriba los iconos ocultos, mantén ⌘ y arrastra mi círculo hacia el reloj. Así.";
@@ -835,14 +836,15 @@
 "It’s up there somewhere, hiding. Anyway: that circle is Less Pull, and my door." = "Está ahí arriba, escondido. En fin: ese círculo es Less Pull, y mi puerta.";
 "Your turn: click the circle. The menu drops out of it." = "Te toca: haz clic en el círculo. El menú sale de él.";
 "The amber dot is mine: it marks what to pick. Here: Resume Less Pull." = "El punto ámbar es mío: marca lo que hay que elegir. Aquí: Reanudar Less Pull.";
-"There it goes. The color steps back, and the pull with it." = "Ahí va. El color se retira, y la atracción con él.";
-"There it goes. The screen warms up, and the pull eases." = "Ahí va. La pantalla se vuelve cálida, y la atracción afloja.";
-"Nothing is gone. It just pulls at you less." = "No falta nada. Solo tira menos de ti.";
+"There it goes. The color steps back, and the pull with it." = "Ahí va. El color se retira, y el Pull con él.";
+"There it goes. The screen warms up, and the pull eases." = "Ahí va. La pantalla se vuelve cálida, y el Pull afloja.";
+"Nothing is gone. Just less pull." = "No falta nada. Solo menos Pull.";
 "Again, please: click the circle. In the menu, Extra Warmth has a slider." = "Otra vez, por favor: haz clic en el círculo. En el menú, Calidez extra tiene un regulador.";
 "Drag it toward Red. I’ll go with it; watch my tag." = "Arrástralo hacia Rojo. Voy contigo; mira mi etiqueta.";
 "Other way: toward Red, to the right. Either works, though." = "Al otro lado: hacia Rojo, a la derecha. Aunque vale cualquiera.";
 "The slider, next to Extra Warmth. Drag it, any direction." = "El regulador, junto a Calidez extra. Arrástralo, en cualquier dirección.";
 "Red. Everything’s a sunset, me included. Now slide it back to where it feels right." = "Rojo. Todo es un atardecer, yo incluido. Ahora devuélvelo hasta donde te sientas bien.";
+"Warm. Now slide it back to where it feels right." = "Cálido. Ahora devuélvelo hasta donde te sientas bien.";
 "To the left, until it feels right. The slider is in the menu, under the circle." = "Hacia la izquierda, hasta que te sientas bien. El regulador está en el menú, bajo el círculo.";
 "There. That warmth is yours." = "Ya está. Esa calidez es tuya.";
 "All the way to Off. Fine too; Red is at the far right." = "Del todo a «No». También vale; «Rojo» está a la derecha del todo.";
@@ -861,8 +863,10 @@
 "Any other app will do. Or click the desktop." = "Cualquier otra app sirve. O haz clic en el escritorio.";
 "Quiet again. The exception stays with %@, waiting. Like me, but with a purpose." = "Calma otra vez. La excepción se queda con %@, esperando. Como yo, pero con un propósito.";
 "%@ is already connected. Good: websites get exceptions too." = "%@ ya está conectado. Bien: los sitios web también tienen excepciones.";
+"%@ are already connected. Good: websites get exceptions too." = "%@ ya están conectados. Bien: los sitios web también tienen excepciones.";
 "Exceptions for websites need %@ connected: a small extension. Connect it now? Optional." = "Las excepciones de sitios web necesitan %@ conectado: una pequeña extensión. ¿Lo conectamos ahora? Es opcional.";
 "Exceptions for websites need your browser connected: a small extension. Connect it now? Optional." = "Las excepciones de sitios web necesitan tu navegador conectado: una pequeña extensión. ¿Lo conectamos ahora? Es opcional.";
+"Connect another browser too? Optional." = "¿Conectamos otro navegador también? Es opcional.";
 "Connect" = "Conectar";
 "Which ones? One or several; each gets the same small extension." = "¿Cuáles? Uno o varios; todos reciben la misma pequeña extensión.";
 "That’s enough for now. More browsers: Less Pull’s Settings → Websites. I’ll come and help." = "Con esto basta por ahora. Más navegadores: Ajustes de Less Pull → Sitios web. Vendré a ayudar.";
@@ -943,5 +947,8 @@
 "Come by sometime. There’s a drawn Mac to play with, and I’ll act surprised." = "Pásate algún día. Hay un Mac dibujado para jugar, y haré como que me sorprendo.";
 "That’s the tour. Thank you for having me. Enjoy the quiet." = "Ese fue el tour. Gracias por recibirme. Disfruta de la calma.";
 "Firefox opens its add-ons page. Click Add to Firefox, then Add. I’ll notice." = "Firefox abre su página de complementos. Haz clic en Añadir a Firefox y luego en Añadir. Me daré cuenta.";
+"%@ opens the page for the extension. Add it there; I’ll notice." = "%@ abre la página de la extensión. Añádela allí; me daré cuenta.";
+"Still on the store page? Its button adds the extension; then confirm." = "¿Sigues en la página de la tienda? Su botón añade la extensión; luego confirma.";
+"On the add-ons page: Add to Firefox, then Add." = "En la página de complementos: Añadir a Firefox y luego Añadir.";
 "1. On the add-ons page that opened, click Add to Firefox, then Add.\n\nThe extension has no buttons: with a website in front, use “Exception for …” in the Less Pull menu. Keep Less Pull where it is installed." = "1. En la página de complementos que se abrió, pulsa Añadir a Firefox y luego Añadir.\n\nLa extensión no tiene botones: con un sitio web delante, usa “Excepción para …” en el menú de Less Pull. Deja Less Pull donde está instalado.";
 "Choose a browser. Less Pull connects to it and opens the page where you add the extension, with the steps to finish. Chrome, Brave, Edge and Opera get it from the Chrome Web Store, Firefox from Mozilla’s add-ons site, and Safari has it built in." = "Elige un navegador. Less Pull se conecta a él y abre la página donde añades la extensión, con los pasos para terminar. Chrome, Brave, Edge y Opera la obtienen de Chrome Web Store, Firefox del sitio de complementos de Mozilla, y Safari la trae integrada.";

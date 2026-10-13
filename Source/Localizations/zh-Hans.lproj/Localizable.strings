@@ -719,7 +719,7 @@
 "Extra Warmth · +%ld at night" = "暖色 · 夜间 +%ld";
 "At night, Less Pull adds this much warmth on top of yours. Night Shift itself can stay off." = "到了夜里，Less Pull 会在你的暖色上再加这么多。夜览本身可以一直关着。";
 "+%ld points" = "+%ld 点";
-"The pull" = "吸引力";
+"The pull" = "Pull";
 "Peek" = "一瞥";
 "Sessions & nights" = "专注与夜晚";
 "Your turn" = "轮到你了";
@@ -747,7 +747,7 @@
 "That’s the start of this stop. The numbers on the bar go further back." = "这一站从这里开始。更早的内容，点按栏上的数字。";
 "Once more, then." = "那就再来一次。";
 "Everything back as it was." = "一切都恢复原样了。";
-"Opera opens the store page. Click Add to Opera, then confirm. I’ll notice." = "Opera 会打开商店页面。点按“添加到 Opera”，然后确认。我会注意到的。";
+"Opera opens the store page. If it first offers its helper for the Chrome Web Store, add that. Then Add to Opera, and confirm. I’ll notice." = "Opera 会打开商店页面。如果它先提供用于 Chrome 应用商店的助手，就先添加它。然后点按“添加到 Opera”，再确认。我会注意到的。";
 "Slower again? No rush; I’m on holiday." = "还要更慢？不急，我在度假。";
 "Slower it is. Real pixels are heavier; I felt that." = "那就慢一点。真实的像素更重，我感觉到了。";
 "Faster, then. I’ll try not to blur." = "那就快一点。我尽量不变模糊。";
@@ -774,6 +774,7 @@
 "A small companion app opens. Click its button: Open Safari Settings." = "一个小小的配套应用会打开。点按它的按钮：“打开 Safari 浏览器设置”。";
 "Safari didn’t open? Open it yourself: Safari, Settings, Extensions." = "Safari 浏览器没有打开？那就自己打开：Safari 浏览器、设置、扩展。";
 "In Extensions, turn on Less Pull and allow it on all websites. I’ll notice." = "在“扩展”里打开 Less Pull，并允许它用于所有网站。我会注意到的。";
+"No Extensions page in Safari? Choose Safari → Settings…, then Extensions." = "Safari 浏览器里没有“扩展”页面？选择 Safari 浏览器 →“设置…”，再点“扩展”。";
 "%@ opens the store page. Click Add to Chrome, then Add extension. I’ll notice." = "%@ 会打开商店页面。点按“添加至 Chrome”，再点按“添加扩展程序”。我会注意到的。";
 "%@ opens the store page. Click its Add button, then Add extension. I’ll notice." = "%@ 会打开商店页面。点按它的添加按钮，再点按“添加扩展程序”。我会注意到的。";
 "Edge asks once about extensions from other stores. Say yes to that first." = "Edge 会询问一次是否允许其他商店的扩展。先在那里同意。";
@@ -820,9 +821,9 @@
 "← and → go one line back or on: here, or on your keyboard. Handy if I’m too quick." = "← 和 → 退回或前进一句：在这里，或者用你的键盘。我说太快时很方便。";
 "End tour sends me home at once." = "“结束导览”会让我马上回家。";
 "One promise: this is a playing field. At the end, you pick what stays; the rest goes back." = "先说好一件事：这是一片游乐场。到最后，由你决定留下什么；其余的都会恢复原样。";
-"Paused already? Handy. We start from the pull anyway." = "已经暂停了？正好。反正我们从吸引力开始。";
-"First, the pull. Less Pull pauses for a moment: your screen without it." = "先来看吸引力。Less Pull 暂停一会儿：这是没有它的你的屏幕。";
-"Full color. Everything on it wants a look. That’s the pull; I feel it too." = "满满的颜色。上面的一切都想被看一眼。这就是吸引力；我也感觉到了。";
+"Paused already? Handy. We start from the pull anyway." = "已经暂停了？正好。反正我们从 Pull 开始。";
+"First, the pull. Less Pull pauses for a moment: your screen without it." = "先来看 Pull。Less Pull 暂停一会儿：这是没有它的你的屏幕。";
+"Full color. Everything on it wants a look. That’s the pull; I feel it too." = "满满的颜色。上面的一切都想被看一眼。这就是 Pull；我也感觉到了。";
 "Hm. My door is behind the notch. Of all the places." = "嗯。我的门在刘海后面。偏偏在那儿。";
 "Hm. My door is hidden. Your menu bar is full." = "嗯。我的门被藏起来了。你的菜单栏满了。";
 "Show the hidden icons up there, then hold ⌘ and drag my circle toward the clock. Like this." = "先在上面显示隐藏的图标，再按住 ⌘ 把我的圆圈拖向时钟。像这样。";
@@ -835,14 +836,15 @@
 "It’s up there somewhere, hiding. Anyway: that circle is Less Pull, and my door." = "它就躲在上面某个地方。总之：那个圆圈就是 Less Pull，也是我的门。";
 "Your turn: click the circle. The menu drops out of it." = "轮到你了：点按圆圈。菜单会从里面落下来。";
 "The amber dot is mine: it marks what to pick. Here: Resume Less Pull." = "那个琥珀色圆点是我的：它标出要选的项目。这里是：继续 Less Pull。";
-"There it goes. The color steps back, and the pull with it." = "看，颜色退开了，吸引力也跟着退开。";
-"There it goes. The screen warms up, and the pull eases." = "看，屏幕变暖了，吸引力也松开了。";
-"Nothing is gone. It just pulls at you less." = "什么都没少。只是它不那么拉扯你了。";
+"There it goes. The color steps back, and the pull with it." = "看，颜色退开了，Pull 也跟着退开。";
+"There it goes. The screen warms up, and the pull eases." = "看，屏幕变暖了，Pull 也松开了。";
+"Nothing is gone. Just less pull." = "什么都没少。只是 Pull 少了。";
 "Again, please: click the circle. In the menu, Extra Warmth has a slider." = "请再来一次：点按圆圈。菜单里的“暖色”有一个滑块。";
 "Drag it toward Red. I’ll go with it; watch my tag." = "把它往“红”那边拖。我跟着走；看我的名牌。";
 "Other way: toward Red, to the right. Either works, though." = "反方向：往“红”，向右。不过两边都行。";
 "The slider, next to Extra Warmth. Drag it, any direction." = "就是“暖色”旁边的滑块。拖动它，哪个方向都行。";
 "Red. Everything’s a sunset, me included. Now slide it back to where it feels right." = "红。一切都成了晚霞，我也是。现在把它拖回到你觉得舒服的地方。";
+"Warm. Now slide it back to where it feels right." = "暖了。现在把它拖回到你觉得舒服的地方。";
 "To the left, until it feels right. The slider is in the menu, under the circle." = "往左，直到你觉得舒服。滑块在菜单里，圆圈下面。";
 "There. That warmth is yours." = "好了。这份暖色是你的。";
 "All the way to Off. Fine too; Red is at the far right." = "一直到“关”。这样也行；“红”在最右边。";
@@ -861,8 +863,10 @@
 "Any other app will do. Or click the desktop." = "随便哪个别的应用都行。或者点按桌面。";
 "Quiet again. The exception stays with %@, waiting. Like me, but with a purpose." = "又安静了。单独设置留在 %@ 那里等着。和我一样，只不过它有目的。";
 "%@ is already connected. Good: websites get exceptions too." = "%@ 已经连接好了。很好：网站也能有单独设置。";
+"%@ are already connected. Good: websites get exceptions too." = "%@ 已经连接好了。很好：网站也能有单独设置。";
 "Exceptions for websites need %@ connected: a small extension. Connect it now? Optional." = "网站的单独设置需要连接 %@：一个小小的扩展。现在连接吗？可选。";
 "Exceptions for websites need your browser connected: a small extension. Connect it now? Optional." = "网站的单独设置需要连接你的浏览器：一个小小的扩展。现在连接吗？可选。";
+"Connect another browser too? Optional." = "也连接另一个浏览器吗？可选。";
 "Connect" = "连接";
 "Which ones? One or several; each gets the same small extension." = "哪些？一个或多个；每个都装同一个小扩展。";
 "That’s enough for now. More browsers: Less Pull’s Settings → Websites. I’ll come and help." = "先这样就够了。更多浏览器：Less Pull 设置 → 网站。我会来帮忙。";
@@ -943,5 +947,8 @@
 "Come by sometime. There’s a drawn Mac to play with, and I’ll act surprised." = "有空来坐坐。那儿有一台画出来的 Mac 可以玩，我会装作很惊讶。";
 "That’s the tour. Thank you for having me. Enjoy the quiet." = "导览到此结束。谢谢你的招待。享受这份安静吧。";
 "Firefox opens its add-ons page. Click Add to Firefox, then Add. I’ll notice." = "Firefox 会打开附加组件页面。点按“添加到 Firefox”，再点按“添加”。装好了我会知道。";
+"%@ opens the page for the extension. Add it there; I’ll notice." = "%@ 会打开扩展的页面。在那里添加它，我会注意到的。";
+"Still on the store page? Its button adds the extension; then confirm." = "还在商店页面？点那里的按钮添加扩展，然后确认。";
+"On the add-ons page: Add to Firefox, then Add." = "在附加组件页面：点按“添加到 Firefox”，再点按“添加”。";
 "1. On the add-ons page that opened, click Add to Firefox, then Add.\n\nThe extension has no buttons: with a website in front, use “Exception for …” in the Less Pull menu. Keep Less Pull where it is installed." = "1. 在打开的附加组件页面点按“添加到 Firefox”，再点按“添加”。\n\n扩展没有按钮：网站在前台时，使用 Less Pull 菜单中的“… 的单独设置”。请把 Less Pull 留在安装位置。";
 "Choose a browser. Less Pull connects to it and opens the page where you add the extension, with the steps to finish. Chrome, Brave, Edge and Opera get it from the Chrome Web Store, Firefox from Mozilla’s add-ons site, and Safari has it built in." = "选择一个浏览器。Less Pull 会连接它，并打开添加扩展的页面和收尾步骤。Chrome、Brave、Edge 和 Opera 从 Chrome 应用商店获取，Firefox 从 Mozilla 附加组件网站获取，Safari 内置。";

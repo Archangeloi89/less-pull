@@ -9,7 +9,10 @@ SIGN="${LESS_PULL_SIGN_IDENTITY:--}"
 sign() { if [[ "$SIGN" == "-" ]]; then codesign --force --sign - "$@"; else codesign --force --sign "$SIGN" --options runtime --timestamp "$@"; fi; }
 cd "$(dirname "$0")"
 BUILD_ROOT=$(mktemp -d /tmp/lesspull.XXXXXX)
-trap 'rm -rf "$BUILD_ROOT"' EXIT
+# On the way out: macOS registers the Safari companion built here (Launch Services, pluginkit); a stale copy with
+# the same identifier can be what Safari offers, and an ad hoc one cannot be turned on. So it is unregistered first.
+LSREGISTER=/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister
+trap 'p="$BUILD_ROOT/safari-build/Build/Products/Release/Less Pull for Safari.app"; [[ -d "$p" ]] && { pluginkit -r "$p/Contents/PlugIns/Less Pull for Safari Extension.appex" 2>/dev/null; "$LSREGISTER" -u "$p" 2>/dev/null; }; rm -rf "$BUILD_ROOT"' EXIT
 APP="$BUILD_ROOT/Less Pull.app"
 mkdir -p "$APP/Contents/MacOS"
 clang -fobjc-arc -O2 -Wall -Wextra -Wno-unused-parameter -mmacosx-version-min=13.0 -arch arm64 main.m Engine.m SwitchingPolicy.m WarmthEngine.m PausePolicy.m NightSchedule.m GuideTour.m ExclusionPolicy.m BrowserBridge.m MenuDismissal.m Session.m Localize.m -framework Security -framework CoreVideo -framework QuartzCore -framework UniformTypeIdentifiers -framework Cocoa -framework Carbon -framework ServiceManagement -o "$APP/Contents/MacOS/LessPull"

@@ -709,7 +709,7 @@
 "Click my spot and the menu drops. Grayscale, Extra Warmth: all right there." = "Klick auf meinen Platz, und das Menü klappt auf. Graustufen, Extra-Wärme: alles da.";
 "Your real screen, in full color. Every badge and button: look at me, look at me." = "Dein echter Bildschirm, in voller Farbe. Jedes Badge, jeder Knopf: schau her, schau her.";
 "Grayscale. The color goes, and my warm half with it. Fair is fair." = "Graustufen. Die Farbe geht, meine warme Hälfte gleich mit. Nur fair.";
-"Nothing is gone. It just pulls at you less." = "Nichts ist weg. Es zieht nur weniger an dir.";
+"Nothing is gone. Just less pull." = "Nichts ist weg. Nur weniger Pull.";
 "Back to your own setting. I only borrow your screen. Nothing is saved." = "Zurück zu deiner Einstellung. Nur geliehen, nichts gespeichert.";
 "Extra Warmth: a touch of amber, all the way to red. Watch my right half." = "Extra-Wärme: ein Hauch Amber, bis ganz nach Rot. Schau auf meine rechte Hälfte.";
 "Don’t look at me like that. That’s warmth, not blushing." = "Guck nicht so. Das ist Wärme, kein Rotwerden.";
@@ -749,6 +749,7 @@
 "Short tour. I like short. See you in the menu bar." = "Kurze Tour. Kurz ist gut. Wir sehen uns in der Menüleiste.";
 /* Die Tour v3: der Cursor von der Website besucht den Mac (Drehbuch TOUR-SCRIPT-v3, Fable). */
 "%@ is already connected. Good: websites get exceptions too." = "%@ ist schon verbunden. Gut: Dann bekommen auch Websites Ausnahmen.";
+"%@ are already connected. Good: websites get exceptions too." = "%@ sind schon verbunden. Gut: Dann bekommen auch Websites Ausnahmen.";
 "%@ is connected. That was the hard part; the rest is one slider." = "%@ ist verbunden. Das war der schwere Teil; der Rest ist ein Regler.";
 "%@ opens the store page. Click Add to Chrome, then Add extension. I’ll notice." = "%@ öffnet die Store-Seite. Klick auf Hinzufügen, dann auf Erweiterung hinzufügen. Ich merke es.";
 "%@ opens the store page. Click its Add button, then Add extension. I’ll notice." = "%@ öffnet die Store-Seite. Klick auf Hinzufügen, dann auf Erweiterung hinzufügen. Ich merke es.";
@@ -800,6 +801,7 @@
 "Hm. My door is hidden. Your menu bar is full." = "Hm. Meine Tür ist versteckt. Deine Menüleiste ist voll.";
 "Home now: lesspull.com, the little circle in the corner." = "Jetzt nach Hause: lesspull.com, der kleine Kreis in der Ecke.";
 "In Extensions, turn on Less Pull and allow it on all websites. I’ll notice." = "Unter Erweiterungen Less Pull einschalten und auf allen Websites erlauben. Ich merke es.";
+"No Extensions page in Safari? Choose Safari → Settings…, then Extensions." = "Keine Erweiterungen-Seite in Safari? Wähle Safari → Einstellungen …, dann Erweiterungen.";
 "It’s night by your schedule, so this is on already. A preview of the present." = "Nach deinem Zeitplan ist Nacht, also läuft das schon. Eine Vorschau der Gegenwart.";
 "It’s up there somewhere, hiding. Anyway: that circle is Less Pull, and my door." = "Irgendwo da oben, versteckt. Jedenfalls: Der Kreis ist Less Pull, und meine Tür.";
 "I’d drag it myself, but guest rules: I don’t touch anything here." = "Ich würde ihn selbst ziehen, aber Gastregeln: Ich fasse hier nichts an.";
@@ -874,7 +876,7 @@
 "Your turn. Hold %@." = "Du bist dran. Halte %@.";
 "Your turn: click the circle, then the first item, Session or break…" = "Du bist dran: Klick auf den Kreis, dann der erste Eintrag, Sitzung oder Auszeit …";
 "I’ll wait up by the bar, out of your way. Guest rules." = "Ich geh dir aus dem Weg und warte oben bei der Leiste. Gastregeln.";
-"Opera opens the store page. Click Add to Opera, then confirm. I’ll notice." = "Opera öffnet die Store-Seite. Klick auf Zu Opera hinzufügen, dann bestätigen. Ich merke es.";
+"Opera opens the store page. If it first offers its helper for the Chrome Web Store, add that. Then Add to Opera, and confirm. I’ll notice." = "Opera öffnet die Store-Seite. Bietet es zuerst seinen Helfer für den Chrome Web Store an, füge ihn hinzu. Dann Zu Opera hinzufügen, und bestätigen. Ich merke es.";
 "Let’s leave it. The setup waits in Less Pull’s own Settings, the Websites tab. On we go." = "Lassen wir es. Die Einrichtung wartet in Less Pulls eigenen Einstellungen, Tab Websites. Weiter geht's.";
 "No problem. Websites wait in Less Pull’s own Settings, the Websites tab, whenever you like." = "Kein Problem. Websites warten in Less Pulls eigenen Einstellungen, Tab Websites, wann du willst.";
 "The numbers in the panel: 25 will do. Or Not now, and we go on without it." = "Die Zahlen im Fenster: 25 reicht. Oder Jetzt nicht, dann machen wir ohne weiter.";
@@ -989,6 +991,7 @@
 "All the way to Off. Fine too; Red is at the far right." = "Ganz auf Aus. Geht auch; Rot ist ganz rechts.";
 "Exceptions for websites need %@ connected: a small extension. Connect it now? Optional." = "Ausnahmen für Websites brauchen %@ verbunden: eine kleine Erweiterung. Jetzt verbinden? Freiwillig.";
 "Exceptions for websites need your browser connected: a small extension. Connect it now? Optional." = "Ausnahmen für Websites brauchen deinen Browser verbunden: eine kleine Erweiterung. Jetzt verbinden? Freiwillig.";
+"Connect another browser too? Optional." = "Noch einen Browser verbinden? Freiwillig.";
 "Sunset to sunrise needs your location: macOS sets the time zone from it. Shall I show you the switches?" = "Sonnenuntergang bis Sonnenaufgang braucht deinen Standort: macOS stellt daraus die Zeitzone ein. Soll ich dir die Schalter zeigen?";
 "In Date & Time, turn on “Set time zone automatically using your current location”." = "Schalte in Datum & Uhrzeit „Zeitzone automatisch anhand deines Standorts einstellen“ ein.";
 "The switch is in Date & Time, next to the time zone. I’ll wait right here." = "Der Schalter ist in Datum & Uhrzeit, bei der Zeitzone. Ich warte hier.";
@@ -1005,10 +1008,14 @@
 "Normal" = "Normal";
 "Normal speed again." = "Wieder normales Tempo.";
 "Red. Everything’s a sunset, me included. Now slide it back to where it feels right." = "Rot. Alles ein Sonnenuntergang, ich auch. Jetzt schieb ihn zurück, bis es sich gut anfühlt.";
+"Warm. Now slide it back to where it feels right." = "Warm. Jetzt schieb ihn zurück, bis es sich gut anfühlt.";
 "Slow" = "Langsam";
 "There. That warmth is yours." = "So. Diese Wärme gehört dir.";
 "To the left, until it feels right. The slider is in the menu, under the circle." = "Nach links, bis es sich gut anfühlt. Der Regler ist im Menü, unter dem Kreis.";
 "Tour speed" = "Tempo der Tour";
 "Firefox opens its add-ons page. Click Add to Firefox, then Add. I’ll notice." = "Firefox öffnet seine Add-on-Seite. Klick auf „Zu Firefox hinzufügen“, dann auf „Hinzufügen“. Ich merke es.";
+"%@ opens the page for the extension. Add it there; I’ll notice." = "%@ öffnet die Seite der Erweiterung. Füg sie dort hinzu; ich merke es.";
+"Still on the store page? Its button adds the extension; then confirm." = "Noch auf der Store-Seite? Ihr Knopf fügt die Erweiterung hinzu; dann bestätigen.";
+"On the add-ons page: Add to Firefox, then Add." = "Auf der Add-on-Seite: „Zu Firefox hinzufügen“, dann „Hinzufügen“.";
 "1. On the add-ons page that opened, click Add to Firefox, then Add.\n\nThe extension has no buttons: with a website in front, use “Exception for …” in the Less Pull menu. Keep Less Pull where it is installed." = "1. Klicke auf der geöffneten Add-on-Seite auf „Zu Firefox hinzufügen“ und dann auf „Hinzufügen“.\n\nDie Erweiterung im Browser ist ohne Bedienelemente; alles geschieht in Less Pull: Ist eine Website vorn, wähle im Menü von Less Pull „Ausnahme für …“. Lass Less Pull dort, wo es installiert ist.";
 "Choose a browser. Less Pull connects to it and opens the page where you add the extension, with the steps to finish. Chrome, Brave, Edge and Opera get it from the Chrome Web Store, Firefox from Mozilla’s add-ons site, and Safari has it built in." = "Wähle einen Browser. Less Pull verbindet sich mit ihm und öffnet die Seite, auf der du die Erweiterung hinzufügst, mit den Schritten zum Abschluss. Chrome, Brave, Edge und Opera holen sie aus dem Chrome Web Store, Firefox von Mozillas Add-on-Seite, und Safari hat sie eingebaut.";

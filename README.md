@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-41.1"><b>Download build 41.1</b></a>
+  <a href="https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-41.2"><b>Download build 41.2</b></a>
   &nbsp;·&nbsp; <a href="https://lesspull.com"><b>lesspull.com</b></a>
   &nbsp;·&nbsp; <a href="#install">Install</a>
   &nbsp;·&nbsp; <a href="docs/EXCEPTIONS.md">App and website exceptions</a>
@@ -216,10 +216,10 @@ The icon tells you the state: its left half fills while grayscale is showing, it
 - **Exception for [current app]…** opens a small panel under the icon with the same row as in Settings, and every change applies right away. With a website in front, **Exception for [that site]…** does the same for the domain or the exact page.
 
 <p align="center">
-  <img src="docs/assets/exceptions.png" width="100%" alt="The Less Pull menu under its icon, with Session or break, the status line Grayscale, Warmth 40%, Pause Less Pull, Grayscale, Grayscale off for, the Extra Warmth slider at 40 percent, Night Shift, Night Shift off for, Exception for Finder, Settings and Quit. Beside it, the exception panel for Finder under the icon: Use this exception, Grayscale and Night Shift each as Default, On or Off, and Use default warmth with its slider.">
+  <img src="docs/assets/exceptions.png" width="100%" alt="The Less Pull menu under its icon, at night: Session or break, the status line Grayscale, Warmth 53%, Pause Less Pull, Grayscale, Grayscale off for, the Extra Warmth slider at 40 percent with +13 at night, Night Shift on with Auto, On and Off, Night Shift off for, Exception for Finder, Settings and Quit. Beside it, the exception panel for Finder under the icon: Use this exception, Grayscale and Night Shift each as Default, On or Off, Use default warmth with its slider, and a gear.">
 </p>
 
-<sub>The menu and the exception panel it opens. Real screenshots of build 41 with an example rule.</sub>
+<sub>The menu and the exception panel it opens, at night. Real screenshots of build 41.2 with example settings.</sub>
 
 <details>
 <summary><b>See the menu beside the Settings window, and every Settings tab</b></summary>
@@ -227,7 +227,7 @@ The icon tells you the state: its left half fills while grayscale is showing, it
 <br>
 
 <p align="center">
-  <img src="docs/assets/interfaces.png" width="100%" alt="The Less Pull menu under its icon beside the Settings window on its General tab: the heading Grayscale, Warmth 40%, Grayscale with Turn Grayscale off for, the Extra Warmth slider with Reset, Night Shift with Turn Night Shift off for, Launch at login, Language, and Show advanced options, each with a short explanation underneath.">
+  <img src="docs/assets/interfaces.png" width="100%" alt="The Less Pull menu under its icon beside the Settings window on its General tab: the heading Grayscale, Warmth 53%, Warmer at night +13 now, Night Shift on; Grayscale with Turn Grayscale off for; the Extra Warmth slider at 40 percent with Reset; Night Shift as Automatic, On or Off, with Turn Night Shift off for; the Night schedule, Custom hours from 22:00 to 07:00, with Displays Settings; Warmer at night, +13 points, with Try it; Launch at login, Language, and Show advanced options, each with a short explanation underneath.">
 </p>
 
 The Settings window has six tabs:
@@ -245,7 +245,7 @@ Display options appear only with two or more displays connected, and the fine-tu
   <img src="docs/assets/settings-tabs.png" width="100%" alt="Five tabs of the Settings window: Shortcuts with Peek in color and the Toggle Grayscale shortcut; Sessions with lengths, call-back times and what happens at the end; Apps with example exceptions for Music, Photos and TextEdit; Websites with example exceptions for example.com and one exact page; About with the version, the author's links, Help, Support and Updates.">
 </p>
 
-<sub>Real screenshots of build 41 with example rules.</sub>
+<sub>Real screenshots of build 41.2 with example rules.</sub>
 
 </details>
 
@@ -257,7 +257,7 @@ The app changes the display; nothing is injected into pages, and the Mac app has
 
 ## Install
 
-1. Download **Less-Pull-1.4.4-41.1.dmg** from the [build 41.1 release](https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-41.1), open it and drag **Less Pull** onto **Applications**.
+1. Download **Less-Pull-1.4.4-41.2.dmg** from the [build 41.2 release](https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-41.2), open it and drag **Less Pull** onto **Applications**.
 2. Open it. The welcome opens right under the circle in your menu bar, where you choose Grayscale and Extra Warmth from then on, and offers [the tour](#a-tour-on-your-own-screen). If the menu bar is full and the circle is hidden, a small animated drawing shows what to do: hold ⌘ and drag the circle toward the clock. (macOS decides where new icons start, and apps cannot choose a spot.)
 3. For website rules, open **Settings… → Websites**, choose **Install Browser Extension…**, pick a browser from the list, and follow the steps for [your browser](docs/INSTALL.md#safari-brave-chrome-firefox-opera-or-edge).
 
@@ -265,7 +265,7 @@ The app changes the display; nothing is injected into pages, and the Mac app has
 > Setting up with an AI agent? The release includes an **agent pack** (`Less-Pull-Agent-Pack.zip`): a script that installs the app and the bridge, and scripts that connect Brave, Chrome, Opera, Edge and Firefox, with the instructions an agent needs. See [tools/agent-pack](tools/agent-pack/README.md).
 
 > [!NOTE]
-> Version 1.4.4 (build 41.1) is a test build for Apple silicon Macs. The version number stays 1.4.4 on purpose; the build number is what changes. It is signed with a Developer ID and notarized by Apple, so it opens like any other app. It is built for macOS 13 and later and has been tested on macOS 27 only. The browser extension comes from the Chrome Web Store (Chrome, Brave, Edge, Opera) and from addons.mozilla.org (Firefox); Safari’s comes with the app. See [install help](docs/INSTALL.md) and [what is still open](docs/RELEASE-PLAN.md).
+> Version 1.4.4 (build 41.2) is a test build for Apple silicon Macs. The version number stays 1.4.4 on purpose; the build number is what changes. It is signed with a Developer ID and notarized by Apple, so it opens like any other app. It is built for macOS 13 and later and has been tested on macOS 27 only. The browser extension comes from the Chrome Web Store (Chrome, Brave, Edge, Opera) and from addons.mozilla.org (Firefox); Safari’s comes with the app. See [install help](docs/INSTALL.md) and [what is still open](docs/RELEASE-PLAN.md).
 
 ## Private by design
 

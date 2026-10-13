@@ -719,7 +719,7 @@
 "Extra Warmth · +%ld at night" = "Extra warmte · ’s nachts +%ld";
 "At night, Less Pull adds this much warmth on top of yours. Night Shift itself can stay off." = "’s Nachts telt Less Pull zoveel warmte op bij die van jou. Night Shift zelf mag uit blijven.";
 "+%ld points" = "+%ld punten";
-"The pull" = "De aantrekkingskracht";
+"The pull" = "De Pull";
 "Peek" = "Kleurblik";
 "Sessions & nights" = "Sessies en nachten";
 "Your turn" = "Jouw beurt";
@@ -747,7 +747,7 @@
 "That’s the start of this stop. The numbers on the bar go further back." = "Hier begint deze halte. De nummers in de balk gaan verder terug.";
 "Once more, then." = "Dan nog een keer.";
 "Everything back as it was." = "Alles weer zoals het was.";
-"Opera opens the store page. Click Add to Opera, then confirm. I’ll notice." = "Opera opent de winkelpagina. Klik op Aan Opera toevoegen en bevestig. Ik merk het.";
+"Opera opens the store page. If it first offers its helper for the Chrome Web Store, add that. Then Add to Opera, and confirm. I’ll notice." = "Opera opent de winkelpagina. Biedt het eerst zijn helper voor de Chrome Web Store aan, voeg die dan toe. Klik daarna op Aan Opera toevoegen en bevestig. Ik merk het.";
 "Slower again? No rush; I’m on holiday." = "Nog langzamer? Geen haast; ik heb vakantie.";
 "Slower it is. Real pixels are heavier; I felt that." = "Langzamer dus. Echte pixels zijn zwaarder; dat merkte ik.";
 "Faster, then. I’ll try not to blur." = "Sneller dus. Ik probeer niet te vervagen.";
@@ -774,6 +774,7 @@
 "A small companion app opens. Click its button: Open Safari Settings." = "Er opent een kleine hulpapp. Klik op de knop ervan: Open Safari-instellingen.";
 "Safari didn’t open? Open it yourself: Safari, Settings, Extensions." = "Is Safari niet opengegaan? Open het zelf: Safari, Instellingen, Extensies.";
 "In Extensions, turn on Less Pull and allow it on all websites. I’ll notice." = "Zet bij Extensies Less Pull aan en sta het toe op alle websites. Ik merk het.";
+"No Extensions page in Safari? Choose Safari → Settings…, then Extensions." = "Geen Extensies-pagina in Safari? Kies Safari → Instellingen…, dan Extensies.";
 "%@ opens the store page. Click Add to Chrome, then Add extension. I’ll notice." = "%@ opent de winkelpagina. Klik op Toevoegen aan Chrome en dan op Extensie toevoegen. Ik merk het.";
 "%@ opens the store page. Click its Add button, then Add extension. I’ll notice." = "%@ opent de winkelpagina. Klik op de knop om toe te voegen en dan op Extensie toevoegen. Ik merk het.";
 "Edge asks once about extensions from other stores. Say yes to that first." = "Edge vraagt één keer naar extensies uit andere winkels. Zeg daar eerst ja op.";
@@ -820,9 +821,9 @@
 "← and → go one line back or on: here, or on your keyboard. Handy if I’m too quick." = "← en → gaan een zin terug of verder: hier, of op je toetsenbord. Handig als ik te snel ga.";
 "End tour sends me home at once." = "Stop de tour stuurt me meteen naar huis.";
 "One promise: this is a playing field. At the end, you pick what stays; the rest goes back." = "Eén belofte: dit is een speelveld. Aan het eind kies jij wat blijft; de rest gaat terug.";
-"Paused already? Handy. We start from the pull anyway." = "Al gepauzeerd? Handig. We beginnen toch bij de aantrekkingskracht.";
-"First, the pull. Less Pull pauses for a moment: your screen without it." = "Eerst de aantrekkingskracht. Less Pull pauzeert even: je scherm zonder.";
-"Full color. Everything on it wants a look. That’s the pull; I feel it too." = "Volle kleur. Alles erop wil bekeken worden. Dat is de aantrekkingskracht; ik voel hem ook.";
+"Paused already? Handy. We start from the pull anyway." = "Al gepauzeerd? Handig. We beginnen toch bij de Pull.";
+"First, the pull. Less Pull pauses for a moment: your screen without it." = "Eerst de Pull. Less Pull pauzeert even: je scherm zonder.";
+"Full color. Everything on it wants a look. That’s the pull; I feel it too." = "Volle kleur. Alles erop wil bekeken worden. Dat is de Pull; ik voel hem ook.";
 "Hm. My door is behind the notch. Of all the places." = "Hm. Mijn deur zit achter de inkeping. Uitgerekend daar.";
 "Hm. My door is hidden. Your menu bar is full." = "Hm. Mijn deur is verborgen. Je menubalk is vol.";
 "Show the hidden icons up there, then hold ⌘ and drag my circle toward the clock. Like this." = "Toon daarboven de verborgen symbolen, houd ⌘ ingedrukt en sleep mijn cirkel naar de klok. Zo.";
@@ -835,14 +836,15 @@
 "It’s up there somewhere, hiding. Anyway: that circle is Less Pull, and my door." = "Hij zit daarboven ergens verstopt. Hoe dan ook: die cirkel is Less Pull, en mijn deur.";
 "Your turn: click the circle. The menu drops out of it." = "Jouw beurt: klik op de cirkel. Het menu komt eruit.";
 "The amber dot is mine: it marks what to pick. Here: Resume Less Pull." = "De amberkleurige stip is van mij: hij wijst aan wat je kiest. Hier: Less Pull hervatten.";
-"There it goes. The color steps back, and the pull with it." = "Daar gaat hij. De kleur doet een stap terug, en de aantrekkingskracht mee.";
-"There it goes. The screen warms up, and the pull eases." = "Daar gaat hij. Het scherm wordt warmer, en de aantrekkingskracht zakt.";
-"Nothing is gone. It just pulls at you less." = "Er is niets weg. Het trekt alleen minder aan je.";
+"There it goes. The color steps back, and the pull with it." = "Daar gaat hij. De kleur doet een stap terug, en de Pull mee.";
+"There it goes. The screen warms up, and the pull eases." = "Daar gaat hij. Het scherm wordt warmer, en de Pull zakt.";
+"Nothing is gone. Just less pull." = "Er is niets weg. Alleen minder Pull.";
 "Again, please: click the circle. In the menu, Extra Warmth has a slider." = "Nog eens, alsjeblieft: klik op de cirkel. In het menu heeft Extra warmte een schuifknop.";
 "Drag it toward Red. I’ll go with it; watch my tag." = "Sleep hem naar Rood. Ik ga mee; let op mijn label.";
 "Other way: toward Red, to the right. Either works, though." = "Andersom: naar Rood, naar rechts. Al werkt het allebei.";
 "The slider, next to Extra Warmth. Drag it, any direction." = "De schuifknop, naast Extra warmte. Sleep hem, welke kant op ook.";
 "Red. Everything’s a sunset, me included. Now slide it back to where it feels right." = "Rood. Alles is een zonsondergang, ik ook. Schuif hem nu terug tot het goed voelt.";
+"Warm. Now slide it back to where it feels right." = "Warm. Schuif hem nu terug tot het goed voelt.";
 "To the left, until it feels right. The slider is in the menu, under the circle." = "Naar links, tot het goed voelt. De schuifknop zit in het menu, onder de cirkel.";
 "There. That warmth is yours." = "Zo. Die warmte is van jou.";
 "All the way to Off. Fine too; Red is at the far right." = "Helemaal naar Uit. Ook goed; Rood zit helemaal rechts.";
@@ -861,8 +863,10 @@
 "Any other app will do. Or click the desktop." = "Elke andere app is goed. Of klik op het bureaublad.";
 "Quiet again. The exception stays with %@, waiting. Like me, but with a purpose." = "Weer rustig. De uitzondering blijft bij %@ en wacht. Net als ik, maar met een doel.";
 "%@ is already connected. Good: websites get exceptions too." = "%@ is al verbonden. Mooi: dan krijgen websites ook uitzonderingen.";
+"%@ are already connected. Good: websites get exceptions too." = "%@ zijn al verbonden. Mooi: dan krijgen websites ook uitzonderingen.";
 "Exceptions for websites need %@ connected: a small extension. Connect it now? Optional." = "Uitzonderingen voor websites hebben %@ nodig, verbonden via een kleine extensie. Nu verbinden? Het hoeft niet.";
 "Exceptions for websites need your browser connected: a small extension. Connect it now? Optional." = "Uitzonderingen voor websites hebben je browser nodig, verbonden via een kleine extensie. Nu verbinden? Het hoeft niet.";
+"Connect another browser too? Optional." = "Nog een browser verbinden? Het hoeft niet.";
 "Connect" = "Verbind";
 "Which ones? One or several; each gets the same small extension." = "Welke? Eén of meer; elke krijgt dezelfde kleine extensie.";
 "That’s enough for now. More browsers: Less Pull’s Settings → Websites. I’ll come and help." = "Dat is genoeg voor nu. Meer browsers: instellingen van Less Pull → Websites. Ik kom helpen.";
@@ -943,5 +947,8 @@
 "Come by sometime. There’s a drawn Mac to play with, and I’ll act surprised." = "Kom eens langs. Er staat een getekende Mac om mee te spelen, en ik doe verrast.";
 "That’s the tour. Thank you for having me. Enjoy the quiet." = "Dat was de tour. Dank je dat ik mocht komen. Geniet van de rust.";
 "Firefox opens its add-ons page. Click Add to Firefox, then Add. I’ll notice." = "Firefox opent zijn add-onpagina. Klik op Toevoegen aan Firefox en dan op Toevoegen. Ik merk het.";
+"%@ opens the page for the extension. Add it there; I’ll notice." = "%@ opent de pagina van de extensie. Voeg hem daar toe; ik merk het.";
+"Still on the store page? Its button adds the extension; then confirm." = "Nog op de winkelpagina? De knop voegt de extensie toe; bevestig daarna.";
+"On the add-ons page: Add to Firefox, then Add." = "Op de add-onpagina: Toevoegen aan Firefox, dan Toevoegen.";
 "1. On the add-ons page that opened, click Add to Firefox, then Add.\n\nThe extension has no buttons: with a website in front, use “Exception for …” in the Less Pull menu. Keep Less Pull where it is installed." = "1. Klik op de geopende add-onpagina op Toevoegen aan Firefox en dan op Toevoegen.\n\nDe extensie heeft geen knoppen: met een website vooraan gebruik je “Uitzondering voor …” in het menu van Less Pull. Laat Less Pull staan waar het geïnstalleerd is.";
 "Choose a browser. Less Pull connects to it and opens the page where you add the extension, with the steps to finish. Chrome, Brave, Edge and Opera get it from the Chrome Web Store, Firefox from Mozilla’s add-ons site, and Safari has it built in." = "Kies een browser. Less Pull verbindt ermee en opent de pagina waar je de extensie toevoegt, met de stappen om af te ronden. Chrome, Brave, Edge en Opera halen hem uit de Chrome Web Store, Firefox van Mozilla’s add-onsite, en Safari heeft hem ingebouwd.";
