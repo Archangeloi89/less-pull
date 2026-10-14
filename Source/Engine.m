@@ -2,11 +2,25 @@
 #import <dlfcn.h>
 #import <objc/runtime.h>
 #import <CoreGraphics/CoreGraphics.h>
+#import <sys/sysctl.h>
 static long (*getType)(long);
 static BOOL (*getEnabled)(long);
 static void (*setType)(long,long);
 static void (*setEnabled)(long,BOOL);
 static double (*getHue)(void), (*getIntensity)(void);
+BOOL LessPullLayoutMatches(const char *actual,const char *layout) {
+ char spelled[128];if(!actual||!layout||strlcpy(spelled,layout,sizeof spelled)>=sizeof spelled)return NO;
+ char b=@encode(BOOL)[0];if(b!='B')for(char *p=spelled;*p;p++)if(*p=='B')*p=b;
+ return strcmp(actual,spelled)==0;
+}
+NSString *LessPullProcessor(void) {
+#if defined(__x86_64__)
+ int translated=0;size_t size=sizeof translated;
+ return sysctlbyname("sysctl.proc_translated",&translated,&size,NULL,0)==0&&translated==1?@"Intel code under Rosetta (x86_64 on Apple silicon)":@"Intel (x86_64)";
+#else
+ return @"Apple silicon (arm64)";
+#endif
+}
 static void filterPreferencesChanged(CFNotificationCenterRef center,void *observer,CFStringRef name,const void *object,CFDictionaryRef info) {
  __weak FilterEngine *engine=(__bridge FilterEngine *)observer;
  dispatch_async(dispatch_get_main_queue(),^{if(engine.changed)engine.changed();});
@@ -25,7 +39,7 @@ static void filterPreferencesChanged(CFNotificationCenterRef center,void *observ
   Method method=class_getInstanceMethod(c,@selector(getBlueLightStatus:));
   const char *encoding=method ? method_getTypeEncoding(method) : "";
   if(!getType||!getEnabled||!setType||!setEnabled||!getHue||!getIntensity) self.error=@"Color Filters API unavailable. No settings were changed.";
-  else if(strcmp(encoding,"B24@0:8^{?=BBBi{?={?=ii}{?=ii}}QB}16")!=0) self.error=@"Night Shift API layout is unsupported. Automatic switching is unavailable.";
+  else if(!LessPullLayoutMatches(encoding,"B24@0:8^{?=BBBi{?={?=ii}{?=ii}}QB}16")) self.error=@"Night Shift API layout is unsupported. Automatic switching is unavailable.";
   else {
    self.client=[[c alloc] init];
    if(![self.client respondsToSelector:@selector(supported)]||![self.client supported])self.error=@"Night Shift is unsupported on this Mac/display.";
@@ -67,7 +81,7 @@ __attribute__((weak)) BOOL LessPullHandsOff=NO;
  if(LessPullHandsOff)return YES;
  if(!self.client||self.error)return NO;
  Method method=class_getInstanceMethod([self.client class],@selector(setEnabled:));
- if(!method||strcmp(method_getTypeEncoding(method),"B20@0:8B16")!=0)return NO;
+ if(!method||!LessPullLayoutMatches(method_getTypeEncoding(method),"B20@0:8B16"))return NO;
  return [self.client setEnabled:enabled];
 }
 - (BOOL)nightShiftStrength:(float *)strength {
@@ -83,7 +97,7 @@ __attribute__((weak)) BOOL LessPullHandsOff=NO;
  if(LessPullHandsOff)return YES;
  if(!self.client||self.error)return NO;
  Method method=class_getInstanceMethod([self.client class],@selector(setStrength:withPeriod:commit:));
- if(!method||strcmp(method_getTypeEncoding(method),"B28@0:8f16f20B24")!=0)return [self setNightShiftStrength:strength];
+ if(!method||!LessPullLayoutMatches(method_getTypeEncoding(method),"B28@0:8f16f20B24"))return [self setNightShiftStrength:strength];
  BOOL (*set)(id,SEL,float,float,BOOL)=(void *)[self.client methodForSelector:@selector(setStrength:withPeriod:commit:)];return set(self.client,@selector(setStrength:withPeriod:commit:),fmaxf(0,fminf(strength,1)),fmaxf(0,seconds),YES);
 }
 - (BOOL)systemFilterEnabled:(BOOL *)enabled type:(int *)type {if(!getType||!getEnabled)return NO;*enabled=getEnabled(1);*type=getType(1);return YES;}
@@ -108,6 +122,6 @@ __attribute__((weak)) BOOL LessPullHandsOff=NO;
  NSMutableString *displayInfo=[NSMutableString new];CGDirectDisplayID displays[32];uint32_t count=0;CGError displayError=CGGetOnlineDisplayList(32,displays,&count);
  [displayInfo appendFormat:@"Online display query=%d; count=%u\n",displayError,count];
  for(uint32_t i=0;i<count;i++)[displayInfo appendFormat:@"Display %u: %@, vendor=%u model=%u, %zu×%zu pixels\n",displays[i],CGDisplayIsBuiltin(displays[i])?@"built-in":@"external",CGDisplayVendorNumber(displays[i]),CGDisplayModelNumber(displays[i]),CGDisplayPixelsWide(displays[i]),CGDisplayPixelsHigh(displays[i])];
- return [NSString stringWithFormat:@"Night Shift read: %@; active=%d enabled=%d available=%d disableFlags=%llu mode=%d\nFilter mode=%ld; saved tint hue=%.6f intensity=%.6f\n%@\n%@",ok?@"OK":@"failed",s.active,s.enabled,s.available,s.disableFlags,s.mode,(long)[self currentMode],getHue?getHue():-1,getIntensity?getIntensity():-1,displayInfo,self.error?:@""];
+ return [NSString stringWithFormat:@"Processor: %@\nNight Shift read: %@; active=%d enabled=%d available=%d disableFlags=%llu mode=%d\nFilter mode=%ld; saved tint hue=%.6f intensity=%.6f\n%@\n%@",LessPullProcessor(),ok?@"OK":@"failed",s.active,s.enabled,s.available,s.disableFlags,s.mode,(long)[self currentMode],getHue?getHue():-1,getIntensity?getIntensity():-1,displayInfo,self.error?:@""];
 }
 @end

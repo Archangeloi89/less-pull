@@ -30,3 +30,8 @@ typedef struct { BOOL active, enabled, sunSchedulePermitted; int mode; struct { 
 @end
 // Tells every app that watches the display filter (an installed Less Pull among them) to look again. Changes nothing.
 void LessPullAnnounceFilterChange(void);
+// A method's type encoding against a layout written with B for BOOL. The runtime spells BOOL as B on
+// Apple silicon (bool) and as c on Intel (signed char); the comparison uses this build's own spelling.
+BOOL LessPullLayoutMatches(const char *actual,const char *layout);
+// The processor this copy runs on: Apple silicon, Intel, or Intel code under Rosetta.
+NSString *LessPullProcessor(void);

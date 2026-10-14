@@ -6,6 +6,7 @@
 #import <malloc/malloc.h>
 #import <ServiceManagement/ServiceManagement.h>
 #import <UniformTypeIdentifiers/UniformTypeIdentifiers.h>
+#import "SelfTest.h"
 #import "Engine.h"
 #import "SwitchingPolicy.h"
 #import "NightSchedule.h"
@@ -1515,7 +1516,7 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  [self sync];[menu removeAllItems];BOOL on=NO;BOOL known=[self logicalNightShift:&on];BOOL actualOn=NO;BOOL actualKnown=[self.engine nightShift:&actualOn];
  Session *session=self.session;
  // An update waits at the very top, above everything else, with its own separator; one click installs it.
- if(self.availableUpdate){NSString *title=self.installingUpdate?(self.updateStatus?:L(@"Installing…")):self.pendingUpdateInstall?L(@"Installs when the session ends"):L(@"Install update");NSMenuItem *i=[self add:title action:@selector(installUpdate:) to:menu];i.enabled=!self.installingUpdate&&!self.pendingUpdateInstall;NSImage *mark=[NSImage imageWithSystemSymbolName:self.installingUpdate?@"arrow.down.circle.dotted":@"arrow.down.circle.fill" accessibilityDescription:nil];i.image=[mark imageWithSymbolConfiguration:[NSImageSymbolConfiguration configurationWithPointSize:14 weight:NSFontWeightMedium]];}
+ if(self.availableUpdate){NSString *title=self.installingUpdate?(self.updateStatus?:L(@"Installing…")):self.pendingUpdateInstall?L(@"Installs when the session ends"):L(@"Install update");NSMenuItem *i=[self add:title action:@selector(installUpdate:) to:menu];i.enabled=!self.installingUpdate&&!self.pendingUpdateInstall;NSImage *mark=[NSImage imageWithSystemSymbolName:self.installingUpdate?@"arrow.down.circle.dotted":@"arrow.down.circle.fill" accessibilityDescription:nil]?:[NSImage imageWithSystemSymbolName:@"arrow.down.circle" accessibilityDescription:nil]/* the dotted circle needs macOS 14 */;i.image=[mark imageWithSymbolConfiguration:[NSImageSymbolConfiguration configurationWithPointSize:14 weight:NSFontWeightMedium]];}
  if(self.availableUpdate)[menu addItem:NSMenuItem.separatorItem];
  if(session.state==SessionIdle){[self add:L(@"Session or break…") action:@selector(openStartPanel:) to:menu];}
  else {NSDate *now=NSDate.date;NSString *line=session.state==SessionRunning?[NSString stringWithFormat:L(@"Session · %@ min left"),[session labelAt:now]]:session.state==SessionOver?[NSString stringWithFormat:L(@"Session over · %@ min past"),[[session labelAt:now] substringFromIndex:1]]:[NSString stringWithFormat:L(@"Break · back in %@ min"),[session labelAt:now]];
@@ -3202,6 +3203,7 @@ int main(int argc,const char *argv[]){@autoreleasepool{
  // A renamed copy (a demo or a test build) never takes the displays or the browsers away from the installed app.
  NSArray *args=NSProcessInfo.processInfo.arguments;if([args containsObject:@"--hands-off"]||(![NSBundle.mainBundle.bundleIdentifier isEqual:@"com.jiriarion.lesspull"]&&![args containsObject:@"--hands-on"]))LessPullHandsOff=YES;[LessPullLanguage load];
  if(argc>1&&strcmp(argv[1],"--diagnostics")==0){FilterEngine *e=[FilterEngine new];puts(e.diagnostics.UTF8String);return e.error?1:0;}
+ if([args containsObject:@"--self-test"])return LessPullSelfTest();  // a first run on a new kind of Mac: tries every part and puts it back
  NSApplication *app=NSApplication.sharedApplication;AppDelegate *delegate=[AppDelegate new];app.delegate=delegate;
  // --regular keeps a Dock icon so UI automation can reach a test build; production is a menu-bar-only app.
  if(![NSProcessInfo.processInfo.arguments containsObject:@"--regular"])[app setActivationPolicy:NSApplicationActivationPolicyAccessory];[app run];

@@ -77,7 +77,7 @@ BOOL LessPullBorrowScreen=NO;  // a demo copy during its tour: the looks are rea
  return YES;
 }
 - (NSArray<NSNumber *> *)displays {
- if(!self.perDisplay)return @[@0];
+ if(!self.perDisplay||!targetKey)return @[@0];  // a macOS without per-display matrices: one matrix for every display
  uint32_t count=0;CGDirectDisplayID ids[32];if(CGGetActiveDisplayList(32,ids,&count)!=kCGErrorSuccess||!count)return @[@0];
  NSMutableArray *list=[NSMutableArray new];for(uint32_t i=0;i<count;i++)[list addObject:@(ids[i])];
  for(NSNumber *known in self.states.allKeys)if(![list containsObject:known])[self.states removeObjectForKey:known];  // unplugged
@@ -156,6 +156,6 @@ BOOL LessPullBorrowScreen=NO;  // a demo copy during its tour: the looks are rea
 }
 - (NSString *)diagnostics {
  double gains[3];WarmthGains(self.strength,gains);
- return [NSString stringWithFormat:@"Extra Warmth: %@; last request result=%d\nStrength %.2f / 3.00; output gains R=%.3f G=%.3f B=%.3f\nDisplay appearance requires visual verification; request success is not an optical measurement.\n%@",self.active?@"applied by Less Pull":@"not applied",self.lastRequest,self.strength,gains[0],gains[1],gains[2],self.error?:@""];
+ return [NSString stringWithFormat:@"Extra Warmth: %@; last request result=%d; per-display matrices %@\nStrength %.2f / 3.00; output gains R=%.3f G=%.3f B=%.3f\nDisplay appearance requires visual verification; request success is not an optical measurement.\n%@",self.active?@"applied by Less Pull":@"not applied",self.lastRequest,targetKey?@"available":@"unavailable",self.strength,gains[0],gains[1],gains[2],self.error?:@""];
 }
 @end
