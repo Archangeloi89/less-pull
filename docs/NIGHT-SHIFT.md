@@ -26,8 +26,8 @@ macOS keeps **Sunset to sunrise** only when it may use your location for the tim
 
 At night, Less Pull adds this many points to your Extra Warmth, and takes them away again in the morning. The extra warmth rises over the first half hour of the night and fades over the last.
 
-- **Off** adds nothing: the slider's warmth stays the same day and night.
-- **A number of points** adds that much: pick one from the list (+5 to +50) or type your own. New installs start at +13.
+- **Off** adds nothing: the slider's warmth stays the same day and night. New installs start here.
+- **A number of points** adds that much: pick one from the list (+5 to +50) or type your own. +13 is a good start.
 - **Red** makes the night red, whatever the warmth by day.
 - **Try it** shows the night look for a minute, long enough to switch to other apps and see it there. Click again to end it sooner. Unless Night Shift is set to Off, it comes on for that minute too.
 

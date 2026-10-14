@@ -1,6 +1,6 @@
 # Release plan
 
-Less Pull 1.4.4 build 41.2 is the current release (14 October 2026). The version number stays 1.4.4 for good; releases are tagged `v1.4.4-<build>`, and the [release history](1.4.4-19-release.txt) describes every build since 19. The repository has been public since 8 October 2026.
+Less Pull 1.4.4 build 41.3 is the current release (14 October 2026). The version number stays 1.4.4 for good; releases are tagged `v1.4.4-<build>`, and the [release history](1.4.4-19-release.txt) describes every build since 19. The repository has been public since 8 October 2026.
 
 ## Done
 

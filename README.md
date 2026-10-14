@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-41.2"><b>Download build 41.2</b></a>
+  <a href="https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-41.3"><b>Download build 41.3</b></a>
   &nbsp;·&nbsp; <a href="https://lesspull.com"><b>lesspull.com</b></a>
   &nbsp;·&nbsp; <a href="#install">Install</a>
   &nbsp;·&nbsp; <a href="docs/EXCEPTIONS.md">App and website exceptions</a>
@@ -172,7 +172,7 @@ Extra Warmth is your warmth for the whole day. **Warmer at night** adds a few po
 
 - **You set the night once.** Under **Settings… → General → Night schedule**: **Sunset to sunrise**, or **Custom hours** (22:00 to 07:00 to begin with). It is the same schedule macOS keeps for Night Shift, so a change in System Settings shows up here too.
 - **Sunset to sunrise needs your location in macOS.** macOS keeps it only with Location Services on and **Set time zone automatically** under General → Date & Time. Until then, Less Pull works out sunset from your time zone and switches Night Shift itself; the note under Night schedule has a button for each setting.
-- **How much warmer is up to you.** Off, a few points (new installs start at +13), or **Red** for a red night whatever the warmth by day. **Try it** shows the night look for a minute.
+- **How much warmer is up to you.** Off (where new installs start), a few points (+13 is a good start), or **Red** for a red night whatever the warmth by day. **Try it** shows the night look for a minute.
 - **Night Shift is Automatic, On or Off.** Automatic is on at night and off by day; On and Off hold until you change them. The menu has the same three beside Night Shift, and **Night Shift off for** an hour, four hours, or until morning.
 - **Grayscale stays as you set it**, day and night.
 - **Apps and websites with their own warmth keep it**, at night too.
@@ -257,15 +257,15 @@ The app changes the display; nothing is injected into pages, and the Mac app has
 
 ## Install
 
-1. Download **Less-Pull-1.4.4-41.2.dmg** from the [build 41.2 release](https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-41.2), open it and drag **Less Pull** onto **Applications**.
-2. Open it. The welcome opens right under the circle in your menu bar, where you choose Grayscale and Extra Warmth from then on, and offers [the tour](#a-tour-on-your-own-screen). If the menu bar is full and the circle is hidden, a small animated drawing shows what to do: hold ⌘ and drag the circle toward the clock. (macOS decides where new icons start, and apps cannot choose a spot.)
+1. Download **Less-Pull-1.4.4-41.3.dmg** from the [build 41.3 release](https://github.com/Archangeloi89/less-pull/releases/tag/v1.4.4-41.3), open it and drag **Less Pull** onto **Applications**.
+2. Open it. Less Pull starts with Grayscale on and 20% Extra Warmth. The welcome opens right under the circle in your menu bar, where you change both from then on, and offers [the tour](#a-tour-on-your-own-screen). If the menu bar is full and the circle is hidden, a small animated drawing shows what to do: hold ⌘ and drag the circle toward the clock. (macOS decides where new icons start, and apps cannot choose a spot.)
 3. For website rules, open **Settings… → Websites**, choose **Install Browser Extension…**, pick a browser from the list, and follow the steps for [your browser](docs/INSTALL.md#safari-brave-chrome-firefox-opera-or-edge).
 
 > [!TIP]
 > Setting up with an AI agent? The release includes an **agent pack** (`Less-Pull-Agent-Pack.zip`): a script that installs the app and the bridge, and scripts that connect Brave, Chrome, Opera, Edge and Firefox, with the instructions an agent needs. See [tools/agent-pack](tools/agent-pack/README.md).
 
 > [!NOTE]
-> Version 1.4.4 (build 41.2) is a test build for Apple silicon Macs. The version number stays 1.4.4 on purpose; the build number is what changes. It is signed with a Developer ID and notarized by Apple, so it opens like any other app. It is built for macOS 13 and later and has been tested on macOS 27 only. The browser extension comes from the Chrome Web Store (Chrome, Brave, Edge, Opera) and from addons.mozilla.org (Firefox); Safari’s comes with the app. See [install help](docs/INSTALL.md) and [what is still open](docs/RELEASE-PLAN.md).
+> Version 1.4.4 (build 41.3) is a test build for Apple silicon Macs. The version number stays 1.4.4 on purpose; the build number is what changes. It is signed with a Developer ID and notarized by Apple, so it opens like any other app. It is built for macOS 13 and later and has been tested on macOS 27 only. The browser extension comes from the Chrome Web Store (Chrome, Brave, Edge, Opera) and from addons.mozilla.org (Firefox); Safari’s comes with the app. See [install help](docs/INSTALL.md) and [what is still open](docs/RELEASE-PLAN.md).
 
 ## Private by design
 
