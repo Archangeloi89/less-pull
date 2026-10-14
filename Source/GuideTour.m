@@ -1054,7 +1054,7 @@ static NSString *GTJoin(NSArray<NSString *> *names){NSListFormatter *f=[NSListFo
  // 2 Less Pull: the circle (its door), Resume from the menu, and the Extra Warmth slider
  [steps addObject:^NSArray *{
   __block BOOL wasHidden=NO;__block double warmStart=-1,warmLast=-1,warmSince=0;BOOL notch=[[host guideValue:@"notch"] boolValue];
-  GTBeat *stage=Beat(nil,GTFaceNone);stage.run=^{if(![[host guideValue:@"paused"] boolValue]){[host guideDo:@"pause" with:nil];weak.tourPaused=YES;}};  // the stop starts paused, as after the pull
+  GTBeat *stage=Beat(nil,GTFaceNone);stage.run=^{if(![[host guideValue:@"paused"] boolValue]){[host guideDo:@"pause" with:nil];weak.tourPaused=YES;}[host guideDo:@"startLook" with:nil];};  // the stop starts paused, as after the pull; with nothing set yet, Resume shows the starting look
   GTBeat *hid=Beat(notch?L(@"Hm. My door is behind the notch. Of all the places."):L(@"Hm. My door is hidden. Your menu bar is full."),GTFaceTilt);hid.to=weak.underCircle;hid.pointAt=weak.circleAim;
   hid.onlyIf=^BOOL{if(iconShown())return NO;wasHidden=YES;weak.iconWasHidden=YES;return YES;};
   hid.later=@[@[@1.1,^{GuideTour *s=weak;s.view.pointAt=NSMakePoint(s.view.pos.x-300,s.view.pos.y+60);}],@[@1.8,^{GuideTour *s=weak;s.view.pointAt=NSMakePoint(s.view.pos.x+300,s.view.pos.y+60);}],@[@2.5,^{[weak aimAt:weak.circleAim()];}]];

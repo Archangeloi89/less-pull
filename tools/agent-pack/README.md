@@ -34,7 +34,7 @@ Check: `pgrep -fl LessPullBrowserHost` lists one helper per connected Chromium/F
 
 ## 3. What to tell the user
 
-- Less Pull lives in the menu bar; the first launch opens Settings with a short welcome.
+- Less Pull lives in the menu bar; the first launch opens Settings with a short welcome and starts with Grayscale on and 20% Extra Warmth.
 - Launch at login is a checkbox in Settings → General; the app must stay in Applications.
 - The update check (daily, one request to GitHub, nothing about the user) can be turned off in Settings → About. Installing updates is by hand until signed releases exist.
 - Remove: quit Less Pull from its menu, delete the app; preferences remain in `~/Library/Preferences/com.jiriarion.lesspull.plist`.

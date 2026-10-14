@@ -30,6 +30,8 @@ static NSString *LPCopyKind(void){NSString *b=NSBundle.mainBundle.bundleIdentifi
 static BOOL LPQuiet(void){static BOOL q;static dispatch_once_t once;dispatch_once(&once,^{q=[NSProcessInfo.processInfo.arguments containsObject:@"--test-quiet"];});return q;}
 static void LPActivate(void){if(!LPQuiet())[NSApp activateIgnoringOtherApps:YES];}
 static void LPShowWindow(NSWindow *w){if(LPQuiet())[w orderFrontRegardless];else [w makeKeyAndOrderFront:nil];}
+// The look a new user starts with: Grayscale on and 20% Extra Warmth (the slider's 0–100% is 0–3).
+static const double LPStartWarmth=.6;
 // The settings a tour can change: kept aside when it starts, put back unless you keep them (see beginPlayingField).
 static NSArray<NSString *> *LPPlayingFieldKeys(void){return @[@"warmth",@"warmthColor",@"warmthGrayscale",@"manualMode",@"nightMode",@"overrideMode",@"automatic",@"displayModes",@"appExclusions",@"websiteRules",@"lessPullPause",@"grayscaleOff",@"nightShiftPause",@"nightShiftMode",@"nightHours",@"nightStart",@"nightEnd",@"nightBoost",@"peekEffects",@"peekActiveDisplayOnly",@"peekShortcut",@"grayscaleShortcut"];}
 static NSDictionary *LPStoredSettings(void){NSString *bid=NSBundle.mainBundle.bundleIdentifier?:NSProcessInfo.processInfo.processName;return [NSUserDefaults.standardUserDefaults persistentDomainForName:bid]?:@{};}  // a test tool keeps its settings under its own name
@@ -1088,6 +1090,9 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
   if(!saved[@"nightBoost"]){BOOL existing=saved[@"warmth"]||saved[@"welcomeShown"]||saved[@"automatic"];NSInteger boost=13;
    if(existing){if(saved[@"automatic"]?[saved[@"automatic"] boolValue]:YES){boost=MIN(100,lround([d doubleForKey:@"warmth"]/3*100));[d setDouble:0 forKey:@"warmth"];[d setInteger:[d integerForKey:@"nightMode"] forKey:@"manualMode"];}else boost=0;}
    [d setInteger:boost forKey:@"nightBoost"];[d setBool:NO forKey:@"automatic"];[d setInteger:-1 forKey:@"overrideMode"];}}
+ // A new install starts with the starting look (Jiri, 14 Oct 2026). Until 41.2 it started with nothing on: the steps above
+ // took it for an earlier user, so Grayscale was off, Extra Warmth at 0, and turning Less Pull on showed nothing.
+ if(firstLaunch){[d setInteger:100 forKey:@"nightMode"];[d setInteger:100 forKey:@"manualMode"];[d setDouble:LPStartWarmth forKey:@"warmth"];}
  self.automatic=[d boolForKey:@"automatic"];self.lastSeenMacMode=-1;self.tourGray=-1;self.tourWarmth=-1;
  if(![d boolForKey:@"nightScheduleMirrored"]){self.nightModeDirty=YES;[d setBool:YES forKey:@"nightScheduleMirrored"];}  // once: put the Night Shift setting into the macOS schedule
  self.selectedMode=[d integerForKey:self.automatic?@"nightMode":@"manualMode"];
@@ -2761,6 +2766,11 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
 - (void)guideDo:(NSString *)action with:(id)argument {
  if([action isEqual:@"pause"]){if(!self.pausedUntil)[self pauseLessPullForMinutes:0];return;}
  if([action isEqual:@"resume"]){if(self.pausedUntil)[self resumeLessPull:nil];return;}
+ if([action isEqual:@"startLook"]){  // nothing set yet (Grayscale off, no Extra Warmth): the starting look, set while paused, so turning Less Pull on shows it.
+  if(self.selectedMode==1||self.selectedMode==100||[self currentWarmth]>0)return;  // the user's own look stays as it is
+  [NSUserDefaults.standardUserDefaults setDouble:LPStartWarmth forKey:@"warmth"];self.warmthSlider.doubleValue=LPStartWarmth/3*100;self.menuWarmthSlider.doubleValue=LPStartWarmth/3*100;
+  NSMenuItem *gray=[NSMenuItem new];gray.tag=100;[self manual:gray];
+  [self guideDo:@"keepSetup" with:@[@"warmth",@"manualMode",@"nightMode",@"overrideMode"]];return;}  // not a tour change: it stays, whatever the tour puts back
  if([action isEqual:@"settingsToFront"]){if(self.settings.visible){LPActivate();[self.settings orderFrontRegardless];}return;}  // the guide asks for a click in Settings: it comes forward once, not for good
  if([action isEqual:@"iconArrow"]){[self showIconArrow:[argument boolValue]&&[self iconFarFromClock]];return;}  // the way to the clock, while the guide says it
  if([action isEqual:@"setWarmth"]){double v=MAX(0,MIN(100,[argument doubleValue]));NSSlider *s=[NSSlider sliderWithValue:v minValue:0 maxValue:100 target:nil action:nil];self.menuWarmthSlider.doubleValue=v;[self warmthChanged:s];return;}  // the tour brings the warmth back from Red, as the slider would
