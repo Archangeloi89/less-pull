@@ -3076,9 +3076,14 @@ if(self.welcomeWanted&&self.welcomeCard){BOOL first=!self.welcomePlaced;self.wel
  if(self.nightModeDirty){  // write this setting into macOS
   if(m==0&&!sunset){[self.engine setNightShiftScheduleFrom:[d integerForKey:@"nightStart"] to:[d integerForKey:@"nightEnd"]];[self.engine setNightShiftScheduleMode:2];}
   else if(m==0&&s.sunSchedulePermitted)[self.engine setNightShiftScheduleMode:1];
-  else {[self.engine setNightShiftScheduleMode:0];if(m!=0&&!self.exclusion.active&&!self.pause&&!self.excludeNight&&!self.screenLocked&&actual!=(m==1))[self.engine setNightShiftEnabled:m==1];}
+  else {[self.engine setNightShiftScheduleMode:0];[self.engine nightShift:&actual];if(m!=0&&!self.exclusion.active&&!self.pause&&!self.excludeNight&&!self.screenLocked&&actual!=(m==1))[self.engine setNightShiftEnabled:m==1];}  // read again: ending the schedule can end the night it was showing
   if(![self.engine readNightShiftStatus:&s])return;[self.engine nightShift:&actual];}
  self.lastSeenMacMode=s.mode;
+ // On and Off hold until you change them. macOS ends a Night Shift turned on by hand the next morning, so On used to stop
+ // there (a friend's Mac, 19 Oct), and turning the schedule off can end the night it was showing a moment after the write.
+ // Night Shift turned on elsewhere while Off is a choice: Less Pull takes it over as On.
+ if(m!=0&&s.mode==0&&!self.nightModeDirty&&actual!=(m==1)&&!self.exclusion.active&&!self.pause&&!self.excludeNight&&!self.screenLocked&&!self.nightPreviewTurnedNightShiftOn){
+  if(m==2)[d setInteger:1 forKey:@"nightShiftMode"];else [self.engine setNightShiftEnabled:YES];}
  // Less Pull's own switching: Automatic where macOS cannot keep the night itself
  BOOL own=m==0&&s.mode==0;BOOL night=[self nightNow];NSInteger last=[d objectForKey:@"nightPhase"]?[d integerForKey:@"nightPhase"]:-1;
  if(!own||(last==(night?1:0)&&!self.nightModeDirty)){self.nightModeDirty=NO;[d setInteger:night?1:0 forKey:@"nightPhase"];return;}

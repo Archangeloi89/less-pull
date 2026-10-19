@@ -2,7 +2,7 @@
 #import "main.m"
 #undef main
 @interface FakeFilter : FilterEngine
-@property BOOL on;
+@property BOOL on,endsNight;  // endsNight: turning the schedule off ends the night it was showing, as macOS does
 @property NSInteger mode,nativeWrites,nightWrites;
 @property NSBlueStatus state;
 @end
@@ -11,7 +11,7 @@
 - (BOOL)readNightShiftStatus:(NSBlueStatus *)s {*s=self.state;return YES;}
 - (BOOL)setNightShiftEnabled:(BOOL)on {self.on=on;self.nightWrites++;return YES;}
 - (BOOL)applyMode:(NSInteger)mode {self.mode=mode;self.nativeWrites++;return YES;}
-- (BOOL)setNightShiftScheduleMode:(int)mode {NSBlueStatus s=self.state;s.mode=mode;self.state=s;return YES;}
+- (BOOL)setNightShiftScheduleMode:(int)mode {NSBlueStatus s=self.state;s.mode=mode;self.state=s;if(mode==0&&self.endsNight)self.on=NO;return YES;}
 - (BOOL)setNightShiftScheduleFrom:(NSInteger)from to:(NSInteger)to {NSBlueStatus s=self.state;s.schedule.from=(NSTimePair){(int)(from/60),(int)(from%60)};s.schedule.to=(NSTimePair){(int)(to/60),(int)(to%60)};self.state=s;return YES;}
 @end
 @interface FakeWarmth : WarmthEngine
@@ -99,6 +99,10 @@ int main(){@autoreleasepool{
   [d setInteger:0 forKey:@"nightHours"];NSBlueStatus p=fe.state;p.sunSchedulePermitted=YES;fe.state=p;t.nightModeDirty=YES;[t sync];check(fe.state.mode==1,"Automatic with sunset to sunrise becomes the macOS Sunset to Sunrise schedule");
   [d setInteger:1 forKey:@"nightShiftMode"];t.nightModeDirty=YES;[t sync];check(fe.state.mode==0&&fe.on,"On: no macOS schedule, Night Shift on");
   [d setInteger:2 forKey:@"nightShiftMode"];t.nightModeDirty=YES;[t sync];check(fe.state.mode==0&&!fe.on,"Off: no macOS schedule, Night Shift off");
+  p=fe.state;p.mode=1;fe.state=p;fe.on=YES;fe.endsNight=YES;[d setInteger:1 forKey:@"nightShiftMode"];t.nightModeDirty=YES;[t sync];check(fe.state.mode==0&&fe.on,"On, chosen while the schedule shows the night: Night Shift stays on");
+  fe.endsNight=NO;fe.on=NO;[t sync];check(fe.on,"On holds when macOS ends a Night Shift turned on by hand (the next morning)");
+  [d setInteger:2 forKey:@"nightShiftMode"];t.nightModeDirty=YES;[t sync];fe.on=YES;[t sync];check([t nightShiftMode]==1&&fe.on,"Night Shift turned on elsewhere while Off is taken over as On");
+  [d setInteger:2 forKey:@"nightShiftMode"];t.nightModeDirty=YES;[t sync];check(!fe.on&&[t nightShiftMode]==2,"and Off again");
   p=fe.state;p.mode=2;p.schedule.from=(NSTimePair){20,0};p.schedule.to=(NSTimePair){8,15};fe.state=p;[t sync];check([t nightShiftMode]==0&&[d integerForKey:@"nightHours"]==1&&[d integerForKey:@"nightStart"]==20*60&&[d integerForKey:@"nightEnd"]==8*60+15,"a Custom schedule set in System Settings comes back as Automatic with those hours");
   p=fe.state;p.mode=1;fe.state=p;[t sync];check([t nightShiftMode]==0&&[d integerForKey:@"nightHours"]==0,"Sunset to Sunrise set in System Settings comes back too");
   p=fe.state;p.mode=0;fe.state=p;fe.on=YES;[t sync];check([t nightShiftMode]==1,"the schedule turned off in System Settings, with Night Shift on, reads as On");
