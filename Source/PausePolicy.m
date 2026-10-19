@@ -6,12 +6,15 @@
  return [calendar nextDateAfterDate:date matchingComponents:parts options:NSCalendarMatchNextTime];
 }
 - (BOOL)mayResumeAt:(NSDate *)date calendar:(NSCalendar *)calendar {
- if(!self.priorOn||!self.created||!self.nightEnd||[date compare:self.nightEnd]!=NSOrderedAscending)return NO;
+ if(!self.priorOn||!self.created)return NO;
  NSInteger minute=[calendar component:NSCalendarUnitHour fromDate:date]*60+[calendar component:NSCalendarUnitMinute fromDate:date];
+ // Custom hours say by themselves whether it is night now, whichever night it is: a schedule of 07:00 to 06:59 starts a new
+ // night one minute after the last one ended, often while the Mac sleeps, so the end of the night it began in does not count.
  if(self.scheduleMode==2){
   if(self.startMinute==self.endMinute)return NO;
   return self.startMinute<self.endMinute?(minute>=self.startMinute&&minute<self.endMinute):(minute>=self.startMinute||minute<self.endMinute);
  }
+ if(!self.nightEnd||[date compare:self.nightEnd]!=NSOrderedAscending)return NO;
  if(self.scheduleMode==1)return minute>=1080||minute<420; // Conservative fallback; true sunrise is not exposed.
  if(self.scheduleMode==0)return [date timeIntervalSinceDate:self.created]<=4*3600+60; // Previously manually enabled, no schedule.
  return NO;
