@@ -1065,6 +1065,12 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  self.exclusionRules=[[NSUserDefaults.standardUserDefaults dictionaryForKey:@"appExclusions"] mutableCopy]?:[NSMutableDictionary new];self.exclusion=[ExclusionPolicy fromDictionary:[NSUserDefaults.standardUserDefaults dictionaryForKey:@"exclusionRecovery"]]?:[ExclusionPolicy new];
  self.forcedNightOn=[[[NSUserDefaults.standardUserDefaults dictionaryForKey:@"exclusionRecovery"] objectForKey:@"forcedNightOn"] boolValue];self.engine=[FilterEngine new];self.warmth=[WarmthEngine new];self.warmth.perDisplay=YES;[self.warmth restore];self.selectedMode=self.engine.currentMode;
  NSUserDefaults *d=NSUserDefaults.standardUserDefaults;
+ // At launch the screen is not locked: a Grayscale filter left by a lock (a quit or crash while locked, or the leftover described
+ // at refreshLockProfile) goes off; a color filter of yours saved at the lock comes back.
+ {NSArray *f=[d arrayForKey:@"lockFilterRestore"];BOOL en=NO;int ty=0;
+  if(f.count==2)[self.engine setSystemFilterEnabled:[f[0] boolValue] type:[f[1] intValue]];
+  else if(([d objectForKey:@"lockGray"]?[d boolForKey:@"lockGray"]:YES)&&[self.engine systemFilterEnabled:&en type:&ty]&&en&&ty==1)[self.engine setSystemFilterEnabled:NO type:1];
+  [d removeObjectForKey:@"lockFilterRestore"];}
  // The welcome window is for brand-new users only. Anyone with saved settings from an
  // earlier version gets the marker silently; it is not a user setting.
  BOOL firstLaunch=!migrated&&![d objectForKey:@"welcomeShown"]&&![d objectForKey:@"nightMode"]&&![d objectForKey:@"unifiedWarmth"]&&![d objectForKey:@"warmth"];
@@ -1366,22 +1372,26 @@ static NSMutableDictionary *RuleAfterChange(NSDictionary *before,NSMutableDictio
  NSUserDefaults *d=NSUserDefaults.standardUserDefaults;
  if(!self.screenLocked){if(!self.lockActive)return;
   if(self.lockStrength&&self.lockStrength.floatValue>=0)[self.engine setNightShiftStrength:self.lockStrength.floatValue period:.25];
-  if(self.lockFilter)[self.engine setSystemFilterEnabled:[self.lockFilter[0] boolValue] type:[self.lockFilter[1] intValue]];
+  if(self.lockFilter)[self.engine setSystemFilterEnabled:[self.lockFilter[0] boolValue] type:[self.lockFilter[1] intValue]];[d removeObjectForKey:@"lockFilterRestore"];
   self.lockStrength=nil;self.lockFilter=nil;self.lockActive=NO;self.lockQuieting=NO;self.lockGrayWanted=NO;self.lockNightWanted=NO;self.fade=0.2;self.animateAppearance=YES;[self pipelineChanged:nil];return;}
  if(!self.lockActive){BOOL gray=self.effectiveMode==100||self.effectiveMode==1;self.lockGrayAtEngage=gray&&!self.pausedUntil;self.lockQuieting=!self.pausedUntil&&(gray||self.targetStrength>0);self.lockActive=YES;}
  BOOL lock=self.screenLockedFlag;
  BOOL wantNight=self.lockQuieting&&[d boolForKey:lock?@"lockNight":@"saverNight"],wantGray=self.lockGrayAtEngage&&[d boolForKey:lock?@"lockGray":@"saverGray"];
  if(wantNight&&!self.lockStrength){float s=0;self.lockStrength=@(-1);if([self.engine nightShiftStrength:&s]&&[self.engine setNightShiftStrength:1 period:.25])self.lockStrength=@(s);}
  else if(!wantNight&&self.lockStrength){if(self.lockStrength.floatValue>=0)[self.engine setNightShiftStrength:self.lockStrength.floatValue period:.25];self.lockStrength=nil;}
- if(wantGray&&!self.lockFilter){BOOL en=NO;int ty=0;if([self.engine systemFilterEnabled:&en type:&ty]){self.lockFilter=@[@(en),@(ty)];if(!(en&&ty==1))[self.engine setSystemFilterEnabled:YES type:1];}}
- else if(!wantGray&&self.lockFilter){[self.engine setSystemFilterEnabled:[self.lockFilter[0] boolValue] type:[self.lockFilter[1] intValue]];self.lockFilter=nil;}
+ // macOS's Grayscale filter is Less Pull's for the lock screen: on at lock, off on return. Found on at lock, it is a leftover (since
+ // 14 Oct one stayed on for days: every return put back "on", and macOS laid it over exceptions and Peek now and then), so it goes
+ // off on return too. Another color filter of yours comes back as it was. What to put back is saved, so a quit while locked keeps it.
+ if(wantGray&&!self.lockFilter){BOOL en=NO;int ty=0;if([self.engine systemFilterEnabled:&en type:&ty]){self.lockFilter=(en&&ty==1)?@[@NO,@1]:@[@(en),@(ty)];[d setObject:self.lockFilter forKey:@"lockFilterRestore"];if(!(en&&ty==1))[self.engine setSystemFilterEnabled:YES type:1];}}
+ else if(!wantGray&&self.lockFilter){[self.engine setSystemFilterEnabled:[self.lockFilter[0] boolValue] type:[self.lockFilter[1] intValue]];self.lockFilter=nil;[d removeObjectForKey:@"lockFilterRestore"];}
  self.lockNightWanted=wantNight;self.lockGrayWanted=wantGray;self.fade=0.2;self.animateAppearance=YES;[self sync];
 }
 // A short record of every lock and screensaver in ~/Library/Logs/Less Pull/lock.log: what Less Pull
 // decided and what Night Shift really did a moment later, so a failure on one Mac can be read back.
 - (void)lockLog:(NSString *)event {
  BOOL on=NO;BOOL known=[self.engine nightShift:&on];float st=-1;[self.engine nightShiftStrength:&st];
- NSString *line=[NSString stringWithFormat:@"%@ %@ quieting=%d wantNight=%d wantGray=%d gray=%d warmth=%.2f follow=%d pausedAll=%d nightPause=%d nightShift=%@ strength=%.2f\n",[NSISO8601DateFormatter stringFromDate:NSDate.date timeZone:NSTimeZone.localTimeZone formatOptions:NSISO8601DateFormatWithInternetDateTime|NSISO8601DateFormatWithFractionalSeconds],event,self.lockQuieting,self.lockNightWanted,self.lockGrayWanted,self.effectiveMode==100||self.effectiveMode==1,self.targetStrength,self.automatic,self.pausedUntil!=nil,self.pause!=nil,known?(on?@"on":@"off"):@"unknown",st];
+ BOOL fen=NO;int fty=0;BOOL fknown=[self.engine systemFilterEnabled:&fen type:&fty];
+ NSString *line=[NSString stringWithFormat:@"%@ %@ systemFilter=%@ quieting=%d wantNight=%d wantGray=%d gray=%d warmth=%.2f follow=%d pausedAll=%d nightPause=%d nightShift=%@ strength=%.2f\n",[NSISO8601DateFormatter stringFromDate:NSDate.date timeZone:NSTimeZone.localTimeZone formatOptions:NSISO8601DateFormatWithInternetDateTime|NSISO8601DateFormatWithFractionalSeconds],event,!fknown?@"unknown":fen?[NSString stringWithFormat:@"on(%d)",fty]:@"off",self.lockQuieting,self.lockNightWanted,self.lockGrayWanted,self.effectiveMode==100||self.effectiveMode==1,self.targetStrength,self.automatic,self.pausedUntil!=nil,self.pause!=nil,known?(on?@"on":@"off"):@"unknown",st];
  NSString *dir=[NSHomeDirectory() stringByAppendingPathComponent:@"Library/Logs/Less Pull"];[NSFileManager.defaultManager createDirectoryAtPath:dir withIntermediateDirectories:YES attributes:nil error:nil];
  NSString *path=[dir stringByAppendingPathComponent:@"lock.log"];NSFileHandle *h=[NSFileHandle fileHandleForWritingAtPath:path];
  if(!h){[line writeToFile:path atomically:YES encoding:NSUTF8StringEncoding error:nil];return;}
