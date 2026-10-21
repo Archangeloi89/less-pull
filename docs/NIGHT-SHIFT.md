@@ -50,7 +50,7 @@ To turn Night Shift off for a while, choose **Night Shift off for** in the menu:
 
 ## The lock screen and screensaver
 
-Less Pull's warmth cannot reach the lock screen or the screensaver, so Night Shift takes over there: while Less Pull is quieting your screen (Grayscale or warmth on), it turns Night Shift on at full warmth, and everything returns as it was when you are back. Your schedule stays as it is. The choices are in **Settings… → General** once **Show advanced options** is on.
+Less Pull's warmth cannot reach the lock screen or the screensaver, so Night Shift takes over there: while Less Pull is quieting your screen (Grayscale or warmth on), it turns Night Shift on at full warmth, and everything returns as it was when you are back. macOS's own Grayscale filter, which Less Pull uses for the lock screen, is always off again on your return. Your schedule stays as it is. The choices are in **Settings… → General** once **Show advanced options** is on.
 
 ## Coming from an earlier build
 
